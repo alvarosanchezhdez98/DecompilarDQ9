@@ -23,7 +23,12 @@ e.g. `ov014`.
 
 The script keeps everything outside the generated section, so this is the place for plans and notes.
 
-- Current focus: not chosen yet.
+- Current focus: overlay 14, the bestiary.
+  - It was probably compiled from a single source file. Its code is laid out as the monster view (0x021842a0 to about
+    0x02186bc8), then the monster list (up to 0x02188b18), then out-of-line copies of inline functions.
+  - `src/Bestiary/HabitatTable.cpp` (0x02188b18-0x02189468): 17 of 18 functions match. `HabitatTable::Build` has the
+    same instructions as the original but different registers (73 %), so the file isn't `complete` yet.
+  - Next: the monster view, starting at 0x021842a0.
 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
@@ -34,9 +39,9 @@ Last recorded on 2026-09-22.
 | --- | ----------: | -----: | --------: |
 | Code (bytes) | 143,400 | 2,959,024 | 4.85 % |
 | Functions | 1,075 | 14,779 | 7.27 % |
-| Modules | 1 complete, 4 in progress, 27 not started | 32 with code |  |
+| Modules | 1 complete, 5 in progress, 26 not started | 32 with code |  |
 
-Source files: 84 complete, 1 in progress.
+Source files: 84 complete, 2 in progress.
 
 ## History
 
@@ -65,7 +70,7 @@ Source files: 84 complete, 1 in progress.
 | ov011 | Unclear | 17.6 | 186 | 0 | 186 | 0.00 % | Not started |
 | ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
 | ov013 | *Likely* skill point allocation | 14.7 | 40 | 0 | 40 | 0.00 % | Not started |
-| ov014 | Bestiary | 20.6 | 69 | 0 | 69 | 0.00 % | Not started |
+| ov014 | Bestiary | 20.6 | 69 | 0 | 69 | 0.00 % | In progress |
 | ov015 | *Likely* character model loading / viewer | 33.8 | 103 | 0 | 103 | 0.00 % | Not started |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 0 | 85 | 0.00 % | Not started |
 | ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 0 | 1194 | 0.00 % | Not started |

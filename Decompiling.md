@@ -7,6 +7,17 @@ If you are receiving an error when trying to load the config.yaml, make sure you
 ## The basics
 Decide on a piece of code you want to decompile; either from looking at already decompiled code and wishing to decompile functions it references, or through other means such as debugging. Once you have it, Ghidra can be an excellent base for understanding what the code is trying to achieve, and decomp.me can ensure the code you write matches the assembly.
 
+## Matching functions locally
+`tools/diff_function.py` compiles a source file with the same flags as the build and diffs its functions against the original game with objdiff, marking every instruction that differs. It's a local alternative to decomp.me scratches that doesn't need GCC. It needs `build.ninja` and the delinked objects, so run `python tools/configure.py eur` and `ninja delink` first.
+```shell
+python tools/diff_function.py src/Bestiary/HabitatTable.cpp              # every function in the file
+python tools/diff_function.py src/Bestiary/HabitatTable.cpp --summary    # only the match percentages
+python tools/diff_function.py test.cpp func_ov014_021842a0=MyFunction    # an original function against one with another name
+```
+To get the assembly of every function, run `dsd dis --config-path config/eur/arm9/config.yaml --asm-path build/eur/asm --ual`.
+
+Functions are matched by name, so after naming a function, rename it in `symbols.txt` to the name the compiler gives it (e.g. `_ZN8NatTable7ForEachEPFvPS_P8NatEntryE`) and run `ninja delink` again.
+
 ## Referencing functions and data that have yet to be decompiled
 Add a declaration to the file referencing the yet un-decompiled info. For example, if you wanted to reference a function in the main ARM9 file at 02074388, you would add
 ```C
