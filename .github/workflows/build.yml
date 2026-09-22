@@ -12,12 +12,34 @@ on:
       publish-badges:
         type: boolean
         default: false
+    outputs:
+      built:
+        description: Whether the baserom could be fetched, so the ROM was built
+        value: ${{ jobs.baserom.outputs.available }}
 
 permissions:
   contents: read
 
 jobs:
+  baserom:
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          BASEROM_REPO: ${{ secrets.BASEROM_REPO }}
+        run: |
+          if [ -n "$BASEROM_REPO" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::The BASEROM_REPO secret isn't set, so the ${{ inputs.label }} ROM can't be fetched and its build is skipped"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: baserom
+    if: needs.baserom.outputs.available == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -47,13 +69,20 @@ jobs:
           BASEROM_TAG: ${{ vars.BASEROM_TAG }}
         run: |
           gh release download "$BASEROM_TAG" -R "$BASEROM_REPO" -p 'baserom_dqix_${{ inputs.version }}.nds' -D extract/
-          gh release download "$BASEROM_TAG" -R "$BASEROM_REPO" -p 'arm7_bios.bin' -D .
+          gh release download "$BASEROM_TAG" -R "$BASEROM_REPO" -p 'arm7_bios.bin' -D . \
+            || echo "::notice::There's no arm7_bios.bin in the baserom release, so the SHA-1 of the whole ROM isn't verified"
 
-      - run: sha1sum -c ci/baseroms_${{ inputs.version }}.sha1
+      - run: sha1sum -c --ignore-missing ci/baseroms_${{ inputs.version }}.sha1
 
       - run: python tools/configure.py ${{ inputs.version }}
 
-      - run: ninja
+      # Without the BIOS the whole ROM can't match, so only verify the modules
+      - run: |
+          if [ -f arm7_bios.bin ]; then
+            ninja
+          else
+            ninja min report
+          fi
 
       - name: Progress summary
         run: |
