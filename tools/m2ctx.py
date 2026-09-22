@@ -14,6 +14,7 @@ parser.add_argument('-f', type=str, dest='out_file', required=False, help='Outpu
 parser.add_argument('-c', action=argparse.BooleanOptionalAction, dest='clipboard', required=False, help='Copy output to clipboard')
 parser.add_argument('-e', type=str, dest='encoding', required=False, default="utf-8", help='Input file encoding')
 parser.add_argument('-v', action=argparse.BooleanOptionalAction, dest='verbose', required=False, help='Verbose error output')
+parser.add_argument('-D', action='append', dest='defines', default=[], help='Macro to define, e.g. the game version')
 args = parser.parse_args()
 
 CXX_FLAGS = [
@@ -55,6 +56,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
             'gcc',
             '-E', '-P', '-fworking-directory', '-undef', '-dD',
             *CXX_FLAGS,
+            *(f'-D{define}' for define in args.defines),
             tmp_file.name
         ], cwd=root_dir, encoding=args.encoding)
     except FileNotFoundError:
