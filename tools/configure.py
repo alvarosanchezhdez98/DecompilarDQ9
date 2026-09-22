@@ -48,6 +48,13 @@ CC_FLAGS = " ".join([
     "-msgstyle gcc",        # Use GCC-like messages (some IDEs will make file names clickable)
     "-str pool,reuse"       # Pool and reuse strings within translation units
 ])
+REGION_DEFINES = { # Preprocessor macros that each version is compiled with
+    "usa": ["usa"],
+    "jpn": ["jpn"],
+    "eur": ["usa", "eur"], # EUR is built from the same code as USA
+}
+MWCC_DEFINES = " ".join(f"-d {define}" for define in REGION_DEFINES[args.version])
+M2CTX_DEFINES = " ".join(f"-D {define}" for define in REGION_DEFINES[args.version])
 FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing references them
     "usa": "func_ov030_021d8a40",
     "jpn": "func_ov029_021d9300,func_ov030_021d9300",
@@ -67,7 +74,7 @@ LD_FLAGS = " ".join([
 DSD_OBJDIFF_ARGS = " ".join([
     "--scratch",                        # Metadata for creating decomp.me scratches
     f"--compiler {DECOMP_ME_COMPILER}", # decomp.me compiler name
-    f'--c-flags "{CC_FLAGS} -lang=c++"',# decomp.me compiler flags
+    f'--c-flags "{CC_FLAGS} -lang=c++ {MWCC_DEFINES}"', # decomp.me compiler flags
     "--custom-make ninja",              # Command for rebuilding files
 ])
 
@@ -208,7 +215,7 @@ def main():
         n.newline()
 
         # -MMD excludes all includes instead of just system includes for some reason, so use -MD instead.
-        mwcc_cmd = f'{WINE} "{CC}" {CC_FLAGS} {CC_INCLUDES} $cc_flags -d $game_version -MD -c $in -o $basedir'
+        mwcc_cmd = f'{WINE} "{CC}" {CC_FLAGS} {CC_INCLUDES} $cc_flags {MWCC_DEFINES} -MD -c $in -o $basedir'
         mwcc_implicit = [CC]
         if platform.system != "windows":
             transform_dep = "tools/transform_dep.py"
@@ -260,7 +267,7 @@ def main():
 
         n.rule(
             name="m2ctx",
-            command=f"{PYTHON} tools/m2ctx.py -f $out $in"
+            command=f"{PYTHON} tools/m2ctx.py -f $out {M2CTX_DEFINES} $in"
         )
         n.newline()
 
@@ -447,14 +454,12 @@ def add_mwcc_builds(n: ninja_syntax.Writer, project: Project, mwcc_implicit: lis
         cc_flags = []
         if is_cpp(source_file): cc_flags.append("-lang=c++")
         elif is_c(source_file): cc_flags.append("-lang=c")
-        if project.game_version == "eur": cc_flags.append("-d usa") # EUR is built from the same code as USA
         n.build(
             inputs=str(source_file),
             implicit=mwcc_implicit,
             rule="mwcc",
             outputs=str(src_obj_path.with_suffix(".o")),
             variables={
-                "game_version": project.game_version,
                 "cc_flags": " ".join(cc_flags),
                 "basedir": os.path.dirname(src_obj_path),
                 "basefile": str(src_obj_path.with_suffix("")),
