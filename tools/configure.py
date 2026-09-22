@@ -296,6 +296,16 @@ def main():
         add_check_builds(n, project)
         add_objdiff_builds(n, project)
 
+        # Provide barebones alternative `ninja min` to avoid building a
+        # decomp.me context for every source file, which makes GCC a
+        # prerequisite for producing the ROM. Also skips the sha1 step
+        n.build(
+            inputs=["rom", "check"],
+            rule="phony",
+            outputs="min",
+        )
+        n.newline()
+
 
 def add_download_tool_builds(n: ninja_syntax.Writer):
     if args.dsd is None:
