@@ -14,8 +14,11 @@ So everything after those functions in .text/.init/.rodata/.ctor is shifted by 0
 
 Symbol names are kept as in USA, so the source code can refer to the same names in both versions.
 
-The EUR ROM must be extracted first (`python tools/configure.py eur` followed by `ninja`). After porting, the
-script verifies every relocation of the new configs against the extracted EUR binaries.
+The EUR ROM must be extracted first (`python tools/configure.py eur` followed by `ninja extract`). After porting,
+the script verifies every relocation of the new configs against the extracted EUR binaries.
+
+New work goes directly into config/eur, so running this again with --force discards it. Only do so to start over
+from config/usa.
 '''
 
 import argparse

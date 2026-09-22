@@ -1,16 +1,12 @@
 # Dragon Quest IX: Sentinels of the Starry Skies Decompilation Project
 
-[![USA functions](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDQIX%2Fdqix-decomp%2Fbadges%2Fusa%2Ffunctions.json)](https://github.com/DQIX/dqix-decomp/actions/workflows/match.yml)
-[![USA bytes](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDQIX%2Fdqix-decomp%2Fbadges%2Fusa%2Fbytes.json)](https://github.com/DQIX/dqix-decomp/actions/workflows/match.yml)
-[![JPN functions](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDQIX%2Fdqix-decomp%2Fbadges%2Fjpn%2Ffunctions.json)](https://github.com/DQIX/dqix-decomp/actions/workflows/match.yml)
-[![JPN bytes](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDQIX%2Fdqix-decomp%2Fbadges%2Fjpn%2Fbytes.json)](https://github.com/DQIX/dqix-decomp/actions/workflows/match.yml)
-[![EUR functions](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDQIX%2Fdqix-decomp%2Fbadges%2Feur%2Ffunctions.json)](https://github.com/DQIX/dqix-decomp/actions/workflows/match.yml)
-[![EUR bytes](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDQIX%2Fdqix-decomp%2Fbadges%2Feur%2Fbytes.json)](https://github.com/DQIX/dqix-decomp/actions/workflows/match.yml)
+[![EUR functions](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Falvarosanchezhdez98%2FDecompilarDQ9%2Fbadges%2Feur%2Ffunctions.json)](https://github.com/alvarosanchezhdez98/DecompilarDQ9/actions/workflows/match.yml)
+[![EUR bytes](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Falvarosanchezhdez98%2FDecompilarDQ9%2Fbadges%2Feur%2Fbytes.json)](https://github.com/alvarosanchezhdez98/DecompilarDQ9/actions/workflows/match.yml)
 
 ## 📖 About
 This project aims to create a **1:1 disassembly and decompilation** of *Dragon Quest IX: Sentinels of the Starry Skies* for the Nintendo DS.  
-The primary focus is on the USA and Japanese versions of the game, with the goal of making it fully recompilable.  
-The European version is built from the same code as the USA version, so it is supported as well (see [The EUR version](#-the-eur-version)).
+The upstream project, [DQIX/dqix-decomp](https://github.com/DQIX/dqix-decomp), focuses on the USA and Japanese versions of the game, with the goal of making it fully recompilable.  
+This fork focuses on the European version, which is built from the same code as the USA version (see [The EUR version](#-the-eur-version)). It's the version that CI builds and that new work is matched against, while the USA and JPN configs are kept as they came from upstream.
 
 ---
 
@@ -58,9 +54,23 @@ This builds the ROM, verifies every module against the original, generates a dec
 ### 🌍 The EUR version
 The European version (English, French, German, Italian and Spanish) was built from the same code as the USA version. Every module is at the same address, and the only code differences are in the ARM9 main module: the BIOS call stubs in the secure area are laid out differently, and two functions check for more system languages, which shifts the rest of main's `.text` and `.rodata` by 0x10 bytes.
 
-Because of this, `config/eur` is ported from `config/usa` and keeps its symbol names:
-- After changing `config/usa`, update `config/eur` by running `python tools/port_eur_config.py --force`. It needs the EUR ROM to be extracted first (`python tools/configure.py eur` followed by `ninja extract`), and it verifies every relocation of the new config against it.
-- Source files are compiled with both `-d usa` and `-d eur`, so `#if defined(usa)` also applies to the EUR version. Use `#if defined(eur)` for code that only exists in the European version.
+Because of this, `config/eur` was ported from `config/usa` by [tools/port_eur_config.py](tools/port_eur_config.py):
+- It keeps USA's symbol names, including the addresses in automatic names: `func_0200fb40` is at `0x0200fb50` in EUR. Only the address in `symbols.txt` tells where a symbol is.
+- New work goes directly into `config/eur`, while `config/usa` and `config/jpn` aren't updated. Don't run `port_eur_config.py --force` again: it regenerates `config/eur` from `config/usa`, which would discard that work.
+- Source files are compiled with both `-d usa` and `-d eur`, and decomp.me contexts and scratches get the same macros. So `#if defined(usa)` also applies to the EUR version, and `#if defined(eur)` is for code that only exists in the European version.
+
+---
+
+### 🤖 Continuous integration
+On every push and pull request, the `Match` workflow builds the EUR ROM and checks that every module matches. On `main`, it also publishes the progress badges at the top of this page. The workflow needs the base ROM, which can't be part of the repository, so it fetches it from a release of a private repository:
+
+| Name | Kind | Value |
+| ---- | ---- | ----- |
+| `BASEROM_REPO` | Secret | The private repository, e.g. `user/dqix-baseroms` |
+| `BASEROM_TOKEN` | Secret | A token that can read that repository's releases |
+| `BASEROM_TAG` | Variable | The tag of the release that contains `baserom_dqix_eur.nds`, and optionally `arm7_bios.bin` |
+
+Until `BASEROM_REPO` is set, the build job is skipped. Without `arm7_bios.bin`, the workflow runs `ninja min report`, which verifies the modules but not the SHA-1 of the whole ROM.
 
 ---
 
@@ -76,7 +86,7 @@ We recommend joining the DQIX discord server **The Quester's Rest** (https://dis
 > Ensure the decompiled code you submit produces the **same binary** as the original release game. The build script should throw errors should your code not match.
 
 ### Decompiling code
-See [Decompiling.md](Decompiling.md)
+See [Decompiling.md](Decompiling.md), and [docs/module-map.md](docs/module-map.md) for where each part of the game lives.
 
 Contributions are welcome, though make sure you've read the pages linked above first. If you're new to decompilation, some possible tasks to get started with include:
 1. Find and decompile additional uses for [the game's scripting system](src/Resource/Script.cpp). Some existing uses can be found [here](src/World/LootableContainer.cpp) and [here](src/Graphics/AtmosphericEffect.cpp) as a guideline. (You don't need to worry about matching global variables, it's okay to mark everything as extern for the time being - just focus on matching the .text section). You may find [this script disassembler](https://github.com/DQIX/dqix-script-disasm) helpful.
@@ -99,7 +109,12 @@ Contributions are welcome, though make sure you've read the pages linked above f
    - Another popular DS emulator for debugging, though less user-friendly.  
    - [Download No$GBA](https://problemkaputt.de/gba.htm)
 
-4. **Decomp.me**:
+4. **objdiff**:
+   - Compares each object built from the source code with the same part of the original game, function by function, and rebuilds it as you edit. It can also create a decomp.me scratch from a function.
+   - Run `ninja objdiff` to generate its project file (`objdiff.json`), then open the repository folder with it.
+   - [Download objdiff (use version 2.7.1, the same as the build)](https://github.com/encounter/objdiff/releases/tag/v2.7.1)
+
+5. **Decomp.me**:
    - A powerful website designed to aid decompilation of games on different platforms. Select the DS platform and input the assembly of the function you want to decompile, and it will show you how closely the code you write matches the output assembly.
    - Additionally, it's great for collaboration, as you can share a "scratch" of the function you're working on with others and they can seamlessly fork it and contribute.
    - [Check it out here](https://decomp.me)
