@@ -17,7 +17,7 @@ parser.add_argument('-w', type=str, default=DEFAULT_WIBO_PATH, dest="wine", requ
 parser.add_argument("--compiler", type=Path, required=False, help="Path to pre-installed compiler root directory")
 parser.add_argument("--no-extract", action="store_true", help="Skip extract step")
 parser.add_argument("--dsd", type=Path, required=False, help="Path to pre-installed dsd CLI")
-parser.add_argument('version', help='Game version')
+parser.add_argument('version', choices=["usa", "jpn", "eur"], help='Game version')
 args = parser.parse_args()
 
 
@@ -48,9 +48,12 @@ CC_FLAGS = " ".join([
     "-msgstyle gcc",        # Use GCC-like messages (some IDEs will make file names clickable)
     "-str pool,reuse"       # Pool and reuse strings within translation units
 ])
-active_function_name = "-force_active func_ov030_021d8a40"
-if args.version == "jpn":
-    active_function_name = "-force_active func_ov029_021d9300,func_ov030_021d9300"
+FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing references them
+    "usa": "func_ov030_021d8a40",
+    "jpn": "func_ov029_021d9300,func_ov030_021d9300",
+    "eur": "func_ov030_021d8a40", # same symbol names and overlay addresses as USA
+}
+active_function_name = f"-force_active {FORCE_ACTIVE[args.version]}"
 LD_FLAGS = " ".join([
     "-proc arm946e",        # Target processor
     "-nostdlib",            # No C/C++ standard library
@@ -115,10 +118,6 @@ class Project:
         self.game_config = config_path / game_version
         '''Root directory for dsd configs'''
 
-        if not self.game_config.is_dir():
-            print(f"Version '{game_version}' not recognized")
-            exit(1)
-
         self.game_build = build_path / game_version
         '''Path to build directory'''
         self.game_extract = extract_path / game_version
@@ -136,6 +135,10 @@ class Project:
 
     def arm9_config_yaml(self) -> Path:
         return self.game_config / "arm9" / "config.yaml"
+
+    def is_initialized(self) -> bool:
+        '''Whether the dsd configs for this version exist yet'''
+        return self.arm9_config_yaml().is_file()
 
     def baserom(self) -> Path:
         return extract_path / f'baserom_{GAME}_{self.game_version}.nds'
@@ -281,6 +284,12 @@ def main():
 
         add_download_tool_builds(n)
         add_extract_build(n, project)
+        if not project.is_initialized():
+            # New version without dsd configs yet, so there is nothing to delink or build
+            if not args.no_extract:
+                n.default("extract")
+            print(f"{project.arm9_config_yaml()} not found, so only the extract step was generated.")
+            return
         add_delink_and_lcf_builds(n, project)
         add_mwcc_builds(n, project, mwcc_implicit)
         add_mwld_and_rom_builds(n, project)
@@ -347,6 +356,13 @@ def add_extract_build(n: ninja_syntax.Writer, project: Project):
             variables={
                 "output_path": str(project.game_extract)
             }
+        )
+        n.newline()
+
+        n.build(
+            inputs=str(project.baserom_config()),
+            rule="phony",
+            outputs="extract",
         )
         n.newline()
 
@@ -421,6 +437,7 @@ def add_mwcc_builds(n: ninja_syntax.Writer, project: Project, mwcc_implicit: lis
         cc_flags = []
         if is_cpp(source_file): cc_flags.append("-lang=c++")
         elif is_c(source_file): cc_flags.append("-lang=c")
+        if project.game_version == "eur": cc_flags.append("-d usa") # EUR is built from the same code as USA
         n.build(
             inputs=str(source_file),
             implicit=mwcc_implicit,
