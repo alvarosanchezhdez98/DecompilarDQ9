@@ -24,3 +24,5 @@ src/BasicAttackCalculation.cpp:
 Add the 'complete' qualifier to indicate the code is finished, or else it won't be included in the build.
 
 Additionally, be sure to rename any symbols in symbols.txt to match the names you gave functions or data in the decompiled file.
+
+Once `ninja min` confirms that everything still matches, run `python tools/progress.py --record` to update [docs/progress.md](docs/progress.md), and commit it with your changes.

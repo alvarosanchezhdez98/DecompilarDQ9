@@ -86,7 +86,7 @@ We recommend joining the DQIX discord server **The Quester's Rest** (https://dis
 > Ensure the decompiled code you submit produces the **same binary** as the original release game. The build script should throw errors should your code not match.
 
 ### Decompiling code
-See [Decompiling.md](Decompiling.md), and [docs/module-map.md](docs/module-map.md) for where each part of the game lives.
+See [Decompiling.md](Decompiling.md), [docs/module-map.md](docs/module-map.md) for where each part of the game lives, and [docs/progress.md](docs/progress.md) for what's left to decompile.
 
 Contributions are welcome, though make sure you've read the pages linked above first. If you're new to decompilation, some possible tasks to get started with include:
 1. Find and decompile additional uses for [the game's scripting system](src/Resource/Script.cpp). Some existing uses can be found [here](src/World/LootableContainer.cpp) and [here](src/Graphics/AtmosphericEffect.cpp) as a guideline. (You don't need to worry about matching global variables, it's okay to mark everything as extern for the time being - just focus on matching the .text section). You may find [this script disassembler](https://github.com/DQIX/dqix-script-disasm) helpful.
