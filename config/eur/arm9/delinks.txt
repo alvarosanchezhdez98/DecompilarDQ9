@@ -1,0 +1,370 @@
+    .text       start:0x02000000 end:0x020e5930 kind:code align:32
+    .init       start:0x020e5930 end:0x020e693c kind:code align:4
+    .rodata     start:0x020e693c end:0x020eeb28 kind:rodata align:1
+    .ctor       start:0x020eeb28 end:0x020eebd4 kind:rodata align:4
+    .data       start:0x020eebe0 end:0x020f2e60 kind:data align:32
+    .bss        start:0x020f2e60 end:0x021536e0 kind:bss align:32
+
+src/GameState/GameStateInstance.cpp:
+	complete
+	.text start:0x0200f398 end:0x0200f3a4
+
+src/GameState/GameStateObjects.cpp:
+	complete
+	.text start:0x0200fd80 end:0x0200feb4
+
+src/GameState/GameTime.cpp:
+    complete
+    .text start:0x02010160 end:0x020103d8
+
+src/Grotto/Main/GrottoNameDataFile.cpp:
+    complete
+    .text start:0x02011654 end:0x0201166c
+
+src/Grotto/Main/GrottoStruct.cpp:
+    complete
+    .text start:0x02011748 end:0x02011754
+
+src/World/Zone3D.cpp:
+    complete
+    .text start:0x0201384c end:0x02013b80
+
+src/Grotto/Main/GenerateObjectPosition.cpp:
+    complete
+    .text start:0x0201a198 end:0x0201a310
+
+src/Grotto/Main/TileFeatures.cpp:
+    complete
+    .text start:0x0201ea64 end:0x0201ebd4
+
+src/Filesystem/BackgroundLoader.cpp:
+    complete
+    .bss start:0x02104304 end:0x02104b0c
+    .text start:0x0202f710 end:0x02030644
+
+src/Resource/Script.cpp:
+    complete
+    .text start:0x02030644 end:0x02030c78
+
+src/Graphics/ExtendedVectorMath.cpp:
+    complete
+    .text start:0x02030c78 end:0x020310ac
+
+src/Memory/SafeAllocator.cpp:
+    complete
+    .text start:0x0203247c end:0x020328cc
+    .data start:0x020ef91c end:0x020ef920
+    .bss start:0x02104b0c end:0x02104b10
+
+src/Resource/BCFG.cpp:
+    complete
+    .text start:0x020343b0 end:0x020349d8
+    .data start:0x020efa48 end:0x020efaa8
+    .bss start:0x02104b10 end:0x02104b18
+
+src/Graphics/AlphaTween.cpp:
+    complete
+    .text start:0x020349d8 end:0x02034bd4
+
+src/World/Object3D.cpp:
+    complete
+    .text start:0x02034bd4 end:0x02037d20
+    .rodata start:0x020e7810 end:0x020e781c
+    .data start:0x020efaa8 end:0x020efb44
+    .bss start:0x02104b18 end:0x02104b60
+
+src/Resource/Brightness.cpp:
+    complete
+    .text start:0x0203aef0 end:0x0203b4a8
+
+src/Graphics/LightingManager.cpp:
+    complete
+    .text start:0x02050464 end:0x02052968
+    .init start:0x020e5da8 end:0x020e5e3c
+    .ctor start:0x020eeb58 end:0x020eeb5c
+    .data start:0x020f030c end:0x020f0420
+    .bss start:0x0210791c end:0x021079cc
+
+src/Util/Random.cpp:
+	complete
+	.text start:0x020741e0 end:0x020744b8
+
+src/Combat/Main/BasicAttackCalculation.cpp:
+    complete
+    .text start:0x020744b8 end:0x02074748
+
+src/Combat/Main/TensionBonusCalculation.cpp:
+	complete
+	.text start:0x02074774 end:0x020747b4
+	
+src/Combat/Main/CritRateCalculation.cpp:
+	complete
+	.text start:0x020747b4 end:0x02074848
+
+src/Filesystem/FileIO.cpp:
+    complete
+    .text start:0x020750a8 end:0x0207569c
+
+src/Graphics/AtmosphericEffect.cpp:
+    complete
+    .text start:0x0207a070 end:0x0207b2dc
+    .init start:0x020e6134 end:0x020e61bc
+    .ctor start:0x020eeb84 end:0x020eeb88
+    .data start:0x020f0e38 end:0x020f0ec8
+    .bss start:0x02108e40 end:0x02108e60
+
+src/Graphics/LightingInfo.cpp:
+    complete
+    .text start:0x0207b2dc end:0x0207ba38
+    .init start:0x020e61bc end:0x020e6244
+    .ctor start:0x020eeb88 end:0x020eeb8c
+    .data start:0x020f0ec8 end:0x020f0f18
+    .bss start:0x02108e60 end:0x02108e78
+
+src/World/LootableContainer.cpp:
+    complete
+    .text start:0x0207ba64 end:0x0207c254
+    .data start:0x020f0f18 end:0x020f0f88
+
+src/Graphics/Animation3D.cpp:
+    complete
+    .text start:0x0207e070 end:0x0207e24c
+
+src/Graphics/Model3D.cpp:
+    complete
+    .text start:0x0207e274 end:0x0207ed2c
+
+src/Grotto/Main/ActiveGrottoClass.cpp:
+    complete
+    .text start:0x0208fe78 end:0x020902a4
+
+src/Grotto/Main/ActiveGrottoClass_2.cpp:
+    complete
+    .text start:0x0209034c end:0x02090454
+
+src/Grotto/Main/FloorMapGenerator.cpp:
+    complete
+    .text start:0x02090454 end:0x02092654
+
+src/Grotto/Main/FloorMap.cpp:
+    complete
+    .text start:0x02092654 end:0x02092a84
+
+src/Grotto/Main/TreasureMapDataStructs.cpp:
+    complete
+    .text start:0x020a3a44 end:0x020a3ef4
+
+src/Grotto/Main/DetailedTreasureMapData.cpp:
+    complete
+    .rodata start:0x020e9048 end:0x020e9084
+    .text start:0x020a3ef4 end:0x020a5cc8
+
+src/Grotto/Main/TreasureMapMetadata.cpp:
+    complete
+    .text start:0x020a5cc8 end:0x020a6094
+
+src/Memory/SignedAllocator.cpp:
+    complete
+    .bss start:0x02109ffc end:0x0210a00c
+    .text start:0x020aeed8 end:0x020af21c
+
+src/Memory/HPXEAllocator.cpp:
+    complete
+    .text start:0x020af21c end:0x020af848
+
+src/Memory/HMRFAllocator.cpp:
+    complete
+    .text start:0x020af848 end:0x020afb00
+
+src/Memory/UnusedSignedAllocator.cpp:
+    complete
+    .text start:0x020afb00 end:0x020afb68
+
+src/Filesystem/NarcHandle.cpp:
+    complete
+    .text start:0x020afb68 end:0x020afdd8
+
+src/Memory/AllocatorTypes.cpp:
+    complete
+    .rodata start:0x020e9170 end:0x020e9188
+    .text start:0x020afdd8 end:0x020afe44
+
+src/Memory/AllocatorUnion.cpp:
+    complete
+    .text start:0x020afe7c end:0x020afed4
+
+src/Graphics/NSBXX/Animation.cpp:
+    complete
+    .text start:0x020b2adc end:0x020b2e4c
+
+src/Graphics/NSBXX/TEX.cpp:
+    complete
+    .text start:0x020b2e4c end:0x020b36d0
+
+src/Graphics/NSBXX/RenderConfig.cpp:
+    complete
+    .text start:0x020b36d0 end:0x020b3ae0
+
+src/Graphics/NSBXX/AnimationProcessing.cpp:
+    complete
+    .text start:0x020b3ae0 end:0x020b4030
+
+src/Graphics/NSBXX/RenderCommands.cpp:
+    complete
+    .text start:0x020b4030 end:0x020b5768
+
+//src/Graphics/NSBXX/RenderCommand_9.cpp:
+//    complete
+//    .text start:0x020b5768 end:0x020b5ec4
+
+src/Graphics/NSBXX/RenderCommands_10_13.cpp:
+    complete
+    .text start:0x020b5ec4 end:0x020b69a8
+
+src/Graphics/NSBXX/GeometryFifo.cpp:
+    complete
+    .text start:0x020b69a8 end:0x020b6ea8
+
+src/Graphics/NSBXX/NSBXX.cpp:
+    complete
+    .text start:0x020b6ea8 end:0x020b737c
+
+//src/Graphics/NSBXX/NameList.cpp:
+//    complete
+//    .text start:0x020b737c end:0x020b76a4
+
+src/Graphics/NSBXX/PatternAnimation.cpp:
+    complete
+    .text start:0x020b76a4 end:0x020b7850
+
+//src/Graphics/NSBXX/JAC.cpp:
+//    complete
+//    .text start:0x020b7850 end:0x020b8e70
+
+src/Graphics/NSBXX/MAM.cpp:
+    complete
+    .text start:0x020b8e70 end:0x020b9288
+
+src/Graphics/NSBXX/MAT.cpp:
+    complete
+    .text start:0x020b9288 end:0x020b96ac
+
+src/Graphics/NSBXX/MPT.cpp:
+    complete
+    .text start:0x020b96ac end:0x020b993c
+
+src/Graphics/NSBXX/VAV.cpp:
+    complete
+    .text start:0x020b993c end:0x020b99c0
+
+src/Graphics/NSBXX/RenderCommandProcs.cpp:
+    complete
+    .text start:0x020b99c0 end:0x020bb434
+
+src/System/VRAM.cpp:
+    complete
+    .text start:0x020c3a5c end:0x020c4c84
+
+src/System/BGBases.cpp:
+    complete
+    .text start:0x020c4c84 end:0x020c50f4
+
+src/System/ColorEffects.cpp:
+    complete
+    .text start:0x020c50f4 end:0x020c517c
+
+src/System/LoadToVRAM.cpp:
+    complete
+    .text start:0x020c5830 end:0x020c6924
+
+//src/System/InterruptHandler.cpp:
+//    complete
+//    .text start:0x020c6964 end:0x020c6ca0
+
+src/System/InterruptEnableDisable.cpp:
+    complete
+    .text start:0x020c6ca0 end:0x020c6d58
+
+src/System/GamecardBusOwnership.cpp:
+    complete
+    .text start:0x020c6e58 end:0x020c7090
+
+src/System/ContextList.cpp:
+    complete
+    .text start:0x020c71b4 end:0x020c746c
+
+//src/System/ProcessorContext.cpp:
+//    complete
+//    .text start:0x020c75c4 end:0x020c7d44
+
+src/System/Mutex.cpp:
+    complete
+    .text start:0x020c806c end:0x020c825c
+
+src/System/Cache.cpp:
+    complete
+    .text start:0x020c825c end:0x020c8358
+
+src/System/Timing.cpp:
+    complete
+    .text start:0x020c8c60 end:0x020c9298
+
+src/System/CPSRInterruptState.cpp:
+    complete
+    .text start:0x020c96f8 end:0x020c977c
+
+src/System/DMA.cpp:
+    complete
+    .text start:0x020c9c1c end:0x020ca0b8
+
+src/System/IPC.cpp:
+    complete
+    .bss start:0x021116a4 end:0x02111728
+    .text start:0x020cad28 end:0x020cb044
+
+src/Filesystem/NitroVM.cpp:
+    complete
+    .rodata start:0x020ed6d8 end:0x020ed6fc
+    .text start:0x020cb044 end:0x020cc10c
+
+src/Filesystem/LowNitroHandle.cpp:
+    complete
+    .text start:0x020cc10c end:0x020cc950
+
+src/Filesystem/FileAccessor.cpp:
+    complete
+    .text start:0x020cc950 end:0x020ccf8c
+
+src/Filesystem/OverlayFSManagement.cpp:
+    complete
+    .text start:0x020ccf8c end:0x020cd4a4
+
+src/Filesystem/CardReadManagerInit.cpp:
+    complete
+    .text start:0x020cfccc end:0x020cffdc
+
+src/Filesystem/CardReadManagerAcquireBus.cpp:
+    complete
+    .text start:0x020cffdc end:0x020d0050
+
+src/Filesystem/CardReadManager.cpp:
+    complete
+    .text start:0x020d085c end:0x020d0fd4
+
+src/Filesystem/ExtendedNitroVM.cpp:
+    complete
+    .text start:0x020d8724 end:0x020d8fdc
+
+src/Filesystem/GPC.cpp:
+    complete
+    .text start:0x020d8fdc end:0x020d96c0
+
+src/Resource/ResourceMutex.cpp:
+    complete
+    .bss start:0x0214e4a8 end:0x0214e4c8
+    .text start:0x020d96c0 end:0x020d97b8
+
+src/Graphics/VRAMStaging.cpp:
+    complete
+    .bss start:0x0214e5e4 end:0x02153628
+    .text start:0x020dc08c end:0x020dc224
