@@ -1,203 +1,129 @@
 #include "Graphics/NSBXX/NSBXX.h"
 
 #pragma optimize_for_size off
+// This NitroSystem file was compiled with -O4, unlike the game's -O2: at -O2, the loops aren't strength-reduced and are
+// compiled with their condition at the bottom instead of a check before a do-while loop
+#pragma optimization_level 4
 
-extern "C" void* NSBXXNameList_Search(NSBXXNameList* nameList, const char* name)
+// Names are 16-byte arrays, compared as four 32-bit integers.
+// The name lists are const, like in NitroSystem: otherwise, the tree searches load the number of entries again instead
+// of reusing the first load.
+static inline const uint32_t* GetNameByIndex(const NSBXXNameList* nameList, unsigned int index)
 {
-    volatile NSBXXNameList* volList = nameList;
-    const uint32_t* targetIntArray = (const uint32_t*)name;
+    if (nameList != NULL && index < nameList->numEntries_)
+    {
+        const uint16_t* dataStart = (const uint16_t*)((const uint8_t*)nameList + nameList->offsetToDataStart_);
+        // dataStart[1] is the distance between dataStart and the names
+        return (const uint32_t*)((const uint8_t*)dataStart + dataStart[1] + 16 * index);
+    }
+    return NULL;
+}
+
+static inline void* GetDataByIndex(const NSBXXNameList* nameList, unsigned int index)
+{
+    if (nameList != NULL && index < nameList->numEntries_)
+    {
+        const uint16_t* dataStart = (const uint16_t*)((const uint8_t*)nameList + nameList->offsetToDataStart_);
+        // dataStart[0] is the size of an entry, and the entries follow the 4-byte header
+        return (void*)((const uint8_t*)dataStart + 4 + dataStart[0] * index);
+    }
+    return NULL;
+}
+
+extern "C" void* NSBXXNameList_Search(const NSBXXNameList* nameList, const char* nameChars)
+{
+    const uint32_t* name = (const uint32_t*)nameChars;
     if (name == NULL)
         return NULL;
 
-    unsigned int numEntries = nameList->numEntries_;
-    if (numEntries < 16) // list is short, do linear search
+    if (nameList->numEntries_ < 16) // list is short, do linear search
     {
-        unsigned int searchIndex = 0;
-        uint32_t target0 = targetIntArray[0];
-        uint32_t target1 = targetIntArray[1];
-        uint32_t target2 = targetIntArray[2];
-        uint32_t target3 = targetIntArray[3];
-        
-        unsigned int zero = 0;
-        if (numEntries > zero)
+        unsigned int index;
+        const uint32_t* source;
+        uint32_t target0 = name[0];
+        uint32_t target1 = name[1];
+        uint32_t target2 = name[2];
+        uint32_t target3 = name[3];
+
+        for (index = 0; index < nameList->numEntries_; ++index)
         {
-            int offsetWithinNameData = 0;
-            do
-            {
-                intptr_t sourcePtr;
-                if (nameList != NULL && searchIndex < volList->numEntries_)
-                {
-                    intptr_t dataStart = (intptr_t)nameList + nameList->offsetToDataStart_;
-                    // dataStart + 2 holds the distance between dataStart and the start
-                    // of the name data
-                    sourcePtr = dataStart + *(uint16_t*)(dataStart + 2);
-                    sourcePtr += offsetWithinNameData;
-                }
-                else
-                    sourcePtr = 0;
-
-                // Compare 16-byte strings by comparing ints
-                const uint32_t* source = (const uint32_t*)sourcePtr;
-                if (source[0] == target0 && source[1] == target1 &&
-                    source[2] == target2 && source[3] == target3)
-                {
-                    if (nameList != NULL && searchIndex < nameList->numEntries_)
-                    {
-                        intptr_t dataStart = (intptr_t)nameList + nameList->offsetToDataStart_;
-                        int stride = *(uint16_t*)dataStart;
-                        return (void*)(dataStart + 4 + stride * searchIndex);
-                    }
-                    return NULL;
-                }
-
-                searchIndex++;
-                offsetWithinNameData += 16;
-            } while (searchIndex < volList->numEntries_);
+            source = GetNameByIndex(nameList, index);
+            if (source[0] == target0 && source[1] == target1 && source[2] == target2 && source[3] == target3)
+                return GetDataByIndex(nameList, index);
         }
     }
     else // list is long, use the binary search tree
-    {   
-        NSBXXNameList::SearchTreeEntry* entryArray = (NSBXXNameList::SearchTreeEntry*)&nameList->treeRoot_8_;
-        int firstChild = entryArray[0].children_[0];
-        
-        if (firstChild != 0)
+    {
+        const uint32_t* source;
+        const NSBXXNameList::SearchTreeEntry* entryArray;
+        const NSBXXNameList::SearchTreeEntry *parent, *cursor;
+
+        entryArray = &nameList->treeRoot_8_;
+        parent = entryArray;
+
+        if (parent->children_[0] != 0)
         {
-            NSBXXNameList::SearchTreeEntry* searchCursor = &entryArray[firstChild];
-            int bitIndex = entryArray[firstChild].bitIndex_;
-            unsigned int prevBitIndex = entryArray[0].bitIndex_;
-            if (prevBitIndex > bitIndex)
+            // Go down the tree until reaching a bit index that isn't lower than the parent's
+            cursor = entryArray + parent->children_[0];
+            while (parent->bitIndex_ > cursor->bitIndex_)
             {
-                do
-                {
-                    
-                    int integerToQuery = bitIndex >> 5;
-                    int bitToQuery = bitIndex & 0x1f;
-                    int bitValue = (targetIntArray[integerToQuery] >> bitToQuery) & 1;
-                    int childID = searchCursor->children_[bitValue];
-                    prevBitIndex = searchCursor->bitIndex_;
-                    searchCursor = &entryArray[childID];
-                    bitIndex = entryArray[childID].bitIndex_;
-                    
-                } while (prevBitIndex > bitIndex);
+                parent = cursor;
+                cursor = entryArray + cursor->children_[(name[cursor->bitIndex_ >> 5] >> (cursor->bitIndex_ & 0x1f)) & 1];
             }
 
-            
-            unsigned int candidateIndex = searchCursor->resourceIndex_;
-            intptr_t sourcePtr;
-            if (nameList != NULL && candidateIndex < numEntries)
-            {
-                intptr_t dataStart = (intptr_t)nameList + nameList->offsetToDataStart_;
-                // dataStart + 2 holds the distance between dataStart and the start
-                // of the name data
-                sourcePtr = dataStart + *(uint16_t*)(dataStart + 2) + (candidateIndex * 16);
-            }
-            else
-                sourcePtr = 0;
-
-            const uint32_t* sourceIntArray = (const uint32_t*)sourcePtr;
-            if (sourceIntArray[0] == targetIntArray[0] && sourceIntArray[1] == targetIntArray[1] &&
-                sourceIntArray[2] == targetIntArray[2] && sourceIntArray[3] == targetIntArray[3])
-            {
-                if (nameList != NULL && candidateIndex < numEntries)
-                {
-                    intptr_t dataStart = (intptr_t)nameList + nameList->offsetToDataStart_;
-                    int stride = *(uint16_t*)dataStart;
-                    return (void*)(dataStart + 4 + stride * candidateIndex);
-                }
-                return NULL;
-            }
+            source = GetNameByIndex(nameList, cursor->resourceIndex_);
+            if (source[0] == name[0] && source[1] == name[1] && source[2] == name[2] && source[3] == name[3])
+                return GetDataByIndex(nameList, cursor->resourceIndex_);
         }
     }
 
     return NULL;
 }
 
-// this doesn't quite match, register issues
-extern "C" int NSBXXNameList_SearchIndex(NSBXXNameList* nameList, const char* name)
+extern "C" int NSBXXNameList_SearchIndex(const NSBXXNameList* nameList, const char* nameChars)
 {
-    volatile NSBXXNameList* volList = nameList;
-    const uint32_t* targetIntArray = (const uint32_t*)name;
+    const uint32_t* name = (const uint32_t*)nameChars;
     if (name == NULL)
         return -1;
 
-    unsigned int numEntries = nameList->numEntries_;
-    if (numEntries < 16) // list is short, do linear search
+    if (nameList->numEntries_ < 16) // list is short, do linear search
     {
-        unsigned int searchIndex = 0;
-        uint32_t target0 = targetIntArray[0];
-        uint32_t target1 = targetIntArray[1];
-        uint32_t target2 = targetIntArray[2];
-        uint32_t target3 = targetIntArray[3];
-        unsigned int zero = 0;
-        if (numEntries > zero)
+        unsigned int index;
+        const uint32_t* source;
+        uint32_t target0 = name[0];
+        uint32_t target1 = name[1];
+        uint32_t target2 = name[2];
+        uint32_t target3 = name[3];
+
+        for (index = 0; index < nameList->numEntries_; ++index)
         {
-            int offsetWithinNameData = 0;
-            do
-            {
-                intptr_t sourcePtr;
-                if (nameList != NULL && searchIndex < volList->numEntries_)
-                {
-                    intptr_t dataStart = (intptr_t)nameList + nameList->offsetToDataStart_;
-                    // dataStart + 2 holds the distance between dataStart and the start
-                    // of the name data
-                    sourcePtr = dataStart + *(uint16_t*)(dataStart + 2);
-                    sourcePtr += offsetWithinNameData;
-                }
-                else
-                    sourcePtr = 0;
-
-                // Compare 16-byte strings by comparing ints
-                const uint32_t* source = (const uint32_t*)sourcePtr;
-                if (source[0] == target0 && source[1] == target1 &&
-                    source[2] == target2 && source[3] == target3)
-                    return searchIndex;
-
-                searchIndex++;
-                offsetWithinNameData += 16;
-            } while (searchIndex < volList->numEntries_);
+            source = GetNameByIndex(nameList, index);
+            if (source[0] == target0 && source[1] == target1 && source[2] == target2 && source[3] == target3)
+                return index;
         }
     }
     else // list is long, use the binary search tree
-    {   
-        NSBXXNameList::SearchTreeEntry* entryArray = (NSBXXNameList::SearchTreeEntry*)&nameList->treeRoot_8_;
-        int firstChild = entryArray[0].children_[0];
-        if (firstChild != 0)
-        {
-            NSBXXNameList::SearchTreeEntry* searchCursor = &entryArray[firstChild];
-            int bitIndex = entryArray[firstChild].bitIndex_;   
-            unsigned int prevBitIndex = entryArray[0].bitIndex_;
-            if (prevBitIndex > bitIndex)
-            {
-                do
-                {
-                    int integerToQuery = bitIndex >> 5;
-                    int bitToQuery = bitIndex & 0x1f;
-                    int bitValue = (targetIntArray[integerToQuery] >> bitToQuery) & 1;
-                    int childID = searchCursor->children_[bitValue];
-                    prevBitIndex = searchCursor->bitIndex_;
-                    searchCursor = &entryArray[childID];
-                    bitIndex = entryArray[childID].bitIndex_;
-                    
-                } while (prevBitIndex > bitIndex);
-            }
-            
-            unsigned int candidateIndex = searchCursor->resourceIndex_;
-            intptr_t sourcePtr;
-            if (nameList != NULL && candidateIndex < nameList->numEntries_)
-            {
-                intptr_t dataStart = (intptr_t)nameList + nameList->offsetToDataStart_;
-                // dataStart + 2 holds the distance between dataStart and the start
-                // of the name data
-                sourcePtr = dataStart + *(uint16_t*)(dataStart + 2) + (candidateIndex * 16);
-            }
-            else
-                sourcePtr = 0;
+    {
+        const uint32_t* source;
+        const NSBXXNameList::SearchTreeEntry* entryArray;
+        const NSBXXNameList::SearchTreeEntry *parent, *cursor;
 
-            const uint32_t* sourceIntArray = (const uint32_t*)sourcePtr;
-            if (sourceIntArray[0] == targetIntArray[0] && sourceIntArray[1] == targetIntArray[1] &&
-                sourceIntArray[2] == targetIntArray[2] && sourceIntArray[3] == targetIntArray[3])
-                return candidateIndex;
-            
+        entryArray = &nameList->treeRoot_8_;
+        parent = entryArray;
+
+        if (parent->children_[0] != 0)
+        {
+            // Go down the tree until reaching a bit index that isn't lower than the parent's
+            cursor = entryArray + parent->children_[0];
+            while (parent->bitIndex_ > cursor->bitIndex_)
+            {
+                parent = cursor;
+                cursor = entryArray + cursor->children_[(name[cursor->bitIndex_ >> 5] >> (cursor->bitIndex_ & 0x1f)) & 1];
+            }
+
+            source = GetNameByIndex(nameList, cursor->resourceIndex_);
+            if (source[0] == name[0] && source[1] == name[1] && source[2] == name[2] && source[3] == name[3])
+                return cursor->resourceIndex_;
         }
     }
 
