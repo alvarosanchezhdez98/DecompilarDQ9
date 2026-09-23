@@ -3,9 +3,11 @@
 #include "System/BiosData.h"
 #include "System/DTCM.h"
 #include <globaldefs.h>
-#include <asmhacks.h>
 
 #pragma optimize_for_size off
+// This NitroSDK file was compiled with -O4, like NameList.cpp from NitroSystem: at the game's -O2, the loops are
+// compiled differently
+#pragma optimization_level 4
 
 #if defined(jpn)
 #define data_0211127c data_02110f1c
@@ -24,68 +26,31 @@ extern DMAOrTimerResponse data_0211127c[8];
 // maps index in the previous array to interrupt ID
 extern unsigned short data_020f2274[8];
 
-inline DMACompletionCallback& CallbackByIndex(int n, int base = 0)
-{
-    return *(DMACompletionCallback*)((unsigned int)&data_0211127c[base].callback + n * sizeof(DMAOrTimerResponse));
-}
-
-inline unsigned int& ShouldStayEnabledByIndex(int n, int base = 0)
-{
-    return *(unsigned int*)((unsigned int)&data_0211127c[base].stayEnabledAfter + n * sizeof(DMAOrTimerResponse));
-}
-
-inline int& CallbackUserdataByIndex(int n, int base = 0)
-{
-    return *(int*)((unsigned int)&data_0211127c[base].userdata + n * sizeof(DMAOrTimerResponse));
-}
-
 // Start of exposed functions
 
 void WaitForInterrupt(bool onlySubsequent, unsigned int mask)
 {
     int priorState = DisableIRQInterrupts();
     if (onlySubsequent)
-        DTCM_DATA.interruptsFired &= ~mask;
+        DTCM_DATA_INTERRUPTS_FIRED &= ~mask;
     SetIRQInterruptState(priorState);
-    
-    if (!(mask & DTCM_DATA.interruptsFired))
-    {
-        BlockedContextList* list = &data_027e0000.block_60;
-        unsigned int* pData;
-        do {
-            pData = &DTCM_DATA.interruptsFired;
-            BlockCurrentContext(list);
-        } while (!(mask & *pData));
-    }
-    DECLARE_ASM_NOP();
+
+    while (!(mask & DTCM_DATA_INTERRUPTS_FIRED))
+        BlockCurrentContext(&data_027e0060);
 }
 
 void EmptyInterruptHandler() {}
 
-// This function matches with wrong registers
 void OnDMAOrTimerCompletion(int index)
 {
-    unsigned int irqId = data_020f2274[index];
-    unsigned int irqMask = 1 << irqId;
-
-    DMACompletionCallback callback = CallbackByIndex(index);
-    CallbackByIndex(index) = NULL;
-
+    unsigned int mask = 1 << data_020f2274[index];
+    DMACompletionCallback callback = data_0211127c[index].callback;
+    data_0211127c[index].callback = NULL;
     if (callback != NULL)
-        callback(CallbackUserdataByIndex(index));
-        
-    
-    unsigned int stayEnabled = 0;
-    
-    DTCMData& itcm = DTCM_DATA;
-    stayEnabled = ShouldStayEnabledByIndex(index);
-    itcm.interruptsFired |= irqMask;
-    
-
-    if (!stayEnabled)
-    {
-        DisableSpecificInterrupts(irqMask);
-    }
+        callback(data_0211127c[index].userdata);
+    DTCM_DATA_INTERRUPTS_FIRED |= mask;
+    if (!data_0211127c[index].stayEnabledAfter)
+        DisableSpecificInterrupts(mask);
 }
 
 void DMA0InterruptHandler() { OnDMAOrTimerCompletion(0); }
@@ -100,96 +65,73 @@ void Timer3OverflowInterruptHandler() { OnDMAOrTimerCompletion(7); }
 
 void InitializeInterruptContextBlock_020c6ad4()
 {
-    BlockedContextList& list = GetInterruptDataBlockedContextList();
-    list.first = list.last = NULL;
+    data_027e0060.first = data_027e0060.last = NULL;
 }
 
-// This function matches but with wrong registers
 // proc can either be of type void(*)() for regular interrupts,
 // or void(*)(int) for DMA / timer response interrupts
 void SetInterruptHandler(unsigned int mask, const void* proc)
 {
-    InterruptHandlerProc* regularTable;
-    int dmaTimerIndex;
-    DMAOrTimerResponse* specialTable;
-    
-    int interruptID;
-    
-    regularTable = data_027e0000.interruptProcTable;
-    specialTable = data_0211127c;
-    interruptID = 0;
-    do {
-        
+    int i;
+    DMAOrTimerResponse* response;
+    for (i = 0; i < 22; i++)
+    {
         if (mask & 1)
         {
-            DMAOrTimerResponse* dmaTimerData = NULL;
-            // DMA channels
-            if (interruptID >= 8 && interruptID <= 11)
-            {
-                int dmaTimerIndex = interruptID - 8;
-                dmaTimerData = &specialTable[dmaTimerIndex];
-            }
-            // timer overflows
-            else if (interruptID >= 3 && interruptID <= 6)
-            {
-                dmaTimerIndex = interruptID + 1;
-                dmaTimerData = &specialTable[dmaTimerIndex];
-            }
+            response = NULL;
+            if (8 <= i && i <= 11) // DMA channels
+                response = &data_0211127c[i - 8];
+            else if (3 <= i && i <= 6) // timer overflows
+                response = &data_0211127c[i - 3 + 4];
             else
-            {
-                regularTable[interruptID] = (InterruptHandlerProc)proc;
-            }
+                data_027e0000.interruptProcTable[i] = (InterruptHandlerProc)proc;
 
-            if (dmaTimerData != NULL)
+            if (response != NULL)
             {
-                dmaTimerData->callback = (DMACompletionCallback)proc;
-                dmaTimerData->userdata = 0;
-                dmaTimerData->stayEnabledAfter = true;
+                response->callback = (DMACompletionCallback)proc;
+                response->userdata = 0;
+                response->stayEnabledAfter = true;
             }
         }
-        interruptID++;
         mask >>= 1;
-    } while (interruptID < 22);
+    }
 }
 
 InterruptHandlerProc GetInterruptHandler(unsigned int mask)
 {
-    int interruptId = 0;
-    InterruptHandlerProc* pProc = &data_027e0000.interruptProcTable[0];
-    do
+    int i;
+    InterruptHandlerProc* proc = &data_027e0000.interruptProcTable[0];
+    for (i = 0; i < 22; i++)
     {
-        if (!(mask & 1))
-            continue;
-
-        if (interruptId >= 8 && interruptId <= 11)
+        if (mask & 1)
         {
-            return (InterruptHandlerProc)data_0211127c[interruptId - 8].callback;
+            if (8 <= i && i <= 11) // DMA channels
+                return (InterruptHandlerProc)data_0211127c[i - 8].callback;
+            else if (3 <= i && i <= 6) // timer overflows
+                return (InterruptHandlerProc)data_0211127c[i - 3 + 4].callback;
+            return *proc;
         }
-        else if (interruptId >= 3 && interruptId <= 6)
-        {
-            return (InterruptHandlerProc)data_0211127c[interruptId + 1].callback;
-        }
-        else
-        {
-            return *pProc;
-        }
-
-    } while (interruptId++, mask >>= 1, pProc++, interruptId < 22);
+        mask >>= 1;
+        proc++;
+    }
     return NULL;
 }
 
 void SetDMACompletionCallback(int channel, DMACompletionCallback callback, int userdata)
 {
-    CallbackByIndex(channel) = callback;
-    CallbackUserdataByIndex(channel) = userdata;
-    unsigned int prior = EnableSpecificInterrupts(1 << (channel + 8));
-    ShouldStayEnabledByIndex(channel) = prior & (1 << (channel + 8));
+    unsigned int mask = 1 << (channel + 8);
+    data_0211127c[channel].callback = callback;
+    data_0211127c[channel].userdata = userdata;
+    data_0211127c[channel].stayEnabledAfter = EnableSpecificInterrupts(mask) & mask;
 }
 
 void SetTimerOverflowCallback(int timer, DMACompletionCallback callback, int userdata)
 {
-    CallbackByIndex(timer, 4) = callback;
-    CallbackUserdataByIndex(timer, 4) = userdata;
-    EnableSpecificInterrupts(1 << (timer + 3));
-    ShouldStayEnabledByIndex(timer, 4) = true;
+    // unsigned long like the NitroSDK's u32: with int, the compiler doesn't add the timers' offset to the table's address
+    unsigned long timerNo = timer;
+    unsigned int mask = 1 << (timerNo + 3);
+    data_0211127c[timerNo + 4].callback = callback;
+    data_0211127c[timerNo + 4].userdata = userdata;
+    EnableSpecificInterrupts(mask);
+    data_0211127c[timerNo + 4].stayEnabledAfter = true;
 }
