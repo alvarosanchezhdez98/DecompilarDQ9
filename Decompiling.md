@@ -18,6 +18,8 @@ To get the assembly of every function, run `dsd dis --config-path config/eur/arm
 
 Functions are matched by name, so after naming a function, rename it in `symbols.txt` to the name the compiler gives it (e.g. `_ZN8NatTable7ForEachEPFvPS_P8NatEntryE`) and run `ninja delink` again.
 
+A function whose instructions only differ in the symbols they reference is shown as `100.0 % (except ...)`. References to the same external symbols happen because the original object defines data that ours only declares. References to symbols with other names are listed as `original = ours`, so you can rename the data in `symbols.txt`.
+
 ## Referencing functions and data that have yet to be decompiled
 Add a declaration to the file referencing the yet un-decompiled info. For example, if you wanted to reference a function in the main ARM9 file at 02074388, you would add
 ```C

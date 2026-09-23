@@ -6223,7 +6223,7 @@ data_020e6c84 kind:data(any) addr:0x020e6c94
 data_020e6cc4 kind:data(any) addr:0x020e6cd4
 data_020e6ce4 kind:data(any) addr:0x020e6cf4
 data_020e6d04 kind:data(any) addr:0x020e6d14
-data_020e6d5c kind:data(any) addr:0x020e6d6c
+__ptmf_null kind:data(any) addr:0x020e6d6c
 data_020e6d64 kind:data(any) addr:0x020e6d74
 data_020e6d6c kind:data(any) addr:0x020e6d7c
 data_020e6d74 kind:data(any) addr:0x020e6d84
