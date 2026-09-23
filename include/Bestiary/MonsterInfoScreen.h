@@ -7,7 +7,8 @@
 // A monster of the bestiary list, from mon_list_<LG>.nat
 struct MonsterListEntry
 {
-    char unk_0[4];
+    // The next monster shown in the list (see MonsterListScreen)
+    MonsterListEntry* next_;
     const char* modelName_;
     const char* name_;
     short monsterID_;
@@ -15,11 +16,13 @@ struct MonsterListEntry
     // Text of the monster's family, in str_sml_<LG>.nat
     signed char familyTextID_;
     unsigned char unk_13_0_ : 1;
-    unsigned char hasModel_ : 1;
+    // Set when the player has defeated it at least once, so its information is shown
+    unsigned char known_ : 1;
     unsigned char unk_13_2_ : 6;
     char unk_14[6];
     // The monster's number in the bestiary
     short number_;
+    char unk_1c[4];
 };
 
 // What the player knows about a monster
@@ -75,12 +78,16 @@ struct LayoutElement
 // A surface that text is drawn to
 struct Canvas
 {
-    char unk_0[8];
+    char unk_0[4];
+    struct BackgroundGraphics* background_;
     void* pixels_;
     char unk_c[0x9c];
+    // In tiles
     short width_;
     short height_;
-    char unk_ac[8];
+    short x_;
+    short y_;
+    char unk_b0[4];
     short unk_b4;
     short unk_b6;
     char unk_b8[0x28];
@@ -124,9 +131,25 @@ struct Sprite
     char unk_27;
 };
 
+// The animated sprites of a SpriteRenderer
+struct SpriteAnimation
+{
+    char unk_0[4];
+    short x_;
+    short y_;
+    char unk_8[0xd];
+    unsigned char flags_;
+};
+
+struct SpriteAnimationList
+{
+    char unk_0[8];
+};
+
 struct SpriteRenderer
 {
-    char unk_0[0x40];
+    char unk_0[0x3c];
+    SpriteAnimationList* animations_;
     Sprite* sprites_;
     char unk_44[8];
     short numSprites_;

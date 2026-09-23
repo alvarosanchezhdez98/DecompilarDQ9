@@ -13,5 +13,12 @@ src/Bestiary/MonsterInfoScreen.cpp:
     .data start:0x021895a0 end:0x021896d4
     .bss start:0x02189800 end:0x0218981c
 
+src/Bestiary/MonsterListScreen.cpp:
+    complete
+    .text start:0x021868b8 end:0x02188b18
+    .rodata start:0x021894b8 end:0x02189510
+    .data start:0x021896d4 end:0x021897c4
+    .bss start:0x0218981c end:0x02189820
+
 src/Bestiary/HabitatTable.cpp:
     .text start:0x02188b18 end:0x02189468
