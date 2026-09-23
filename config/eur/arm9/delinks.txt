@@ -213,9 +213,9 @@ src/Graphics/NSBXX/RenderCommands.cpp:
     complete
     .text start:0x020b4030 end:0x020b5768
 
-//src/Graphics/NSBXX/RenderCommand_9.cpp:
-//    complete
-//    .text start:0x020b5768 end:0x020b5ec4
+src/Graphics/NSBXX/RenderCommand_9.cpp:
+    complete
+    .text start:0x020b5768 end:0x020b5ec4
 
 src/Graphics/NSBXX/RenderCommands_10_13.cpp:
     complete
