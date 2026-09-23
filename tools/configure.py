@@ -31,6 +31,7 @@ MWCC_VERSIONS = { # Files compiled with another version than MWCC_VERSION
     # Nintendo's libraries were compiled with 2.0/sp2 or older: from 2.0/sp2p2, multiplying a 32-bit value by a 64-bit
     # one skips the multiplications by the high words that are 0, e.g. in OS_Sleep (SleepCurrentContext)
     "src/Graphics/NSBXX/JAC.cpp": "2.0/sp2", # NitroSystem
+    "src/Sound/SoundArchiveStream.cpp": "2.0/sp2", # NitroSystem
     "src/System/ProcessorContext.cpp": "2.0/sp2", # NitroSDK
     "src/System/Trigonometry.cpp": "2.0/sp2", # NitroSDK
 }

@@ -33,8 +33,8 @@ since the official names aren't known for this game.
 | `0x02000000-0x02000800` | 2 KB | Secure area, with the BIOS call stubs (`Div`, `CpuSet`...) |
 | `0x02000800-0x02000c9c` | 1 KB | Startup: `Entry`, `AutoloadCallback`, `BuildInfo` and the library tags above |
 | `0x02000c9c-0x020b2adc` | ~710 KB | Level-5 code: `main`, the C runtime (`memcpy`, `abs`...), then the game and its engine. Around 4400 functions |
-| `0x020b2adc-0x020bc000` | ~37 KB | NitroSystem G3D (`src/Graphics/NSBXX`) |
-| `0x020bc000-0x020c0338` | ~17 KB | NitroSystem sound (`NNS_Snd*`) |
+| `0x020b2adc-0x020bbd24` | ~37 KB | NitroSystem G3D (`src/Graphics/NSBXX`), then GFD, its VRAM managers (`NNS_Gfd*`) |
+| `0x020bbd24-0x020c0338` | ~18 KB | NitroSystem sound (`NNS_Snd*`, `src/Sound`), and a function that isn't identified at `0x020c02a0` |
 | `0x020c0338-0x020dc300` | ~112 KB | NitroSDK: digests (DGT), fixed-point math (FX: `Mat3x3_*`, `Vector3fix_*`...), GX, VRAM, interrupts, cache, timers, DMA, IPC (`src/System`), file system and card access (`src/Filesystem`) |
 | `0x020dc300-0x020e5930` | ~37 KB | More Level-5 code: it uses the game's classes (`GameState`, `SafeAllocator`...) |
 | `0x020e5930-0x020eebd4` | ~36 KB | `.init`, `.rodata` and `.ctor` |
