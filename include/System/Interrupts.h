@@ -9,6 +9,8 @@
 
 typedef void (*InterruptHandlerProc)();
 
+// The NitroSDK's OS_InitIrqTable
+void InitializeInterruptContextBlock_020c6ad4();
 void WaitForInterrupt(bool onlySubsequent, unsigned int mask);
 void OnDMAOrTimerCompletion(int index);
 void SetInterruptHandler(unsigned int mask, const void* proc);

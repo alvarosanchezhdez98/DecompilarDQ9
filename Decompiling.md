@@ -24,6 +24,8 @@ Nintendo's libraries (the NitroSDK and NitroSystem) were compiled with an older 
 
 A variable that's `static` inside a function can compile differently than a global one (see `InitializeGamecardBusOwnership` in `src/System/GamecardBusOwnership.cpp`). The compiler names it like `isInitialized$126`: give the variable that name in `symbols.txt`, marked `local`, and add the file's `.bss` (or `.data`) section to `delinks.txt`. Functions with variable arguments can include `<stdarg.h>`, which works like the compiler's own (see `src/System/Printf.cpp`).
 
+Some NitroSDK code reads values that its linker script defines, such as the sizes of the stacks (`SDK_IRQ_STACKSIZE`, see `include/System/DTCM.h`). The compiler loads them from a literal pool, like addresses, so the code must reference the symbols to match. `tools/add_linker_symbols.py` defines them in the linker script, and `diff_function.py` counts such a reference as matching the original's value (`except N references to symbols of the linker script`). When the original has a plain number where ours has a relocation, dsd may also have missed a relocation, or given it the wrong symbol: fix it in `relocs.txt`, with `add:` for an address inside a symbol (e.g. `to:0x020c8be4 add:0x50` for a label inside a function), and run `ninja delink` again.
+
 ## Referencing functions and data that have yet to be decompiled
 Add a declaration to the file referencing the yet un-decompiled info. For example, if you wanted to reference a function in the main ARM9 file at 02074388, you would add
 ```C

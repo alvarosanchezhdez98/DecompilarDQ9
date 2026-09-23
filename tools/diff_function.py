@@ -19,6 +19,8 @@ import struct
 import subprocess
 import sys
 
+from add_linker_symbols import LINKER_SYMBOLS
+
 
 root_path = Path(__file__).parent.parent
 build_ninja_path = root_path / "build.ninja"
@@ -115,16 +117,33 @@ def relocation_target(row: dict) -> str | None:
     return row.get("instruction", {}).get("relocation", {}).get("target", {}).get("symbol", {}).get("name")
 
 
-def relocation_differences(left: list[dict], right: list[dict]) -> tuple[int, int] | None:
+def is_linker_symbol_word(left: dict, right: dict) -> bool:
+    '''Whether ours is a word with a relocation to a symbol of the NitroSDK's linker script (see
+    tools/add_linker_symbols.py), and the original the same word with the symbol's value, without a relocation'''
+    l, r = left.get("instruction", {}), right.get("instruction", {})
+    if l.get("mnemonic") != ".word" or "relocation" in l or r.get("mnemonic") != ".word":
+        return False
+    relocation = r.get("relocation", {})
+    value = LINKER_SYMBOLS.get(relocation.get("target", {}).get("symbol", {}).get("name"))
+    arguments = [argument["argument"] for argument in l.get("arguments", []) if "argument" in argument]
+    if value is None or len(arguments) != 1 or "unsigned" not in arguments[0]:
+        return False
+    return int(arguments[0]["unsigned"]) == value + int(relocation.get("addend", 0))
+
+
+def relocation_differences(left: list[dict], right: list[dict]) -> tuple[int, int, int] | None:
     '''If the only differences are in relocations, returns how many point to the same symbols (which objdiff reports
-    when a symbol is defined in the original object but external in ours) and how many to symbols with other names
-    (such as data that isn't named like ours yet)'''
+    when a symbol is defined in the original object but external in ours), how many to symbols with other names
+    (such as data that isn't named like ours yet), and how many to symbols of the linker script'''
     if len(left) != len(right):
         return None
-    same = renamed = 0
+    same = renamed = linker = 0
     for l, r in zip(left, right):
         kind = r.get("diff_kind") or l.get("diff_kind")
         if kind is None:
+            continue
+        if kind == "DIFF_ARG_MISMATCH" and is_linker_symbol_word(l, r):
+            linker += 1
             continue
         if kind != "DIFF_ARG_MISMATCH" or relocation_target(l) is None or relocation_target(r) is None:
             return None
@@ -132,7 +151,7 @@ def relocation_differences(left: list[dict], right: list[dict]) -> tuple[int, in
             same += 1
         else:
             renamed += 1
-    return same, renamed
+    return same, renamed, linker
 
 
 def print_diff(name: str, target: dict, base: dict, summary: bool):
@@ -141,12 +160,14 @@ def print_diff(name: str, target: dict, base: dict, summary: bool):
     right = base.get("instructions", [])
     differences = relocation_differences(left, right) if percent < 100.0 else None
     if differences is not None:
-        same, renamed = differences
+        same, renamed, linker = differences
         notes = []
         if same:
             notes.append(f"{same} references to the same external symbols")
         if renamed:
             notes.append(f"{renamed} references to symbols with other names")
+        if linker:
+            notes.append(f"{linker} references to symbols of the linker script")
         print(f"{name}: 100.0 % (except {' and '.join(notes)})")
         if renamed and not summary:
             for l, r in zip(left, right):

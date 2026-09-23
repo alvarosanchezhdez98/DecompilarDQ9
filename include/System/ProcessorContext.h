@@ -113,6 +113,8 @@ extern Struct_021112e0 data_021112e0;
 extern Struct_02111304 data_02111304;
 extern ProcessorContext data_02111314;
 extern ProcessorContext data_021113d4;
+// The stack of the idle context (data_02111314)
+extern unsigned int data_02111494[0xc8 / sizeof(unsigned int)];
 
 Mutex* PopFrontMutexFromList(MutexList* list);
 

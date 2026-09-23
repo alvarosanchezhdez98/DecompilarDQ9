@@ -299,7 +299,7 @@ src/System/InterruptHandler.cpp:
 
 src/System/InterruptEnableDisable.cpp:
     complete
-    .text start:0x020c6ca0 end:0x020c6d58
+    .text start:0x020c6ca0 end:0x020c6d8c
 
 src/System/GamecardBusOwnership.cpp:
     complete
@@ -312,7 +312,7 @@ src/System/Printf.cpp:
 
 src/System/ContextList.cpp:
     complete
-    .text start:0x020c71b4 end:0x020c746c
+    .text start:0x020c71b4 end:0x020c75c4
 
 src/System/ProcessorContext.cpp:
     complete
@@ -337,6 +337,37 @@ src/System/Mutex.cpp:
 src/System/Cache.cpp:
     complete
     .text start:0x020c825c end:0x020c8358
+
+src/System/SystemInit.cpp:
+    complete
+    .text start:0x020c8358 end:0x020c83c0
+
+src/System/Arena.cpp:
+    complete
+    .text start:0x020c83c0 end:0x020c8778
+    .bss start:0x0211155c end:0x02111564
+
+src/System/Heap.cpp:
+    complete
+    .text start:0x020c8778 end:0x020c89d4
+    .bss start:0x02111564 end:0x02111588
+
+src/System/TCM.cpp:
+    complete
+    .text start:0x020c89d4 end:0x020c8a08
+
+src/System/ProtectionUnit.cpp:
+    complete
+    .text start:0x020c8a08 end:0x020c8a28
+
+src/System/ProtectionRegion.cpp:
+    complete
+    .text start:0x020c8a28 end:0x020c8a4c
+
+src/System/Exception.cpp:
+    complete
+    .text start:0x020c8a4c end:0x020c8c60
+    .bss start:0x02111588 end:0x02111634
 
 src/System/Timing.cpp:
     complete

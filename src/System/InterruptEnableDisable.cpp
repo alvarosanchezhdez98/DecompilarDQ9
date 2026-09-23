@@ -1,4 +1,5 @@
 #include "System/Interrupts.h"
+#include "System/DTCM.h"
 
 #define INTERRUPT_MASTER_ENABLE (*(volatile unsigned short*)0x04000208)
 #define INTERRUPT_ENABLE (*(volatile unsigned int*)0x04000210)
@@ -64,4 +65,12 @@ unsigned int AcknowledgeSpecificInterrupts(unsigned int flagMask)
 
     INTERRUPT_MASTER_ENABLE = oldIME;
     return oldIF;
+}
+
+// usa: func_020c6d48
+// The NitroSDK's OS_SetIrqStackChecker: writes the values at the ends of the IRQ stack that show if it overflowed
+extern "C" void func_020c6d48()
+{
+    *(unsigned int*)(ADDR_DTCM_IRQ_STACK_BOTTOM - sizeof(unsigned int)) = STACK_BOTTOM_MAGIC;
+    *(unsigned int*)(ADDR_DTCM_IRQ_STACK_BOTTOM - IRQ_STACK_SIZE) = STACK_TOP_MAGIC;
 }
