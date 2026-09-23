@@ -34,26 +34,42 @@ DIFF_MARKS = {
 }
 
 
+def ninja_statements() -> list[str]:
+    '''The lines of build.ninja, with the lines continued by `$` joined'''
+    statements = []
+    for line in build_ninja_path.read_text().splitlines():
+        if statements and statements[-1].endswith("$"):
+            statements[-1] = statements[-1][:-1] + line.strip()
+        else:
+            statements.append(line)
+    return statements
+
+
 def mwcc_command(source: Path, output_dir: Path, version: str | None) -> str:
     '''The build's compile command for `source`, taken from build.ninja, optionally with another compiler version'''
-    lines = build_ninja_path.read_text().splitlines()
-    start = lines.index("rule mwcc")
-    command = ""
-    for line in lines[start + 1:]:
-        line = line.strip()
-        if line.startswith("command ="):
-            command = line.removeprefix("command =").strip()
-        elif command and command.endswith("$"):
-            command = command[:-1] + line
-        if command and not command.endswith("$"):
-            break
+    statements = ninja_statements()
+    start = statements.index("rule mwcc")
+    command = next(s.strip() for s in statements[start + 1:] if s.strip().startswith("command ="))
+    command = command.removeprefix("command =").strip()
     command = command.split(" && ")[0] # drop the dependency file conversion on Linux
+
+    # The compiler: the file's own version (see MWCC_VERSIONS in configure.py), otherwise the build's
+    compiler = next(s.removeprefix("mwcc =").strip() for s in statements if s.startswith("mwcc ="))
+    source_name = str(source).replace("/", "\\").lower()
+    for i, statement in enumerate(statements):
+        inputs = statement.partition(": mwcc ")[2].split(" | ")[0].strip()
+        if statement.startswith("build ") and inputs.replace("/", "\\").lower() == source_name:
+            for variable in statements[i + 1:]:
+                if not variable.startswith("  "):
+                    break
+                if variable.strip().startswith("mwcc ="):
+                    compiler = variable.strip().removeprefix("mwcc =").strip()
+            break
     if version is not None:
         compiler = str(Path("tools") / "mwccarm" / version / "mwccarm.exe")
-        command = re.sub(r"[^\s\"]*mwccarm[\\/][^\\/]+[\\/][^\\/]+[\\/]mwccarm\.exe", lambda _: compiler, command)
     cc_flags = "-lang=c++" if source.suffix == ".cpp" else "-lang=c"
-    return (command.replace("$cc_flags", cc_flags).replace(" -MD", "").replace("$in", str(source))
-            .replace("$basedir", str(output_dir)))
+    return (command.replace("$mwcc", compiler).replace("$cc_flags", cc_flags).replace(" -MD", "")
+            .replace("$in", str(source)).replace("$basedir", str(output_dir)))
 
 
 def elf_symbols(path: Path) -> set[str]:
