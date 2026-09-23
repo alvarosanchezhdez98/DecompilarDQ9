@@ -22,7 +22,7 @@ extern "C"
     void func_0205ac40(SpriteRenderer* renderer, Sprite* sprite);
     // Returns whether the buttons are held
     bool func_02012430(void* pad, int buttons);
-    // Returns whether the buttons were just pressed
+    // Returns whether the buttons were just released
     bool func_02012468(void* pad, int buttons);
     // Adds the sprite cells of a file to a sprite renderer
     void func_0205a528(SpriteRenderer* renderer, void* file, unsigned int size, SafeAllocator* allocator);
@@ -427,21 +427,21 @@ void MonsterInfoScreen::Draw()
         return;
     if (monster_ == NULL || record_ == NULL)
         return;
-    if (!monster_->hasModel_)
+    if (!monster_->known_)
         return;
 
     bool showArrows = false;
     bool showPageButton = false;
     if (flags_ & 0x20)
     {
-        if (prevMonster_ != NULL && prevMonster_->hasModel_)
+        if (prevMonster_ != NULL && prevMonster_->known_)
             showArrows = true;
         if (prevRecord_ != NULL && prevRecord_->complete_)
             showPageButton = true;
     }
     else
     {
-        if (monster_->hasModel_)
+        if (monster_->known_)
             showArrows = true;
         if (record_->complete_)
             showPageButton = true;
@@ -636,7 +636,7 @@ void MonsterInfoScreen::LoadMonster(MonsterListEntry* monster, MonsterRecord* re
     flags_ |= 1;
     flags_ &= ~8;
     loadModel_ = loadModel;
-    if (!monster_->hasModel_)
+    if (!monster_->known_)
     {
         flags_ &= ~1;
         flags_ |= 0x10;
@@ -674,7 +674,7 @@ void MonsterInfoScreen::UpdateLoading()
         sprintf(file, "mon_trv%d_<LG>.nat", page_ + 1);
         taskIDs_[2] = loader->QueueLoadFileInGP2(archive, file, NULL);
         taskIDs_[3] = loader->QueueLoadFileInGP2("data/ani/bg_si.gp2", "bg_si_<LG>.pac", NULL);
-        if (loadModel_ && monster_ != NULL && record_ != NULL && monster_->hasModel_ && monster_->modelName_ != NULL)
+        if (loadModel_ && monster_ != NULL && record_ != NULL && monster_->known_ && monster_->modelName_ != NULL)
         {
             sprintf(file, "%s.mon", monster_->modelName_);
             taskIDs_[4] = loader->QueueLoadFileInGP2("data/pack_lv5/enemy.gp2", file, NULL);
