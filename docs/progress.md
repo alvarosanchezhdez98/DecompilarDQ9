@@ -24,11 +24,13 @@ e.g. `ov014`.
 The script keeps everything outside the generated section, so this is the place for plans and notes.
 
 - Current focus: overlay 14, the bestiary.
-  - It was probably compiled from a single source file. Its code is laid out as the monster view (0x021842a0 to about
-    0x02186bc8), then the monster list (up to 0x02188b18), then out-of-line copies of inline functions.
-  - `src/Bestiary/HabitatTable.cpp` (0x02188b18-0x02189468): 17 of 18 functions match. `HabitatTable::Build` has the
-    same instructions as the original but different registers (73 %), so the file isn't `complete` yet.
-  - Next: the monster view, starting at 0x021842a0.
+  - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
+    the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
+  - `src/Bestiary/MonsterInfoScreen.cpp`: 18 of 19 functions match, and so does its data. `UpdateText` (97 %) and the
+    static initializer (88 %) still differ in the order of a few instructions, so the file isn't `complete` yet.
+  - `src/Bestiary/HabitatTable.cpp`: 17 of 18 functions match. `HabitatTable::Build` has the same instructions as the
+    original but different registers (73 %), so the file isn't `complete` yet.
+  - Next: the monster list, starting at 0x021868b8.
 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
@@ -41,7 +43,7 @@ Last recorded on 2026-09-22.
 | Functions | 1,075 | 14,779 | 7.27 % |
 | Modules | 1 complete, 5 in progress, 26 not started | 32 with code |  |
 
-Source files: 84 complete, 2 in progress.
+Source files: 84 complete, 3 in progress.
 
 ## History
 

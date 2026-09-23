@@ -99,29 +99,43 @@ def relocation_target(row: dict) -> str | None:
     return row.get("instruction", {}).get("relocation", {}).get("target", {}).get("symbol", {}).get("name")
 
 
-def only_extern_differences(left: list[dict], right: list[dict]) -> int | None:
-    '''If the only differences are relocations to the same symbols, which objdiff reports when a symbol is defined in
-    the original object but external in ours, returns how many there are'''
+def relocation_differences(left: list[dict], right: list[dict]) -> tuple[int, int] | None:
+    '''If the only differences are in relocations, returns how many point to the same symbols (which objdiff reports
+    when a symbol is defined in the original object but external in ours) and how many to symbols with other names
+    (such as data that isn't named like ours yet)'''
     if len(left) != len(right):
         return None
-    count = 0
+    same = renamed = 0
     for l, r in zip(left, right):
         kind = r.get("diff_kind") or l.get("diff_kind")
         if kind is None:
             continue
-        if kind != "DIFF_ARG_MISMATCH" or relocation_target(l) is None or relocation_target(l) != relocation_target(r):
+        if kind != "DIFF_ARG_MISMATCH" or relocation_target(l) is None or relocation_target(r) is None:
             return None
-        count += 1
-    return count
+        if relocation_target(l) == relocation_target(r):
+            same += 1
+        else:
+            renamed += 1
+    return same, renamed
 
 
 def print_diff(name: str, target: dict, base: dict, summary: bool):
     percent = base.get("match_percent", 0.0)
     left = target.get("instructions", [])
     right = base.get("instructions", [])
-    externs = only_extern_differences(left, right) if percent < 100.0 else None
-    if externs is not None:
-        print(f"{name}: 100.0 % (except {externs} references to the same external symbols)")
+    differences = relocation_differences(left, right) if percent < 100.0 else None
+    if differences is not None:
+        same, renamed = differences
+        notes = []
+        if same:
+            notes.append(f"{same} references to the same external symbols")
+        if renamed:
+            notes.append(f"{renamed} references to symbols with other names")
+        print(f"{name}: 100.0 % (except {' and '.join(notes)})")
+        if renamed and not summary:
+            for l, r in zip(left, right):
+                if (r.get("diff_kind") or l.get("diff_kind")) and relocation_target(l) != relocation_target(r):
+                    print(f"         {relocation_target(l)} = {relocation_target(r)}")
         return
     print(f"{name}: {percent:.1f} %")
     if summary or percent == 100.0:
@@ -134,6 +148,9 @@ def print_diff(name: str, target: dict, base: dict, summary: bool):
         mark = DIFF_MARKS.get(kind, " ")
         l_text = l.get("instruction", {}).get("formatted", "")
         r_text = r.get("instruction", {}).get("formatted", "")
+        if kind and relocation_target(l) and relocation_target(l) != relocation_target(r):
+            l_text += f" ({relocation_target(l)})"
+            r_text += f" ({relocation_target(r)})"
         print(f"  {index:4} {l_text:<{width}} {mark} {r_text}")
 
 
