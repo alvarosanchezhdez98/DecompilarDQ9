@@ -150,7 +150,7 @@ _fmul kind:function(arm,size=0x1e0) addr:0x0200c7d4
 func_0200c9b4 kind:function(arm,size=0xe4) addr:0x0200c9b4
 _fsub kind:function(arm,size=0x278) addr:0x0200caa4
 func_0200cd1c kind:function(arm,size=0x10) addr:0x0200cd1c
-func_0200cd2c kind:function(arm,size=0x1b0) addr:0x0200cd2c
+_ll_sdiv kind:function(arm,size=0x1b0) addr:0x0200cd2c
 _ll_udiv kind:function(arm,size=0xc) addr:0x0200cedc
 _ull_mod kind:function(arm,size=0x3c) addr:0x0200cee8
 func_0200cf24 kind:function(arm,size=0x20) addr:0x0200cf24
@@ -4856,7 +4856,7 @@ func_020c08ec kind:function(arm,size=0x154) addr:0x020c08fc
 func_020c0a40 kind:function(arm,size=0x1fc) addr:0x020c0a50
 func_020c0c3c kind:function(arm,size=0x94) addr:0x020c0c4c
 func_020c0cd0 kind:function(arm,size=0x1b8) addr:0x020c0ce0
-func_020c0e9c kind:function(arm,size=0x294) addr:0x020c0eac
+func_020c0e9c kind:function(arm,size=0x280) addr:0x020c0eac
 func_020c111c kind:function(thumb,size=0xc) addr:0x020c112c
 func_020c1128 kind:function(arm,size=0x58) addr:0x020c1138
 Mat3x3_WriteIdentity kind:function(arm,size=0x24) addr:0x020c1190
@@ -4904,7 +4904,7 @@ func_020c3194 kind:function(arm,size=0xcc) addr:0x020c31a4
 func_020c3260 kind:function(arm,size=0x98) addr:0x020c3270
 func_020c32f8 kind:function(arm,size=0x94) addr:0x020c3308
 fix32_Atan2 kind:function(arm,size=0x1b8) addr:0x020c339c
-func_020c3544 kind:function(arm,size=0x1a8) addr:0x020c3554
+fix32_Atan2_Rescaled kind:function(arm,size=0x1a8) addr:0x020c3554
 func_020c36ec kind:function(arm,size=0x4) addr:0x020c36fc
 func_020c36f0 kind:function(arm,size=0x14c) addr:0x020c3700
 func_020c383c kind:function(arm,size=0x28) addr:0x020c384c
@@ -6485,8 +6485,8 @@ data_020e9348 kind:data(any) addr:0x020e9358
 data_020e93fc kind:data(any) addr:0x020e940c
 data_020e9450 kind:data(any) addr:0x020e9460
 data_020e9a50 kind:data(any) addr:0x020e9a60
-data_020ed450 kind:data(any) addr:0x020ed460
-data_020ed554 kind:data(any) addr:0x020ed564
+atanTable kind:data(short[129]) addr:0x020ed460
+atanIndexTable kind:data(short[129]) addr:0x020ed564
 data_020ed658 kind:data(any) addr:0x020ed668
 data_020ed668 kind:data(any) addr:0x020ed678
 data_020ed66a kind:data(any) addr:0x020ed67a
@@ -7451,7 +7451,7 @@ data_020f21bc kind:data(any) addr:0x020f21bc
 data_020f21d4 kind:data(any) addr:0x020f21d4
 data_020f21ec kind:data(any) addr:0x020f21ec
 data_020f2228 kind:data(any) addr:0x020f2228
-data_020f226c kind:data(any) addr:0x020f226c
+isDisplayOn kind:data(short) addr:0x020f226c local
 data_020f2270 kind:data(any) addr:0x020f2270
 data_020f2274 kind:data(any) addr:0x020f2274
 data_020f2284 kind:data(any) addr:0x020f2284
@@ -7827,7 +7827,7 @@ data_02110a28 kind:bss addr:0x02110a28
 data_02110a40 kind:bss addr:0x02110a40
 data_02110a4c kind:bss addr:0x02110a4c
 data_02111020 kind:bss addr:0x02111020
-data_02111220 kind:bss addr:0x02111220
+displayMode kind:bss addr:0x02111220 local
 data_02111222 kind:bss addr:0x02111222
 data_02111224 kind:bss addr:0x02111224
 data_02111226 kind:bss addr:0x02111226
@@ -7874,7 +7874,7 @@ data_02111654 kind:bss addr:0x02111654
 data_02111668 kind:bss addr:0x02111668
 data_0211166c kind:bss addr:0x0211166c
 data_02111670 kind:bss addr:0x02111670
-data_02111684 kind:bss addr:0x02111684
+gxCommandDMAParams kind:bss addr:0x02111684 local
 isIPCCommunicationInitialized kind:bss addr:0x021116a4 local
 ipcArm9HandlerTable kind:bss addr:0x021116a8 local
 data_02111728 kind:bss addr:0x02111728

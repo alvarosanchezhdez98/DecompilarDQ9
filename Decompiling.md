@@ -26,6 +26,17 @@ A variable that's `static` inside a function can compile differently than a glob
 
 Some NitroSDK code reads values that its linker script defines, such as the sizes of the stacks (`SDK_IRQ_STACKSIZE`, see `include/System/DTCM.h`). The compiler loads them from a literal pool, like addresses, so the code must reference the symbols to match. `tools/add_linker_symbols.py` defines them in the linker script, and `diff_function.py` counts such a reference as matching the original's value (`except N references to symbols of the linker script`). When the original has a plain number where ours has a relocation, dsd may also have missed a relocation, or given it the wrong symbol: fix it in `relocs.txt`, with `add:` for an address inside a symbol (e.g. `to:0x020c8be4 add:0x50` for a label inside a function), and run `ninja delink` again.
 
+## Identifying library code
+Much of main and overlay 31 is Nintendo's libraries, whose code is the same in every game with the same version. `tools/find_signatures.py` compares each of our functions with those of pret/pokeheartgold's libraries, which are in assembly with their official names, ignoring addresses and symbols. Download them first with `tools/fetch_references.py` (5 MB, in `build/references`).
+```shell
+python tools/fetch_references.py
+python tools/find_signatures.py main --runs                   # consecutive matches, grouped by reference file
+python tools/find_signatures.py main 0x020ca0b8 0x020cad28    # one function per line
+```
+A run of matches usually is one of our source files, and the official names tell which NitroSDK or NitroSystem file it is. The public decompilations of Sonic Rush Adventure (RushRE/SonicRushAdventure-Decomp) and pret/pokediamond have the C of many of those files.
+
+The libraries wrote some functions in assembly (e.g. the NitroSDK's `mi_memory.c`), and they're `asm` functions in our files too. `tools/asm_to_mwcc.py` converts functions of the disassembly into MWCC's inline assembly, with local labels and `ldr rX, =value` for the literal pool (see `src/System/MemoryCopy.cpp`). Thumb functions go between `#pragma thumb on` and `#pragma thumb off`; when the original's symbol includes the 2 bytes of padding after a Thumb function, write them as `lsl r0, r0, #0` (see `src/System/Matrix43.cpp`).
+
 ## Referencing functions and data that have yet to be decompiled
 Add a declaration to the file referencing the yet un-decompiled info. For example, if you wanted to reference a function in the main ARM9 file at 02074388, you would add
 ```C

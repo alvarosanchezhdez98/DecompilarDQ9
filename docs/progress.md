@@ -68,10 +68,24 @@ The script keeps everything outside the generated section, so this is the place 
     0x3000), a call and a label's address in `OSi_DisplayExContext`, and the end of the idle thread's stack
     (`data_02111494`, which pointed to the arena's flag).
   - The files with data define it, like the NitroSDK, with their `.bss` in `delinks.txt`.
-- Next: the other NitroSDK gaps in main (`python tools/progress.py --remaining main`, between `0x020c3a5c` and
-  `0x020dc300`), starting with `0x020c9298-0x020c96f8` (11 functions after `Timing.cpp`, from `os_valarm.c`). The
-  public NitroSDK decompilations (Sonic Rush Adventure, pret's Pokémon projects) are the reference. Also the upstream
-  sketch in overlay 24 (`GetAttackBaseDamage.cpp`).
+- Main, NitroSDK: the library code is identified by its instructions now (see "Identifying library code" in
+  [Decompiling.md](../Decompiling.md)). `tools/find_signatures.py` found that `0x020bc000-0x020c0338` is NitroSystem's
+  sound library, followed by the NitroSDK's digests, FX and GX, and that `0x020dc300-0x020e5930` is Level-5 code; the
+  regions above say so. With it, 85 more functions are complete, in 18 new files:
+  - FX and GX (59): `fx_mtx22.c` to `fx_mtx44.c` (`Matrix22.cpp` to `Matrix44.cpp`), `fx_cp.c` (`MathCoprocessor.cpp`),
+    `fx_vec.c` (`Vector.cpp`), `fx_trig.c` (`Trigonometry.cpp`, compiled with 2.0/sp2), `fx_atan.c` and
+    `fx_atanidx.c` (`Atan.cpp`, `AtanIndex.cpp`, with their tables), `fx.c` (`FixedPoint.cpp`) and `gx.c`
+    (`Display.cpp`). The hardware divider's operands and results aren't volatile, like in the NitroSDK
+    (`include/System/MathCoprocessor.h`): the compiler combines their accesses.
+  - MI (26): `mi_dma_gxcommand.c` (`GeometryCommandDMA.cpp`), `mi_memory.c` (`MemoryCopy.cpp`), `mi_swap.c`,
+    `mi_uncompress.c`, `mi_dma_card.c`, `mi_uncomp_stream.c` and `mi_init.c` (`MemorySwap.cpp`, `Uncompress.cpp`,
+    `CardDMA.cpp`, `UncompressStream.cpp`, `MemoryInit.cpp`). The functions in assembly were converted with
+    `tools/asm_to_mwcc.py`.
+- Next: the other library code that `find_signatures.py` identifies in main: NitroSystem's sound
+  (`0x020bc000-0x020c0338`, 153 functions), the NitroSDK's digests (`0x020c0338-0x020c112c`), and the NitroSDK gaps
+  (`python tools/progress.py --remaining main`), e.g. RTC, CARD, SND and WM after `0x020cd4a4`, and
+  `0x020c9298-0x020c96f8` (`os_valarm.c`, which pokeheartgold has in C). Also the upstream sketch in overlay 24
+  (`GetAttackBaseDamage.cpp`).
 - Overlay 14, the bestiary, is on hold.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
@@ -88,24 +102,24 @@ Last recorded on 2026-09-23.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 173,704 | 2,959,024 | 5.87 % |
-| Functions | 1,260 | 14,779 | 8.53 % |
+| Code (bytes) | 187,432 | 2,959,024 | 6.33 % |
+| Functions | 1,345 | 14,779 | 9.10 % |
 | Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 107 complete, 2 in progress.
+Source files: 125 complete, 2 in progress.
 
 ## History
 
 | Date | Functions | Code (bytes) | Complete files |
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
-| 2026-09-23 | 1,260 (8.53 %) | 173,704 (5.87 %) | 107 |
+| 2026-09-23 | 1,345 (9.10 %) | 187,432 (6.33 %) | 125 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1169 | 5038 | 16.18 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1254 | 4953 | 17.64 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 23 | 15 | 70.56 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -151,9 +165,9 @@ Source files: 107 complete, 2 in progress.
 | Secure area and startup | `0x02000000-0x02000c9c` | 3.2 | 26 | 0 | 26 | 0.00 % |
 | Level-5 code | `0x02000c9c-0x020b2adc` | 711.6 | 4438 | 550 | 3888 | 10.40 % |
 | NitroSystem G3D | `0x020b2adc-0x020bc000` | 37.3 | 228 | 154 | 74 | 92.09 % |
-| Fixed-point math, not fully identified | `0x020bc000-0x020c3a5c` | 30.6 | 222 | 0 | 222 | 0.00 % |
-| NitroSDK | `0x020c3a5c-0x020dc300` | 98.2 | 941 | 462 | 479 | 41.26 % |
-| Not identified | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
+| NitroSystem sound | `0x020bc000-0x020c0338` | 16.8 | 153 | 0 | 153 | 0.00 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 547 | 463 | 48.15 % |
+| Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
 ## Remaining functions by size
@@ -162,7 +176,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2450 | 2282 | 275 | 31 | 773.1 |
+| main | 2406 | 2247 | 269 | 31 | 759.7 |
 | itcm | 10 | 5 | 0 | 0 | 1.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
@@ -192,5 +206,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5496** | **6844** | **1047** | **132** | **2720.0** |
+| **Total** | **5452** | **6809** | **1041** | **132** | **2706.6** |
 <!-- END GENERATED -->

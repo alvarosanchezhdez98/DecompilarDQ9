@@ -32,6 +32,7 @@ MWCC_VERSIONS = { # Files compiled with another version than MWCC_VERSION
     # one skips the multiplications by the high words that are 0, e.g. in OS_Sleep (SleepCurrentContext)
     "src/Graphics/NSBXX/JAC.cpp": "2.0/sp2", # NitroSystem
     "src/System/ProcessorContext.cpp": "2.0/sp2", # NitroSDK
+    "src/System/Trigonometry.cpp": "2.0/sp2", # NitroSDK
 }
 DECOMP_ME_COMPILER = "mwcc_30_137"
 CC_FLAGS = " ".join([

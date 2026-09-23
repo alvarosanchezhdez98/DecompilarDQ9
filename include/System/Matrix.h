@@ -51,6 +51,11 @@ typedef Vector3s Vector3fix16;
 
 #define FIX_2PI 0x6488
 
+typedef union Matrix2x2
+{
+    fix32_t entries[4];
+} Matrix2x2;
+
 typedef union Matrix3x3
 {
     Vector3fix rows[3];
@@ -92,6 +97,15 @@ typedef union Matrix4x4
 extern "C"
 {
 #endif
+    // usa: func_020c111c
+    // The NitroSDK's MTX_Rot22_: writes a rotation, from its sine and cosine
+    void func_020c111c(Matrix2x2* out, fix32_t sine, fix32_t cosine);
+    // usa: func_020c1128
+    // The NitroSDK's MTX_ScaleApply22: computes diag(x, y) * in and writes to out
+    void func_020c1128(const Matrix2x2* in, Matrix2x2* out, fix32_t x, fix32_t y);
+
+
+
     // usa: func_020c1180
     void Mat3x3_WriteIdentity(Matrix3x3* out);
     // usa: func_020c11a4
@@ -281,11 +295,12 @@ extern "C"
     // Will come back to this when the call sites come up
 
     // usa: func_020c338c
+    // The NitroSDK's FX_Atan2: the angle of (x, y) in radians, from -pi to pi. It returns an fx16.
     fix32_t fix32_Atan2(fix32_t y, fix32_t x);
-    // usa: func_020c3554
-    // works like Atan2 but the range is rescaled so that pi = 0x8000,
+    // usa: func_020c3544
+    // The NitroSDK's FX_Atan2Idx: works like Atan2 but the range is rescaled so that pi = 0x8000,
     // so for example (x = 0, y > 0) gives 0x4000 = 4.0
-    fix32_t fix32_Atan2_Rescaled(fix32_t y, fix32_t x);
+    unsigned short fix32_Atan2_Rescaled(fix32_t y, fix32_t x);
 
 #ifdef __cplusplus
 }
