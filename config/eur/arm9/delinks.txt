@@ -273,9 +273,25 @@ src/System/ColorEffects.cpp:
     complete
     .text start:0x020c50f4 end:0x020c517c
 
+src/System/GeometryMatrices.cpp:
+    complete
+    .text start:0x020c517c end:0x020c51ec
+
+src/System/GeometryEngine.cpp:
+    complete
+    .text start:0x020c51ec end:0x020c5780
+
+src/System/GeometryProjection.cpp:
+    complete
+    .text start:0x020c5780 end:0x020c5830
+
 src/System/LoadToVRAM.cpp:
     complete
     .text start:0x020c5830 end:0x020c6924
+
+src/System/GeometryFifoCopy.cpp:
+    complete
+    .text start:0x020c6924 end:0x020c6964
 
 src/System/InterruptHandler.cpp:
     complete

@@ -192,7 +192,7 @@ extern "C"
     void Mat4x3_ApplyToVector(const Vector3fix* inVec, const Matrix4x3* inMat, Vector3fix* out);
 
     // usa: func_020c20d4
-    // calculate a 4x3 view matrix
+    // calculate a 4x3 view matrix (the NitroSDK's MTX_LookAt)
     void Mat4x3_WriteViewMatrix(const Vector3fix* eye, const Vector3fix* up, const Vector3fix* target, Matrix4x3* out);
 
 
@@ -210,11 +210,9 @@ extern "C"
     // e.g. glFrustum but doesn't match exactly
     void Mat4x4_MaybeWriteFrustum(fix32_t a, fix32_t b, fix32_t c, fix32_t d, fix32_t e, fix32_t f, Matrix4x4* out);
     // usa: func_020c29ec
-    // Similar function to the previous, is used in places to populate the
-    // RenderConfig's projection matrix, but I don't know what exactly it is
-    // Might be something like glOrtho???
-    // From call site in AtmosphericEffect it looks to be (top, bottom, left, right, near, far)
-    // not sure about 7th parameter
+    // The NitroSDK's MTX_OrthoW: computes an orthographic projection matrix from
+    // (top, bottom, left, right, near, far, scaleW), where scaleW scales the W component.
+    // Used to populate the RenderConfig's projection matrix.
     void Mat4x4_WriteProjectionUnknown(fix32_t a, fix32_t b, fix32_t c, fix32_t d, fix32_t e, fix32_t f, fix32_t g, Matrix4x4* out);
 
 
