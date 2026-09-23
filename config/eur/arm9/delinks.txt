@@ -303,7 +303,12 @@ src/System/InterruptEnableDisable.cpp:
 
 src/System/GamecardBusOwnership.cpp:
     complete
-    .text start:0x020c6e58 end:0x020c7090
+    .text start:0x020c6d8c end:0x020c7140
+    .bss start:0x021112dc end:0x021112e0
+
+src/System/Printf.cpp:
+    complete
+    .text start:0x020c7140 end:0x020c71b4
 
 src/System/ContextList.cpp:
     complete
@@ -312,6 +317,18 @@ src/System/ContextList.cpp:
 src/System/ProcessorContext.cpp:
     complete
     .text start:0x020c75c4 end:0x020c7d44
+
+src/System/SaveRestoreContext.cpp:
+    complete
+    .text start:0x020c7d44 end:0x020c7dd4
+
+src/System/ConsoleType.cpp:
+    complete
+    .text start:0x020c7dd4 end:0x020c7df4
+
+src/System/MessageQueue.cpp:
+    complete
+    .text start:0x020c7df4 end:0x020c806c
 
 src/System/Mutex.cpp:
     complete

@@ -170,7 +170,7 @@ void SetContextEndProc(ProcessorContext* context, ProcessorContext::ExitRoutine 
 
 void InitializeContextRegisters(ProcessorContext* context, unsigned int startAddress, unsigned int stackBottom);
 
-// low level asm stuff, probably not going in decomp
+// In assembly, in SaveRestoreContext.cpp
 extern "C" int SaveContext(ProcessorContext* context);
 extern "C" void RestoreContext(ProcessorContext* context);
 
