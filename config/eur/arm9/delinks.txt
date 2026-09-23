@@ -237,9 +237,9 @@ src/Graphics/NSBXX/PatternAnimation.cpp:
     complete
     .text start:0x020b76a4 end:0x020b7850
 
-//src/Graphics/NSBXX/JAC.cpp:
-//    complete
-//    .text start:0x020b7850 end:0x020b8e70
+src/Graphics/NSBXX/JAC.cpp:
+    complete
+    .text start:0x020b7850 end:0x020b8e70
 
 src/Graphics/NSBXX/MAM.cpp:
     complete

@@ -20,7 +20,7 @@ Functions are matched by name, so after naming a function, rename it in `symbols
 
 A function whose instructions only differ in the symbols they reference is shown as `100.0 % (except ...)`. References to the same external symbols happen because the original object defines data that ours only declares. References to symbols with other names are listed as `original = ours`, so you can rename the data in `symbols.txt`.
 
-Nintendo's libraries (the NitroSDK and NitroSystem) were compiled with an older compiler version than the game's code, 2.0/sp2 or earlier. From 2.0/sp2p2 on, the compiler handles some 64-bit arithmetic differently, so when a library function almost matches, try `--mwcc 2.0/sp2`. If that matches, add the file to `MWCC_VERSIONS` in `tools/configure.py`, so that the build and `diff_function.py` compile it with that version.
+Nintendo's libraries (the NitroSDK and NitroSystem) were compiled with an older compiler version than the game's code, 2.0/sp2 or earlier. From 2.0/sp2p2 on, the compiler handles some 64-bit arithmetic differently, so when a library function almost matches, try `--mwcc 2.0/sp2`. If that matches, add the file to `MWCC_VERSIONS` in `tools/configure.py`, so that the build and `diff_function.py` compile it with that version. Also, their `u32` and `s32` types are `long`, and the compiler can assign registers differently for a `long` variable than for an `int` one.
 
 ## Referencing functions and data that have yet to be decompiled
 Add a declaration to the file referencing the yet un-decompiled info. For example, if you wanted to reference a function in the main ARM9 file at 02074388, you would add
