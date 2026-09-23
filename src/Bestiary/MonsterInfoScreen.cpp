@@ -111,11 +111,21 @@ extern "C"
 // 2 pi in fixed point
 #define FULL_TURN 0x6487
 
-// The day lengths and thresholds come from a header that many files include (see src/Graphics/LightingInfo.cpp)
-static float s_eveningLength = 30.0f;
-static float s_dayLength = 180.0f;
+// The day lengths and thresholds come from a header that many files include (see src/Graphics/LightingInfo.cpp).
+// In the original they're separate variables, and so is the guard of s_states, a static local of Update(). The
+// compiler places separate variables in another order, so they're grouped in structs here, and declared in the order
+// that gives the original layout.
 static float s_nightLength = 180.0f;
+static float s_eveningLength = 30.0f;
 static float s_morningLength = 30.0f;
+static float s_dayLength = 180.0f;
+
+static struct
+{
+    float dayThreshold2;
+    // The camera before the screen was opened
+    void* previousCamera;
+} s_statics1;
 
 // What Update() runs in each state. The last entry is NULL, which is set when Update() first runs.
 static void (MonsterInfoScreen::*s_states[MonsterInfoScreen::State_Count + 1])() = {
@@ -123,27 +133,25 @@ static void (MonsterInfoScreen::*s_states[MonsterInfoScreen::State_Count + 1])()
     &MonsterInfoScreen::Run,
 };
 
-// These variables are grouped in a struct, since the compiler places them in another order when they're declared
-// separately. The guard of s_states, a static local of Update() in the original, is also placed among them.
-// TODO: __sinit doesn't match yet: with separate variables, the store of dayThreshold1 comes after the load of
-// s_dayLength.
+// dayThreshold1 has to start its struct: when it's further into one, the compiler doesn't load s_dayLength before
+// storing it, unlike the original
 static struct
 {
-    float dayThreshold0;
-    // Originally the guard of states, a static local of Update()
-    unsigned int statesInitialized;
-    float dayThreshold2;
-    // The camera before the screen was opened
-    void* previousCamera;
     float dayThreshold1;
     float dayThreshold3;
     float dayThreshold4;
-} s_bss = {
-    (s_bss.dayThreshold4 = s_eveningLength + (s_dayLength + (s_nightLength + s_morningLength)),
-     s_bss.dayThreshold2 = s_bss.dayThreshold3 + s_nightLength,
-     s_bss.dayThreshold1 = s_bss.dayThreshold2 + s_morningLength,
-     s_bss.dayThreshold1 + s_dayLength),
+} s_statics2 = {
+    (s_statics2.dayThreshold4 = s_eveningLength + (s_dayLength + (s_nightLength + s_morningLength)),
+     s_statics1.dayThreshold2 = s_statics2.dayThreshold3 + s_nightLength,
+     s_statics1.dayThreshold2 + s_morningLength),
 };
+
+static struct
+{
+    float dayThreshold0;
+    // Originally the guard of s_states
+    unsigned int statesInitialized;
+} s_statics0 = { s_statics2.dayThreshold1 + s_dayLength };
 
 static LayoutElement* FindLayoutElement(Layout* layout, short id)
 {
@@ -224,7 +232,7 @@ static const short s_unused1[4] = { 0x1e, 0x10, 0x10, 0x10 };
 
 void MonsterInfoScreen::Init()
 {
-    s_bss.previousCamera = NULL;
+    s_statics1.previousCamera = NULL;
     buffers_ = NULL;
     spriteRenderer_ = NULL;
     sprites_ = NULL;
@@ -299,8 +307,8 @@ void MonsterInfoScreen::Release()
     habitats_.Unload();
     func_02096fc4(&infos_);
     habitats_.Init();
-    func_020100c4(GameState::GetInstance(), s_bss.previousCamera);
-    s_bss.previousCamera = NULL;
+    func_020100c4(GameState::GetInstance(), s_statics1.previousCamera);
+    s_statics1.previousCamera = NULL;
     LightingManager::GetInstance()->fogEnabled_ = true;
     if (allocators_ == NULL)
         return;
@@ -412,10 +420,10 @@ void MonsterInfoScreen::Update()
     }
 
     buttonPressed_[2] = false;
-    if (!(s_bss.statesInitialized & 1))
+    if (!(s_statics0.statesInitialized & 1))
     {
         s_states[State_Count] = NULL;
-        s_bss.statesInitialized |= 1;
+        s_statics0.statesInitialized |= 1;
     }
     if (s_states[state_] != NULL)
         (this->*s_states[state_])();
@@ -959,7 +967,7 @@ void MonsterInfoScreen::Setup()
         BG3CNT = (BG3CNT & ~BGCNT_MASK_PRIORITY) | 3;
         DISPCNT = (DISPCNT & ~0x1f00) | (0x13 << 8);
         GameState* gameState = GameState::GetInstance();
-        s_bss.previousCamera = func_020100f8(gameState);
+        s_statics1.previousCamera = func_020100f8(gameState);
         func_020a2010(camera_);
         func_0202e5c8(camera_, 0, 0, 0);
         func_0202e5d8(camera_, 0, 0, 0xa000);

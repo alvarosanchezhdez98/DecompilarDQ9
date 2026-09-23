@@ -4,7 +4,7 @@
 #include <std_library_functions.h>
 
 // The NatTable functions in this file are probably inline functions from a header, since other modules have their own
-// copies of them. They're defined here while the rest of the bestiary isn't decompiled.
+// copies of them. They're defined here, where this overlay has its copies.
 
 extern "C"
 {
@@ -19,10 +19,10 @@ extern "C"
     bool func_0206dfb0(void*, void*, int flag);
     // Copies a string into memory from the allocator
     char* func_020da150(SafeAllocator* allocator, const char* string);
-
-    // { "enchab_<LG>.nat", "data/prm/enchab.gp2" }
-    extern const char* data_ov014_021897c4[2];
 }
+
+// The habitat table and the archive that it's in
+static const char* s_habitatFiles[2] = { "enchab_<LG>.nat", "data/prm/enchab.gp2" };
 
 int GetNatEntryKey(NatEntry* entry)
 {
@@ -80,7 +80,7 @@ bool HabitatTable::Update()
     switch (state_)
     {
     case State_Queue:
-        taskID_ = loader->QueueLoadFileInGP2(data_ov014_021897c4[1], data_ov014_021897c4[0], NULL);
+        taskID_ = loader->QueueLoadFileInGP2(s_habitatFiles[1], s_habitatFiles[0], NULL);
         state_ = State_Loading;
         return Update();
     case State_Loading:
@@ -123,11 +123,20 @@ bool HabitatTable::Build(SafeAllocator* allocator, void* file, unsigned int file
     {
         if (allocator != NULL && file != NULL)
         {
+            unsigned int tablesSize;
+            unsigned int dataSize;
+
             memcpy(this, file, 0xc);
-            unsigned int tablesSize = GetTablesSize();
-            unsigned int dataSize = dataSize_;
-            entries_ = tablesSize != 0 ? (NatEntry*)allocator->Allocate(tablesSize) : NULL;
-            data_ = dataSize != 0 ? (char*)allocator->Allocate(dataSize) : NULL;
+            tablesSize = GetTablesSize();
+            dataSize = dataSize_;
+            if (tablesSize != 0)
+                entries_ = (NatEntry*)allocator->Allocate(tablesSize);
+            else
+                entries_ = NULL;
+            if (dataSize != 0)
+                data_ = (char*)allocator->Allocate(dataSize);
+            else
+                data_ = NULL;
             if (entries_ != NULL)
                 memcpy(entries_, (char*)file + 0xc, tablesSize);
             if (data_ != NULL)
@@ -139,58 +148,84 @@ bool HabitatTable::Build(SafeAllocator* allocator, void* file, unsigned int file
     else
     {
         NatTable source;
-        memset(&source, 0, sizeof(source));
         bool alreadyRelocated;
+        NatEntry* entry;
+
+        memset(&source, 0, sizeof(source));
         source.Attach(file, &alreadyRelocated, NULL);
-        NatEntry* entry = source.BinarySearch(monsterID, GetNatEntryKey);
+        entry = source.BinarySearch(monsterID, GetNatEntryKey);
         if (entry != NULL)
         {
-            char* flags = func_0205ec34();
-            bool grottosKnown = func_0206dfb0(flags, flags + 0x8c, 0x79d) != false;
-            void* zoneStruct = func_02012fe4();
+            char* flags;
+            bool grottosKnown;
+            void* zoneStruct;
+            NatGroup* groups;
+            unsigned short* indices;
+            char** pointers;
+            int numGroups;
+            int numIndices;
+            NatGroup* entryGroups;
+            NatGroup* entryGroup;
+            NatTable table;
+            char* buffer;
 
-            NatGroup* groups = (NatGroup*)(source.entries_ + source.numEntries_);
-            NatGroup* entryGroups = groups + entry->groupIndex_;
-            unsigned short* indices = (unsigned short*)(groups + source.numGroups_);
-            char** pointers = (char**)((char*)source.entries_ + (((char*)(indices + source.numIndices_) - (char*)source.entries_ + 3) & ~3));
-            int numGroups = entry->numGroups_;
-            int numIndices = 0;
-            NatGroup* entryGroup = entryGroups;
+            flags = func_0205ec34();
+            grottosKnown = func_0206dfb0(flags, flags + 0x8c, 0x79d) != false;
+            zoneStruct = func_02012fe4();
+
+            groups = (NatGroup*)(source.entries_ + source.numEntries_);
+            indices = (unsigned short*)(groups + source.numGroups_);
+            pointers = (char**)((char*)source.entries_ + (((char*)(indices + source.numIndices_) - (char*)source.entries_ + 3) & ~3));
+            numGroups = entry->numGroups_;
+            entryGroups = groups + entry->groupIndex_;
+            numIndices = 0;
+            entryGroup = entryGroups;
             for (int i = 0; i < numGroups; i++, entryGroup++)
                 numIndices += entryGroup->numIndices_;
 
-            NatTable table;
             table.numEntries_ = 1;
             table.numGroups_ = numGroups;
             table.numIndices_ = numIndices;
             table.numPointers_ = numGroups;
             table.dataSize_ = 0;
-            char* buffer = (char*)allocator->Allocate(table.GetTablesSize());
+            buffer = (char*)allocator->Allocate(table.GetTablesSize());
             table.entries_ = (NatEntry*)buffer;
             table.data_ = NULL;
             if (buffer != NULL)
             {
-                NatGroup* newGroups = (NatGroup*)(buffer + sizeof(NatEntry));
-                unsigned short* newIndices = (unsigned short*)(newGroups + numGroups);
-                char** newPointers = (char**)(buffer + (((char*)(newIndices + numIndices) - buffer + 3) & ~3));
+                NatGroup* newGroups;
+                unsigned short* newIndices;
+                NatGroup* group;
+                int indexTotal;
+                int count;
+                int pointerIndex;
+                unsigned short* zoneID;
+                char** newPointers;
+                bool swapped;
+
+                newGroups = (NatGroup*)(buffer + sizeof(NatEntry));
+                newIndices = (unsigned short*)(newGroups + numGroups);
+                newPointers = (char**)(buffer + (((char*)(newIndices + numIndices) - buffer + 3) & ~3));
                 memcpy(buffer, entry, sizeof(NatEntry));
                 memcpy(newGroups, entryGroups, numGroups * sizeof(NatGroup));
-                NatGroup* group = newGroups;
+                group = newGroups;
                 ((NatEntry*)buffer)->groupIndex_ = 0;
 
-                int indexTotal = 0;
-                int pointerIndex = 0;
+                indexTotal = 0;
+                pointerIndex = 0;
                 for (int i = 0; i < numGroups; i++)
                 {
-                    int count = group->numIndices_;
+                    bool known;
+
+                    count = group->numIndices_;
                     memcpy(newIndices, indices + group->firstIndex_, count * sizeof(unsigned short));
                     memcpy(newPointers, pointers + group->pointerIndex_, sizeof(char*));
                     group->pointerIndex_ = pointerIndex;
                     group->firstIndex_ = indexTotal;
                     *newPointers = func_020da150(allocator, source.GetDataPointer(*newPointers, NULL));
 
-                    bool known = count == 0;
-                    unsigned short* zoneID = newIndices;
+                    known = count == 0;
+                    zoneID = newIndices;
                     for (int j = 0; j < count; j++, zoneID++)
                     {
                         known = (func_0201b588(*zoneID) && grottosKnown) || func_0201bb78(zoneStruct, *zoneID);
@@ -207,7 +242,6 @@ bool HabitatTable::Build(SafeAllocator* allocator, void* file, unsigned int file
                 }
 
                 // Sort the areas that the player knows first
-                bool swapped;
                 do
                 {
                     swapped = false;
@@ -237,6 +271,7 @@ bool HabitatTable::Build(SafeAllocator* allocator, void* file, unsigned int file
     }
     return true;
 }
+
 
 bool NatTable::ForEach(void (*func)(NatTable* table, NatEntry* entry))
 {

@@ -96,8 +96,7 @@ data_ov014_021896a7 kind:data(any) addr:0x021896a7
 data_ov014_021896bc kind:data(any) addr:0x021896bc
 states$1294 kind:data(any) addr:0x021896d4 local
 @stringBase0 kind:data(byte[0xb7]) addr:0x0218970c local
-data_ov014_021897c4 kind:data(any) addr:0x021897c4
-data_ov014_021897cc kind:data(any) addr:0x021897cc
-data_ov014_021897dc kind:data(any) addr:0x021897dc
+s_habitatFiles kind:data(any) addr:0x021897c4 local
+@stringBase0 kind:data(byte[0x24]) addr:0x021897cc local
 data_ov014_02189800 kind:bss addr:0x02189800
 _ZGVstates$1294 kind:bss addr:0x0218981c local
