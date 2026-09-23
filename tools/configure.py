@@ -27,6 +27,11 @@ DSD_VERSION = 'v0.10.2'
 WIBO_VERSION = '0.6.16'
 OBJDIFF_VERSION = 'v2.7.1'
 MWCC_VERSION = "2.0/sp2p2" # minimum version required to match fixed point s64 arithmetic around 0x02030f30 (not sdk code). might need p3 or p4?
+MWCC_VERSIONS = { # Files compiled with another version than MWCC_VERSION
+    # Nintendo's libraries were compiled with 2.0/sp2 or older: from 2.0/sp2p2, multiplying a 32-bit value by a 64-bit
+    # one skips the multiplications by the high words that are 0, e.g. in OS_Sleep (SleepCurrentContext)
+    "src/System/ProcessorContext.cpp": "2.0/sp2",
+}
 DECOMP_ME_COMPILER = "mwcc_30_137"
 CC_FLAGS = " ".join([
     "-O2",                  # Optimize maximally, omit p: it optimizes out things that the game doesn't normally
@@ -119,6 +124,7 @@ WINE = args.wine if platform.system != "windows" else ""
 DSD = str(args.dsd or os.path.join('.', str(root_path / f"dsd{EXE}")))
 OBJDIFF = os.path.join('.', str(root_path / f"objdiff-cli{EXE}"))
 CC = os.path.join('.', str(mwcc_path / "mwccarm.exe"))
+CC_VERSIONS = {source: os.path.join('.', str(mwcc_root / version / "mwccarm.exe")) for source, version in MWCC_VERSIONS.items()}
 LD = os.path.join('.', str(mwcc_path / "mwldarm.exe"))
 PYTHON = sys.executable
 
@@ -220,7 +226,9 @@ def main():
         n.newline()
 
         # -MMD excludes all includes instead of just system includes for some reason, so use -MD instead.
-        mwcc_cmd = f'{WINE} "{CC}" {CC_FLAGS} {CC_INCLUDES} $cc_flags {MWCC_DEFINES} -MD -c $in -o $basedir'
+        # The compiler is a variable, since some files are compiled with another version (see MWCC_VERSIONS)
+        n.variable("mwcc", CC)
+        mwcc_cmd = f'{WINE} "$mwcc" {CC_FLAGS} {CC_INCLUDES} $cc_flags {MWCC_DEFINES} -MD -c $in -o $basedir'
         mwcc_implicit = [CC]
         if platform.system != "windows":
             transform_dep = "tools/transform_dep.py"
@@ -352,7 +360,7 @@ def add_download_tool_builds(n: ninja_syntax.Writer):
     if args.compiler is None:
         n.build(
             rule="download_tool",
-            outputs=[CC, LD],
+            outputs=[CC, LD, *sorted(set(CC_VERSIONS.values()) - {CC})],
             variables={
                 "tool": "mwccarm",
                 "tag": "latest",
@@ -468,16 +476,22 @@ def add_mwcc_builds(n: ninja_syntax.Writer, project: Project, mwcc_implicit: lis
         cc_flags = []
         if is_cpp(source_file): cc_flags.append("-lang=c++")
         elif is_c(source_file): cc_flags.append("-lang=c")
+        variables = {
+            "cc_flags": " ".join(cc_flags),
+            "basedir": os.path.dirname(mwcc_obj_path),
+            "basefile": str(mwcc_obj_path.with_suffix("")),
+        }
+        implicit = mwcc_implicit
+        compiler = CC_VERSIONS.get(source_file.as_posix())
+        if compiler is not None:
+            variables["mwcc"] = compiler
+            implicit = [compiler if dependency == CC else dependency for dependency in mwcc_implicit]
         n.build(
             inputs=str(source_file),
-            implicit=mwcc_implicit,
+            implicit=implicit,
             rule="mwcc",
             outputs=str(mwcc_obj_path.with_suffix(".o")),
-            variables={
-                "cc_flags": " ".join(cc_flags),
-                "basedir": os.path.dirname(mwcc_obj_path),
-                "basefile": str(mwcc_obj_path.with_suffix("")),
-            },
+            variables=variables,
         )
         n.newline()
 
