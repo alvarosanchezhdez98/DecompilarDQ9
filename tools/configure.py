@@ -58,9 +58,14 @@ M2CTX_DEFINES = " ".join(f"-D {define}" for define in REGION_DEFINES[args.versio
 FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing references them
     "usa": "func_ov030_021d8a40",
     "jpn": "func_ov029_021d9300,func_ov030_021d9300",
-    "eur": "func_ov030_021d8a40", # same symbol names and overlay addresses as USA
+    # Main calls overlay 34's loader through the symbol of overlay 33's, which is at the same address
+    "eur": "func_ov030_021d8a40,_Z28PopulateOv34BackgroundLoaderPvji",
 }
 active_function_name = f"-force_active {FORCE_ACTIVE[args.version]}"
+LOCAL_SYMBOLS = { # Weak symbols that a file has its own copy of, see tools/localize_symbols.py
+    # Overlays 33 and 34 are at the same address, and both have a copy of BackgroundLoader's vtable
+    "src/Filesystem/Overlay_34/Ov34BackgroundLoader.cpp": ["_ZTV16BackgroundLoader"],
+}
 LD_FLAGS = " ".join([
     "-proc arm946e",        # Target processor
     "-nostdlib",            # No C/C++ standard library
@@ -225,6 +230,12 @@ def main():
             name="mwcc",
             command=mwcc_cmd,
             depfile="$basefile.d",
+        )
+        n.newline()
+
+        n.rule(
+            name="localize_symbols",
+            command=f"{PYTHON} tools/localize_symbols.py $in $out $symbols"
         )
         n.newline()
 
@@ -451,6 +462,9 @@ def add_mwld_and_rom_builds(n: ninja_syntax.Writer, project: Project):
 def add_mwcc_builds(n: ninja_syntax.Writer, project: Project, mwcc_implicit: list[Path]):
     for source_file in get_c_cpp_files([src_path, libs_path]):
         src_obj_path = project.game_build / source_file
+        local_symbols = LOCAL_SYMBOLS.get(source_file.as_posix())
+        # With symbols to make local, the compiler's object goes to a subdirectory first
+        mwcc_obj_path = src_obj_path.parent / "weak" / src_obj_path.name if local_symbols else src_obj_path
         cc_flags = []
         if is_cpp(source_file): cc_flags.append("-lang=c++")
         elif is_c(source_file): cc_flags.append("-lang=c")
@@ -458,14 +472,24 @@ def add_mwcc_builds(n: ninja_syntax.Writer, project: Project, mwcc_implicit: lis
             inputs=str(source_file),
             implicit=mwcc_implicit,
             rule="mwcc",
-            outputs=str(src_obj_path.with_suffix(".o")),
+            outputs=str(mwcc_obj_path.with_suffix(".o")),
             variables={
                 "cc_flags": " ".join(cc_flags),
-                "basedir": os.path.dirname(src_obj_path),
-                "basefile": str(src_obj_path.with_suffix("")),
+                "basedir": os.path.dirname(mwcc_obj_path),
+                "basefile": str(mwcc_obj_path.with_suffix("")),
             },
         )
         n.newline()
+
+        if local_symbols:
+            n.build(
+                inputs=str(mwcc_obj_path.with_suffix(".o")),
+                implicit="tools/localize_symbols.py",
+                rule="localize_symbols",
+                outputs=str(src_obj_path.with_suffix(".o")),
+                variables={"symbols": " ".join(local_symbols)},
+            )
+            n.newline()
 
         extension = source_file.suffix
         ctx_file = str(project.game_build / source_file.with_suffix(f".ctx{extension}"))

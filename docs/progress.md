@@ -23,7 +23,14 @@ e.g. `ov014`.
 
 The script keeps everything outside the generated section, so this is the place for plans and notes.
 
-- Current focus: overlay 14, the bestiary.
+- Overlay 34: complete. It's overlay 33's background loader with a random memory leak, and it's loaded at the same
+  address. Both overlays have a copy of `BackgroundLoader`'s vtable, and the linker only keeps one copy of a weak
+  symbol, so `configure.py` makes overlay 34's copy local (`LOCAL_SYMBOLS`, see `tools/localize_symbols.py`). Other
+  overlays that share an address will need the same for their vtables and inline functions.
+- Next: the files that were left commented out in main's `delinks.txt`, which mostly match already:
+  `src/System/ProcessorContext.cpp` (25 of 26 functions), `src/System/InterruptHandler.cpp` (12 of 16),
+  `src/Graphics/NSBXX/JAC.cpp` (10 of 13) and `src/Graphics/NSBXX/NameList.cpp` (1 of 2).
+- Overlay 14, the bestiary, is on hold.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
   - `src/Bestiary/MonsterListScreen.cpp` and `src/Bestiary/HabitatTable.cpp`: complete.
@@ -39,18 +46,18 @@ Last recorded on 2026-09-23.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 154,584 | 2,959,024 | 5.22 % |
-| Functions | 1,125 | 14,779 | 7.61 % |
-| Modules | 1 complete, 5 in progress, 26 not started | 32 with code |  |
+| Code (bytes) | 156,808 | 2,959,024 | 5.30 % |
+| Functions | 1,130 | 14,779 | 7.65 % |
+| Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 86 complete, 2 in progress.
+Source files: 87 complete, 2 in progress.
 
 ## History
 
 | Date | Functions | Code (bytes) | Complete files |
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
-| 2026-09-23 | 1,125 (7.61 %) | 154,584 (5.22 %) | 86 |
+| 2026-09-23 | 1,130 (7.65 %) | 156,808 (5.30 %) | 87 |
 
 ## Modules
 
@@ -88,12 +95,12 @@ Source files: 86 complete, 2 in progress.
 | ov026 | *Likely* spell and skill effects | 23.1 | 24 | 0 | 24 | 0.00 % | Not started |
 | ov027 | Unclear, no strings | 19.6 | 87 | 0 | 87 | 0.00 % | Not started |
 | ov028 | Staff roll | 4.0 | 34 | 0 | 34 | 0.00 % | Not started |
-| ov029 | Data only, no code | 0.0 | 0 | 0 | 0 | - | No code |
+| ov029 | *Likely* encrypted code: dsd only finds data, but `main()` calls three addresses in it at startup, as checks that decide whether to load overlay 33 or 34 | 0.0 | 0 | 0 | 0 | - | No code |
 | ov030 | Unclear, no strings. Needs `-force_active` to be linked | 4.5 | 11 | 0 | 11 | 0.00 % | Not started |
 | ov031 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | 279.6 | 1962 | 0 | 1962 | 0.00 % | Not started |
 | ov032 | 648 KB of `.bss` only, a buffer in overlay 31's place | 0.0 | 0 | 0 | 0 | - | No code |
 | ov033 | Background loader (`src/Filesystem/Overlay_33`), fully decompiled | 2.1 | 5 | 5 | 0 | 100.00 % | Complete |
-| ov034 | Unclear, same size as overlay 33 | 2.2 | 5 | 0 | 5 | 0.00 % | Not started |
+| ov034 | Overlay 33's background loader with a random memory leak, *likely* anti-piracy (`src/Filesystem/Overlay_34`), fully decompiled. Needs `-force_active` to be linked | 2.2 | 5 | 5 | 0 | 100.00 % | Complete |
 
 ## ARM9 main by region
 
@@ -143,6 +150,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| ov034 | 4 | 0 | 0 | 1 | 2.2 |
-| **Total** | **5567** | **6903** | **1051** | **133** | **2738.7** |
+| **Total** | **5563** | **6903** | **1051** | **132** | **2736.5** |
 <!-- END GENERATED -->

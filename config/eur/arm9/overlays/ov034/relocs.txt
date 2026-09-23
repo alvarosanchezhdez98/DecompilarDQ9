@@ -54,10 +54,10 @@ from:0x022a299c kind:arm_call to:0x020d9798 module:main
 from:0x022a29a4 kind:arm_call to:0x020d9180 module:main
 from:0x022a29b4 kind:load to:0x02114e20 module:main
 from:0x022a29c8 kind:arm_call to:0x0202f818 module:main
-from:0x022a29dc kind:load to:0x022a2a54 module:overlay(34)
-from:0x022a29e0 kind:load to:0x022a2a48 module:overlay(34)
+from:0x022a29dc kind:load to:0x022a2a4c add:0x8 module:overlay(34)
+from:0x022a29e0 kind:load to:0x022a2a40 add:0x8 module:overlay(34)
 from:0x022a29f4 kind:arm_call to:0x0202f818 module:main
-from:0x022a2a00 kind:load to:0x022a2a54 module:overlay(34)
+from:0x022a2a00 kind:load to:0x022a2a4c add:0x8 module:overlay(34)
 from:0x022a2a0c kind:arm_call to:0x022a29b8 module:overlay(34)
 from:0x022a2a1c kind:arm_call to:0x0200efd0 module:main
 from:0x022a2a24 kind:load to:0x022a2a6c module:overlay(34)
