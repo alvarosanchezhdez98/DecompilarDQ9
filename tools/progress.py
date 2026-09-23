@@ -39,8 +39,8 @@ END_MARKER = "<!-- END GENERATED -->"
 MAIN_REGIONS = [
     ("Secure area and startup", 0x02000000, 0x02000c9c),
     ("Level-5 code", 0x02000c9c, 0x020b2adc),
-    ("NitroSystem G3D", 0x020b2adc, 0x020bc000),
-    ("NitroSystem sound", 0x020bc000, 0x020c0338),
+    ("NitroSystem G3D and GFD", 0x020b2adc, 0x020bbd24),
+    ("NitroSystem sound", 0x020bbd24, 0x020c0338),
     ("NitroSDK", 0x020c0338, 0x020dc300),
     ("Level-5 code, after the libraries", 0x020dc300, 0x020e5930),
     ("Static initializers (.init)", 0x020e5930, 0x020e693c),

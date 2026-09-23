@@ -6480,8 +6480,8 @@ data_020e9285 kind:data(any) addr:0x020e9295
 data_020e9286 kind:data(any) addr:0x020e9296
 data_020e9287 kind:data(any) addr:0x020e9297
 data_020e92a8 kind:data(any) addr:0x020e92b8
-data_020e9338 kind:data(any) addr:0x020e9348
-data_020e9348 kind:data(any) addr:0x020e9358
+adpcmIndexTable kind:data(any) addr:0x020e9348 local
+adpcmStepSizeTable kind:data(any) addr:0x020e9358 local
 data_020e93fc kind:data(any) addr:0x020e940c
 data_020e9450 kind:data(any) addr:0x020e9460
 data_020e9a50 kind:data(any) addr:0x020e9a60
@@ -7798,35 +7798,30 @@ data_0210cf7c kind:bss addr:0x0210cf7c
 data_0210cf84 kind:bss addr:0x0210cf84
 data_0210cf88 kind:bss addr:0x0210cf88
 data_0210cf94 kind:bss addr:0x0210cf94
-data_0210cfc0 kind:bss addr:0x0210cfc0
-data_0210cfd0 kind:bss addr:0x0210cfd0
-data_0210cfdc kind:bss addr:0x0210cfdc
-data_0210f3c0 kind:bss addr:0x0210f3c0
-data_0210f3cc kind:bss addr:0x0210f3cc
-data_0210f3d8 kind:bss addr:0x0210f3d8
-data_0210f3e4 kind:bss addr:0x0210f3e4
-data_0210f824 kind:bss addr:0x0210f824
-data_0210f83c kind:bss addr:0x0210f83c
-data_0210f840 kind:bss addr:0x0210f840
-data_0210f844 kind:bss addr:0x0210f844
-data_0210fca4 kind:bss addr:0x0210fca4
-data_0210fca8 kind:bss addr:0x0210fca8
-data_0210fcb4 kind:bss addr:0x0210fcb4
-data_0210fcf4 kind:bss addr:0x0210fcf4
-data_0210fd74 kind:bss addr:0x0210fd74
-data_0210fd7c kind:bss addr:0x0210fd7c
-data_0210fdbc kind:bss addr:0x0210fdbc
-data_02110370 kind:bss addr:0x02110370
-data_02110374 kind:bss addr:0x02110374
-data_021103b0 kind:bss addr:0x021103b0
-data_021103bc kind:bss addr:0x021103bc
-data_021103c8 kind:bss addr:0x021103c8
-data_021103e0 kind:bss addr:0x021103e0
-data_02110560 kind:bss addr:0x02110560
-data_02110a28 kind:bss addr:0x02110a28
-data_02110a40 kind:bss addr:0x02110a40
-data_02110a4c kind:bss addr:0x02110a4c
-data_02111020 kind:bss addr:0x02111020
+currentDriverInfo kind:bss addr:0x0210cfc0 local
+preSleepCallback kind:bss addr:0x0210cfd0 local
+postSleepCallback kind:bss addr:0x0210cfdc local
+captureLock kind:bss addr:0x0210f3c0 local
+freeList kind:bss addr:0x0210f3cc local
+prioList kind:bss addr:0x0210f3d8 local
+seqPlayers kind:bss addr:0x0210f3e4 local
+players kind:bss addr:0x0210f824 local
+isInitialized kind:bss addr:0x0210fca4 local
+streamList kind:bss addr:0x0210fca8 local
+callbackBuffers kind:bss addr:0x0210fcb4 local
+streamChannels kind:bss addr:0x0210fcf4 local
+isThreadCreated kind:bss addr:0x0210fd74 local
+messageQueue kind:bss addr:0x0210fd7c local
+captureParameters kind:bss addr:0x0210fdbc local
+currentArchive kind:bss addr:0x02110370 local
+waveArcHeader kind:bss addr:0x02110374 local
+isInitialized kind:bss addr:0x021103b0 local
+freeCommandList kind:bss addr:0x021103bc local
+decodeBufferMutex kind:bss addr:0x021103c8 local
+loadCommandBuffer kind:bss addr:0x021103e0 local
+strmThread kind:bss addr:0x02110560 local
+strmPlayers kind:bss addr:0x02110a4c local
+decodeBufferArea kind:bss addr:0x02111020 local
 displayMode kind:bss addr:0x02111220 local
 data_02111222 kind:bss addr:0x02111222
 data_02111224 kind:bss addr:0x02111224

@@ -261,6 +261,63 @@ src/Graphics/NSBXX/RenderCommandProcs.cpp:
     complete
     .text start:0x020b99c0 end:0x020bb434
 
+src/Sound/SoundMain.cpp:
+    complete
+    .text start:0x020bbd24 end:0x020bbe2c
+    .bss start:0x0210cfc0 end:0x0210f3c0
+
+src/Sound/SoundResources.cpp:
+    complete
+    .text start:0x020bbe2c end:0x020bbf44
+    .bss start:0x0210f3c0 end:0x0210f3cc
+
+src/Sound/SoundPlayer.cpp:
+    complete
+    .text start:0x020bbf44 end:0x020bc8e0
+    .bss start:0x0210f3cc end:0x0210fca4
+
+src/Sound/SoundStream.cpp:
+    complete
+    .text start:0x020bc8e0 end:0x020bceac
+    .bss start:0x0210fca4 end:0x0210fd74
+
+src/Sound/SoundCapture.cpp:
+    complete
+    .text start:0x020bceac end:0x020bd120
+    .bss start:0x0210fd74 end:0x02110370
+
+src/Sound/SoundArchive.cpp:
+    complete
+    .text start:0x020bd120 end:0x020bd924
+    .bss start:0x02110370 end:0x02110374
+
+src/Sound/SoundHeap.cpp:
+    complete
+    .text start:0x020bd924 end:0x020bdc90
+
+src/Sound/SoundArchiveLoader.cpp:
+    complete
+    .text start:0x020bdc90 end:0x020be6d4
+    .bss start:0x02110374 end:0x021103b0
+
+src/Sound/SoundArchivePlayer.cpp:
+    complete
+    .text start:0x020be6d4 end:0x020be9f8
+
+src/Sound/SoundArchiveStream.cpp:
+    complete
+    .text start:0x020be9f8 end:0x020c01bc
+    .rodata start:0x020e9348 end:0x020e940c
+    .bss start:0x021103b0 end:0x02111220
+
+src/Sound/SequenceData.cpp:
+    complete
+    .text start:0x020c01bc end:0x020c01fc
+
+src/Sound/SoundFader.cpp:
+    complete
+    .text start:0x020c01fc end:0x020c02a0
+
 src/System/Matrix22.cpp:
     complete
     .text start:0x020c112c end:0x020c1190
