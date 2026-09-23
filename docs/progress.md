@@ -26,12 +26,11 @@ The script keeps everything outside the generated section, so this is the place 
 - Current focus: overlay 14, the bestiary.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
-  - `src/Bestiary/MonsterListScreen.cpp`: the monster list, complete.
-  - `src/Bestiary/MonsterInfoScreen.cpp`: 18 of 19 functions match, and so does its data. `UpdateText` (97 %) and the
-    static initializer (88 %) still differ in the order of a few instructions, so the file isn't `complete` yet.
-  - `src/Bestiary/HabitatTable.cpp`: 17 of 18 functions match. `HabitatTable::Build` has the same instructions as the
-    original but different registers (73 %), so the file isn't `complete` yet.
-  - Next: the three functions left in the other two files.
+  - `src/Bestiary/MonsterListScreen.cpp` and `src/Bestiary/HabitatTable.cpp`: complete.
+  - `src/Bestiary/MonsterInfoScreen.cpp`: 18 of 19 functions match, and so does its data. In `UpdateText` (97 %), the
+    compiler keeps the constant `0xf` in a register in the first block of drops, while the original loads it each time,
+    so the file isn't `complete` yet. A trial link with it `complete` only needs `.p__sinit_ov014_02189510` renamed to
+    `.p__sinit_MonsterInfoScreen.cpp` besides that.
 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
@@ -40,18 +39,18 @@ Last recorded on 2026-09-23.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 152,200 | 2,959,024 | 5.14 % |
-| Functions | 1,107 | 14,779 | 7.49 % |
+| Code (bytes) | 154,584 | 2,959,024 | 5.22 % |
+| Functions | 1,125 | 14,779 | 7.61 % |
 | Modules | 1 complete, 5 in progress, 26 not started | 32 with code |  |
 
-Source files: 85 complete, 3 in progress.
+Source files: 86 complete, 2 in progress.
 
 ## History
 
 | Date | Functions | Code (bytes) | Complete files |
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
-| 2026-09-23 | 1,107 (7.49 %) | 152,200 (5.14 %) | 85 |
+| 2026-09-23 | 1,125 (7.61 %) | 154,584 (5.22 %) | 86 |
 
 ## Modules
 
@@ -74,7 +73,7 @@ Source files: 85 complete, 3 in progress.
 | ov011 | Unclear | 17.6 | 186 | 0 | 186 | 0.00 % | Not started |
 | ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
 | ov013 | *Likely* skill point allocation | 14.7 | 40 | 0 | 40 | 0.00 % | Not started |
-| ov014 | Bestiary | 20.6 | 69 | 32 | 37 | 41.76 % | In progress |
+| ov014 | Bestiary | 20.6 | 69 | 50 | 19 | 53.08 % | In progress |
 | ov015 | *Likely* character model loading / viewer | 33.8 | 103 | 0 | 103 | 0.00 % | Not started |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 0 | 85 | 0.00 % | Not started |
 | ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 0 | 1194 | 0.00 % | Not started |
@@ -129,7 +128,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov011 | 86 | 100 | 0 | 0 | 17.6 |
 | ov012 | 2 | 52 | 16 | 1 | 27.2 |
 | ov013 | 2 | 29 | 9 | 0 | 14.7 |
-| ov014 | 14 | 18 | 4 | 1 | 12.0 |
+| ov014 | 2 | 13 | 3 | 1 | 9.7 |
 | ov015 | 28 | 57 | 16 | 2 | 33.8 |
 | ov016 | 51 | 26 | 5 | 3 | 21.0 |
 | ov017 | 420 | 626 | 132 | 16 | 300.4 |
@@ -145,5 +144,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
 | ov034 | 4 | 0 | 0 | 1 | 2.2 |
-| **Total** | **5579** | **6908** | **1052** | **133** | **2741.0** |
+| **Total** | **5567** | **6903** | **1051** | **133** | **2738.7** |
 <!-- END GENERATED -->
