@@ -121,13 +121,21 @@ struct Struct_0210b078
 {
     Vector3fix vec0_;
     BoneMatrixRenderData::Scale vec1_;
-} extern data_0210b078[64];
+};
 
 struct Struct_0210b678
 {
     Matrix4x4 mat4x4;
     Matrix3x3 mat3x3;
-} extern data_0210b678[];
+};
+
+// Caches shared by every model, like NitroSystem's NNS_G3dRSOnGlb. That struct starts with the material cache
+// (data_0210a278), but RenderCommand_9 doesn't match with it in the struct.
+struct RenderStateOnGlobal
+{
+    Struct_0210b078 scaleCache[64];
+    Struct_0210b678 envelopeMatrixCache[64]; // at 0x0210b678, used by RenderCommand_9
+} extern data_0210b078;
 
 extern "C"
 {  

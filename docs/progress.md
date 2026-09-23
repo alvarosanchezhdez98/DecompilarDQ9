@@ -40,8 +40,13 @@ The script keeps everything outside the generated section, so this is the place 
 - Main: `src/System/InterruptHandler.cpp` (the NitroSDK's interrupt table) is complete too, rewritten like the
   NitroSDK's code and also with `-O4`. It accesses the DTCM through its symbols (`data_027e0000` and
   `data_027e0060`), not through fixed addresses, and one index is `unsigned long`.
-- Next: `src/Graphics/NSBXX/RenderCommand_9.cpp`, the last file that was left commented out in main's
-  `delinks.txt`. It goes from 11 % to 32 % with 2.0/sp2.
+- Main: `src/Graphics/NSBXX/RenderCommand_9.cpp` (NitroSystem's `NNSi_G3dFuncSbc_NODEMIX`) is complete too, so
+  none of the files in main's `delinks.txt` are commented out anymore. It needed `-O4`, a 64-bit weight
+  (NitroSystem's `fx64`), inline functions for the bit vector, and the matrix cache as a member of a global struct
+  (`RenderStateOnGlobal` in `RenderCommands_Common.h`, like NitroSystem's `NNS_G3dRSOnGlb`).
+- Next: the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`), or new files. The NitroSystem G3D range is at
+  92 %, and the NitroSDK range at 35.5 %: the public NitroSDK and NitroSystem decompilations (pret's Pokémon projects,
+  Sonic Rush Adventure) make that library code the easiest to match next.
 - Overlay 14, the bestiary, is on hold.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
@@ -58,24 +63,24 @@ Last recorded on 2026-09-23.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 166,028 | 2,959,024 | 5.61 % |
-| Functions | 1,187 | 14,779 | 8.03 % |
+| Code (bytes) | 167,912 | 2,959,024 | 5.67 % |
+| Functions | 1,188 | 14,779 | 8.04 % |
 | Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 91 complete, 2 in progress.
+Source files: 92 complete, 2 in progress.
 
 ## History
 
 | Date | Functions | Code (bytes) | Complete files |
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
-| 2026-09-23 | 1,187 (8.03 %) | 166,028 (5.61 %) | 91 |
+| 2026-09-23 | 1,188 (8.04 %) | 167,912 (5.67 %) | 92 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1096 | 5111 | 15.37 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1097 | 5110 | 15.57 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 23 | 15 | 70.56 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -120,7 +125,7 @@ Source files: 91 complete, 2 in progress.
 | ------ | ----- | ---------: | ---------: | ----------: | ---------: | --------: |
 | Secure area and startup | `0x02000000-0x02000c9c` | 3.2 | 26 | 0 | 26 | 0.00 % |
 | Level-5 code | `0x02000c9c-0x020b2adc` | 711.6 | 4438 | 550 | 3888 | 10.40 % |
-| NitroSystem G3D | `0x020b2adc-0x020bc000` | 37.3 | 228 | 153 | 75 | 87.16 % |
+| NitroSystem G3D | `0x020b2adc-0x020bc000` | 37.3 | 228 | 154 | 74 | 92.09 % |
 | Fixed-point math, not fully identified | `0x020bc000-0x020c3a5c` | 30.6 | 222 | 0 | 222 | 0.00 % |
 | NitroSDK | `0x020c3a5c-0x020dc300` | 98.2 | 941 | 390 | 551 | 35.50 % |
 | Not identified | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
@@ -132,7 +137,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2490 | 2314 | 276 | 31 | 780.6 |
+| main | 2490 | 2314 | 275 | 31 | 778.7 |
 | itcm | 10 | 5 | 0 | 0 | 1.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
@@ -162,5 +167,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5536** | **6876** | **1048** | **132** | **2727.5** |
+| **Total** | **5536** | **6876** | **1047** | **132** | **2725.7** |
 <!-- END GENERATED -->

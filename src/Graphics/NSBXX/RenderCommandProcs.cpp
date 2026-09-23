@@ -173,9 +173,9 @@ void BoneMatrixScaleCalculationProc_Type1(BoneMatrixRenderData* renderData, NSBX
         {
             unsigned int thisBoneIdx = ip[1];
             data_0210a274->boneMatrixBitfield_[thisBoneIdx >> 5] &= ~(1 << (thisBoneIdx & 0x1f));
-            data_0210b078[thisBoneIdx].vec1_.x = scaling->x_v2;
-            data_0210b078[thisBoneIdx].vec1_.y = scaling->y_v2;
-            data_0210b078[thisBoneIdx].vec1_.z = scaling->z_v2;
+            data_0210b078.scaleCache[thisBoneIdx].vec1_.x = scaling->x_v2;
+            data_0210b078.scaleCache[thisBoneIdx].vec1_.y = scaling->y_v2;
+            data_0210b078.scaleCache[thisBoneIdx].vec1_.z = scaling->z_v2;
         }
     }
 
@@ -189,7 +189,7 @@ void BoneMatrixScaleCalculationProc_Type1(BoneMatrixRenderData* renderData, NSBX
         }
         else
         {
-            renderData->scale_v1_ = data_0210b078[parentBoneIdx].vec1_;
+            renderData->scale_v1_ = data_0210b078.scaleCache[parentBoneIdx].vec1_;
         }
     }
 
@@ -450,8 +450,8 @@ void BoneMatrixScaleCalculationProc_Type2(BoneMatrixRenderData* renderData, NSBX
         }
         else
         {
-            Struct_0210b078* parent = &data_0210b078[parentBoneIdx];
-            func_020ca408(parent, &data_0210b078[thisBoneIdx], sizeof(Struct_0210b078));
+            Struct_0210b078* parent = &data_0210b078.scaleCache[parentBoneIdx];
+            func_020ca408(parent, &data_0210b078.scaleCache[thisBoneIdx], sizeof(Struct_0210b078));
             // copy to scale2 and scale3
             func_020ca408(parent, &renderData->scale_v1_, 2 * 3 * sizeof(fix32_t));
         }
@@ -463,20 +463,20 @@ void BoneMatrixScaleCalculationProc_Type2(BoneMatrixRenderData* renderData, NSBX
         renderData->scale_v0_.z = scaling->z;
         if (data_0210a274->boneMatrixBitfield_[parentBoneIdx >> 5] & (1 << (parentBoneIdx & 0x1f)))
         {
-            func_020ca408(scaling, &data_0210b078[thisBoneIdx], 2 * 3 * sizeof(fix32_t));
+            func_020ca408(scaling, &data_0210b078.scaleCache[thisBoneIdx], 2 * 3 * sizeof(fix32_t));
             data_0210a274->boneMatrixBitfield_[thisBoneIdx >> 5] &= ~(1 << (thisBoneIdx & 0x1f));
             renderData->flags_ |= 0x18;
         }
         else
         {
             data_0210a274->boneMatrixBitfield_[thisBoneIdx >> 5] &= ~(1 << (thisBoneIdx & 0x1f));
-            data_0210b078[thisBoneIdx].vec0_.x = ((int64_t)scaling->x * (int64_t)data_0210b078[parentBoneIdx].vec0_.x) >> 12;
-            data_0210b078[thisBoneIdx].vec0_.y = ((int64_t)scaling->y * (int64_t)data_0210b078[parentBoneIdx].vec0_.y) >> 12;
-            data_0210b078[thisBoneIdx].vec0_.z = ((int64_t)scaling->z * (int64_t)data_0210b078[parentBoneIdx].vec0_.z) >> 12;
-            data_0210b078[thisBoneIdx].vec1_.x = ((int64_t)scaling->x_v2 * (int64_t)data_0210b078[parentBoneIdx].vec1_.x) >> 12;
-            data_0210b078[thisBoneIdx].vec1_.y = ((int64_t)scaling->y_v2 * (int64_t)data_0210b078[parentBoneIdx].vec1_.y) >> 12;
-            data_0210b078[thisBoneIdx].vec1_.z = ((int64_t)scaling->z_v2 * (int64_t)data_0210b078[parentBoneIdx].vec1_.z) >> 12;
-            func_020ca408(&data_0210b078[parentBoneIdx], &renderData->scale_v1_, 2 * 3 * sizeof(fix32_t));
+            data_0210b078.scaleCache[thisBoneIdx].vec0_.x = ((int64_t)scaling->x * (int64_t)data_0210b078.scaleCache[parentBoneIdx].vec0_.x) >> 12;
+            data_0210b078.scaleCache[thisBoneIdx].vec0_.y = ((int64_t)scaling->y * (int64_t)data_0210b078.scaleCache[parentBoneIdx].vec0_.y) >> 12;
+            data_0210b078.scaleCache[thisBoneIdx].vec0_.z = ((int64_t)scaling->z * (int64_t)data_0210b078.scaleCache[parentBoneIdx].vec0_.z) >> 12;
+            data_0210b078.scaleCache[thisBoneIdx].vec1_.x = ((int64_t)scaling->x_v2 * (int64_t)data_0210b078.scaleCache[parentBoneIdx].vec1_.x) >> 12;
+            data_0210b078.scaleCache[thisBoneIdx].vec1_.y = ((int64_t)scaling->y_v2 * (int64_t)data_0210b078.scaleCache[parentBoneIdx].vec1_.y) >> 12;
+            data_0210b078.scaleCache[thisBoneIdx].vec1_.z = ((int64_t)scaling->z_v2 * (int64_t)data_0210b078.scaleCache[parentBoneIdx].vec1_.z) >> 12;
+            func_020ca408(&data_0210b078.scaleCache[parentBoneIdx], &renderData->scale_v1_, 2 * 3 * sizeof(fix32_t));
         }
     }
 }
