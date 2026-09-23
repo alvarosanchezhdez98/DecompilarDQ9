@@ -7,7 +7,7 @@ struct GamecardBusLock
     unsigned short unknown_6;
 };
 
-//void InitializeGamecardBusOwnership();
+void InitializeGamecardBusOwnership();
 
 int ReleaseGBABus(unsigned short owner);
 int TryAcquireGBABus(unsigned short owner);

@@ -48,9 +48,21 @@ The script keeps everything outside the generated section, so this is the place 
   `g3imm.c`, `g3x.c`, `g3_util.c` and `gxasm.c` (`src/System/Geometry*.cpp`, 24 functions). They keep their
   `func_` names, which other files use, and follow the public decompilation of the NitroSDK in Sonic Rush Adventure.
   Like the NitroSystem files, they're compiled with `-O4`.
+- Main, NitroSDK: more OS functions are complete (16), from `os_spinLock.c` (`OS_InitLock`, `OS_GetLockID`,
+  `OS_ReleaseLockID`, in `GamecardBusOwnership.cpp`), `os_printf.c` (`Printf.cpp`), `os_context.c`
+  (`SaveRestoreContext.cpp`), `os_emulator.c` (`ConsoleType.cpp`) and `os_message.c` (`MessageQueue.cpp`).
+  - `OS_InitLock` needed its flag as a local `static`, so `GamecardBusOwnership.cpp` has a `.bss` section with it
+    (`isInitialized$126` in `symbols.txt`).
+  - `OS_GetLockID` and `OS_ReleaseLockID` are in assembly. In the original, each conditional instruction became a
+    conditional branch over an unconditional one, which none of our compiler versions do, so the branches are written
+    out.
+  - Left in these gaps: `OS_SetIrqStackChecker` (`func_020c6d48`) and `OS_InitThread` (`func_020c745c`). They read
+    the stack sizes from symbols that the linker defines (`SDK_IRQ_STACKSIZE`, `SDK_SYS_STACKSIZE`), which our LCF
+    doesn't have yet. `OS_InitThread` also uses the statics of `os_thread.c`.
 - Next: the other NitroSDK gaps in main (`python tools/progress.py --remaining main`, between `0x020c3a5c` and
-  `0x020dc300`), with the public NitroSDK decompilations (Sonic Rush Adventure, pret's Pokémon projects) as
-  reference. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`).
+  `0x020dc300`), starting with `0x020c8358-0x020c8c60` (29 functions after `Cache.cpp`, likely `os_init.c`,
+  `os_arena.c` and `os_alloc.c`). The public NitroSDK decompilations (Sonic Rush Adventure, pret's Pokémon projects)
+  are the reference. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`).
 - Overlay 14, the bestiary, is on hold.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
@@ -67,24 +79,24 @@ Last recorded on 2026-09-23.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 169,692 | 2,959,024 | 5.73 % |
-| Functions | 1,212 | 14,779 | 8.20 % |
+| Code (bytes) | 170,996 | 2,959,024 | 5.78 % |
+| Functions | 1,228 | 14,779 | 8.31 % |
 | Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 96 complete, 2 in progress.
+Source files: 100 complete, 2 in progress.
 
 ## History
 
 | Date | Functions | Code (bytes) | Complete files |
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
-| 2026-09-23 | 1,212 (8.20 %) | 169,692 (5.73 %) | 96 |
+| 2026-09-23 | 1,228 (8.31 %) | 170,996 (5.78 %) | 100 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1121 | 5086 | 15.76 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1137 | 5070 | 15.90 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 23 | 15 | 70.56 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -131,7 +143,7 @@ Source files: 96 complete, 2 in progress.
 | Level-5 code | `0x02000c9c-0x020b2adc` | 711.6 | 4438 | 550 | 3888 | 10.40 % |
 | NitroSystem G3D | `0x020b2adc-0x020bc000` | 37.3 | 228 | 154 | 74 | 92.09 % |
 | Fixed-point math, not fully identified | `0x020bc000-0x020c3a5c` | 30.6 | 222 | 0 | 222 | 0.00 % |
-| NitroSDK | `0x020c3a5c-0x020dc300` | 98.2 | 941 | 414 | 527 | 37.27 % |
+| NitroSDK | `0x020c3a5c-0x020dc300` | 98.2 | 941 | 430 | 511 | 38.57 % |
 | Not identified | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
@@ -141,7 +153,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2475 | 2305 | 275 | 31 | 777.0 |
+| main | 2468 | 2296 | 275 | 31 | 775.7 |
 | itcm | 10 | 5 | 0 | 0 | 1.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
@@ -171,5 +183,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5521** | **6867** | **1047** | **132** | **2724.0** |
+| **Total** | **5514** | **6858** | **1047** | **132** | **2722.7** |
 <!-- END GENERATED -->

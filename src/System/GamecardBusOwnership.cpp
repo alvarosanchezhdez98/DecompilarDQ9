@@ -4,8 +4,6 @@
 #include <asmhacks.h>
 #include "std_library_functions.h"
 
-extern int data_021112dc;
-
 #define REG_EXTMEMCTRL (*(volatile unsigned short*)0x04000204)
 #define EXTMEMCTRL_FLAG_RELINQUISH_GBA_BUS (1 << 7)
 #define EXTMEMCTRL_FLAG_RELINQUISH_NDS_BUS (1 << 11)
@@ -45,17 +43,18 @@ void MarkGBABusReleased(); // release gba bus
 void MarkNDSBusAcquired();
 void MarkNDSBusReleased();
 
-#if false
-// this is almost correct except the first bit, excluding it for now
+// The NitroSDK's OS_InitLock
 void InitializeGamecardBusOwnership()
 {
-    if (data_021112dc)
+    // A local static like in the NitroSDK: with a global variable, the compiler schedules the first stores differently
+    static int isInitialized = false;
+    if (isInitialized)
     {
         return;
     }
     
     GamecardBusLock* ndsLock = PTR_UNKNOWN_BUS_LOCK;
-    data_021112dc = true;
+    isInitialized = true;
     ndsLock->atomic = 0;
     
     WeakLockGamecardBusLock(126, ndsLock, NULL);
@@ -78,7 +77,6 @@ void InitializeGamecardBusOwnership()
     WeakUnlockGamecardBusLock(126, ndsLock, NULL);
     WeakLockGamecardBusLock(127, ndsLock, NULL);
 }
-#endif
 
 // can be static
 int LockGamecardBusLock(unsigned short owner, GamecardBusLock* lock, void (*onLock)(), bool strict)
@@ -227,6 +225,90 @@ inline int leadZeroCount(unsigned int what)
     return ret;
 }
 
-// GenerateLockOwnerID and ReleaseLockOwnerID are the next two functions,
-// but they appear to be written in assembly (they use clz which the compiler
-// never emits, and more generally are quite weird for compiled code)
+// GenerateLockOwnerID and ReleaseLockOwnerID are written in assembly, like the NitroSDK's OS_GetLockID and
+// OS_ReleaseLockID. In the original, each conditional instruction (e.g. movne) became a conditional branch over an
+// unconditional one, which none of our compiler versions do, so the branches are written out.
+#ifdef __MWERKS__
+asm unsigned int GenerateLockOwnerID()
+{
+    ldr r3, =ADDR_REGISTERED_OWNERS_LOW
+    ldr r1, [r3, #0]
+    clz r2, r1 // number of the first free ID among 0x40-0x5f
+    cmp r2, #32
+    bne @movne
+    b @skip_movne
+@movne:
+    mov r0, #0x40
+@skip_movne:
+    bne @found
+    add r3, r3, #4
+    ldr r1, [r3, #0]
+    clz r2, r1 // number of the first free ID among 0x60-0x7f
+    cmp r2, #32
+    ldr r0, =0xfffffffd // no free ID
+    beq @bxeq
+    b @skip_bxeq
+@bxeq:
+    bx lr
+@skip_bxeq:
+    mov r0, #0x60
+@found:
+    add r0, r0, r2
+    mov r1, #0x80000000
+    mov r1, r1, lsr r2
+    ldr r2, [r3, #0]
+    bic r2, r2, r1
+    str r2, [r3, #0]
+    bx lr
+}
+
+asm void ReleaseLockOwnerID(register unsigned short id)
+{
+    ldr r3, =ADDR_REGISTERED_OWNERS_LOW
+    cmp r0, #0x60
+    bpl @addpl
+    b @skip_addpl
+@addpl:
+    add r3, r3, #4
+@skip_addpl:
+    bpl @subpl
+    b @skip_subpl
+@subpl:
+    sub r0, r0, #0x60
+@skip_subpl:
+    bmi @submi
+    b @skip_submi
+@submi:
+    sub r0, r0, #0x40
+@skip_submi:
+    mov r1, #0x80000000
+    mov r1, r1, lsr r0
+    ldr r2, [r3, #0]
+    orr r2, r2, r1
+    str r2, [r3, #0]
+    bx lr
+}
+#else
+// The IDs 0x40-0x7f are free when their bit (from the highest) is set in REGISTERED_OWNER_FLAGS[0] or [1]
+unsigned int GenerateLockOwnerID()
+{
+    for (int word = 0; word < 2; word++)
+    {
+        int bit = leadZeroCount(REGISTERED_OWNER_FLAGS[word]);
+        if (bit != 32)
+        {
+            REGISTERED_OWNER_FLAGS[word] &= ~(0x80000000 >> bit);
+            return 0x40 + word * 32 + bit;
+        }
+    }
+    return 0xfffffffd;
+}
+
+void ReleaseLockOwnerID(unsigned short id)
+{
+    if (id >= 0x60)
+        REGISTERED_OWNER_FLAGS[1] |= 0x80000000 >> (id - 0x60);
+    else
+        REGISTERED_OWNER_FLAGS[0] |= 0x80000000 >> (id - 0x40);
+}
+#endif
