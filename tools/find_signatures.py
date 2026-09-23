@@ -119,12 +119,28 @@ def load_references() -> list[AsmFunction]:
     return functions
 
 
-def load_ours(module: str) -> dict[int, AsmFunction]:
+def module_asm_files(module: str) -> list[Path]:
+    '''The module's disassembly: dsd writes the files of its delinks.txt at their own paths, and the rest in parts'''
     if not asm_path.exists():
         subprocess.run([str(root_path / "dsd"), "dis", "--config-path", str(root_path / "config/eur/arm9/config.yaml"),
                         "--asm-path", str(asm_path)], check=True, stdout=subprocess.DEVNULL)
+    config = progress.config_path
+    if module.startswith("ov"):
+        config = config / "overlays" / module
+    elif module != "main":
+        config = config / module
+    paths = sorted(asm_path.glob(f"{module}_*.s"))
+    for line in (config / "delinks.txt").read_text().splitlines():
+        if line and not line[0].isspace() and line.strip().endswith(":"):
+            path = asm_path / Path(line.strip()[:-1]).with_suffix(".s")
+            if path.is_file():
+                paths.append(path)
+    return paths
+
+
+def load_ours(module: str) -> dict[int, AsmFunction]:
     functions = {}
-    for path in asm_path.glob(f"{module}_*.s"):
+    for path in module_asm_files(module):
         for function, address in parse_asm(path, path.name):
             if address is not None:
                 functions[address] = function

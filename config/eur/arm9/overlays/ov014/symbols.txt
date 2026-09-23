@@ -1,4 +1,4 @@
-_Z17FindLayoutElementP6Layouts kind:function(arm,size=0x60) addr:0x021842a0
+_Z17FindLayoutElementP6Layouts kind:function(arm,size=0x60) addr:0x021842a0 local
 _ZN17MonsterInfoScreen8AllocateEP13SafeAllocator kind:function(arm,size=0x1c4) addr:0x02184300
 _ZN17MonsterInfoScreen4InitEv kind:function(arm,size=0x110) addr:0x021844c4
 _ZN11MonsterBest4InitEv kind:function(arm,size=0x18) addr:0x021845d4
@@ -66,37 +66,20 @@ _ZN8NatTable9FindEntryEi kind:function(arm,size=0x20) addr:0x021893c4
 _ZN8NatTable9GetGroupsEP8NatEntry kind:function(arm,size=0x28) addr:0x021893e4
 _ZN8NatTable8GetGroupEiP8NatEntry kind:function(arm,size=0x24) addr:0x0218940c
 _ZN8NatTable15GetGroupPointerEiP8NatEntry kind:function(arm,size=0x38) addr:0x02189430
-data_ov014_02189478 kind:data(any) addr:0x02189478
-data_ov014_02189480 kind:data(any) addr:0x02189480
-data_ov014_0218948c kind:data(any) addr:0x0218948c
-data_ov014_0218948e kind:data(any) addr:0x0218948e
-data_ov014_02189498 kind:data(any) addr:0x02189498
+s_buttonIDs kind:data(any) addr:0x02189478 local
+s_bufferSizes kind:data(any) addr:0x02189480 local
+s_pressedOffsets kind:data(any) addr:0x0218948c local
+@1137 kind:data(any) addr:0x02189498 local
 s_allocatorSizes kind:data(any) addr:0x021894b8 local
 s_hiddenItems kind:data(any) addr:0x021894cc local
-__sinit_MonsterInfoScreen.cpp kind:function(arm,size=0x88) addr:0x02189510
-.p__sinit_ov014_02189510 kind:data(word) addr:0x02189598
-data_ov014_021895a0 kind:data(any) addr:0x021895a0
-data_ov014_021895b0 kind:data(any) addr:0x021895b0
-data_ov014_021895c8 kind:data(any) addr:0x021895c8
-data_ov014_021895ce kind:data(any) addr:0x021895ce
-data_ov014_021895d5 kind:data(any) addr:0x021895d5
-data_ov014_021895ed kind:data(any) addr:0x021895ed
-data_ov014_02189603 kind:data(any) addr:0x02189603
-data_ov014_02189615 kind:data(any) addr:0x02189615
-data_ov014_0218962c kind:data(any) addr:0x0218962c
-data_ov014_0218963f kind:data(any) addr:0x0218963f
-data_ov014_02189652 kind:data(any) addr:0x02189652
-data_ov014_02189661 kind:data(any) addr:0x02189661
-data_ov014_02189668 kind:data(any) addr:0x02189668
-data_ov014_02189680 kind:data(any) addr:0x02189680
-data_ov014_02189686 kind:data(any) addr:0x02189686
-data_ov014_0218968c kind:data(any) addr:0x0218968c
-data_ov014_02189692 kind:data(any) addr:0x02189692
-data_ov014_021896a7 kind:data(any) addr:0x021896a7
-data_ov014_021896bc kind:data(any) addr:0x021896bc
+__sinit_MonsterInfoScreen.cpp kind:function(arm,size=0x88) addr:0x02189510 local
+.p__sinit_MonsterInfoScreen.cpp kind:data(word) addr:0x02189598 local
+s_eveningLength kind:data(any) addr:0x021895a0 local
+s_states kind:data(any) addr:0x021895b0 local
+@stringBase0 kind:data(byte[0x10b]) addr:0x021895c8 local
 states$1294 kind:data(any) addr:0x021896d4 local
 @stringBase0 kind:data(byte[0xb7]) addr:0x0218970c local
 s_habitatFiles kind:data(any) addr:0x021897c4 local
 @stringBase0 kind:data(byte[0x24]) addr:0x021897cc local
-data_ov014_02189800 kind:bss addr:0x02189800
+s_statics0 kind:bss addr:0x02189800 local
 _ZGVstates$1294 kind:bss addr:0x0218981c local

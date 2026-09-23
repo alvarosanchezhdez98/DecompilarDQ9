@@ -37,6 +37,35 @@ A run of matches usually is one of our source files, and the official names tell
 
 The libraries wrote some functions in assembly (e.g. the NitroSDK's `mi_memory.c`), and they're `asm` functions in our files too. `tools/asm_to_mwcc.py` converts functions of the disassembly into MWCC's inline assembly, with local labels and `ldr rX, =value` for the literal pool (see `src/System/MemoryCopy.cpp`). Thumb functions go between `#pragma thumb on` and `#pragma thumb off`; when the original's symbol includes the 2 bytes of padding after a Thumb function, write them as `lsl r0, r0, #0` (see `src/System/Matrix43.cpp`).
 
+## Functions that don't match yet
+A function whose C almost matches, but not quite, can block a whole file from being marked `complete`. Its original
+instructions can be written in assembly meanwhile, so that the file's other functions and data count, and the C is kept
+for later:
+```cpp
+// NONMATCHING: the C matches 97.2 %, ... (why it doesn't match)
+#ifdef NONMATCHING
+void MonsterInfoScreen::UpdateText()
+{
+    ...
+}
+#else
+asm void MonsterInfoScreen::UpdateText()
+{
+    ...
+}
+#endif
+```
+`tools/asm_to_mwcc.py` converts the function (`python tools/asm_to_mwcc.py ov014 _ZN17MonsterInfoScreen10UpdateTextEv`).
+Give the `asm` function the C function's return and parameter types. MWCC's assembler doesn't take qualified names like
+`NatTable::FindEntry`, so the code calls member functions by their symbols, and the tool prints them declared as
+`extern "C"` for the `#else` branch. Compiler functions like `__clear` need a declaration too (see
+`src/Bestiary/MonsterInfoScreen.cpp`).
+
+The build uses the assembly, and `python tools/diff_function.py <file> --nonmatching` compiles the C instead, to keep
+working on it. `tools/progress.py` finds these functions in the complete files and doesn't count them as decompiled:
+[docs/progress.md](docs/progress.md) lists them apart. Use it for the last functions of a file, after trying to match
+them, not instead of decompiling.
+
 ## Referencing functions and data that have yet to be decompiled
 Add a declaration to the file referencing the yet un-decompiled info. For example, if you wanted to reference a function in the main ARM9 file at 02074388, you would add
 ```C

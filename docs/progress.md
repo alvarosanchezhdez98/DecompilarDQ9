@@ -10,6 +10,11 @@ the build verifies that those files match the original. The tables below are gen
 [tools/progress.py](../tools/progress.py) from `config/eur`, so they don't need the ROM. objdiff's report
 (`ninja report`) splits the code differently, so its numbers can differ slightly.
 
+A function whose C doesn't match yet can be written in assembly (`NONMATCHING`, see
+[Decompiling.md](../Decompiling.md#functions-that-dont-match-yet)), so that the rest of its file counts. Those functions
+are counted apart: they aren't decompiled, and they're listed in [Functions in assembly](#functions-in-assembly).
+objdiff's report counts them as matching.
+
 After decompiling something:
 1. Check that it matches with `ninja min`.
 2. Run `python tools/progress.py --record` to update this page and its history
@@ -86,14 +91,14 @@ The script keeps everything outside the generated section, so this is the place 
   (`python tools/progress.py --remaining main`), e.g. RTC, CARD, SND and WM after `0x020cd4a4`, and
   `0x020c9298-0x020c96f8` (`os_valarm.c`, which pokeheartgold has in C). Also the upstream sketch in overlay 24
   (`GetAttackBaseDamage.cpp`).
-- Overlay 14, the bestiary, is on hold.
+- Overlay 14, the bestiary: its three source files are complete, only `UpdateText`'s C is left.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
   - `src/Bestiary/MonsterListScreen.cpp` and `src/Bestiary/HabitatTable.cpp`: complete.
-  - `src/Bestiary/MonsterInfoScreen.cpp`: 18 of 19 functions match, and so does its data. In `UpdateText` (97 %), the
-    compiler keeps the constant `0xf` in a register in the first block of drops, while the original loads it each time,
-    so the file isn't `complete` yet. A trial link with it `complete` only needs `.p__sinit_ov014_02189510` renamed to
-    `.p__sinit_MonsterInfoScreen.cpp` besides that.
+  - `src/Bestiary/MonsterInfoScreen.cpp`: complete, the first file with a function in assembly (`NONMATCHING`). The C
+    of `UpdateText` matches 97.2 %: the compiler keeps the constant `0xf` in a register in the first block of drops,
+    while the original loads it each time. The other 18 functions and the data match, and now count. Its data symbols
+    have their names, and its strings are `@stringBase0` plus an offset in `relocs.txt`.
 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
@@ -102,18 +107,20 @@ Last recorded on 2026-09-23.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 187,432 | 2,959,024 | 6.33 % |
-| Functions | 1,345 | 14,779 | 9.10 % |
+| Code (bytes) | 194,208 | 2,959,024 | 6.56 % |
+| Functions | 1,363 | 14,779 | 9.22 % |
 | Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 125 complete, 2 in progress.
+Source files: 126 complete, 1 in progress.
+
+Not counted as decompiled: 1 function (3,112 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
 | Date | Functions | Code (bytes) | Complete files |
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
-| 2026-09-23 | 1,345 (9.10 %) | 187,432 (6.33 %) | 125 |
+| 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
 
 ## Modules
 
@@ -136,7 +143,7 @@ Source files: 125 complete, 2 in progress.
 | ov011 | Unclear | 17.6 | 186 | 0 | 186 | 0.00 % | Not started |
 | ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
 | ov013 | *Likely* skill point allocation | 14.7 | 40 | 0 | 40 | 0.00 % | Not started |
-| ov014 | Bestiary | 20.6 | 69 | 50 | 19 | 53.08 % | In progress |
+| ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
 | ov015 | *Likely* character model loading / viewer | 33.8 | 103 | 0 | 103 | 0.00 % | Not started |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 0 | 85 | 0.00 % | Not started |
 | ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 0 | 1194 | 0.00 % | Not started |
@@ -170,6 +177,14 @@ Source files: 125 complete, 2 in progress.
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
+## Functions in assembly
+
+Their files are complete, since the build uses the assembly after `#else`, but the C between `#ifdef NONMATCHING` and `#else` doesn't match yet. They count as remaining.
+
+| Module | Function | Address | Size |
+| ------ | -------- | ------- | ----: |
+| ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
+
 ## Remaining functions by size
 
 An estimate of the work left in each module, by the size of the functions that aren't decompiled.
@@ -191,7 +206,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov011 | 86 | 100 | 0 | 0 | 17.6 |
 | ov012 | 2 | 52 | 16 | 1 | 27.2 |
 | ov013 | 2 | 29 | 9 | 0 | 14.7 |
-| ov014 | 2 | 13 | 3 | 1 | 9.7 |
+| ov014 | 0 | 0 | 0 | 1 | 3.0 |
 | ov015 | 28 | 57 | 16 | 2 | 33.8 |
 | ov016 | 51 | 26 | 5 | 3 | 21.0 |
 | ov017 | 420 | 626 | 132 | 16 | 300.4 |
@@ -206,5 +221,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5452** | **6809** | **1041** | **132** | **2706.6** |
+| **Total** | **5450** | **6796** | **1038** | **132** | **2700.0** |
 <!-- END GENERATED -->

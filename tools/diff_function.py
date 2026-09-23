@@ -9,6 +9,8 @@ and `ninja delink` first, so that build.ninja and the delinked objects of the or
   python tools/diff_function.py src/Bestiary/Bestiary.cpp                         Diffs every function in the file
   python tools/diff_function.py src/Bestiary/Bestiary.cpp func_ov014_021842a0     Diffs only these functions
   python tools/diff_function.py src/Bestiary/Bestiary.cpp --summary               Only prints the match percentages
+  python tools/diff_function.py src/Bestiary/Bestiary.cpp --nonmatching           Compiles the C of the functions that
+                                                                                  are in assembly (NONMATCHING)
 '''
 
 import argparse
@@ -47,8 +49,9 @@ def ninja_statements() -> list[str]:
     return statements
 
 
-def mwcc_command(source: Path, output_dir: Path, version: str | None) -> str:
-    '''The build's compile command for `source`, taken from build.ninja, optionally with another compiler version'''
+def mwcc_command(source: Path, output_dir: Path, version: str | None, nonmatching: bool = False) -> str:
+    '''The build's compile command for `source`, taken from build.ninja, optionally with another compiler version, or
+    with the C of the functions that the build uses in assembly (see NONMATCHING in Decompiling.md)'''
     statements = ninja_statements()
     start = statements.index("rule mwcc")
     command = next(s.strip() for s in statements[start + 1:] if s.strip().startswith("command ="))
@@ -70,6 +73,8 @@ def mwcc_command(source: Path, output_dir: Path, version: str | None) -> str:
     if version is not None:
         compiler = str(Path("tools") / "mwccarm" / version / "mwccarm.exe")
     cc_flags = "-lang=c++" if source.suffix == ".cpp" else "-lang=c"
+    if nonmatching:
+        cc_flags += " -d NONMATCHING"
     return (command.replace("$mwcc", compiler).replace("$cc_flags", cc_flags).replace(" -MD", "")
             .replace("$in", str(source)).replace("$basedir", str(output_dir)))
 
@@ -199,11 +204,14 @@ def main():
                              "original game against one with another name")
     parser.add_argument("--summary", action="store_true", help="Only print the match percentages")
     parser.add_argument("--mwcc", metavar="VERSION", help="Compiler version to use instead of the build's, e.g. 2.0/sp2p3")
+    parser.add_argument("--nonmatching", action="store_true",
+                        help="Compile the C of the functions in assembly, between #ifdef NONMATCHING and #else")
     args = parser.parse_args()
 
     output_dir = root_path / "build" / "diff_function"
     output_dir.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(mwcc_command(args.source, output_dir, args.mwcc), shell=True, cwd=root_path)
+    command = mwcc_command(args.source, output_dir, args.mwcc, args.nonmatching)
+    result = subprocess.run(command, shell=True, cwd=root_path)
     if result.returncode != 0:
         sys.exit(result.returncode)
     base = output_dir / args.source.with_suffix(".o").name
