@@ -180,6 +180,9 @@ class Project:
     def arm9_lcf(self) -> Path:
         return self.game_build / "arm9.lcf"
 
+    def arm9_sdk_lcf(self) -> Path:
+        return self.game_build / "arm9_sdk.lcf"
+
     def arm9_objects_txt(self) -> Path:
         return self.game_build / "objects.txt"
 
@@ -252,6 +255,12 @@ def main():
             name="lcf",
            # command=f"{DSD} lcf -c $config_path --lcf-file $lcf_file --objects-file $objects_file"
             command=f"{DSD} lcf --config-path $config_path"
+        )
+        n.newline()
+
+        n.rule(
+            name="add_linker_symbols",
+            command=f"{PYTHON} tools/add_linker_symbols.py $in $out"
         )
         n.newline()
 
@@ -405,7 +414,17 @@ def add_extract_build(n: ninja_syntax.Writer, project: Project):
 
 
 def add_mwld_and_rom_builds(n: ninja_syntax.Writer, project: Project):
-    lcf_file = str(project.arm9_lcf())
+    # dsd's linker script, with the symbols that the NitroSDK's linker script defines
+    lcf_file = str(project.arm9_sdk_lcf())
+    add_linker_symbols = "tools/add_linker_symbols.py"
+    n.build(
+        inputs=str(project.arm9_lcf()),
+        implicit=add_linker_symbols,
+        rule="add_linker_symbols",
+        outputs=lcf_file,
+    )
+    n.newline()
+
     objects_file = str(project.arm9_objects_txt())
     delink_file = str(project.arm9_delink_yaml())
     elf_file = str(project.arm9_o())

@@ -1,6 +1,7 @@
 #include "System/ProcessorContext.h"
 #include "System/Mutex.h"
 #include "System/Interrupts.h"
+#include "System/DTCM.h"
 #include <globaldefs.h>
 #include <asmhacks.h>
 
@@ -197,4 +198,76 @@ void SwitchContext()
 
     data_021112e0.substruct_24.activeContext = incoming;
     RestoreContext(incoming);
+}
+
+// data_021112e0.hasSetupPrimaryContext and data_02111304.activeContext, which the original code references by their own
+// symbols in these functions
+extern int data_021112ec;
+extern ProcessorContext* data_02111308;
+
+// The NitroSDK's OS_GetSystemWork()->threadinfo_mainp
+#define PTR_SYSTEM_THREAD_INFO (*(Struct_02111304**)0x027fffa0)
+
+// Where the DTCM's arena starts by default, after its data
+#define ADDR_DTCM_ARENA_LO 0x027e0080
+
+extern "C"
+{
+    // usa: func_020c745c
+    // The NitroSDK's OS_InitThread: makes the running code the primary context (data_021113d4), with the system stack,
+    // and creates the idle context (data_02111314)
+    void func_020c745c()
+    {
+        unsigned int stackTop;
+
+        if (data_021112e0.hasSetupPrimaryContext)
+        {
+            return;
+        }
+        data_021112e0.hasSetupPrimaryContext = true;
+
+        data_021112e0.ppActiveContext = &data_02111308;
+
+        data_021112e0.contextB.priority = 0x10;
+        data_021112e0.contextB.uniqueID = 0;
+        data_021112e0.contextB.blockState = CONTEXT_STATE_READY;
+        data_021112e0.contextB.pNext = NULL;
+        data_021112e0.contextB.unknown_74 = 0;
+
+        data_021112e0.substruct_24.firstContext = &data_021113d4;
+        data_021112e0.substruct_24.activeContext = &data_021113d4;
+
+        // The system stack is below the IRQ stack, or at the start of the DTCM's arena if its size is negative
+        stackTop = SYS_STACK_SIZE <= 0 ? ADDR_DTCM_ARENA_LO - SYS_STACK_SIZE
+                                       : ADDR_DTCM_IRQ_STACK_BOTTOM - IRQ_STACK_SIZE - SYS_STACK_SIZE;
+
+        data_021112e0.contextB.stackBottom = ADDR_DTCM_IRQ_STACK_BOTTOM - IRQ_STACK_SIZE;
+        data_021112e0.contextB.stackTop = stackTop;
+        data_021112e0.contextB.stackUnknownTopSubspaceSize = 0;
+
+        *(unsigned int*)(data_021112e0.contextB.stackBottom - sizeof(unsigned int)) = STACK_BOTTOM_MAGIC;
+        *(unsigned int*)data_021112e0.contextB.stackTop = STACK_TOP_MAGIC;
+
+        data_021112e0.contextB.contextsAwaitingThisCompletion.first =
+            data_021112e0.contextB.contextsAwaitingThisCompletion.last = NULL;
+
+        data_021112e0.substruct_24.unknown_0 = 0;
+        data_021112e0.substruct_24.unknown_2 = 0;
+
+        PTR_SYSTEM_THREAD_INFO = &data_02111304;
+
+        SetSwitchContextProcB(NULL);
+
+        PopulateContext(&data_02111314, (unsigned int)InterruptWaitLoopFunction, 0,
+            (unsigned int)(data_02111494 + sizeof(data_02111494) / sizeof(unsigned int)), sizeof(data_02111494), 0x1f);
+        data_021112e0.contextA.priority = 0x20;
+        data_021112e0.contextA.blockState = CONTEXT_STATE_READY;
+    }
+
+    // usa: func_020c75a4
+    // The NitroSDK's OS_IsThreadAvailable
+    int func_020c75a4()
+    {
+        return data_021112ec;
+    }
 }

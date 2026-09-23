@@ -7857,12 +7857,15 @@ data_02111304 kind:bss addr:0x02111304
 data_02111308 kind:bss addr:0x02111308
 data_02111314 kind:bss addr:0x02111314
 data_021113d4 kind:bss addr:0x021113d4
-data_0211155c kind:bss addr:0x0211155c
-data_02111564 kind:bss addr:0x02111564
-data_02111588 kind:bss addr:0x02111588
-data_0211158c kind:bss addr:0x0211158c
-data_02111590 kind:bss addr:0x02111590
-data_021115b4 kind:bss addr:0x021115b4
+data_02111494 kind:bss addr:0x02111494
+isArenaInitialized kind:bss addr:0x0211155c local
+isMainExArenaEnabled kind:bss addr:0x02111560 local
+heapInfoByArena kind:bss addr:0x02111564
+debuggerExceptionHandler kind:bss addr:0x02111588 local
+userExceptionHandlerData kind:bss addr:0x0211158c local
+userExceptionHandler kind:bss addr:0x02111590 local
+exceptionHookStack kind:bss addr:0x02111594 local
+exceptionContext kind:bss addr:0x021115b4 local
 data_02111634 kind:bss addr:0x02111634
 data_02111638 kind:bss addr:0x02111638
 data_02111640 kind:bss addr:0x02111640

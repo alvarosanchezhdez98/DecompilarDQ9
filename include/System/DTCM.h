@@ -23,3 +23,15 @@ extern BlockedContextList data_027e0060;
 // The original code accesses the DTCM through the symbol at its start, not through a fixed address. The address is
 // unsigned like the NitroSDK's: with int, WaitForInterrupt computes it for its loop before the first check.
 #define DTCM_DATA_INTERRUPTS_FIRED (*(unsigned int*)((unsigned int)&data_027e0000 + 0x3ff8))
+// The NitroSDK's HW_EXCP_VECTOR_BUF: the exception handler that the BIOS calls
+#define DTCM_DATA_EXCEPTION_HANDLER (*(unsigned int*)((unsigned int)&data_027e0000 + 0x3fdc))
+
+// The sizes of the IRQ stack and of the system stack (0: all the free DTCM below the IRQ stack). The NitroSDK's linker
+// script defines them, so the code loads them like addresses (see tools/add_linker_symbols.py).
+extern "C" void SDK_IRQ_STACKSIZE();
+extern "C" void SDK_SYS_STACKSIZE();
+#define IRQ_STACK_SIZE ((long)SDK_IRQ_STACKSIZE)
+#define SYS_STACK_SIZE ((long)SDK_SYS_STACKSIZE)
+
+// The NitroSDK's HW_DTCM_SVC_STACK: where the IRQ stack starts (it grows down), below the supervisor mode's stack
+#define ADDR_DTCM_IRQ_STACK_BOTTOM ((unsigned long)&data_027e0000 + 0x3f80)
