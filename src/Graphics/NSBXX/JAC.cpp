@@ -118,7 +118,6 @@ void ApplyBindPoseScaling(BoneMatrixRenderData* bmrd)
     handler->boneMatrixRenderDataScalePopulateProc_(bmrd, (NSBXXBoneMatrix::Scaling*)addrScaling, ip, flags);
 }
 
-// not quite a match, some register nonsense
 void ApplyBindPoseRotation(BoneMatrixRenderData* bmrd)
 {  
     RenderCommandHandler* handler = data_0210a274;
@@ -132,7 +131,8 @@ void ApplyBindPoseRotation(BoneMatrixRenderData* bmrd)
     {
         if (boneMatrix->flags_ & 8) // pivot matrix format
         {
-            int pivotForm;
+            // unsigned long like the NitroSDK's u32: with int, the compiler swaps the registers of this and boneMatrix
+            unsigned long pivotForm;
             pivotForm = (boneMatrix->flags_ & 0xf0) >> 4;
             NSBXXBoneMatrix::PivotMatrixData* pivot = (NSBXXBoneMatrix::PivotMatrixData*)addrRotation;
             fix32_t entryA = pivot->a;
