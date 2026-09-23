@@ -3,8 +3,13 @@
 '''
 Tracks what's left to decompile in the EUR version, in docs/progress.md.
 
-A function counts as decompiled when it's inside a source file marked `complete` in its module's delinks.txt, since the
-build verifies that those files match the original. This only reads config/eur, so it works without the ROM and in CI.
+A function counts as decompiled when it's inside a source file marked `complete` in its module's delinks.txt, since
+the build verifies that those files match the original. This only reads config/eur and those files, so it works without
+the ROM and in CI.
+
+A function whose C doesn't match yet can be written in assembly, so that the rest of its file counts: the C goes between
+`#ifdef NONMATCHING` and `#else`, and the `asm` function between `#else` and `#endif` (see Decompiling.md). Those
+functions are counted apart, not as decompiled.
 
   python tools/progress.py                     Prints the summary
   python tools/progress.py --record            Adds the current numbers to the history and regenerates docs/progress.md
@@ -43,10 +48,13 @@ MAIN_REGIONS = [
 
 SIZE_BUCKETS = [("< 64 B", 0x40), ("64-511 B", 0x200), ("512 B-2 KB", 0x800), (">= 2 KB", None)]
 
-HISTORY_FIELDS = ["date", "functions_done", "functions_total", "bytes_done", "bytes_total", "complete_files"]
+HISTORY_FIELDS = ["date", "functions_done", "functions_total", "bytes_done", "bytes_total", "complete_files",
+                  "functions_nonmatching", "bytes_nonmatching"]
 
 SECTION = re.compile(r"^\s*(\.\w+)\s+start:(0x[0-9a-f]+)\s+end:(0x[0-9a-f]+)(?:\s+kind:(\w+))?")
 FUNCTION = re.compile(r"^(\S+) kind:function\((?:arm|thumb),size=(0x[0-9a-f]+)[^)]*\) addr:(0x[0-9a-f]+)")
+NONMATCHING_BLOCK = re.compile(r"^#ifdef NONMATCHING\b.*?^#else\b(.*?)^#endif\b", re.MULTILINE | re.DOTALL)
+ASM_FUNCTION = re.compile(r"^\s*asm\s[^;{}()]*?([\w:~]+)\s*\(", re.MULTILINE)
 
 
 @dataclass
@@ -54,7 +62,12 @@ class Function:
     name: str
     address: int
     size: int
-    done: bool
+    done: bool # In a complete file
+    nonmatching: bool = False # Written in assembly, see NONMATCHING above
+
+    @property
+    def decompiled(self) -> bool:
+        return self.done and not self.nonmatching
 
 
 @dataclass
@@ -71,15 +84,25 @@ class Module:
         return sum(end - start for start, end in self.code_sections)
 
     @property
+    def nonmatching(self) -> list[Function]:
+        return [function for function in self.functions if function.nonmatching]
+
+    @property
+    def nonmatching_size(self) -> int:
+        return sum(function.size for function in self.nonmatching)
+
+    @property
     def done_size(self) -> int:
-        return sum(end - start for start, end in self.done_ranges)
+        '''The size of the decompiled code, without the functions in assembly'''
+        return sum(end - start for start, end in self.done_ranges) - self.nonmatching_size
 
     def done_size_in(self, start: int, end: int) -> int:
-        return sum(max(0, min(end, e) - max(start, s)) for s, e in self.done_ranges)
+        return (sum(max(0, min(end, e) - max(start, s)) for s, e in self.done_ranges)
+                - sum(function.size for function in self.nonmatching if start <= function.address < end))
 
     @property
     def remaining(self) -> list[Function]:
-        return [function for function in self.functions if not function.done]
+        return [function for function in self.functions if not function.decompiled]
 
     @property
     def status(self) -> str:
@@ -87,20 +110,54 @@ class Module:
             return "No code"
         if self.done_size >= self.code_size:
             return "Complete"
-        return "In progress" if self.done_size > 0 or self.partial_files > 0 else "Not started"
+        return "In progress" if self.done_ranges or self.partial_files > 0 else "Not started"
+
+
+def qualified_name(symbol: str) -> str:
+    '''The name of a function in the source, from its symbol: e.g. MonsterInfoScreen::UpdateText for
+    _ZN17MonsterInfoScreen10UpdateTextEv. It only reads the names, not the parameters.'''
+    if not symbol.startswith("_Z"):
+        return symbol
+    rest = symbol[2:]
+    nested = rest.startswith("N")
+    if nested:
+        rest = rest.removeprefix("N").lstrip("KVr") # const, volatile and restrict member functions
+    names = []
+    while match := re.match(r"\d+", rest):
+        length = int(match[0])
+        names.append(rest[len(match[0]):len(match[0]) + length])
+        rest = rest[len(match[0]) + length:]
+        if not nested:
+            break
+    if nested and names and rest[:2] in ["C1", "C2", "C3"]:
+        names.append(names[-1])
+    elif nested and names and rest[:2] in ["D0", "D1", "D2"]:
+        names.append("~" + names[-1])
+    return "::".join(names)
+
+
+def nonmatching_names(source: Path) -> list[str]:
+    '''The names of the functions that a source file writes in assembly, since their C doesn't match yet'''
+    if not source.is_file():
+        return []
+    text = source.read_text(encoding="utf-8", errors="replace")
+    return [match[1] for block in NONMATCHING_BLOCK.finditer(text) for match in ASM_FUNCTION.finditer(block[1])]
 
 
 def load_module(name: str, path: Path) -> Module:
     module = Module(name)
 
+    current_file = None
     current_ranges = None
     complete = False
+    complete_files = [] # (source file, its code)
     def finish_file():
         if current_ranges is None:
             return
         if complete:
             module.complete_files += 1
             module.done_ranges.extend(current_ranges)
+            complete_files.append((current_file, current_ranges))
         else:
             module.partial_files += 1
 
@@ -110,6 +167,7 @@ def load_module(name: str, path: Path) -> Module:
             continue
         if not line[0].isspace() and stripped.endswith(":"):
             finish_file()
+            current_file = stripped[:-1]
             current_ranges = []
             complete = False
         elif stripped == "complete":
@@ -133,6 +191,16 @@ def load_module(name: str, path: Path) -> Module:
         done = any(start <= address < end for start, end in module.done_ranges)
         module.functions.append(Function(match[1], address, int(match[2], 16), done))
     module.functions.sort(key=lambda function: function.address)
+
+    for file, ranges in complete_files:
+        in_file = [function for function in module.functions
+                   if any(start <= function.address < end for start, end in ranges)]
+        for name in nonmatching_names(root_path / file):
+            matches = [function for function in in_file if qualified_name(function.name) == name]
+            if len(matches) != 1:
+                sys.exit(f"{file}: {len(matches)} functions of {name} in its code, instead of 1 (see NONMATCHING in "
+                         f"tools/progress.py)")
+            matches[0].nonmatching = True
     return module
 
 
@@ -169,6 +237,10 @@ def percent(done: int, total: int) -> str:
     return f"{100 * done / total:.2f} %" if total else "-"
 
 
+def plural(count: int, noun: str) -> str:
+    return f"{count:,} {noun}{'' if count == 1 else 's'}"
+
+
 def kilobytes(size: int) -> str:
     return f"{size / 1024:.1f}"
 
@@ -180,6 +252,8 @@ def totals(modules: list[Module]) -> dict[str, int]:
         "bytes_done": sum(module.done_size for module in modules),
         "bytes_total": sum(module.code_size for module in modules),
         "complete_files": sum(module.complete_files for module in modules),
+        "functions_nonmatching": sum(len(module.nonmatching) for module in modules),
+        "bytes_nonmatching": sum(module.nonmatching_size for module in modules),
     }
 
 
@@ -187,7 +261,8 @@ def read_history() -> list[dict[str, str]]:
     if not history_path.is_file():
         return []
     with history_path.open(newline="") as file:
-        return list(csv.DictReader(file))
+        # The rows from before a field was added don't have it
+        return [{key: row.get(key) or "0" for key in HISTORY_FIELDS} for row in csv.DictReader(file)]
 
 
 def write_history(history: list[dict[str, str]]):
@@ -227,6 +302,10 @@ def generate(modules: list[Module], history: list[dict[str, str]]) -> str:
     ], "lrrr")
     partial_files = sum(module.partial_files for module in modules)
     lines += ["", f"Source files: {current['complete_files']} complete, {partial_files} in progress.", ""]
+    if current["functions_nonmatching"]:
+        lines += [f"Not counted as decompiled: {plural(current['functions_nonmatching'], 'function')} "
+                  f"({current['bytes_nonmatching']:,} bytes) in assembly, since their C doesn't match yet "
+                  "(see [below](#functions-in-assembly)).", ""]
 
     lines += ["## History", ""]
     lines += table(["Date", "Functions", "Code (bytes)", "Complete files"], [
@@ -259,6 +338,17 @@ def generate(modules: list[Module], history: list[dict[str, str]]) -> str:
     lines += table(["Region", "Range", "Code (KB)", "Functions", "Decompiled", "Remaining", "Progress"], rows,
                    "llrrrrr")
     lines += [""]
+
+    nonmatching = [(module, function) for module in modules for function in module.nonmatching]
+    if nonmatching:
+        lines += ["## Functions in assembly", "",
+                  "Their files are complete, since the build uses the assembly after `#else`, but the C between "
+                  "`#ifdef NONMATCHING` and `#else` doesn't match yet. They count as remaining.", ""]
+        lines += table(["Module", "Function", "Address", "Size"], [
+            [module.name, f"`{qualified_name(function.name)}`", f"`0x{function.address:08x}`", f"{function.size:#x}"]
+            for module, function in nonmatching
+        ], "lllr")
+        lines += [""]
 
     lines += ["## Remaining functions by size", "",
               "An estimate of the work left in each module, by the size of the functions that aren't decompiled.", ""]
@@ -294,6 +384,9 @@ def print_summary(modules: list[Module]):
           f"({percent(current['functions_done'], current['functions_total'])})")
     print(f"Code:      {current['bytes_done']:,}/{current['bytes_total']:,} bytes "
           f"({percent(current['bytes_done'], current['bytes_total'])})")
+    if current["functions_nonmatching"]:
+        print(f"Not counted: {plural(current['functions_nonmatching'], 'function')} "
+              f"({current['bytes_nonmatching']:,} bytes) in assembly (NONMATCHING)")
     for module in modules:
         if module.status in ["Complete", "In progress"]:
             print(f"  {module.name:6} {percent(module.done_size, module.code_size):>9}  "
@@ -305,7 +398,8 @@ def print_remaining(modules: list[Module], name: str):
     if module is None:
         sys.exit(f"Unknown module '{name}', use main, itcm, dtcm or ov000-ov034")
     for function in module.remaining:
-        print(f"0x{function.address:08x} {function.size:#7x} {function.name}")
+        print(f"0x{function.address:08x} {function.size:#7x} {function.name}"
+              f"{' (NONMATCHING, in assembly)' if function.nonmatching else ''}")
     print(f"{len(module.remaining)} of {len(module.functions)} functions left in {module.name}")
 
 

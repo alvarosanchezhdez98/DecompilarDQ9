@@ -1,3 +1,3 @@
-date,functions_done,functions_total,bytes_done,bytes_total,complete_files
-2026-09-22,1075,14779,143400,2959024,84
-2026-09-23,1345,14779,187432,2959024,125
+date,functions_done,functions_total,bytes_done,bytes_total,complete_files,functions_nonmatching,bytes_nonmatching
+2026-09-22,1075,14779,143400,2959024,84,0,0
+2026-09-23,1363,14779,194208,2959024,126,1,3112

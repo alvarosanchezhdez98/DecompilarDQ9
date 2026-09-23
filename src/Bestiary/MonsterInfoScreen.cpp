@@ -1001,6 +1001,10 @@ void MonsterInfoScreen::UpdateBackground()
     backgroundStep_++;
 }
 
+// NONMATCHING: the C matches 97.2 %, so the build uses the original's instructions after #else (see Decompiling.md).
+// In the block of the first drop, the compiler keeps 0xf in r8, which dropNameID doesn't use there, while the original
+// loads it again for each call.
+#ifdef NONMATCHING
 void MonsterInfoScreen::UpdateText()
 {
     BackgroundLoader* loader = BackgroundLoader::GetInstance();
@@ -1224,3 +1228,822 @@ void MonsterInfoScreen::UpdateText()
         unk_93 = false;
     }
 }
+#else
+extern "C"
+{
+    // The assembler doesn't take qualified names, so these are the member functions' symbols
+    void _ZN16BackgroundLoader10RemoveTaskEi(); // BackgroundLoader::RemoveTask
+    void _ZN16BackgroundLoader11GetInstanceEv(); // BackgroundLoader::GetInstance
+    void _ZN16BackgroundLoader13GetTaskStatusEi(); // BackgroundLoader::GetTaskStatus
+    void _ZN16BackgroundLoader17GetLoadedFileByIDEiPPvPj(); // BackgroundLoader::GetLoadedFileByID
+    void _ZN8NatTable15GetGroupPointerEiP8NatEntry(); // NatTable::GetGroupPointer
+    void _ZN8NatTable8GetGroupEiP8NatEntry(); // NatTable::GetGroup
+    void _ZN8NatTable9FindEntryEi(); // NatTable::FindEntry
+    // The compiler's function that zeroes memory, e.g. the arrays initialized with = {}
+    void __clear(void* dst, unsigned int size);
+}
+
+asm void MonsterInfoScreen::UpdateText()
+{
+    stmdb sp!, {r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}
+    sub sp, sp, #0x480
+    mov r10, r0
+    bl _ZN16BackgroundLoader11GetInstanceEv
+    ldrb r1, [r10, #0x81]
+    mov r4, r0
+    tst r1, #0x1
+    beq @L02186794
+    ldrb r1, [r10, #0x7f]
+    cmp r1, #0x5
+    bne @L02186794
+    ldrsh r1, [r10, #0x8c]
+    bl _ZN16BackgroundLoader13GetTaskStatusEi
+    cmp r0, #0x0
+    beq @L02186794
+    ldrsh r1, [r10, #0x8c]
+    add r2, sp, #0x38
+    add r3, sp, #0x34
+    mov r0, r4
+    bl _ZN16BackgroundLoader17GetLoadedFileByIDEiPPvPj
+    ldr r0, [sp, #0x38]
+    bl func_02046900
+    str r0, [sp, #0x1c]
+    cmp r0, #0x0
+    beq @L02186774
+    ldr r0, [sp, #0x38]
+    add r2, sp, #0x3c
+    add r3, sp, #0x30
+    mov r1, #0x0
+    bl func_020467f0
+    movs r5, r0
+    beq @L02186774
+    add r0, sp, #0x3a0
+    bl func_0204c684
+    add r1, r5, #0x10
+    mov r6, #0x20
+    add r0, sp, #0x420
+    mov r5, #0x18
+    strh r6, [r0, #0x28]
+    mov r3, #0xa
+    strh r5, [r0, #0x2a]
+    mov r2, #0xb
+    strh r3, [r0, #0x34]
+    strh r2, [r0, #0x36]
+    str r1, [sp, #0x3a8]
+    ldr r1, [r10, #0x48]
+    add r0, r10, #0xc
+    ldrsh r1, [r1, #0xc]
+    bl func_02097224
+    add r0, sp, #0x358
+    mov r1, #0x48
+    bl __clear
+    add r0, sp, #0x310
+    mov r1, #0x48
+    bl __clear
+    add r0, sp, #0x110
+    mov r1, #0x200
+    bl __clear
+    add r0, sp, #0xc8
+    mov r1, #0x48
+    bl __clear
+    add r0, sp, #0x80
+    mov r1, #0x48
+    bl __clear
+    ldr r0, [r10, #0x60]
+    add r1, sp, #0x358
+    mov r2, #0x0
+    bl func_0206819c
+    ldr r0, [r10, #0x64]
+    add r1, sp, #0x310
+    mov r2, #0x0
+    bl func_0206819c
+    bl func_020421a0
+    mov r1, #0x400
+    str r1, [sp, #0x0]
+    mov r1, #0x0
+    str r1, [sp, #0x4]
+    str r1, [sp, #0x8]
+    mov r1, #0xa
+    add r2, sp, #0x358
+    add r3, sp, #0xc8
+    mov r5, r0
+    bl func_02046608
+    mov r0, #0x400
+    str r0, [sp, #0x0]
+    mov r0, #0x0
+    str r0, [sp, #0x4]
+    str r0, [sp, #0x8]
+    mov r0, r5
+    mov r1, #0xa
+    add r2, sp, #0x310
+    add r3, sp, #0x80
+    bl func_02046608
+    mov r1, #0x8c
+    str r1, [sp, #0x0]
+    mov r1, #0x0
+    str r1, [sp, #0x4]
+    str r1, [sp, #0x8]
+    ldr r2, [r10, #0x68]
+    mov r0, r5
+    mov r1, #0xa
+    add r3, sp, #0x110
+    bl func_02046608
+    ldrb r0, [r10, #0x80]
+    ldr r5, [r10, #0x58]
+    str r0, [sp, #0x18]
+    ldr r7, [r10, #0x50]
+    ldr r6, [r10, #0x5c]
+    ldr r8, [r10, #0x48]
+    cmp r5, #0x0
+    cmpne r8, #0x0
+    cmpne r6, #0x0
+    cmpne r7, #0x0
+    beq @L021866a4
+    ldr r0, [r7, #0x0]
+    mov r0, r0, lsl #0x16
+    movs r0, r0, lsr #0x16
+    beq @L021866a4
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r1, #0x1
+    str r1, [sp, #0x4]
+    mov r0, #0x3
+    str r0, [sp, #0x8]
+    mov r0, #0x0
+    str r0, [sp, #0xc]
+    str r1, [sp, #0x10]
+    ldrsh r2, [r8, #0x1a]
+    mov r0, r5
+    mov r1, #0x2
+    mov r3, #0x8
+    bl func_ov023_021e24b0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    ldr r2, [r8, #0x8]
+    mov r0, r5
+    mov r1, #0x3
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+    ldrsb r1, [r8, #0x12]
+    mov r0, r6
+    bl func_020e0434
+    mov r2, r0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, r5
+    mov r1, #0x4
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+    mov r0, r5
+    mov r1, #0x4
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x10
+    strneb r1, [r0, #0x16]
+    adds r0, r10, #0x9c
+    beq @L02185f80
+    ldrsh r0, [r10, #0xa0]
+    cmp r0, #0x0
+    ble @L02185f80
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, #0x1
+    str r0, [sp, #0x4]
+    mov r0, #0x6
+    str r0, [sp, #0x8]
+    mov r0, #0x0
+    str r0, [sp, #0xc]
+    str r0, [sp, #0x10]
+    ldr r2, [r10, #0x9c]
+    mov r0, r5
+    mov r1, #0x5
+    mov r3, #0x8
+    bl func_ov023_021e24b0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, #0x1
+    str r0, [sp, #0x4]
+    mov r1, #0x6
+    str r1, [sp, #0x8]
+    mov r0, #0x0
+    str r0, [sp, #0xc]
+    str r0, [sp, #0x10]
+    mov r0, r5
+    ldrh r2, [r10, #0xa2]
+    mov r3, #0x8
+    bl func_ov023_021e24b0
+@L02185f80:
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, #0x1
+    str r0, [sp, #0x4]
+    mov r0, #0x6
+    str r0, [sp, #0x8]
+    mov r0, #0x0
+    str r0, [sp, #0xc]
+    str r0, [sp, #0x10]
+    ldr r1, [r7, #0x0]
+    mov r0, r5
+    mov r1, r1, lsl #0x16
+    mov r2, r1, lsr #0x16
+    mov r1, #0x7
+    mov r3, #0x8
+    bl func_ov023_021e24b0
+    mov r0, r5
+    mov r1, #0x8
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xa
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xc
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x9
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xb
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xd
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x16
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x14
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x1a
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x1b
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x17
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x18
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x19
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x15
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    mov r9, #0x0
+    mov r8, #0x8
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    ldr r1, [r7, #0x0]
+    mov r11, #0xa
+    mov r0, r1, lsl #0x15
+    movs r0, r0, lsr #0x1f
+    mov r0, #0xc
+    str r0, [sp, #0x14]
+    bne @L02186178
+    mov r0, r1, lsl #0x16
+    movs r0, r0, lsr #0x16
+    beq @L02186274
+@L02186178:
+    add r0, sp, #0xc8
+    ldrsb r0, [r0, #0x0]
+    mov r9, #0x1
+    cmp r0, #0x0
+    beq @L02186274
+    mov r0, r5
+    mov r1, #0x8
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xa
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xc
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    mov r3, #0xf
+    add r2, sp, #0xc8
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    str r3, [sp, #0x0]
+    mov r0, r5
+    mov r1, #0x8
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, #0x1
+    str r0, [sp, #0x4]
+    mov r0, #0x3
+    str r0, [sp, #0x8]
+    mov r0, #0x0
+    str r0, [sp, #0xc]
+    str r0, [sp, #0x10]
+    ldr r2, [r7, #0x0]
+    mov r0, r5
+    mov r2, r2, lsl #0xe
+    mov r1, #0xa
+    mov r3, #0x8
+    mov r2, r2, lsr #0x19
+    bl func_ov023_021e24b0
+    mov r0, r6
+    mov r1, #0xf
+    bl func_020e0434
+    mov r2, r0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, r5
+    mov r1, #0xc
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+    mov r0, #0xd
+    mov r8, #0x9
+    mov r11, #0xb
+    str r0, [sp, #0x14]
+@L02186274:
+    ldr r0, [r7, #0x0]
+    mov r1, r0, lsl #0x7
+    movs r1, r1, lsr #0x19
+    bne @L02186290
+    mov r0, r0, lsl #0x15
+    movs r0, r0, lsr #0x1f
+    beq @L0218637c
+@L02186290:
+    add r0, sp, #0x80
+    ldrsb r0, [r0, #0x0]
+    cmp r0, #0x0
+    beq @L0218637c
+    mov r0, r5
+    mov r1, r8
+    mov r9, #0x1
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, r11
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    ldr r1, [sp, #0x14]
+    mov r0, r5
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    add r2, sp, #0x80
+    mov r3, #0xa
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, r5
+    mov r1, r8
+    bl func_ov023_021e23d0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, #0x1
+    str r0, [sp, #0x4]
+    mov r0, #0x3
+    str r0, [sp, #0x8]
+    mov r0, #0x0
+    str r0, [sp, #0xc]
+    str r0, [sp, #0x10]
+    ldr r2, [r7, #0x0]
+    mov r1, r11
+    mov r2, r2, lsl #0x7
+    mov r0, r5
+    mov r3, #0x8
+    mov r2, r2, lsr #0x19
+    bl func_ov023_021e24b0
+    mov r0, r6
+    mov r1, #0xf
+    bl func_020e0434
+    mov r2, r0
+    ldr r1, [sp, #0x14]
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, r5
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+@L0218637c:
+    cmp r9, #0x0
+    bne @L021863c8
+    mov r0, r5
+    mov r1, #0x16
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r6
+    mov r1, #0xe
+    bl func_020e0434
+    mov r2, r0
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    mov r0, r5
+    mov r1, #0x16
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+@L021863c8:
+    mov r1, #0xf
+    str r1, [sp, #0x0]
+    mov r0, r5
+    add r2, sp, #0x110
+    mov r1, #0x13
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+    ldr r0, [r7, #0x0]
+    mov r0, r0, lsl #0x15
+    movs r0, r0, lsr #0x1f
+    beq @L021864f8
+    mov r0, r5
+    mov r1, #0x14
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x17
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r6
+    mov r1, #0x1c
+    bl func_020e0434
+    mov r3, #0xf
+    mov r2, r0
+    str r3, [sp, #0x0]
+    mov r0, r5
+    mov r1, #0x17
+    mov r3, #0x8
+    bl func_ov023_021e23d0
+    mov r0, r5
+    mov r1, #0x18
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    mov r7, #0x0
+    mov r3, #0x8
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    str r7, [sp, #0x4]
+    mov r0, #0x1
+    str r0, [sp, #0x8]
+    str r7, [sp, #0xc]
+    ldr r1, [sp, #0x18]
+    mov r0, r5
+    add r2, r1, #0x1
+    mov r1, #0x18
+    str r7, [sp, #0x10]
+    bl func_ov023_021e24b0
+    mov r0, r5
+    mov r1, #0x19
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    mov r7, #0x0
+    mov r2, #0x2
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, #0xf
+    str r0, [sp, #0x0]
+    str r7, [sp, #0x4]
+    mov r0, #0x1
+    str r0, [sp, #0x8]
+    str r7, [sp, #0xc]
+    mov r0, r5
+    mov r1, #0x19
+    mov r3, #0x8
+    str r7, [sp, #0x10]
+    bl func_ov023_021e24b0
+@L021864f8:
+    mov r0, r5
+    mov r1, #0xe
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0xf
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r5
+    mov r1, #0x10
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    bicne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    add r0, r10, #0x1c
+    mvn r1, #0x0
+    bl _ZN8NatTable9FindEntryEi
+    movs r9, r0
+    beq @L021866a4
+    mov r8, #0xe
+    mov r7, #0x0
+    b @L02186624
+@L0218656c:
+    ldrh r0, [r9, #0x2]
+    mov r0, r0, lsl #0x10
+    cmp r7, r0, lsr #0x1c
+    bge @L02186620
+    mov r0, r5
+    mov r1, r8
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    mov r2, r9
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r1, r7
+    add r0, r10, #0x1c
+    bl _ZN8NatTable8GetGroupEiP8NatEntry
+    mov r11, r0
+    add r0, r10, #0x1c
+    mov r1, r7
+    mov r2, r9
+    bl _ZN8NatTable15GetGroupPointerEiP8NatEntry
+    ldrh r1, [r11, #0x2]
+    mov r1, r1, lsl #0x1f
+    movs r1, r1, lsr #0x1f
+    beq @L021865ec
+    mov r1, #0xf
+    str r1, [sp, #0x0]
+    ldr r2, [r0, #0x0]
+    mov r0, r5
+    mov r1, r8
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+    b @L02186614
+@L021865ec:
+    mov r0, r6
+    mov r1, #0x15
+    bl func_020e0434
+    mov r1, #0xf
+    str r1, [sp, #0x0]
+    mov r2, r0
+    mov r0, r5
+    mov r1, r8
+    mov r3, #0xa
+    bl func_ov023_021e23d0
+@L02186614:
+    add r0, r8, #0x1
+    mov r0, r0, lsl #0x10
+    mov r8, r0, asr #0x10
+@L02186620:
+    add r7, r7, #0x1
+@L02186624:
+    cmp r7, #0x2
+    blt @L0218656c
+    ldrh r0, [r9, #0x2]
+    mov r0, r0, lsl #0x10
+    mov r0, r0, lsr #0x1c
+    cmp r0, #0x3
+    blo @L021866a4
+    mov r2, r9
+    add r0, r10, #0x1c
+    mov r1, #0x2
+    bl _ZN8NatTable8GetGroupEiP8NatEntry
+    ldrh r0, [r0, #0x2]
+    mov r0, r0, lsl #0x1f
+    movs r0, r0, lsr #0x1f
+    beq @L021866a4
+    mov r0, r5
+    mov r1, #0x10
+    bl FindLayoutElement
+    cmp r0, #0x0
+    ldrneb r1, [r0, #0x16]
+    orrne r1, r1, #0x1
+    strneb r1, [r0, #0x16]
+    mov r0, r6
+    mov r1, #0x10
+    bl func_020e0434
+    mov r2, r0
+    mov r6, #0xf
+    mov r0, r5
+    mov r1, #0x10
+    mov r3, #0xa
+    str r6, [sp, #0x0]
+    bl func_ov023_021e23d0
+@L021866a4:
+    ldr r2, [r10, #0x58]
+    add r1, sp, #0x3a0
+    mov r0, #0x1
+    str r1, [r2, #0x4]
+    strh r0, [r2, #0x12]
+    ldr r0, [r10, #0x58]
+    bl func_ov023_021e257c
+    add r0, sp, #0x60
+    bl func_0204af64
+    add r0, sp, #0x60
+    mov r1, #0x0
+    bl func_0204b11c
+    ldrb r2, [sp, #0x7c]
+    add r0, sp, #0x60
+    mov r1, #0x1
+    bic r2, r2, #0xf
+    and r2, r2, #0xff
+    bic r2, r2, #0xf0
+    orr r2, r2, #0x10
+    strb r2, [sp, #0x7c]
+    bl func_0204b5b4
+    mov r1, #0x0
+    add r0, sp, #0x60
+    mov r2, r1
+    bl func_0204b5e8
+    mov r8, #0x0
+    add r5, sp, #0x60
+    add r7, sp, #0x3c
+    add r6, sp, #0x30
+    b @L0218675c
+@L0218671c:
+    ldr r0, [sp, #0x38]
+    mov r1, r8
+    mov r2, r7
+    mov r3, r6
+    bl func_020467f0
+    movs r1, r0
+    beq @L02186758
+    ldr r0, [r10, #0x0]
+    ldr r2, [sp, #0x30]
+    ldr r0, [r0, r8, lsl #0x2]
+    bl memcpy
+    ldr r1, [r10, #0x0]
+    mov r0, r5
+    ldr r1, [r1, r8, lsl #0x2]
+    bl func_0204b4c0
+@L02186758:
+    add r8, r8, #0x1
+@L0218675c:
+    ldr r0, [sp, #0x1c]
+    cmp r8, r0
+    blt @L0218671c
+    ldrb r0, [r10, #0x81]
+    bic r0, r0, #0x20
+    strb r0, [r10, #0x81]
+@L02186774:
+    ldrsh r1, [r10, #0x8c]
+    mov r0, r4
+    bl _ZN16BackgroundLoader10RemoveTaskEi
+    mvn r0, #0x0
+    strh r0, [r10, #0x8c]
+    ldrb r0, [r10, #0x7f]
+    add r0, r0, #0x1
+    strb r0, [r10, #0x7f]
+@L02186794:
+    ldrb r0, [r10, #0x81]
+    tst r0, #0x10
+    beq @L021868b0
+    ldrb r0, [r10, #0x7e]
+    cmp r0, #0x1
+    bne @L021868b0
+    ldr r1, [r10, #0x70]
+    mov r0, r4
+    bl _ZN16BackgroundLoader13GetTaskStatusEi
+    cmp r0, #0x0
+    beq @L021868b0
+    ldr r1, [r10, #0x70]
+    add r2, sp, #0x28
+    add r3, sp, #0x24
+    mov r0, r4
+    bl _ZN16BackgroundLoader17GetLoadedFileByIDEiPPvPj
+    ldr r0, [sp, #0x28]
+    bl func_02046900
+    mov r8, r0
+    add r0, sp, #0x40
+    bl func_0204af64
+    add r0, sp, #0x40
+    mov r1, #0x0
+    bl func_0204b11c
+    ldrb r2, [sp, #0x5c]
+    add r0, sp, #0x40
+    mov r1, #0x1
+    bic r2, r2, #0xf
+    and r2, r2, #0xff
+    bic r2, r2, #0xf0
+    orr r2, r2, #0x10
+    strb r2, [sp, #0x5c]
+    bl func_0204b5b4
+    mov r1, #0x0
+    add r0, sp, #0x40
+    mov r2, r1
+    bl func_0204b5e8
+    mov r9, #0x0
+    add r11, sp, #0x40
+    add r7, sp, #0x2c
+    add r6, sp, #0x20
+    b @L02186874
+@L0218683c:
+    ldr r0, [sp, #0x28]
+    mov r1, r9
+    mov r2, r7
+    mov r3, r6
+    bl func_020467f0
+    movs r5, r0
+    beq @L02186870
+    mov r0, r11
+    mov r1, r5
+    bl func_0204b2e0
+    mov r0, r11
+    mov r1, r5
+    bl func_0204b3a0
+@L02186870:
+    add r9, r9, #0x1
+@L02186874:
+    cmp r9, r8
+    blt @L0218683c
+    ldr r1, [r10, #0x70]
+    mov r0, r4
+    bl _ZN16BackgroundLoader10RemoveTaskEi
+    mvn r0, #0x0
+    str r0, [r10, #0x70]
+    mov r1, #0x0
+    strb r1, [r10, #0x7e]
+    ldrb r0, [r10, #0x81]
+    bic r0, r0, #0x10
+    strb r0, [r10, #0x81]
+    ldrb r0, [r10, #0x93]
+    strb r0, [r10, #0x94]
+    strb r1, [r10, #0x93]
+@L021868b0:
+    add sp, sp, #0x480
+    ldmia sp!, {r3, r4, r5, r6, r7, r8, r9, r10, r11, pc}
+}
+#endif
