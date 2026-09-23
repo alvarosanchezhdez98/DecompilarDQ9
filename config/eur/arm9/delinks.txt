@@ -261,6 +261,54 @@ src/Graphics/NSBXX/RenderCommandProcs.cpp:
     complete
     .text start:0x020b99c0 end:0x020bb434
 
+src/System/Matrix22.cpp:
+    complete
+    .text start:0x020c112c end:0x020c1190
+
+src/System/Matrix33.cpp:
+    complete
+    .text start:0x020c1190 end:0x020c1850
+
+src/System/Matrix43.cpp:
+    complete
+    .text start:0x020c1850 end:0x020c21ec
+
+src/System/Matrix44.cpp:
+    complete
+    .text start:0x020c21ec end:0x020c2c04
+
+src/System/MathCoprocessor.cpp:
+    complete
+    .text start:0x020c2c04 end:0x020c2da0
+
+src/System/Vector.cpp:
+    complete
+    .text start:0x020c2da0 end:0x020c30bc
+
+src/System/Trigonometry.cpp:
+    complete
+    .text start:0x020c30bc end:0x020c339c
+
+src/System/Atan.cpp:
+    complete
+    .text start:0x020c339c end:0x020c3554
+    .rodata start:0x020ed460 end:0x020ed564
+
+src/System/AtanIndex.cpp:
+    complete
+    .text start:0x020c3554 end:0x020c36fc
+    .rodata start:0x020ed564 end:0x020ed668
+
+src/System/FixedPoint.cpp:
+    complete
+    .text start:0x020c36fc end:0x020c3700
+
+src/System/Display.cpp:
+    complete
+    .text start:0x020c3700 end:0x020c3a5c
+    .data start:0x020f226c end:0x020f2274
+    .bss start:0x02111220 end:0x02111224
+
 src/System/VRAM.cpp:
     complete
     .text start:0x020c3a5c end:0x020c4c84
@@ -380,6 +428,35 @@ src/System/CPSRInterruptState.cpp:
 src/System/DMA.cpp:
     complete
     .text start:0x020c9c1c end:0x020ca0b8
+
+src/System/GeometryCommandDMA.cpp:
+    complete
+    .text start:0x020ca0b8 end:0x020ca3a0
+    .bss start:0x02111684 end:0x021116a4
+
+src/System/MemoryCopy.cpp:
+    complete
+    .text start:0x020ca3a0 end:0x020ca7f0
+
+src/System/MemorySwap.cpp:
+    complete
+    .text start:0x020ca7f0 end:0x020ca7f8
+
+src/System/Uncompress.cpp:
+    complete
+    .text start:0x020ca7f8 end:0x020ca8f8
+
+src/System/CardDMA.cpp:
+    complete
+    .text start:0x020ca8f8 end:0x020ca96c
+
+src/System/UncompressStream.cpp:
+    complete
+    .text start:0x020ca96c end:0x020cad10
+
+src/System/MemoryInit.cpp:
+    complete
+    .text start:0x020cad10 end:0x020cad28
 
 src/System/IPC.cpp:
     complete

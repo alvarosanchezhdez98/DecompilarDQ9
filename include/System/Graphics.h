@@ -13,6 +13,19 @@
 #define DISPCNT (*(volatile unsigned int*)0x04000000)
 #define DISPCNTSUB (*(volatile unsigned int*)0x04001000)
 #define DISP3DCNT (*(volatile unsigned short*)0x04000060)
+#define DISPSTAT (*(volatile unsigned short*)0x04000004)
+#define POWCNT (*(volatile unsigned short*)0x04000304)
+#define MASTER_BRIGHT (*(volatile unsigned short*)0x0400006c)
+
+// The first and last elements of the rotation and scaling matrices of the backgrounds 2 and 3
+#define BG2PA (*(volatile unsigned short*)0x04000020)
+#define BG2PD (*(volatile unsigned short*)0x04000026)
+#define BG3PA (*(volatile unsigned short*)0x04000030)
+#define BG3PD (*(volatile unsigned short*)0x04000036)
+#define BG2PASUB (*(volatile unsigned short*)0x04001020)
+#define BG2PDSUB (*(volatile unsigned short*)0x04001026)
+#define BG3PASUB (*(volatile unsigned short*)0x04001030)
+#define BG3PDSUB (*(volatile unsigned short*)0x04001036)
 
 #define VCOUNT (*(volatile unsigned short*)0x04000006)
 

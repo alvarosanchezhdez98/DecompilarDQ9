@@ -35,9 +35,9 @@ MAIN_REGIONS = [
     ("Secure area and startup", 0x02000000, 0x02000c9c),
     ("Level-5 code", 0x02000c9c, 0x020b2adc),
     ("NitroSystem G3D", 0x020b2adc, 0x020bc000),
-    ("Fixed-point math, not fully identified", 0x020bc000, 0x020c3a5c),
-    ("NitroSDK", 0x020c3a5c, 0x020dc300),
-    ("Not identified", 0x020dc300, 0x020e5930),
+    ("NitroSystem sound", 0x020bc000, 0x020c0338),
+    ("NitroSDK", 0x020c0338, 0x020dc300),
+    ("Level-5 code, after the libraries", 0x020dc300, 0x020e5930),
     ("Static initializers (.init)", 0x020e5930, 0x020e693c),
 ]
 
