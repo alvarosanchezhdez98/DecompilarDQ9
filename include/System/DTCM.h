@@ -17,11 +17,9 @@ struct DTCMData
 };
 
 extern DTCMData data_027e0000;
+// block_60, the contexts waiting for an interrupt, which the original code references by its own symbol
+extern BlockedContextList data_027e0060;
 
-#define DTCM_DATA (*(DTCMData*)0x027e0000)
-#define DTCM_DATA_INTERRUPTS_FIRED (*(unsigned int*)((int)&data_027e0000 + 0x3ff8))
-
-inline BlockedContextList& GetInterruptDataBlockedContextList()
-{
-    return *(BlockedContextList*)(0x027e0000 + offsetof(DTCMData, block_60));
-}
+// The original code accesses the DTCM through the symbol at its start, not through a fixed address. The address is
+// unsigned like the NitroSDK's: with int, WaitForInterrupt computes it for its loop before the first check.
+#define DTCM_DATA_INTERRUPTS_FIRED (*(unsigned int*)((unsigned int)&data_027e0000 + 0x3ff8))

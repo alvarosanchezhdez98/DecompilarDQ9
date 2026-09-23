@@ -277,9 +277,9 @@ src/System/LoadToVRAM.cpp:
     complete
     .text start:0x020c5830 end:0x020c6924
 
-//src/System/InterruptHandler.cpp:
-//    complete
-//    .text start:0x020c6964 end:0x020c6ca0
+src/System/InterruptHandler.cpp:
+    complete
+    .text start:0x020c6964 end:0x020c6ca0
 
 src/System/InterruptEnableDisable.cpp:
     complete
