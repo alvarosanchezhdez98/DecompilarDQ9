@@ -11,6 +11,8 @@ and `ninja delink` first, so that build.ninja and the delinked objects of the or
   python tools/diff_function.py src/Bestiary/Bestiary.cpp --summary               Only prints the match percentages
   python tools/diff_function.py src/Bestiary/Bestiary.cpp --nonmatching           Compiles the C of the functions that
                                                                                   are in assembly (NONMATCHING)
+
+Under the diff of a function that doesn't match, hints tell likely causes, from the patterns of Decompiling.md.
 '''
 
 import argparse
@@ -159,7 +161,72 @@ def relocation_differences(left: list[dict], right: list[dict]) -> tuple[int, in
     return same, renamed, linker
 
 
-def print_diff(name: str, target: dict, base: dict, summary: bool):
+REGISTER = re.compile(r"\b(r\d+|sp|lr|pc|ip|fp|sl|sb)\b")
+CONDITIONS = ("eq", "ne", "cs", "hs", "cc", "lo", "mi", "pl", "vs", "vc", "hi", "ls", "ge", "lt", "gt", "le")
+
+
+def instructions(rows: list[dict]) -> list[str]:
+    return [row["instruction"]["formatted"] for row in rows if "instruction" in row]
+
+
+def mnemonic(instruction: str) -> str:
+    return instruction.split(" ")[0]
+
+
+def hints(left: list[dict], right: list[dict]) -> list[str]:
+    '''Likely causes of the differences, from the patterns of Decompiling.md (left is the original, right ours)'''
+    original, ours = instructions(left), instructions(right)
+    found = []
+    unregistered = lambda code: [REGISTER.sub("r", instruction) for instruction in code]
+    if unregistered(original) == unregistered(ours):
+        found.append("Only the registers differ: try another order of the declarations or of the statements, a `long` "
+                     "instead of an `int` (the NitroSDK's u32 and s32), a temporary variable or reusing one")
+    elif sorted(unregistered(original)) == sorted(unregistered(ours)):
+        found.append("The same instructions in another order: try another order of the statements or of the "
+                     "operands (the compiler evaluates an inline function's call before the other operands), or of "
+                     "the increments of a loop")
+    count = lambda code, names: sum(1 for instruction in code if mnemonic(instruction) in names)
+    frame = lambda code: [instruction for instruction in code if instruction.startswith(("stmdb sp!", "push"))][:1]
+    if frame(original) != frame(ours):
+        found.append("Another number of saved registers: the variables live longer or shorter than the original's")
+    stack = lambda code: [instruction for instruction in code if re.match(r"sub sp, sp, #", instruction)][:1]
+    if stack(original) != stack(ours):
+        found.append("Another size of the stack frame: the local variables differ (their types, arrays, or a "
+                     "structure copied to the stack)")
+    long_multiply = ("umull", "smull", "umlal", "smlal", "mla")
+    if count(original, long_multiply) != count(ours, long_multiply):
+        found.append("Multiplications differ: library code may need `--mwcc 2.0/sp2`, which handles 64-bit "
+                     "arithmetic differently, or other 64-bit types")
+    blocks = ("ldmia", "stmia")
+    halves = ("ldrh", "strh")
+    if count(original, blocks) > count(ours, blocks) or count(original, halves) > count(ours, halves) + 1:
+        found.append("The original copies with ldmia/stmia or pairs of ldrh/strh: C copies a structure as a block, "
+                     "so copy it through a structure with an array (see CopySample in src/System/TouchPanel.cpp)")
+    boolean = lambda code: sum(1 for instruction in code if re.match(r"mov(eq|ne)\S* r\d+, #0x[01]$", instruction))
+    if boolean(ours) > boolean(original):
+        found.append("Ours turns a condition into 0 or 1 (C++'s bool): in C, `!x` and comparisons are an `int`, so "
+                     "return them through a macro or an `int` (see IsLeapYear in src/System/RealTimeClockConvert.cpp)")
+    jumps = lambda code: sum(1 for instruction in code if re.fullmatch(r"b \S+", instruction))
+    if jumps(original) != jumps(ours) and abs(len(original) - len(ours)) <= max(4, len(original) // 10):
+        found.append("The branches differ: a loop may be `-O4` in the original (a check, then a do-while, and "
+                     "pointers instead of indexes: #pragma optimization_level 4), or of another form (for, while, "
+                     "do-while), or an if/else in the other order")
+    conditional = lambda code: sum(1 for instruction in code if mnemonic(instruction)[-2:] in CONDITIONS
+                                   and not mnemonic(instruction).startswith("b"))
+    if conditional(original) != conditional(ours) and not found:
+        found.append("Conditional instructions differ: try the if/else or the condition in the other order, or `?:`")
+    loads = lambda code: [instruction for instruction in code if mnemonic(instruction) == "ldr"
+                          and "[pc" not in instruction]
+    if len(loads(original)) > len(loads(ours)):
+        found.append("The original loads memory more often: something may be `volatile`, a global instead of a "
+                     "local copy, or a member read again after a call")
+    elif len(loads(original)) < len(loads(ours)):
+        found.append("The original loads memory less often: a local copy of a global or a member, or a static "
+                     "variable of the function (which nothing else changes)")
+    return found
+
+
+def print_diff(name: str, target: dict, base: dict, summary: bool, show_hints: bool = True):
     percent = base.get("match_percent", 0.0)
     left = target.get("instructions", [])
     right = base.get("instructions", [])
@@ -194,6 +261,9 @@ def print_diff(name: str, target: dict, base: dict, summary: bool):
             l_text += f" ({relocation_target(l)})"
             r_text += f" ({relocation_target(r)})"
         print(f"  {index:4} {l_text:<{width}} {mark} {r_text}")
+    if show_hints:
+        for hint in hints(left, right):
+            print(f"  Hint: {hint}")
 
 
 def main():
@@ -206,6 +276,7 @@ def main():
     parser.add_argument("--mwcc", metavar="VERSION", help="Compiler version to use instead of the build's, e.g. 2.0/sp2p3")
     parser.add_argument("--nonmatching", action="store_true",
                         help="Compile the C of the functions in assembly, between #ifdef NONMATCHING and #else")
+    parser.add_argument("--no-hints", action="store_true", help="Don't print the likely causes of the differences")
     args = parser.parse_args()
 
     output_dir = root_path / "build" / "diff_function"
@@ -238,7 +309,7 @@ def main():
         diff = json.loads(output.stdout)
         left, right = function_symbols(diff, "left"), function_symbols(diff, "right")
         if target_symbol in left and base_symbol in right:
-            print_diff(target_symbol, left[target_symbol], right[base_symbol], args.summary)
+            print_diff(target_symbol, left[target_symbol], right[base_symbol], args.summary, not args.no_hints)
 
 
 if __name__ == "__main__": main()

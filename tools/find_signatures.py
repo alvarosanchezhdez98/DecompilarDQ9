@@ -8,6 +8,7 @@ names. Download the references first with tools/fetch_references.py.
   python tools/find_signatures.py main                         All of main's functions that aren't decompiled
   python tools/find_signatures.py main 0x020bc000 0x020c3a5c   Only those in a range
   python tools/find_signatures.py main --runs                  Groups consecutive matches by reference file
+  python tools/find_signatures.py ov031 --exact --rename       Names the functions with one exact match in symbols.txt
 
 An exact match has the same instructions, ignoring addresses and symbols. The others show the most similar reference
 function, when it's at least 80 % alike (same instructions in the same order, ignoring registers). The disassembly in
@@ -17,6 +18,7 @@ divided syntax is generated in build/eur/asm_divided, since the references use t
 import argparse
 from dataclasses import dataclass
 import difflib
+import functools
 from pathlib import Path
 import re
 import subprocess
@@ -107,6 +109,7 @@ def parse_asm(path: Path, file: str) -> list[tuple[AsmFunction, int | None]]:
     return functions
 
 
+@functools.cache
 def load_references() -> list[AsmFunction]:
     functions = []
     for path in sorted(references_path.rglob("*.s")):
@@ -138,6 +141,7 @@ def module_asm_files(module: str) -> list[Path]:
     return paths
 
 
+@functools.cache
 def load_ours(module: str) -> dict[int, AsmFunction]:
     functions = {}
     for path in module_asm_files(module):
@@ -147,19 +151,23 @@ def load_ours(module: str) -> dict[int, AsmFunction]:
     return functions
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("module", help="main, itcm or an overlay, e.g. ov031")
-    parser.add_argument("start", nargs="?", type=lambda text: int(text, 16), default=0)
-    parser.add_argument("end", nargs="?", type=lambda text: int(text, 16), default=0xffffffff)
-    parser.add_argument("--all", action="store_true", help="Include the functions that are already decompiled")
-    parser.add_argument("--runs", action="store_true", help="Group consecutive matches by reference file")
-    args = parser.parse_args()
+@dataclass
+class Match:
+    function: progress.Function
+    # The official names, the first one being the best
+    names: list[str]
+    files: list[str]
+    # exact, "95% alike", trivial, no match or no disassembly
+    kind: str
 
-    module = next((module for module in progress.load_modules() if module.name == args.module), None)
+
+def find_matches(module_name: str, start: int = 0, end: int = 0xffffffff, include_done: bool = False,
+                 fuzzy: bool = True) -> list[Match]:
+    '''The reference functions that are like each function of a module in a range'''
+    module = next((module for module in progress.load_modules() if module.name == module_name), None)
     if module is None:
-        sys.exit(f"Unknown module {args.module}")
-    ours = load_ours(args.module)
+        sys.exit(f"Unknown module {module_name}")
+    ours = load_ours(module_name)
     references = load_references()
     by_instructions: dict[tuple[str, ...], list[AsmFunction]] = {}
     for reference in references:
@@ -167,24 +175,23 @@ def main():
 
     results = []
     for function in module.functions:
-        if not args.start <= function.address < args.end or (function.done and not args.all):
+        if not start <= function.address < end or (function.done and not include_done):
             continue
         asm = ours.get(function.address)
         if asm is None:
-            results.append((function, "", "", "no disassembly"))
+            results.append(Match(function, [], [], "no disassembly"))
             continue
         exact = by_instructions.get(asm.instructions)
         if exact:
             names = sorted({reference.name for reference in exact})
             files = sorted({reference.file for reference in exact})
             if len(names) > TRIVIAL_NAMES:
-                results.append((function, "", "", "trivial"))
+                results.append(Match(function, [], [], "trivial"))
             else:
-                match = names[0] if len(names) == 1 else f"{names[0]} (or {', '.join(names[1:])})"
-                results.append((function, match, ", ".join(files), "exact"))
+                results.append(Match(function, names, files, "exact"))
             continue
         best, best_ratio = None, 0.0
-        if len(asm.instructions) >= 6:
+        if fuzzy and len(asm.instructions) >= 6:
             mnemonics = asm.mnemonics
             for reference in references:
                 length = len(reference.instructions)
@@ -197,33 +204,104 @@ def main():
                 if ratio > best_ratio:
                     best, best_ratio = reference, ratio
         if best is not None and best_ratio >= FUZZY_THRESHOLD:
-            results.append((function, best.name, best.file, f"{best_ratio:.0%} alike"))
+            results.append(Match(function, [best.name], [best.file], f"{best_ratio:.0%} alike"))
         else:
-            results.append((function, "", "", "no match"))
+            results.append(Match(function, [], [], "no match"))
+    return results
+
+
+def referenced_names() -> set[str]:
+    '''The identifiers that the sources and headers use'''
+    names = set()
+    for directory in ("src", "include"):
+        for path in (root_path / directory).rglob("*"):
+            if path.suffix in (".c", ".cpp", ".h", ".hpp", ".inc"):
+                names.update(re.findall(r"\w+", path.read_text(encoding="utf-8", errors="replace")))
+    return names
+
+
+def rename(module_name: str, results: list[Match]) -> list[str]:
+    '''Gives the official names to the functions with an exact match, when the name is only one, it isn't in the
+    module's symbols.txt yet, and no source uses the function's current name'''
+    config = progress.config_path
+    if module_name.startswith("ov"):
+        config = config / "overlays" / module_name
+    elif module_name != "main":
+        config = config / module_name
+    path = config / "symbols.txt"
+    lines = path.read_text().split("\n")
+    # The modules are linked together, so a name must be new in all of them
+    existing = {line.split(" ")[0] for other in progress.config_path.rglob("symbols.txt")
+                for line in other.read_text().split("\n")}
+    used = referenced_names()
+    counts: dict[str, int] = {}
+    for result in results:
+        if result.kind == "exact" and len(result.names) == 1:
+            counts[result.names[0]] = counts.get(result.names[0], 0) + 1
+    renamed = []
+    by_address = {f"addr:{result.function.address:#010x}": result for result in results}
+    for index, line in enumerate(lines):
+        address = re.search(r"addr:0x[0-9a-f]+", line)
+        result = by_address.get(address[0]) if address and " kind:function" in line else None
+        if result is None or result.kind != "exact" or len(result.names) != 1:
+            continue
+        name, current = result.names[0], line.split(" ")[0]
+        if (not current.startswith("func_") or counts[name] > 1 or name in existing or current in used
+                or not re.fullmatch(r"[A-Za-z_]\w*", name)):
+            continue
+        lines[index] = name + line[len(current):]
+        existing.add(name)
+        renamed.append(f"{current} -> {name}")
+    path.write_text("\n".join(lines), newline="\n")
+    return renamed
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("module", help="main, itcm or an overlay, e.g. ov031")
+    parser.add_argument("start", nargs="?", type=lambda text: int(text, 16), default=0)
+    parser.add_argument("end", nargs="?", type=lambda text: int(text, 16), default=0xffffffff)
+    parser.add_argument("--all", action="store_true", help="Include the functions that are already decompiled")
+    parser.add_argument("--runs", action="store_true", help="Group consecutive matches by reference file")
+    parser.add_argument("--exact", action="store_true", help="Only exact matches, which is much faster")
+    parser.add_argument("--rename", action="store_true",
+                        help="Give the official names in symbols.txt to the func_ functions with one exact match, "
+                             "when no source uses their current names")
+    args = parser.parse_args()
+
+    results = find_matches(args.module, args.start, args.end, args.all, not args.exact)
+    if args.rename:
+        for change in rename(args.module, results):
+            print(change)
+        return
 
     if args.runs:
         runs = []
-        for function, match, file, kind in results:
-            key = file if match else ""
+        for result in results:
+            key = result.files[0] if result.names else ""
             # A trivial function doesn't end a run
-            if runs and (runs[-1][0] == key or kind == "trivial"):
-                runs[-1][1].append((function, match, kind))
+            if runs and (runs[-1][0] == key or result.kind == "trivial"):
+                runs[-1][1].append(result)
             else:
-                runs.append((key, [(function, match, kind)]))
-        for file, functions in runs:
-            first, last = functions[0][0], functions[-1][0]
-            names = ", ".join(match for _, match, _ in functions if match)
-            print(f"{first.address:#010x}-{last.address + last.size:#010x}  {len(functions):4d} functions  "
+                runs.append((key, [result]))
+        for file, members in runs:
+            first, last = members[0].function, members[-1].function
+            names = ", ".join(member.names[0] for member in members if member.names)
+            print(f"{first.address:#010x}-{last.address + last.size:#010x}  {len(members):4d} functions  "
                   f"{file or 'no match'}{': ' + names if names else ''}")
     else:
-        for function, match, file, kind in results:
+        for result in results:
+            function = result.function
             done = " (done)" if function.done else ""
-            print(f"{function.address:#010x} {function.size:#6x} {function.name}{done}: {kind}"
-                  f"{' ' + match + ' in ' + file if match else ''}")
+            match = ""
+            if result.names:
+                others = f" (or {', '.join(result.names[1:])})" if len(result.names) > 1 else ""
+                match = f" {result.names[0]}{others} in {', '.join(result.files)}"
+            print(f"{function.address:#010x} {function.size:#6x} {function.name}{done}: {result.kind}{match}")
 
     counts = {}
-    for _, _, _, kind in results:
-        key = "exact" if kind == "exact" else "similar" if kind.endswith("alike") else kind
+    for result in results:
+        key = "exact" if result.kind == "exact" else "similar" if result.kind.endswith("alike") else result.kind
         counts[key] = counts.get(key, 0) + 1
     print(f"\n{len(results)} functions: " + ", ".join(f"{count} {kind}" for kind, count in counts.items()))
 
