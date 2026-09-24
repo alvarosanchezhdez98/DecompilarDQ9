@@ -44,7 +44,9 @@ class Mapping:
         return file.contains(address)
 
 
-def map_object(obj: ElfObject, module: Module, file: DelinkFile | None = None) -> Mapping:
+def map_object(obj: ElfObject, module: Module, file: DelinkFile | None = None,
+               known: dict[Symbol, int] | None = None) -> Mapping:
+    '''`known` has the addresses of functions that were found another way, e.g. by their place in the file'''
     symbols = module.symbols()
     by_name: dict[str, SymbolLine] = {}
     for symbol in symbols:
@@ -59,6 +61,9 @@ def map_object(obj: ElfObject, module: Module, file: DelinkFile | None = None) -
         if line is not None and line.is_function:
             addresses[function] = line.address
             how[function] = "name"
+        elif known and function in known:
+            addresses[function] = known[function]
+            how[function] = "place"
         else:
             unknown.append(function)
 

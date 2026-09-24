@@ -157,11 +157,11 @@ Last recorded on 2026-09-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 226,992 | 2,959,024 | 7.67 % |
-| Functions | 1,644 | 14,779 | 11.12 % |
-| Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
+| Code (bytes) | 228,988 | 2,959,024 | 7.74 % |
+| Functions | 1,647 | 14,779 | 11.14 % |
+| Modules | 3 complete, 5 in progress, 24 not started | 32 with code |  |
 
-Source files: 161 complete, 1 in progress.
+Source files: 162 complete, 1 in progress.
 
 Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -171,7 +171,7 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
-| 2026-09-24 | 1,644 (11.12 %) | 226,992 (7.67 %) | 161 |
+| 2026-09-24 | 1,647 (11.14 %) | 228,988 (7.74 %) | 162 |
 
 ## Modules
 
@@ -190,7 +190,7 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov008 | *Likely* battle records and profile | 28.1 | 63 | 0 | 63 | 0.00 % | Not started |
 | ov009 | *Likely* character creation / name entry | 25.7 | 43 | 0 | 43 | 0.00 % | Not started |
-| ov010 | Unclear | 1.9 | 3 | 0 | 3 | 0.00 % | Not started |
+| ov010 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | 1.9 | 3 | 3 | 0 | 100.00 % | Complete |
 | ov011 | Unclear | 17.6 | 186 | 0 | 186 | 0.00 % | Not started |
 | ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
 | ov013 | *Likely* skill point allocation | 14.7 | 40 | 0 | 40 | 0.00 % | Not started |
@@ -257,7 +257,6 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov006 | 24 | 82 | 22 | 4 | 50.1 |
 | ov008 | 11 | 38 | 12 | 2 | 28.1 |
 | ov009 | 4 | 26 | 9 | 4 | 25.7 |
-| ov010 | 1 | 1 | 1 | 0 | 1.9 |
 | ov011 | 86 | 100 | 0 | 0 | 17.6 |
 | ov012 | 2 | 52 | 16 | 1 | 27.2 |
 | ov013 | 2 | 29 | 9 | 0 | 14.7 |
@@ -276,5 +275,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5327** | **6643** | **1034** | **131** | **2668.0** |
+| **Total** | **5326** | **6642** | **1033** | **131** | **2666.1** |
 <!-- END GENERATED -->

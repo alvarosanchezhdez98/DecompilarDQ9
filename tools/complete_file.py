@@ -45,10 +45,18 @@ def choose_module(obj: ElfObject, source: Path, text_start: int | None) -> tuple
     found = module_files.find_source(source)
     if found is not None:
         return found
-    for module in module_files.modules():
-        if text_start is not None and any(name == ".text" and start <= text_start < end
-                                          for name, start, end in module.delink_files()[0]):
-            return module, None
+    if text_start is not None:
+        # Overlays at the same address: the one with the code of the file's first function there
+        candidates = [module for module in module_files.modules()
+                      if any(name == ".text" and start <= text_start < end
+                             for name, start, end in module.delink_files()[0])]
+        first = min((function for function in obj.functions() if function.section.name == ".text"),
+                    key=lambda function: (function.section.offset, function.value), default=None)
+        for module in candidates:
+            if first is not None and code_matches(obj, first, module.read(text_start, first.size)):
+                return module, None
+        if candidates:
+            return candidates[0], None
     names = {function.name for function in obj.functions()}
     best, count = None, 0
     for module in module_files.modules():
@@ -117,8 +125,15 @@ class Completion:
                     address = candidates[0].address
                     self.renames.append((candidates[0], function.name))
             if address is None:
-                self.notes.append(f"{function.name} isn't in the ROM (the linker strips the functions that nothing "
-                                  "calls)")
+                other = next((module.name for module in module_files.modules() if module is not self.module and
+                              any(symbol.is_function and symbol.name == function.name for symbol in module.symbols())),
+                             None)
+                if other is not None:
+                    self.notes.append(f"{function.name} is {other}'s: the linker keeps one copy of an inline "
+                                      "function that several files define")
+                else:
+                    self.notes.append(f"{function.name} isn't in the ROM (the linker strips the functions that "
+                                      "nothing calls)")
                 continue
             addresses[function] = address
             previous_end = (address + function.size + 3) // 4 * 4
@@ -249,13 +264,12 @@ class Completion:
         for symbol in data_symbols:
             by_address.setdefault(symbol.address, []).append(symbol)
         for variable, address in self.variable_addresses.items():
-            # The compiler's names of strings and constants (@123) change with the code, so keep the ROM's
+            # The build checks that the linked binary has each global name of symbols.txt, so the strings and
+            # constants get the compiler's names too (@stringBase0, @123), which are local
             name = variable.name
             local = " local" if variable.local else ""
             existing = by_address.get(address, [])
-            if name.startswith("@"):
-                pass
-            elif existing:
+            if existing:
                 for symbol in existing:
                     new = SymbolLine(name, symbol.kind, address, re.sub(r"\s+local\b", "", symbol.rest) + local,
                                      symbol.line)
@@ -287,16 +301,26 @@ class Completion:
                     self.notes.append(f"{name} is static, but the ROM references it from outside the file "
                                       f"({', '.join(f'{source:#010x}' for source in outside[:3])}): make it global")
 
-        # dsd takes a .bss variable's size from the next symbol, which can be after the end of the file's .bss
+        # dsd takes the size of a variable of unknown size from the next symbol, which can be after the end of the
+        # file's section
         final = [symbol for symbol in self.symbols if symbol.line not in remove] + add
         final.sort(key=lambda symbol: symbol.address)
         for variable, address in self.variable_addresses.items():
             symbol = next((s for s in final if s.address == address and s.is_data), None)
-            if symbol is None or not symbol.kind.startswith("bss") or symbol.size == variable.size:
+            if symbol is None or symbol.size == variable.size or variable.section.name not in self.sections:
+                continue
+            if symbol.kind.startswith("bss"):
+                kind = f"bss(size={variable.size:#x})"
+            elif symbol.kind == "data(any)":
+                kind = f"data(byte[{variable.size:#x}])"
+            else:
                 continue
             following = next((s for s in final if s.address > address), None)
-            if following is None or following.address > self.sections[".bss"][1]:
-                symbol.kind = f"bss(size={variable.size:#x})"
+            inferred_end = self.module_sections.get(variable.section.name, (0, address + variable.size))[1]
+            if following is not None:
+                inferred_end = min(inferred_end, following.address)
+            if inferred_end > self.sections[variable.section.name][1]:
+                symbol.kind = kind
                 if symbol.line >= 0:
                     lines[symbol.line] = symbol.text()
                 changes.append(f"size of {symbol.name}: {variable.size:#x}")
@@ -350,12 +374,15 @@ def main():
         mapping = rom_mapping.map_object(obj, module, file)
         completion = Completion(args.source, module, file, obj)
         completion.place_code(mapping, args.text_start)
+        if any(function not in mapping.addresses for function in completion.function_addresses):
+            # Again with the functions found by their place, for the variables that they reference
+            mapping = rom_mapping.map_object(obj, module, file, completion.function_addresses)
         completion.place_init()
         completion.place_data(mapping)
         # Again with the sections, to find the initialized variables that nothing references by their contents
         provisional = DelinkFile(module_files.source_name(args.source), True,
                                  [(name, start, end) for name, (start, end) in completion.sections.items()], 0, 0)
-        mapping = rom_mapping.map_object(obj, module, provisional)
+        mapping = rom_mapping.map_object(obj, module, provisional, completion.function_addresses)
         completion.place_data(mapping)
         completion.check_sections()
         changes = completion.edit_symbols()
