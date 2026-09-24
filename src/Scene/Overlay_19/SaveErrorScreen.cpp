@@ -140,7 +140,7 @@ void SaveErrorScreen::Finish()
 {
 }
 
-// NONMATCHING: the C matches 95.9 %, so the build uses the original's instructions after #else (see Decompiling.md).
+// NONMATCHING: the C matches 96.4 %, so the build uses the original's instructions after #else (see Decompiling.md).
 // Like CharacterCreationScene::Run (overlay 21), the compiler gives other registers to the temporaries of some register
 // writes (the OBJ VRAM mode and POWCNT, BG0CNT before G3X_SetClearColor) and of the sprite renderer's setup, so it
 // schedules the instructions around them differently. It also turns the multiplication by 64 of the ticks into shifts
@@ -152,7 +152,6 @@ void SaveErrorScreen::Run()
     char unknown0[0x70];
     char unknown1[0x70];
     NarcHandle narc;
-    SafeAllocator allocator;
     unsigned int size;
 
     GameState* gameState = GameState::GetInstance();
@@ -227,7 +226,7 @@ void SaveErrorScreen::Run()
         return;
     }
     void* buffer = func_02012d88(&data_02114e20, sBufferSize);
-    allocator.ResetAllocatorPointer();
+    SafeAllocator allocator;
     allocator.CreateTypeA(buffer, sBufferSize);
     if (narc.Initialize("ARC", data_0211e33c))
     {

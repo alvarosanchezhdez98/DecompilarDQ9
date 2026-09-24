@@ -124,7 +124,7 @@ void LootableContainerManager::Reset()
 
 void LootableContainerManager::ResetAllocator(SafeAllocator *alloc)
 {
-    data_02108e78.allocator = &func_ov017_0218b5b0()->lootableContainerAllocator_18c_;
+    data_02108e78.allocator = &func_ov017_0218b5b0()->allocators_[17];
     if (alloc != NULL)
         alloc->Reset();
     else
@@ -157,17 +157,16 @@ void LootableContainerManager::LoadZoneContainers(const void *treasureArchive,
     if (alloc != NULL)
         data_02108e78.allocator = alloc;
     else
-        data_02108e78.allocator = &resources->lootableContainerAllocator_18c_;
+        data_02108e78.allocator = &resources->allocators_[17];
     Script runner;
     runner.Initialize();
     runner.SetOpcodeLookup(s_zoneContainerOpcodes);
     runner.Load(scriptFile, scriptFileLength);
     runner.Execute();
-    data_02108e78.allocator = &resources->lootableContainerAllocator_18c_;
+    data_02108e78.allocator = &resources->allocators_[17];
 
     char allocationBuffer[0x400];
     SafeAllocator tempAlloc;
-    tempAlloc.ResetAllocatorPointer(); // constructor almost certainly
     tempAlloc.CreateTypeA(allocationBuffer, sizeof(allocationBuffer));
 
     LootDistribution rng;

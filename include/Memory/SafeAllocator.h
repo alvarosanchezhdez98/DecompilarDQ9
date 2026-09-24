@@ -17,7 +17,12 @@ public:
     // total number of currently existent SafeAllocator instances
     static unsigned int GetLiveCount();
 
-    // This is probably the constructor, if there is one
+    // GameResources' constructor (overlay 30) constructs its allocators with this
+    SafeAllocator()
+    {
+        ResetAllocatorPointer();
+    }
+
     void ResetAllocatorPointer();
 
     void CreateTypeB(void* bufferStart, unsigned int bufferSize, int alignAndDir);

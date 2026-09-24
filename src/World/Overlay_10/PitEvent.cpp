@@ -176,7 +176,7 @@ bool PitEvent::Update()
     loader = BackgroundLoader::GetInstance();
     messages = func_020421a0();
     gameState = GameState::GetInstance();
-    selection = (PartySelection*)func_ov017_0218b5b0()->unknown_ptr_array_3afc[0x2b];
+    selection = (PartySelection*)func_ov017_0218b5b0()->unknown_ptr_3ba8;
     member = gameState->GetPartyMemberByIndex(selection->memberIndex_);
     leader = gameState->GetPartyMemberByIndex(func_020100b0(gameState));
     unknown = func_0202ae18();
