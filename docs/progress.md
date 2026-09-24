@@ -157,13 +157,13 @@ Last recorded on 2026-09-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 229,572 | 2,959,024 | 7.76 % |
-| Functions | 1,655 | 14,779 | 11.20 % |
-| Modules | 3 complete, 7 in progress, 22 not started | 32 with code |  |
+| Code (bytes) | 229,812 | 2,959,024 | 7.77 % |
+| Functions | 1,664 | 14,779 | 11.26 % |
+| Modules | 3 complete, 8 in progress, 21 not started | 32 with code |  |
 
-Source files: 164 complete, 1 in progress.
+Source files: 165 complete, 1 in progress.
 
-Not counted as decompiled: 4 functions (8,360 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 6 functions (12,756 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -171,7 +171,7 @@ Not counted as decompiled: 4 functions (8,360 bytes) in assembly, since their C 
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
-| 2026-09-24 | 1,655 (11.20 %) | 229,572 (7.76 %) | 164 |
+| 2026-09-24 | 1,664 (11.26 %) | 229,812 (7.77 %) | 165 |
 
 ## Modules
 
@@ -199,7 +199,7 @@ Not counted as decompiled: 4 functions (8,360 bytes) in assembly, since their C 
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 0 | 85 | 0.00 % | Not started |
 | ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 0 | 1194 | 0.00 % | Not started |
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
-| ov019 | *Likely* error screen | 3.2 | 5 | 4 | 1 | 8.70 % | In progress |
+| ov019 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | 3.2 | 5 | 4 | 1 | 8.70 % | In progress |
 | ov020 | *Likely* title screen, with a debug version screen | 8.9 | 18 | 0 | 18 | 0.00 % | Not started |
 | ov021 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
@@ -210,11 +210,11 @@ Not counted as decompiled: 4 functions (8,360 bytes) in assembly, since their C 
 | ov027 | Unclear, no strings | 19.6 | 87 | 0 | 87 | 0.00 % | Not started |
 | ov028 | Staff roll | 4.0 | 34 | 0 | 34 | 0.00 % | Not started |
 | ov029 | *Likely* encrypted code: dsd only finds data, but `main()` calls three addresses in it at startup, as checks that decide whether to load overlay 33 or 34 | 0.0 | 0 | 0 | 0 | - | No code |
-| ov030 | Unclear, no strings. Needs `-force_active` to be linked | 4.5 | 11 | 0 | 11 | 0.00 % | Not started |
+| ov030 | Creates, initializes and destroys `GameResources` and its data (`src/Resource/Overlay_30`): `main()` loads it before and after running overlay 17. Decompiled, with `CreateGameResources` and `GameResources::Initialize` in assembly for now. Needs `FORCE_ACTIVE` to be linked | 4.5 | 11 | 9 | 2 | 5.18 % | In progress |
 | ov031 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | 279.6 | 1962 | 0 | 1962 | 0.00 % | Not started |
 | ov032 | 648 KB of `.bss` only, a buffer in overlay 31's place | 0.0 | 0 | 0 | 0 | - | No code |
 | ov033 | Background loader (`src/Filesystem/Overlay_33`), fully decompiled | 2.1 | 5 | 5 | 0 | 100.00 % | Complete |
-| ov034 | Overlay 33's background loader with a random memory leak, *likely* anti-piracy (`src/Filesystem/Overlay_34`), fully decompiled. Needs `-force_active` to be linked | 2.2 | 5 | 5 | 0 | 100.00 % | Complete |
+| ov034 | Overlay 33's background loader with a random memory leak, *likely* anti-piracy (`src/Filesystem/Overlay_34`), fully decompiled. Needs `FORCE_ACTIVE` to be linked | 2.2 | 5 | 5 | 0 | 100.00 % | Complete |
 
 ## ARM9 main by region
 
@@ -241,6 +241,8 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
 | ov019 | `SaveErrorScreen::Run` | `0x0218b5a8` | 0xbd0 |
 | ov021 | `CharacterCreationScene::Run` | `0x0218b5fc` | 0x4fc |
+| ov030 | `CreateGameResources` | `0x021d8a40` | 0x810 |
+| ov030 | `GameResources::Initialize` | `0x021d9340` | 0x91c |
 
 ## Remaining functions by size
 
@@ -275,7 +277,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov026 | 5 | 9 | 8 | 2 | 23.1 |
 | ov027 | 25 | 54 | 6 | 2 | 19.6 |
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
-| ov030 | 8 | 1 | 0 | 2 | 4.5 |
+| ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5321** | **6639** | **1033** | **131** | **2665.5** |
+| **Total** | **5313** | **6638** | **1033** | **131** | **2665.2** |
 <!-- END GENERATED -->

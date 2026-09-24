@@ -82,11 +82,11 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 27 | `0x021d8a40` | 19.7 | 87 | Unclear, no strings | |
 | 28 | `0x021d8a40` | 4.2 | 34 | Staff roll | `staffroll.bin` |
 | 29 | `0x021d8a40` | 7.7 | 1 | *Likely* encrypted code: dsd only finds data, but `main()` calls three addresses in it at startup, as checks that decide whether to load overlay 33 or 34 | Calls from `main()` |
-| 30 | `0x021d8a40` | 4.5 | 11 | Unclear, no strings. Needs `-force_active` to be linked | |
+| 30 | `0x021d8a40` | 4.5 | 11 | Creates, initializes and destroys `GameResources` and its data (`src/Resource/Overlay_30`): `main()` loads it before and after running overlay 17. Decompiled, with `CreateGameResources` and `GameResources::Initialize` in assembly for now. Needs `FORCE_ACTIVE` to be linked | |
 | 31 | `0x02200160` | 306.0 | 1962 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | `nas.nintendowifi.net`, `DWCauth`, `MB_COMM_PSTATE_*` |
 | 32 | `0x02200160` | 0.0 | 0 | 648 KB of `.bss` only, a buffer in overlay 31's place | |
 | 33 | `0x022a2180` | 2.2 | 5 | Background loader (`src/Filesystem/Overlay_33`), fully decompiled | |
-| 34 | `0x022a2180` | 2.2 | 5 | Overlay 33's background loader with a random memory leak, *likely* anti-piracy (`src/Filesystem/Overlay_34`), fully decompiled. Needs `-force_active` to be linked | Loaded by the functions that `main()` passes to overlay 29's checks |
+| 34 | `0x022a2180` | 2.2 | 5 | Overlay 33's background loader with a random memory leak, *likely* anti-piracy (`src/Filesystem/Overlay_34`), fully decompiled. Needs `FORCE_ACTIVE` to be linked | Loaded by the functions that `main()` passes to overlay 29's checks |
 
 ## Progress baseline
 

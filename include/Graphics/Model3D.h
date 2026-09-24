@@ -56,7 +56,7 @@ public:
     // 
     // (For what it's worth, we know it's a constructor and destructor instead
     // of just an Init() / Destroy() pair because their pointers get passed
-    // to a call to func_0200ee94, which is used to default-initialize an
+    // to a call to __construct_array, which is used to default-initialize an
     // array of non-trivially constructible objects).
 
     void Clear();
