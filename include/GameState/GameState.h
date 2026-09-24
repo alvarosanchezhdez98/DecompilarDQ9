@@ -57,7 +57,11 @@ public:
 #endif
 
     unsigned char unknownObjectIndex_397c_; // jpn: offset 0x731c instead
-    char unk_397d[0x63e0 - 0x397d];
+    char unk_397d[0x5cc8 - 0x397d];
+    // The save data error that overlay 19 shows (see SaveErrorScreen). func_020a94f8 sets 2 or 3 when a save fails
+    // its checks
+    unsigned char saveError_;
+    char unk_5cc9[0x63e0 - 0x5cc9];
 
     unsigned char* treasureMapLanguageData_;
     GrottoStruct grottoInfo_;

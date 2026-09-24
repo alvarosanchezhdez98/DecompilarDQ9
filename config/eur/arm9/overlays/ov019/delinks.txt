@@ -4,3 +4,9 @@
     .data       start:0x0218c2c0 end:0x0218c320 kind:data align:32
     .bss        start:0x0218c320 end:0x0218c320 kind:bss align:32
 
+src/Scene/Overlay_19/SaveErrorScreen.cpp:
+    complete
+    .text start:0x0218b5a0 end:0x0218c290
+    .rodata start:0x0218c290 end:0x0218c2ac
+    .data start:0x0218c2c0 end:0x0218c310
+
