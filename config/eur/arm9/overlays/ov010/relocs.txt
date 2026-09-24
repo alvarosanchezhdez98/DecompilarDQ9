@@ -88,6 +88,6 @@ from:0x02184a34 kind:arm_call to:0x021842d8 module:overlay(10)
 from:0x02184a3c kind:arm_call to:0x0205ebfc module:main
 from:0x02184a54 kind:load to:0x02114e20 module:main
 from:0x02184a58 kind:load to:0x02184a80 module:overlay(10)
-from:0x02184a5c kind:load to:0x02184a95 module:overlay(10)
+from:0x02184a5c kind:load to:0x02184a80 add:0x15 module:overlay(10)
 from:0x02184a60 kind:load to:0x02108760 module:main
-from:0x02184a64 kind:load to:0x02184aa6 module:overlay(10)
+from:0x02184a64 kind:load to:0x02184a80 add:0x26 module:overlay(10)

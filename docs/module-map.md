@@ -62,7 +62,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 7 | `0x021842a0` | 0.0 | 0 | Empty | |
 | 8 | `0x021842a0` | 28.8 | 63 | *Likely* battle records and profile | `title_clr.stb`, `profstr`, `tlkpcstr` |
 | 9 | `0x021842a0` | 26.7 | 43 | *Likely* character creation / name entry | `keyboard_cm.bin`, `keyboard_cs.bin`, `str_cm` |
-| 10 | `0x021842a0` | 2.0 | 3 | Unclear | `str_pit`, `ana.chr` |
+| 10 | `0x021842a0` | 2.0 | 3 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | `str_pit`, `ana.chr` ("ana" is a hole in Japanese) |
 | 11 | `0x021842a0` | 18.2 | 186 | Unclear | `data/%s` only |
 | 12 | `0x021842a0` | 28.1 | 71 | *Likely* profile editing (tag mode) | `profstr`, `profsen`, `keyboard_pr.bin` |
 | 13 | `0x021842a0` | 15.1 | 40 | *Likely* skill point allocation | `obj_sklup_i`, `sklname` |
