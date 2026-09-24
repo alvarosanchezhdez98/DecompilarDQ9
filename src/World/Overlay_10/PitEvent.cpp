@@ -2,6 +2,7 @@
 #include "Filesystem/BackgroundLoader.h"
 #include "GameState/GameState.h"
 #include "Resource/GameResources.h"
+#include "Text/MessageSystem.h"
 #include <globaldefs.h>
 
 // What the zone allows, returned by func_02099950 and in CurrentZone
@@ -28,15 +29,6 @@ struct SavedPosition
 {
     unsigned short zoneID_;
     Vector3fix16 position_;
-};
-
-// The text system: it formats texts and shows them in the message window
-struct MessageSystem
-{
-    void* arguments_;
-    char unk_4[0x994];
-    // While the message is shown
-    int busy_;
 };
 
 // The argument of a message: the party member's name

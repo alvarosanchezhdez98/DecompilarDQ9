@@ -71,7 +71,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 16 | `0x0218b5a0` | 70.8 | 87 | *Likely* video player (Mobiclip) | `data/movie/movielist.bin`, `data/movie/%s` |
 | 17 | `0x0218b5a0` | 307.3 | 1194 | Unclear, the largest overlay: game start and events | `opening.stb`, `upload.stb`, `kanoke.nsbmd` |
 | 18 | `0x0218b5a0` | 0.0 | 0 | Empty | |
-| 19 | `0x0218b5a0` | 3.4 | 5 | *Likely* error screen | `str_err`, `icon.nsarc` |
+| 19 | `0x0218b5a0` | 3.4 | 5 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | `str_err`, `icon.nsarc`, `pen.pac` |
 | 20 | `0x0218b5a0` | 9.9 | 18 | *Likely* title screen, with a debug version screen | `bg_title.pac`, `Chara Viewer`, library versions, `LEVEL5 INC.` |
 | 21 | `0x0218b5a0` | 1.6 | 5 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | Loads overlays 9 and 23 |
 | 22 | `0x021d8a40` | 0.0 | 0 | Empty | |

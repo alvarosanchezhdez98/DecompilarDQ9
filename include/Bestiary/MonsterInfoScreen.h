@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bestiary/HabitatTable.h"
+#include "Graphics/Sprite.h"
 #include "Memory/SafeAllocator.h"
 #include "World/Object3D.h"
 
@@ -116,51 +117,6 @@ struct Layout
     {
         canvas_ = canvas;
         unk_12 = 1;
-    }
-};
-
-struct Sprite
-{
-    char unk_0[0x14];
-    fix32_t x_;
-    fix32_t y_;
-    char unk_1c[6];
-    unsigned char unk_22;
-    char unk_23[3];
-    unsigned char unk_26;
-    char unk_27;
-};
-
-// The animated sprites of a SpriteRenderer
-struct SpriteAnimation
-{
-    char unk_0[4];
-    short x_;
-    short y_;
-    char unk_8[0xd];
-    unsigned char flags_;
-};
-
-struct SpriteAnimationList
-{
-    char unk_0[8];
-};
-
-struct SpriteRenderer
-{
-    char unk_0[0x3c];
-    SpriteAnimationList* animations_;
-    Sprite* sprites_;
-    char unk_44[8];
-    short numSprites_;
-    char unk_4e[2];
-    unsigned char unk_50;
-    char unk_51[3];
-
-    void SetSprites(Sprite* sprites, short numSprites)
-    {
-        sprites_ = sprites;
-        numSprites_ = numSprites;
     }
 };
 

@@ -1,17 +1,12 @@
 #pragma once
 
 #include "Bestiary/MonsterInfoScreen.h"
+#include "Text/TextTable.h"
 
 // The loaded mon_list_<LG>.nat, with every monster of the bestiary
 struct MonsterList
 {
     char unk_0[0x10];
-};
-
-// A loaded .nat file of texts, such as str_sml_<LG>.nat
-struct TextTable
-{
-    char unk_0[0x18];
 };
 
 // A menu loaded from a .gp2 file (bm_sml.gp2 for the bestiary). Its items are numbered across all its groups.

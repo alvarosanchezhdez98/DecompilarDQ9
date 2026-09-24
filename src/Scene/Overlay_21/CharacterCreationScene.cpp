@@ -8,17 +8,11 @@
 #include "Resource/GameResources.h"
 #include "System/Graphics.h"
 #include "System/VRAM.h"
+#include "Text/MessageSystem.h"
 #include <globaldefs.h>
 
 #define REG_MASTER_BRIGHT ((volatile unsigned short*)0x0400006c)
 #define REG_MASTER_BRIGHT_SUB ((volatile unsigned short*)0x0400106c)
-
-// The text system: it formats texts and shows them in the message window
-struct MessageSystem
-{
-    char unk_0[0x1e28];
-    void* unk_1e28;
-};
 
 struct Unknown_0203bd08
 {
