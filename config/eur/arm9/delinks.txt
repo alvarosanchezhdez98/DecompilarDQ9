@@ -497,9 +497,40 @@ src/System/Timing.cpp:
     complete
     .text start:0x020c8c60 end:0x020c9298
 
+src/System/VCountAlarm.cpp:
+    complete
+    .text start:0x020c9298 end:0x020c96f8
+    .bss start:0x02111654 end:0x02111668
+
 src/System/CPSRInterruptState.cpp:
     complete
-    .text start:0x020c96f8 end:0x020c977c
+    .text start:0x020c96f8 end:0x020c984c
+
+src/System/Reset.cpp:
+    complete
+    .text start:0x020c984c end:0x020c99bc
+    .bss start:0x02111668 end:0x0211166c
+
+src/System/OwnerInfo.cpp:
+    complete
+    .text start:0x020c99bc end:0x020c9a5c
+
+src/System/VRAMExclusive.cpp:
+    complete
+    .text start:0x020c9a5c end:0x020c9b20
+    .bss start:0x0211166c end:0x02111684
+
+src/System/Entropy.cpp:
+    complete
+    .text start:0x020c9b20 end:0x020c9bf0
+
+src/System/Terminate.cpp:
+    complete
+    .text start:0x020c9bf0 end:0x020c9c0c
+
+src/System/WorkRAM.cpp:
+    complete
+    .text start:0x020c9c0c end:0x020c9c1c
 
 src/System/DMA.cpp:
     complete
@@ -554,7 +585,30 @@ src/Filesystem/FileAccessor.cpp:
 
 src/Filesystem/OverlayFSManagement.cpp:
     complete
-    .text start:0x020ccf8c end:0x020cd4a4
+    .text start:0x020ccf8c end:0x020cd5a4
+
+src/System/MathCoprocessorContext.cpp:
+    complete
+    .text start:0x020cd5a4 end:0x020cd620
+
+src/System/TouchPanel.cpp:
+    complete
+    .text start:0x020cd620 end:0x020ce138
+    .bss start:0x021117b0 end:0x021117ec
+
+src/System/RealTimeClock.cpp:
+    complete
+    .text start:0x020cf030 end:0x020cf88c
+    .bss start:0x02111818 end:0x02111848
+
+src/System/RealTimeClockCommands.cpp:
+    complete
+    .text start:0x020cf88c end:0x020cf8f4
+
+src/System/RealTimeClockConvert.cpp:
+    complete
+    .text start:0x020cf8f4 end:0x020cfccc
+    .data start:0x020f229c end:0x020f22cc
 
 src/Filesystem/CardReadManagerInit.cpp:
     complete
@@ -566,7 +620,39 @@ src/Filesystem/CardReadManagerAcquireBus.cpp:
 
 src/Filesystem/CardReadManager.cpp:
     complete
-    .text start:0x020d085c end:0x020d0fd4
+    .text start:0x020d085c end:0x020d1128
+
+src/Filesystem/CardPullOut.cpp:
+    complete
+    .text start:0x020d1128 end:0x020d12f4
+    .bss start:0x02112140 end:0x02112148
+
+src/System/Cartridge.cpp:
+    complete
+    .text start:0x020d12f4 end:0x020d160c
+    .bss start:0x02112148 end:0x02112150
+
+src/System/CartridgeInit.cpp:
+    complete
+    .text start:0x020d160c end:0x020d1964
+    .bss start:0x02112160 end:0x02112328
+
+src/System/CartridgeTask.cpp:
+    complete
+    .text start:0x020d1964 end:0x020d1af4
+    .bss start:0x02112328 end:0x02112750
+
+src/System/BitCount.cpp:
+    complete
+    .text start:0x020d1af4 end:0x020d1b38
+
+src/System/CRC.cpp:
+    complete
+    .text start:0x020d1b38 end:0x020d1d2c
+
+src/System/Checksum.cpp:
+    complete
+    .text start:0x020d1d2c end:0x020d1df8
 
 src/Filesystem/ExtendedNitroVM.cpp:
     complete

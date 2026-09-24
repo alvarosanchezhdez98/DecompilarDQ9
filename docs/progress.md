@@ -118,9 +118,24 @@ The script keeps everything outside the generated section, so this is the place 
     SHA-1's file (their test isn't in the ROM) and two more descriptions of SHA-1 in `HMAC.cpp`. The test vectors'
     strings are in sections of their own, like the original's, with `#pragma pool_strings off` (see
     [Decompiling.md](../Decompiling.md)).
-- Next: the NitroSDK gaps (`python tools/progress.py --remaining main`), e.g. RTC, CARD, SND and WM after `0x020cd4a4`,
-  and `0x020c9298-0x020c96f8` (`os_valarm.c`, which pokeheartgold has in C). Also the upstream sketch in overlay 24
-  (`GetAttackBaseDamage.cpp`).
+- Main, NitroSDK gaps: 105 more functions, following Sonic Rush Adventure's C and pokeheartgold's.
+  - OS (27): `os_valarm.c` (`VCountAlarm.cpp`), the rest of `os_system.c` (in `CPSRInterruptState.cpp`), `os_reset.c`
+    (`Reset.cpp`), `os_ownerInfo.c` (`OwnerInfo.cpp`), `os_vramExclusive.c` (`VRAMExclusive.cpp`), `os_entropy.c`
+    (`Entropy.cpp`), `os_terminate_proc.c` (`Terminate.cpp`) and `mi_wram.c` (`WorkRAM.cpp`).
+  - The end of `fs_overlay.c` (`FS_EndOverlay`, in `OverlayFSManagement.cpp`), `cp_context.c`
+    (`MathCoprocessorContext.cpp`), the touch panel (`tp.c`, `TouchPanel.cpp`) and the real-time clock
+    (`RealTimeClock.cpp`, `RealTimeClockCommands.cpp`, `RealTimeClockConvert.cpp`, which is compiled with 2.0/sp2).
+  - `CARDi_Request` (in `CardReadManager.cpp`, which is `card_rom.c` and `card_request.c`), `card_pullOut.c`
+    (`src/Filesystem/CardPullOut.cpp`), the cartridge in the GBA slot (`Cartridge.cpp`, `CartridgeInit.cpp`,
+    `CartridgeTask.cpp`) and MATH (`BitCount.cpp`, `CRC.cpp`, `Checksum.cpp`).
+  - `CartridgeInit.cpp` is compiled with `#pragma ipa file`: its data is in the order that `-ipa file` gives, and one
+    of its functions only matches with a function-local `static` (see [Decompiling.md](../Decompiling.md)).
+  - The NitroSDK is in C, which copies structures as a block, and where `!x` is an `int`: see `CopySample`
+    (`TouchPanel.cpp`), `TaskCopy` (`CartridgeTask.cpp`) and `IsLeapYear` (`RealTimeClockConvert.cpp`).
+  - `func_0200cd1c` is `_ll_mod`, the runtime's 64-bit remainder, which `RTC_ConvertSecondToDateTime` calls.
+- Next: the NitroSDK gaps (`python tools/progress.py --remaining main`): PM at `0x020ce138-0x020cf030` (a newer version
+  than the public decompilations), `card_spi.c` and `card_backup.c` at `0x020d0050-0x020d085c`, then SND, STD and WM
+  after `0x020d1df8`. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`).
 - Overlay 14, the bestiary: its three source files are complete, only `UpdateText`'s C is left.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
@@ -137,11 +152,11 @@ Last recorded on 2026-09-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 214,620 | 2,959,024 | 7.25 % |
-| Functions | 1,539 | 14,779 | 10.41 % |
+| Code (bytes) | 226,992 | 2,959,024 | 7.67 % |
+| Functions | 1,644 | 14,779 | 11.12 % |
 | Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 142 complete, 1 in progress.
+Source files: 161 complete, 1 in progress.
 
 Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -151,13 +166,13 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
-| 2026-09-24 | 1,539 (10.41 %) | 214,620 (7.25 %) | 142 |
+| 2026-09-24 | 1,644 (11.12 %) | 226,992 (7.67 %) | 161 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1430 | 4777 | 19.80 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1535 | 4672 | 21.11 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 23 | 15 | 70.56 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -204,7 +219,7 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | Level-5 code | `0x02000c9c-0x020b2adc` | 711.6 | 4438 | 550 | 3888 | 10.40 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 557 | 453 | 50.44 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 662 | 348 | 61.24 % |
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
@@ -223,7 +238,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2330 | 2150 | 267 | 30 | 739.7 |
+| main | 2283 | 2094 | 265 | 30 | 727.6 |
 | itcm | 10 | 5 | 0 | 0 | 1.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
@@ -253,5 +268,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5374** | **6699** | **1036** | **131** | **2680.1** |
+| **Total** | **5327** | **6643** | **1034** | **131** | **2668.0** |
 <!-- END GENERATED -->

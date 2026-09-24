@@ -149,7 +149,7 @@ func_0200c76c kind:function(arm,size=0x68) addr:0x0200c76c
 _fmul kind:function(arm,size=0x1e0) addr:0x0200c7d4
 func_0200c9b4 kind:function(arm,size=0xe4) addr:0x0200c9b4
 _fsub kind:function(arm,size=0x278) addr:0x0200caa4
-func_0200cd1c kind:function(arm,size=0x10) addr:0x0200cd1c
+_ll_mod kind:function(arm,size=0x10) addr:0x0200cd1c
 _ll_sdiv kind:function(arm,size=0x1b0) addr:0x0200cd2c
 _ll_udiv kind:function(arm,size=0xc) addr:0x0200cedc
 _ull_mod kind:function(arm,size=0x3c) addr:0x0200cee8
@@ -7463,7 +7463,7 @@ data_020f2288 kind:data(any) addr:0x020f2288
 data_020f228c kind:data(any) addr:0x020f228c
 data_020f2290 kind:data(any) addr:0x020f2290
 data_020f2298 kind:data(any) addr:0x020f2298
-data_020f229c kind:data(any) addr:0x020f229c
+daysBeforeMonth kind:data(any) addr:0x020f229c local
 data_020f22cc kind:data(any) addr:0x020f22cc
 data_020f22d0 kind:data(any) addr:0x020f22d0
 data_020f22e0 kind:data(any) addr:0x020f22e0
@@ -7869,10 +7869,14 @@ data_02111634 kind:bss addr:0x02111634
 data_02111638 kind:bss addr:0x02111638
 data_02111640 kind:bss addr:0x02111640
 data_02111648 kind:bss addr:0x02111648
-data_02111654 kind:bss addr:0x02111654
-data_02111668 kind:bss addr:0x02111668
-data_0211166c kind:bss addr:0x0211166c
-data_02111670 kind:bss addr:0x02111670
+isInitialized kind:bss addr:0x02111654 local
+previousVCount kind:bss addr:0x02111658 local
+frameCount kind:bss addr:0x0211165c local
+queue kind:bss addr:0x02111660 local
+isResetOccurred kind:bss addr:0x02111668
+isInitialized kind:bss addr:0x0211166a local
+banksInUse kind:bss addr:0x0211166c local
+bankLockIDs kind:bss addr:0x02111670 local
 gxCommandDMAParams kind:bss addr:0x02111684 local
 isIPCCommunicationInitialized kind:bss addr:0x021116a4 local
 ipcArm9HandlerTable kind:bss addr:0x021116a8 local
@@ -7883,28 +7887,37 @@ data_0211173c kind:bss addr:0x0211173c
 data_02111744 kind:bss addr:0x02111744
 data_0211174c kind:bss addr:0x0211174c
 data_02111754 kind:bss addr:0x02111754
-data_021117b0 kind:bss addr:0x021117b0
-data_021117cc kind:bss addr:0x021117cc
+isInitialized kind:bss addr:0x021117b0 local
+state kind:bss addr:0x021117b4 local
 data_021117ec kind:bss addr:0x021117ec
 data_02111800 kind:bss addr:0x02111800
 data_02111804 kind:bss addr:0x02111804
 data_02111808 kind:bss addr:0x02111808
-data_02111818 kind:bss addr:0x02111818
-data_02111824 kind:bss addr:0x02111824
+isInitialized kind:bss addr:0x02111818 local
+isTickInitialized kind:bss addr:0x0211181a local
+initialTotalTicks kind:bss addr:0x0211181c local
+rtcWork kind:bss(size=0x24) addr:0x02111824 local
 data_02111860 kind:bss addr:0x02111860
 data_02111880 kind:bss addr:0x02111880
 data_021118e0 kind:bss addr:0x021118e0
 data_02111f00 kind:bss addr:0x02111f00
 data_02111f20 kind:bss addr:0x02111f20
-data_02112140 kind:bss addr:0x02112140
-data_02112148 kind:bss addr:0x02112148
-data_0211214c kind:bss addr:0x0211214c
-data_02112160 kind:bss addr:0x02112160
-data_02112180 kind:bss addr:0x02112180
-data_02112184 kind:bss addr:0x02112184
-data_02112240 kind:bss addr:0x02112240
-data_02112328 kind:bss addr:0x02112328
-data_0211232c kind:bss addr:0x0211232c
+isPulledOut kind:bss addr:0x02112140 local
+userCallback kind:bss addr:0x02112144 local
+isEnabled kind:bss addr:0x02112148 local
+cartridgeWork kind:bss(size=0x4) addr:0x0211214c
+isModuleInfoInitialized$203 kind:bss addr:0x02112160 local
+isSettingPhi kind:bss addr:0x02112164 local
+isInitialized kind:bss addr:0x02112168 local
+isAlreadyPulledOut kind:bss addr:0x0211216c local
+skipCheck kind:bss addr:0x02112170 local
+isCartridgePulledOut kind:bss addr:0x02112174 local
+pulledOutCallback kind:bss addr:0x02112178
+header$204 kind:bss addr:0x02112180 local
+taskWork kind:bss addr:0x02112240 local
+taskWork kind:bss addr:0x02112328 local
+taskList kind:bss addr:0x0211232c local
+cartridgeTaskStack kind:bss addr:0x02112350
 data_02112750 kind:bss addr:0x02112750
 data_02112754 kind:bss addr:0x02112754
 data_02112780 kind:bss addr:0x02112780
