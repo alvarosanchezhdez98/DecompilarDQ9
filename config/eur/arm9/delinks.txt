@@ -318,6 +318,25 @@ src/Sound/SoundFader.cpp:
     complete
     .text start:0x020c01fc end:0x020c02a0
 
+src/System/MD5.cpp:
+    complete
+    .text start:0x020c0338 end:0x020c08ac
+    .data start:0x020f1f8c end:0x020f2150
+
+src/System/SHA1.cpp:
+    complete
+    .text start:0x020c08ac end:0x020c0c4c
+    .data start:0x020f2150 end:0x020f226c
+
+src/System/HMAC.cpp:
+    complete
+    .text start:0x020c0c4c end:0x020c0e98
+    .rodata start:0x020e940c end:0x020e9460
+
+src/System/SHA1Block.cpp:
+    complete
+    .text start:0x020c0e98 end:0x020c112c
+
 src/System/Matrix22.cpp:
     complete
     .text start:0x020c112c end:0x020c1190

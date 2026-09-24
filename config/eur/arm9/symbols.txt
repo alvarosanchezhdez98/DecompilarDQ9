@@ -6482,7 +6482,8 @@ data_020e9287 kind:data(any) addr:0x020e9297
 data_020e92a8 kind:data(any) addr:0x020e92b8
 adpcmIndexTable kind:data(any) addr:0x020e9348 local
 adpcmStepSizeTable kind:data(any) addr:0x020e9358 local
-data_020e93fc kind:data(any) addr:0x020e940c
+@43 kind:data(any) addr:0x020e940c local
+unusedHashes kind:data(any) addr:0x020e9428 local
 data_020e9450 kind:data(any) addr:0x020e9460
 data_020e9a50 kind:data(any) addr:0x020e9a60
 atanTable kind:data(short[129]) addr:0x020ed460
@@ -7439,18 +7440,21 @@ data_020f1f2c kind:data(any) addr:0x020f1f2c
 data_020f1f44 kind:data(any) addr:0x020f1f44
 data_020f1f5c kind:data(any) addr:0x020f1f5c
 data_020f1f74 kind:data(any) addr:0x020f1f74
-data_020f1f8c kind:data(any) addr:0x020f1f8c
-data_020f1f90 kind:data(any) addr:0x020f1f90
-data_020f2050 kind:data(any) addr:0x020f2050
-data_020f2150 kind:data(any) addr:0x020f2150
-data_020f2154 kind:data(any) addr:0x020f2154
-data_020f2188 kind:data(any) addr:0x020f2188
-data_020f218c kind:data(any) addr:0x020f218c
-data_020f21a4 kind:data(any) addr:0x020f21a4
-data_020f21bc kind:data(any) addr:0x020f21bc
-data_020f21d4 kind:data(any) addr:0x020f21d4
-data_020f21ec kind:data(any) addr:0x020f21ec
-data_020f2228 kind:data(any) addr:0x020f2228
+padding kind:data(any) addr:0x020f1f8c local
+roundWords kind:data(any) addr:0x020f1f90 local
+sineTable kind:data(any) addr:0x020f2050 local
+test3 kind:data(any) addr:0x020f2150 local
+processMessageBlock kind:data(any) addr:0x020f2154
+resultArray kind:data(any) addr:0x020f2158 local
+testArray kind:data(any) addr:0x020f2168 local
+repeatCount kind:data(any) addr:0x020f2178 local
+test1 kind:data(any) addr:0x020f2188 local
+result3 kind:data(any) addr:0x020f218c local
+result4 kind:data(any) addr:0x020f21a4 local
+result1 kind:data(any) addr:0x020f21bc local
+result2 kind:data(any) addr:0x020f21d4 local
+test2 kind:data(any) addr:0x020f21ec local
+test4 kind:data(any) addr:0x020f2228 local
 isDisplayOn kind:data(short) addr:0x020f226c local
 data_020f2270 kind:data(any) addr:0x020f2270
 data_020f2274 kind:data(any) addr:0x020f2274

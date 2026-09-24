@@ -7,9 +7,10 @@ NitroSDK's MI_CpuCopy8, see Decompiling.md).
   python tools/asm_to_mwcc.py main func_020ca3b8 [func_020ca3ec ...]
 
 It prints each function as `asm void name() { ... }`: the branches go to local labels, the literal pool's loads
-become `ldr rX, =value`, and MWCC generates the pool again. The symbols that the code references are listed first,
-since the source file has to declare them. It reads the disassembly in divided syntax (build/eur/asm_divided), which
-tools/find_signatures.py generates.
+become `ldr rX, =value`, and MWCC generates the pool again. Loads of constants outside the function (the NitroSDK's
+SHA-1 has them before it) become `ldr rX, [pc, #offset]`, and the source file has to place the constants there. The
+symbols that the code references are listed first, since the source file has to declare them. It reads the
+disassembly in divided syntax (build/eur/asm_divided), which tools/find_signatures.py generates.
 
 It also writes the functions whose C doesn't match yet in assembly (NONMATCHING, see Decompiling.md). For a C++
 function, give the `asm` function the C function's return and parameter types. MWCC's assembler doesn't take qualified
@@ -27,6 +28,7 @@ from progress import qualified_name
 
 FUNCTION_START = re.compile(r"^\s*(arm|thumb)_func_start\s+(\S+)")
 FUNCTION_END = re.compile(r"^\s*(arm|thumb)_func_end\b")
+FUNCTION_LABEL = re.compile(r"^\S+:\s*;\s*(0x[0-9a-f]+)")
 LABEL = re.compile(r"^\s*(\.L_[0-9a-f]+):\s*(.*)$")
 POOL_LOAD = re.compile(r"^(ldr\w*\s+\w+,\s*)(\.L_[0-9a-f]+)$")
 BRANCH = re.compile(r"^(b\w*\s+)(\.L_[0-9a-f]+)$")
@@ -61,7 +63,10 @@ def convert(name: str, mode: str, body: list[str]) -> tuple[list[str], set[str]]
 
     output = []
     symbols = set()
+    address = None
     for line in body:
+        if match := FUNCTION_LABEL.match(line.strip()):
+            address = int(match[1], 16)
         text = line.split(";")[0].strip()
         if not text or text == f"{name}:":
             continue
@@ -73,7 +78,11 @@ def convert(name: str, mode: str, body: list[str]) -> tuple[list[str], set[str]]
             if not text:
                 continue
         text = re.sub(r"\b(ip|fp|sb|sl)\b", lambda register: ALIASES[register[1]], text)
-        if match := POOL_LOAD.match(text):
+        if (match := POOL_LOAD.match(text)) and match[2] not in pool:
+            # A constant outside the function, relative to the instruction's address (ARM reads pc as address + 8)
+            offset = int(match[2][3:], 16) - (address + 8)
+            text = f"{match[1]}[pc, #{'-' if offset < 0 else ''}{abs(offset):#x}]"
+        elif match := POOL_LOAD.match(text):
             value = pool[match[2]]
             if not value.startswith("0x") and not value.lstrip("-").isdigit():
                 symbols.add(value)
@@ -86,6 +95,8 @@ def convert(name: str, mode: str, body: list[str]) -> tuple[list[str], set[str]]
             symbols.add(symbol)
             text = f"{text.split()[0]} {source_name(symbol)}"
         output.append(f"        {text}" if not text.startswith("@") else f"    {text}")
+        if address is not None and not text.startswith("@"):
+            address += 4 if mode == "arm" else 2
     lines = [f"    asm void {qualified_name(name)}()", "    {"] + output + ["    }"]
     if mode == "thumb":
         lines = ["#pragma thumb on"] + lines + ["#pragma thumb off"]

@@ -66,8 +66,9 @@ M2CTX_DEFINES = " ".join(f"-D {define}" for define in REGION_DEFINES[args.versio
 FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing references them
     "usa": "func_ov030_021d8a40",
     "jpn": "func_ov029_021d9300,func_ov030_021d9300",
-    # Main calls overlay 34's loader through the symbol of overlay 33's, which is at the same address
-    "eur": "func_ov030_021d8a40,_Z28PopulateOv34BackgroundLoaderPvji",
+    # Main calls overlay 34's loader through the symbol of overlay 33's, which is at the same address. The constants of
+    # the NitroSDK's SHA-1 are before its function, which loads them relative to its address (see SHA1Block.cpp).
+    "eur": "func_ov030_021d8a40,_Z28PopulateOv34BackgroundLoaderPvji,sha1Constants",
 }
 active_function_name = f"-force_active {FORCE_ACTIVE[args.version]}"
 LOCAL_SYMBOLS = { # Weak symbols that a file has its own copy of, see tools/localize_symbols.py

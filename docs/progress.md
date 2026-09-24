@@ -103,10 +103,24 @@ The script keeps everything outside the generated section, so this is the place 
     file-scope, and `sndarc_stream.c` has `NNSi_SndArcStrmGetThread`, which isn't in the ROM, before
     `decodeBufferArea`.
   - The function at `0x020c02a0`, between the sound library and the NitroSDK, isn't identified.
-- Next: the other library code that `find_signatures.py` identifies in main: the NitroSDK's digests
-  (`0x020c0338-0x020c112c`), and the NitroSDK gaps (`python tools/progress.py --remaining main`), e.g. RTC, CARD, SND and
-  WM after `0x020cd4a4`, and `0x020c9298-0x020c96f8` (`os_valarm.c`, which pokeheartgold has in C). Also the upstream
-  sketch in overlay 24 (`GetAttackBaseDamage.cpp`).
+- Main, the NitroSDK's digests (DGT, `0x020c0338-0x020c112c`): complete, 10 functions in 4 files. MD5 is "hash 1"
+  (`MD5.cpp`), SHA-1 is "hash 2" (`SHA1.cpp`, like RFC 3174's code), `HMAC.cpp` has `DGT_Hash2CalcHmac` and its HMAC,
+  and `SHA1Block.cpp` has the SHA-1 block function that the NitroSDK wrote in assembly. Sonic Rush Adventure has these
+  functions in assembly only, so the C is new; pokeheartgold has the same version.
+  - MD5's `ProcessBlock` is in assembly (`NONMATCHING`): its C matches 55.3 %. The instructions are the same, but the
+    original increments the pointers in the middle of each loop, and the third and fourth rounds use other registers.
+  - `DGT_Hash2CalcHmac` isn't in SHA-1's file: its description of the hash has the functions' addresses, which the
+    original stores at run time, like the compiler does with functions of other files.
+  - The SHA-1 block function's constants are before it, and it loads them relative to its address. They're an `asm`
+    function with `dcd`, which `FORCE_ACTIVE` (in `tools/configure.py`) keeps, since nothing references them;
+    `tools/asm_to_mwcc.py` converts such loads to `ldr rX, [pc, #offset]`.
+  - Unreferenced data that the linker keeps because it shares a section with used data: RFC 3174's test vectors in
+    SHA-1's file (their test isn't in the ROM) and two more descriptions of SHA-1 in `HMAC.cpp`. The test vectors'
+    strings are in sections of their own, like the original's, with `#pragma pool_strings off` (see
+    [Decompiling.md](../Decompiling.md)).
+- Next: the NitroSDK gaps (`python tools/progress.py --remaining main`), e.g. RTC, CARD, SND and WM after `0x020cd4a4`,
+  and `0x020c9298-0x020c96f8` (`os_valarm.c`, which pokeheartgold has in C). Also the upstream sketch in overlay 24
+  (`GetAttackBaseDamage.cpp`).
 - Overlay 14, the bestiary: its three source files are complete, only `UpdateText`'s C is left.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
@@ -123,13 +137,13 @@ Last recorded on 2026-09-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 211,996 | 2,959,024 | 7.16 % |
-| Functions | 1,530 | 14,779 | 10.35 % |
+| Code (bytes) | 214,620 | 2,959,024 | 7.25 % |
+| Functions | 1,539 | 14,779 | 10.41 % |
 | Modules | 2 complete, 5 in progress, 25 not started | 32 with code |  |
 
-Source files: 138 complete, 1 in progress.
+Source files: 142 complete, 1 in progress.
 
-Not counted as decompiled: 1 function (3,112 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -137,13 +151,13 @@ Not counted as decompiled: 1 function (3,112 bytes) in assembly, since their C d
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
-| 2026-09-24 | 1,530 (10.35 %) | 211,996 (7.16 %) | 138 |
+| 2026-09-24 | 1,539 (10.41 %) | 214,620 (7.25 %) | 142 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1421 | 4786 | 19.52 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1430 | 4777 | 19.80 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 23 | 15 | 70.56 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -190,7 +204,7 @@ Not counted as decompiled: 1 function (3,112 bytes) in assembly, since their C d
 | Level-5 code | `0x02000c9c-0x020b2adc` | 711.6 | 4438 | 550 | 3888 | 10.40 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 547 | 463 | 48.15 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 557 | 453 | 50.44 % |
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
@@ -200,6 +214,7 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 
 | Module | Function | Address | Size |
 | ------ | -------- | ------- | ----: |
+| main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
 
 ## Remaining functions by size
@@ -208,7 +223,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2330 | 2158 | 268 | 30 | 742.3 |
+| main | 2330 | 2150 | 267 | 30 | 739.7 |
 | itcm | 10 | 5 | 0 | 0 | 1.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
@@ -238,5 +253,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5374** | **6707** | **1037** | **131** | **2682.6** |
+| **Total** | **5374** | **6699** | **1036** | **131** | **2680.1** |
 <!-- END GENERATED -->
