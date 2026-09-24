@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bestiary/HabitatTable.h"
+#include "Graphics/Background.h"
 #include "Graphics/Sprite.h"
 #include "Memory/SafeAllocator.h"
 #include "World/Object3D.h"
@@ -75,33 +76,6 @@ struct LayoutElement
 
 #define LAYOUT_ELEMENT_FLAG_VISIBLE 1
 #define LAYOUT_ELEMENT_FLAG_4 0x10
-
-// A surface that text is drawn to
-struct Canvas
-{
-    char unk_0[4];
-    struct BackgroundGraphics* background_;
-    void* pixels_;
-    char unk_c[0x9c];
-    // In tiles
-    short width_;
-    short height_;
-    short x_;
-    short y_;
-    char unk_b0[4];
-    short unk_b4;
-    short unk_b6;
-    char unk_b8[0x28];
-};
-
-// Loads the graphics of a background
-struct BackgroundGraphics
-{
-    char unk_0[0x1c];
-    unsigned char unk_1c_0_ : 4;
-    unsigned char unk_1c_4_ : 4;
-    char unk_1d[3];
-};
 
 struct Layout
 {

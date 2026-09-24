@@ -4,9 +4,17 @@
 struct MessageSystem
 {
     void* arguments_;
-    char unk_4[0x2d4];
+    char unk_4[0x58];
+    // 0x960 bytes, which TitleScreen clears before writing the library versions to it
+    void* unk_5c;
+    char unk_60[0x2d8 - 0x60];
     int unk_2d8;
-    char unk_2dc[0x998 - 0x2dc];
+    char unk_2dc[4];
+    void* unk_2e0;
+    char unk_2e4[3];
+    // TitleScreen waits for 2 after func_02043368
+    unsigned char unk_2e7;
+    char unk_2e8[0x998 - 0x2e8];
     // While the message is shown
     int busy_;
     char unk_99c[4];
