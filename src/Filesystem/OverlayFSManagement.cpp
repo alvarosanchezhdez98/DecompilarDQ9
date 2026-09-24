@@ -1,6 +1,7 @@
 #include "Filesystem/OverlayFSManagement.h"
 #include "Filesystem/FSInnerDefs.h"
 #include "System/Cache.h"
+#include "System/Interrupts.h"
 #include "System/Memory.h"
 #include "System/BiosData.h"
 #include <globaldefs.h>
@@ -285,5 +286,99 @@ void DecompressAndStaticInitializeOverlay(const OverlayMetadata& overlay)
                 (*pInitializer)();
             pInitializer++;
         } while (pInitializer < initializerEnd);
+    }
+}
+
+// The C++ runtime's list of the destructors of global objects (__global_destructor_chain)
+struct DestructorChain
+{
+    DestructorChain* next;
+    void (*destructor)(void* object);
+    void* object;
+};
+
+extern DestructorChain* data_020f33b0;
+
+// Like the NitroSDK's other code, these were compiled with -O4
+#pragma optimization_level 4
+
+extern "C"
+{
+    // usa: func_020cd494
+    // FS_EndOverlay: calls the destructors of the overlay's global objects, and removes them from the list
+    void func_020cd494(const OverlayMetadata& overlay)
+    {
+        for (;;)
+        {
+            DestructorChain* head = NULL;
+            DestructorChain* tail = NULL;
+            const unsigned int regionStart = overlay.loadAddress;
+            const unsigned int regionEnd = regionStart + (overlay.uncompressedSize + overlay.bssSectionSize);
+
+            {
+                int priorState = DisableIRQInterrupts();
+                DestructorChain* prev = NULL;
+                DestructorChain* base = data_020f33b0;
+                DestructorChain* entry = base;
+
+                while (entry)
+                {
+                    DestructorChain* next = entry->next;
+                    const unsigned int destructor = (unsigned int)entry->destructor;
+                    const unsigned int object = (unsigned int)entry->object;
+
+                    if (object == 0 && destructor >= regionStart && destructor < regionEnd ||
+                        object >= regionStart && object < regionEnd)
+                    {
+                        if (!tail)
+                        {
+                            head = entry;
+                        }
+                        else
+                        {
+                            tail->next = entry;
+                        }
+                        if (base == entry)
+                        {
+                            base = data_020f33b0 = next;
+                        }
+                        tail = entry, entry->next = NULL;
+                        if (prev)
+                        {
+                            prev->next = next;
+                        }
+                    }
+                    else
+                    {
+                        prev = entry;
+                    }
+                    entry = next;
+                }
+                SetIRQInterruptState(priorState);
+            }
+
+            if (!head)
+            {
+                break;
+            }
+
+            do
+            {
+                DestructorChain* next = head->next;
+                if (head->destructor)
+                {
+                    head->destructor(head->object);
+                }
+                head = next;
+            } while (head);
+        }
+    }
+
+    // usa: func_020cd584
+    // FS_UnloadOverlayImage
+    int func_020cd584(const OverlayMetadata& overlay)
+    {
+        func_020cd494(overlay);
+        return true;
     }
 }

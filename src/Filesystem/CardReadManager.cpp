@@ -2,6 +2,7 @@
 #include "System/BiosData.h"
 #include "System/Memory.h"
 #include "System/Interrupts.h"
+#include "System/IPC.h"
 #include "System/Cache.h"
 #include "System/DMA.h"
 #include <globaldefs.h>
@@ -432,5 +433,79 @@ void CartridgeReadContextLoop()
         }
         SetIRQInterruptState(priorState);
         readManager->cartridgeReadProc(readManager);
+    }
+}
+
+// The rest of the NitroSDK's card_request.c (CARDi_OnFifoRecv and CARDi_TaskThread are the two functions above),
+// compiled with -O4 like the NitroSDK's other code
+#pragma optimization_level 4
+
+// The NitroSDK's CARD_STAT_INIT_CMD: the first request, which gives the ARM7 the shared data, was sent
+#define READ_MANAGER_FLAG_INIT_REQUEST_SENT 1
+// The IPC command of the card (the NitroSDK's PXI_FIFO_TAG_FS)
+#define IPC_COMMAND_CARD 11
+// CARD_REQ_INIT
+#define CARD_REQUEST_INIT 0
+// CARD_RESULT_SUCCESS and CARD_RESULT_TIMEOUT
+#define CARD_RESULT_SUCCESS 0
+#define CARD_RESULT_TIMEOUT 4
+
+// CARDi_SendPxi
+static inline void SendToArm7(unsigned long data)
+{
+    while (SendCommandToArm7(IPC_COMMAND_CARD, data, true) < 0)
+    {
+    }
+}
+
+extern "C"
+{
+    // usa: func_020c976c
+    // OS_SpinWait
+    void func_020c976c(unsigned long cycles);
+
+    // usa: func_020d0fc4
+    // CARDi_Request: sends a request to the ARM7 and waits for it, and retries it while it times out. Returns
+    // whether it succeeded.
+    int func_020d0fc4(CardReadManager* manager, int request, int retries)
+    {
+        if (!(manager->flags & (1 << READ_MANAGER_FLAG_INIT_REQUEST_SENT)))
+        {
+            manager->flags |= 1 << READ_MANAGER_FLAG_INIT_REQUEST_SENT;
+            while (!IsIPCCommandHandlerRegistered(IPC_COMMAND_CARD, IPCSide_Arm7))
+            {
+                func_020c976c(100);
+            }
+            func_020d0fc4(manager, CARD_REQUEST_INIT, 1);
+        }
+
+        CleanInvalidateCacheRange(manager->pSharedData, sizeof(Arm7CardReadData));
+        DrainWriteBuffer();
+
+        do
+        {
+            manager->unknown_4 = request;
+            manager->flags |= 1 << READ_MANAGER_FLAG_AWAITING_ARM7_ACTION;
+            SendToArm7(request);
+
+            switch (request)
+            {
+            case CARD_REQUEST_INIT:
+                SendToArm7((unsigned long)manager->pSharedData);
+                break;
+            }
+
+            {
+                int priorState = DisableIRQInterrupts();
+                while (manager->flags & (1 << READ_MANAGER_FLAG_AWAITING_ARM7_ACTION))
+                {
+                    BlockCurrentContext(NULL);
+                }
+                SetIRQInterruptState(priorState);
+            }
+            InvalidateDataCacheRange(manager->pSharedData, sizeof(Arm7CardReadData));
+        } while (manager->pSharedData->unknown_0 == CARD_RESULT_TIMEOUT && --retries > 0);
+
+        return manager->pSharedData->unknown_0 == CARD_RESULT_SUCCESS;
     }
 }
