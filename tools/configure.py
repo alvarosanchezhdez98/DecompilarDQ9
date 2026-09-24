@@ -69,7 +69,9 @@ FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing refe
     "jpn": "func_ov029_021d9300,func_ov030_021d9300",
     # Main calls overlay 34's loader through the symbol of overlay 33's, which is at the same address. The constants of
     # the NitroSDK's SHA-1 are before its function, which loads them relative to its address (see SHA1Block.cpp).
-    "eur": "func_ov030_021d8a40,_Z28PopulateOv34BackgroundLoaderPvji,sha1Constants",
+    # Main calls overlay 21's Initialize() and Finish() through the symbols of the overlays at the same address too.
+    "eur": "func_ov030_021d8a40,_Z28PopulateOv34BackgroundLoaderPvji,sha1Constants,"
+           "_ZN22CharacterCreationScene10InitializeEv,_ZN22CharacterCreationScene6FinishEv",
 }
 active_function_name = f"-force_active {FORCE_ACTIVE[args.version]}"
 LOCAL_SYMBOLS = { # Weak symbols that a file has its own copy of, see tools/localize_symbols.py

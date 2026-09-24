@@ -73,7 +73,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 18 | `0x0218b5a0` | 0.0 | 0 | Empty | |
 | 19 | `0x0218b5a0` | 3.4 | 5 | *Likely* error screen | `str_err`, `icon.nsarc` |
 | 20 | `0x0218b5a0` | 9.9 | 18 | *Likely* title screen, with a debug version screen | `bg_title.pac`, `Chara Viewer`, library versions, `LEVEL5 INC.` |
-| 21 | `0x0218b5a0` | 1.6 | 5 | Unclear | |
+| 21 | `0x0218b5a0` | 1.6 | 5 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | Loads overlays 9 and 23 |
 | 22 | `0x021d8a40` | 0.0 | 0 | Empty | |
 | 23 | `0x021d8a40` | 155.9 | 827 | Unclear: list menus | `str_ii`, `bg_iilist`, `al_qu.spr` |
 | 24 | `0x021d8a40` | 157.8 | 573 | Unclear, no strings | |

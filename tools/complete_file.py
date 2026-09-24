@@ -169,6 +169,35 @@ class Completion:
                 self.renames.append((line, function.name))
             self.set_local(line, function)
 
+    def check_references(self):
+        '''Notes the functions that the linker would strip: dsd gives a call to an address that several overlays share
+        the symbol of the first of them, so a function that nothing else calls needs FORCE_ACTIVE'''
+        match = re.fullmatch(r"ov(\d+)", self.module.name)
+        if match is None:
+            return
+        number = int(match[1])
+        addresses = {address: function for function, address in self.function_addresses.items()}
+        called = {relocation.symbol.name for function in self.function_addresses
+                  for relocation in self.obj.relocations_in(function)}
+        direct, shared = set(), {}
+        for module in module_files.modules():
+            for relocation in module.relocations():
+                function = addresses.get(relocation.destination)
+                target = re.search(r"module:overlays?\(([\d,]+)\)", relocation.rest)
+                if function is None or target is None:
+                    continue
+                overlays = [int(overlay) for overlay in target[1].split(",")]
+                if overlays[0] == number:
+                    direct.add(function)
+                elif number in overlays:
+                    shared.setdefault(function, overlays[0])
+        configure = (root_path / "tools" / "configure.py").read_text()
+        for function, first in shared.items():
+            if function not in direct and function.name not in called and function.name not in configure:
+                self.notes.append(f"{function.name} is only called through the symbol of overlay {first}'s function at "
+                                  "the same address: add it to FORCE_ACTIVE in tools/configure.py, or the linker "
+                                  "strips it")
+
     def place_init(self):
         '''The static initializer (.init) and the pointer to it (.ctor)'''
         functions = [function for function in self.obj.functions() if function.section.name == ".init"]
@@ -377,6 +406,7 @@ def main():
         if any(function not in mapping.addresses for function in completion.function_addresses):
             # Again with the functions found by their place, for the variables that they reference
             mapping = rom_mapping.map_object(obj, module, file, completion.function_addresses)
+        completion.check_references()
         completion.place_init()
         completion.place_data(mapping)
         # Again with the sections, to find the initialized variables that nothing references by their contents

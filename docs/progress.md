@@ -157,13 +157,13 @@ Last recorded on 2026-09-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 228,988 | 2,959,024 | 7.74 % |
-| Functions | 1,647 | 14,779 | 11.14 % |
-| Modules | 3 complete, 5 in progress, 24 not started | 32 with code |  |
+| Code (bytes) | 229,284 | 2,959,024 | 7.75 % |
+| Functions | 1,651 | 14,779 | 11.17 % |
+| Modules | 3 complete, 6 in progress, 23 not started | 32 with code |  |
 
-Source files: 162 complete, 1 in progress.
+Source files: 163 complete, 1 in progress.
 
-Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 3 functions (5,336 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -171,7 +171,7 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
-| 2026-09-24 | 1,647 (11.14 %) | 228,988 (7.74 %) | 162 |
+| 2026-09-24 | 1,651 (11.17 %) | 229,284 (7.75 %) | 163 |
 
 ## Modules
 
@@ -201,7 +201,7 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov019 | *Likely* error screen | 3.2 | 5 | 0 | 5 | 0.00 % | Not started |
 | ov020 | *Likely* title screen, with a debug version screen | 8.9 | 18 | 0 | 18 | 0.00 % | Not started |
-| ov021 | Unclear | 1.5 | 5 | 0 | 5 | 0.00 % | Not started |
+| ov021 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov023 | Unclear: list menus | 146.7 | 827 | 0 | 827 | 0.00 % | Not started |
 | ov024 | Unclear, no strings | 151.1 | 573 | 0 | 573 | 0.00 % | In progress |
@@ -239,6 +239,7 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ------ | -------- | ------- | ----: |
 | main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
+| ov021 | `CharacterCreationScene::Run` | `0x0218b5fc` | 0x4fc |
 
 ## Remaining functions by size
 
@@ -266,7 +267,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov017 | 420 | 626 | 132 | 16 | 300.4 |
 | ov019 | 2 | 2 | 0 | 1 | 3.2 |
 | ov020 | 4 | 10 | 3 | 1 | 8.9 |
-| ov021 | 3 | 1 | 1 | 0 | 1.5 |
+| ov021 | 0 | 0 | 1 | 0 | 1.2 |
 | ov023 | 398 | 365 | 56 | 8 | 146.7 |
 | ov024 | 142 | 387 | 36 | 8 | 151.1 |
 | ov025 | 126 | 137 | 33 | 8 | 89.5 |
@@ -275,5 +276,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 8 | 1 | 0 | 2 | 4.5 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5326** | **6642** | **1033** | **131** | **2666.1** |
+| **Total** | **5323** | **6641** | **1033** | **131** | **2665.8** |
 <!-- END GENERATED -->
