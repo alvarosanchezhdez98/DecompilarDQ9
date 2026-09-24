@@ -157,13 +157,13 @@ Last recorded on 2026-09-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 229,812 | 2,959,024 | 7.77 % |
-| Functions | 1,664 | 14,779 | 11.26 % |
-| Modules | 3 complete, 8 in progress, 21 not started | 32 with code |  |
+| Code (bytes) | 234,692 | 2,959,024 | 7.93 % |
+| Functions | 1,681 | 14,779 | 11.37 % |
+| Modules | 3 complete, 9 in progress, 20 not started | 32 with code |  |
 
-Source files: 165 complete, 1 in progress.
+Source files: 166 complete, 1 in progress.
 
-Not counted as decompiled: 6 functions (12,756 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 7 functions (17,024 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -171,7 +171,7 @@ Not counted as decompiled: 6 functions (12,756 bytes) in assembly, since their C
 | ---- | ---------: | ------------: | --------------: |
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
-| 2026-09-24 | 1,664 (11.26 %) | 229,812 (7.77 %) | 165 |
+| 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
 
 ## Modules
 
@@ -200,7 +200,7 @@ Not counted as decompiled: 6 functions (12,756 bytes) in assembly, since their C
 | ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 0 | 1194 | 0.00 % | Not started |
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov019 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | 3.2 | 5 | 4 | 1 | 8.70 % | In progress |
-| ov020 | *Likely* title screen, with a debug version screen | 8.9 | 18 | 0 | 18 | 0.00 % | Not started |
+| ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
 | ov021 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov023 | Unclear: list menus | 146.7 | 827 | 0 | 827 | 0.00 % | Not started |
@@ -240,6 +240,7 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
 | ov019 | `SaveErrorScreen::Run` | `0x0218b5a8` | 0xbd0 |
+| ov020 | `StartupScene::Run` | `0x0218b710` | 0x10ac |
 | ov021 | `CharacterCreationScene::Run` | `0x0218b5fc` | 0x4fc |
 | ov030 | `CreateGameResources` | `0x021d8a40` | 0x810 |
 | ov030 | `GameResources::Initialize` | `0x021d9340` | 0x91c |
@@ -269,7 +270,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov016 | 51 | 26 | 5 | 3 | 21.0 |
 | ov017 | 420 | 626 | 132 | 16 | 300.4 |
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
-| ov020 | 4 | 10 | 3 | 1 | 8.9 |
+| ov020 | 0 | 0 | 0 | 1 | 4.2 |
 | ov021 | 0 | 0 | 1 | 0 | 1.2 |
 | ov023 | 398 | 365 | 56 | 8 | 146.7 |
 | ov024 | 142 | 387 | 36 | 8 | 151.1 |
@@ -279,5 +280,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov028 | 13 | 19 | 2 | 0 | 4.0 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5313** | **6638** | **1033** | **131** | **2665.2** |
+| **Total** | **5309** | **6628** | **1030** | **131** | **2660.5** |
 <!-- END GENERATED -->
