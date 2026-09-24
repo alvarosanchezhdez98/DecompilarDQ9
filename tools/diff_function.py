@@ -124,14 +124,24 @@ def relocation_target(row: dict) -> str | None:
     return row.get("instruction", {}).get("relocation", {}).get("target", {}).get("symbol", {}).get("name")
 
 
+def linker_symbol_value(name: str | None) -> int | None:
+    '''The value of a symbol that the linker script defines: the NitroSDK's (see tools/add_linker_symbols.py), or
+    dsd's overlay IDs (OVERLAY_9_ID), which the NitroSDK's FS_OVERLAY_ID() references'''
+    if name in LINKER_SYMBOLS:
+        return LINKER_SYMBOLS[name]
+    if name is not None and (match := re.fullmatch(r"OVERLAY_(\d+)_ID", name)):
+        return int(match[1])
+    return None
+
+
 def is_linker_symbol_word(left: dict, right: dict) -> bool:
-    '''Whether ours is a word with a relocation to a symbol of the NitroSDK's linker script (see
-    tools/add_linker_symbols.py), and the original the same word with the symbol's value, without a relocation'''
+    '''Whether ours is a word with a relocation to a symbol of the linker script, and the original the same word
+    with the symbol's value, without a relocation'''
     l, r = left.get("instruction", {}), right.get("instruction", {})
     if l.get("mnemonic") != ".word" or "relocation" in l or r.get("mnemonic") != ".word":
         return False
     relocation = r.get("relocation", {})
-    value = LINKER_SYMBOLS.get(relocation.get("target", {}).get("symbol", {}).get("name"))
+    value = linker_symbol_value(relocation.get("target", {}).get("symbol", {}).get("name"))
     arguments = [argument["argument"] for argument in l.get("arguments", []) if "argument" in argument]
     if value is None or len(arguments) != 1 or "unsigned" not in arguments[0]:
         return False
