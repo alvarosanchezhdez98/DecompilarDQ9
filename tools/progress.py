@@ -38,7 +38,10 @@ END_MARKER = "<!-- END GENERATED -->"
 # Regions of main, see docs/module-map.md
 MAIN_REGIONS = [
     ("Secure area and startup", 0x02000000, 0x02000c9c),
-    ("Level-5 code", 0x02000c9c, 0x020b2adc),
+    ("Level-5 code: main", 0x02000c9c, 0x02001578),
+    ("C and C++ runtime (MSL, floating point)", 0x02001578, 0x0200f398),
+    ("Level-5 code", 0x0200f398, 0x020afe44),
+    ("NitroSystem FND and G2D", 0x020afe44, 0x020b2adc),
     ("NitroSystem G3D and GFD", 0x020b2adc, 0x020bbd24),
     ("NitroSystem sound", 0x020bbd24, 0x020c0338),
     ("NitroSDK", 0x020c0338, 0x020dc300),

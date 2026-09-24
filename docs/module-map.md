@@ -32,7 +32,10 @@ since the official names aren't known for this game.
 | ----- | ---- | -------- |
 | `0x02000000-0x02000800` | 2 KB | Secure area, with the BIOS call stubs (`Div`, `CpuSet`...) |
 | `0x02000800-0x02000c9c` | 1 KB | Startup: `Entry`, `AutoloadCallback`, `BuildInfo` and the library tags above |
-| `0x02000c9c-0x020b2adc` | ~710 KB | Level-5 code: `main`, the C runtime (`memcpy`, `abs`...), then the game and its engine. Around 4400 functions |
+| `0x02000c9c-0x02001578` | 2 KB | Level-5's `main` |
+| `0x02001578-0x0200f398` | ~56 KB | The C and C++ runtime: Metrowerks' MSL (`memcpy`, `sprintf`, `strtol`, math, the C++ exceptions) and the floating point and 64-bit arithmetic (`_fadd`, `_ll_sdiv`...). pokeheartgold has the MSL in assembly with its names |
+| `0x0200f398-0x020afe44` | ~643 KB | Level-5 code: the game and its engine. Around 4200 functions |
+| `0x020afe44-0x020b2adc` | ~11 KB | NitroSystem FND (the SDK heap's allocator) and G2D (`NNS_G2dUnpackNCG`, character canvases, fonts) |
 | `0x020b2adc-0x020bbd24` | ~37 KB | NitroSystem G3D (`src/Graphics/NSBXX`), then GFD, its VRAM managers (`NNS_Gfd*`) |
 | `0x020bbd24-0x020c0338` | ~18 KB | NitroSystem sound (`NNS_Snd*`, `src/Sound`), and a function that isn't identified at `0x020c02a0` |
 | `0x020c0338-0x020dc300` | ~112 KB | NitroSDK: digests (DGT), fixed-point math (FX: `Mat3x3_*`, `Vector3fix_*`...), GX, VRAM, interrupts, cache, timers, DMA, IPC (`src/System`), file system and card access (`src/Filesystem`) |

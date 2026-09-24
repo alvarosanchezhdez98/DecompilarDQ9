@@ -133,9 +133,14 @@ The script keeps everything outside the generated section, so this is the place 
   - The NitroSDK is in C, which copies structures as a block, and where `!x` is an `int`: see `CopySample`
     (`TouchPanel.cpp`), `TaskCopy` (`CartridgeTask.cpp`) and `IsLeapYear` (`RealTimeClockConvert.cpp`).
   - `func_0200cd1c` is `_ll_mod`, the runtime's 64-bit remainder, which `RTC_ConvertSecondToDateTime` calls.
+- Official names, from pokeheartgold's assembly (`tools/find_signatures.py --exact --rename`): 75 functions of main's C
+  runtime (`0x02001578-0x0200f398`, now a region of its own, like NitroSystem's FND and G2D at `0x020afe44`) and 1,234
+  of overlay 31's wireless libraries (NitroWiFi and NitroDWC). Nothing is decompiled there yet.
 - Next: the NitroSDK gaps (`python tools/progress.py --remaining main`): PM at `0x020ce138-0x020cf030` (a newer version
   than the public decompilations), `card_spi.c` and `card_backup.c` at `0x020d0050-0x020d085c`, then SND, STD and WM
-  after `0x020d1df8`. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`).
+  after `0x020d1df8`. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
+  drafts them from Sonic Rush Adventure's C, `tools/data_order.py` finds the order of their data, and
+  `tools/complete_file.py` adds them to the build (see [Decompiling.md](../Decompiling.md)).
 - Overlay 14, the bestiary: its three source files are complete, only `UpdateText`'s C is left.
   - It was compiled from three source files, each with its own data: the monster info screen (0x021842a0-0x021868b8),
     the monster list, a class derived from it (0x021868b8-0x02188b18), and the habitat table (0x02188b18-0x02189468).
@@ -216,7 +221,10 @@ Not counted as decompiled: 2 functions (4,060 bytes) in assembly, since their C 
 | Region | Range | Code (KB) | Functions | Decompiled | Remaining | Progress |
 | ------ | ----- | ---------: | ---------: | ----------: | ---------: | --------: |
 | Secure area and startup | `0x02000000-0x02000c9c` | 3.2 | 26 | 0 | 26 | 0.00 % |
-| Level-5 code | `0x02000c9c-0x020b2adc` | 711.6 | 4438 | 550 | 3888 | 10.40 % |
+| Level-5 code: main | `0x02000c9c-0x02001578` | 2.2 | 1 | 0 | 1 | 0.00 % |
+| C and C++ runtime (MSL, floating point) | `0x02001578-0x0200f398` | 55.5 | 173 | 0 | 173 | 0.00 % |
+| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 546 | 3652 | 11.50 % |
+| NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 4 | 62 | 0.77 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
 | NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 662 | 348 | 61.24 % |
