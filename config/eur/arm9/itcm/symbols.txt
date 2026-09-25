@@ -3,8 +3,8 @@ func_01ff8068 kind:function(arm,size=0x17c) addr:0x01ff8068
 func_01ff81e4 kind:function(arm,size=0x34) addr:0x01ff81e4
 func_01ff8218 kind:function(arm,size=0xcc) addr:0x01ff8218
 func_01ff82e4 kind:function(arm,size=0x1c) addr:0x01ff82e4
-func_01ff8300 kind:function(arm,size=0xa8) addr:0x01ff8300
-func_01ff83a8 kind:function(arm,size=0xd8) addr:0x01ff83a8
+func_01ff8300 kind:function(arm,size=0xa8) addr:0x01ff8300 local
+func_01ff83a8 kind:function(arm,size=0xd8) addr:0x01ff83a8 local
 _Z26ConfigureDMATransferAtomicijjj kind:function(arm,size=0x40) addr:0x01ff8480
 _Z30ConfigureDMATransferSafeAtomicijjj kind:function(arm,size=0x70) addr:0x01ff84c0
 _Z20ConfigureDMATransferijjj kind:function(arm,size=0x24) addr:0x01ff8530
@@ -35,11 +35,11 @@ _ZN18VRAMStagingManager11UpdateBanksEv kind:function(arm,size=0x114) addr:0x01ff
 _ZN18VRAMStagingManager19SendReadyDataToVRAMEv kind:function(arm,size=0x500) addr:0x01ff91ac
 _ZN18VRAMStagingManager23CommonVRAMRegionTaskSet5ResetEv kind:function(arm,size=0x14) addr:0x01ff96ac
 _Z24SendStagedVRAMDataToVRAMPv kind:function(arm,size=0x14) addr:0x01ff96c0
-func_01ff96d4 kind:function(arm,size=0x14) addr:0x01ff96d4
-func_01ff96e8 kind:function(arm,size=0x14) addr:0x01ff96e8
-func_01ff96fc kind:function(arm,size=0x1c) addr:0x01ff96fc
-func_01ff9718 kind:function(arm,size=0x14) addr:0x01ff9718
-func_01ff972c kind:function(arm,size=0x14) addr:0x01ff972c
+_ZN18VRAMStagingManager4TaskC1Ev kind:function(arm,size=0x14) addr:0x01ff96d4
+_ZN18VRAMStagingManager22StagingSpaceAllocationC1Ev kind:function(arm,size=0x14) addr:0x01ff96e8
+_ZN18VRAMStagingManager23CommonVRAMRegionTaskSetC1EPht kind:function(arm,size=0x1c) addr:0x01ff96fc
+_ZN18VRAMStagingManagerC1Ev kind:function(arm,size=0x14) addr:0x01ff9718
+_ZN18VRAMStagingManagerD1Ev kind:function(arm,size=0x14) addr:0x01ff972c
 data_01ff9740 kind:bss addr:0x01ff9740
 data_01ffd340 kind:bss addr:0x01ffd340
 data_01ffd344 kind:bss addr:0x01ffd344

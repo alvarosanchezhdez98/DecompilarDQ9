@@ -5527,7 +5527,7 @@ func_020d20e4 kind:function(arm,size=0x20) addr:0x020d20f4
 func_020d2104 kind:function(arm,size=0x28) addr:0x020d2114
 func_020d212c kind:function(arm,size=0x28) addr:0x020d213c
 func_020d2154 kind:function(arm,size=0x28) addr:0x020d2164
-func_020d217c kind:function(arm,size=0x44) addr:0x020d218c
+func_020d217c kind:function(arm,size=0x44) addr:0x020d218c local
 func_020d21c0 kind:function(arm,size=0x38) addr:0x020d21d0
 func_020d21f8 kind:function(arm,size=0x14) addr:0x020d2208
 func_020d220c kind:function(arm,size=0x14) addr:0x020d221c
@@ -5542,11 +5542,11 @@ func_020d2718 kind:function(arm,size=0x50) addr:0x020d2728
 func_020d2768 kind:function(arm,size=0x3c) addr:0x020d2778
 func_020d27a4 kind:function(arm,size=0x3c) addr:0x020d27b4
 func_020d27e0 kind:function(arm,size=0x1c) addr:0x020d27f0
-func_020d27fc kind:function(arm,size=0x24) addr:0x020d280c
-func_020d2820 kind:function(arm,size=0x60) addr:0x020d2830
-func_020d2880 kind:function(arm,size=0x28) addr:0x020d2890
-func_020d28a8 kind:function(arm,size=0x48) addr:0x020d28b8
-func_020d28f0 kind:function(arm,size=0x40) addr:0x020d2900
+func_020d27fc kind:function(arm,size=0x24) addr:0x020d280c local
+func_020d2820 kind:function(arm,size=0x60) addr:0x020d2830 local
+func_020d2880 kind:function(arm,size=0x28) addr:0x020d2890 local
+func_020d28a8 kind:function(arm,size=0x48) addr:0x020d28b8 local
+func_020d28f0 kind:function(arm,size=0x40) addr:0x020d2900 local
 func_020d2930 kind:function(arm,size=0x30) addr:0x020d2940
 func_020d2960 kind:function(arm,size=0x20) addr:0x020d2970
 func_020d2980 kind:function(arm,size=0x30) addr:0x020d2990
@@ -5568,9 +5568,9 @@ func_020d2f88 kind:function(arm,size=0x68) addr:0x020d2f98
 func_020d2ff0 kind:function(arm,size=0x28) addr:0x020d3000
 func_020d3018 kind:function(arm,size=0x2c) addr:0x020d3028
 func_020d3044 kind:function(arm,size=0x40) addr:0x020d3054
-func_020d3084 kind:function(arm,size=0x30) addr:0x020d3094
-func_020d30b4 kind:function(arm,size=0x54) addr:0x020d30c4
-func_020d3108 kind:function(arm,size=0x58) addr:0x020d3118
+func_020d3084 kind:function(arm,size=0x30) addr:0x020d3094 local
+func_020d30b4 kind:function(arm,size=0x54) addr:0x020d30c4 local
+func_020d3108 kind:function(arm,size=0x58) addr:0x020d3118 local
 func_020d3160 kind:function(arm,size=0x87c) addr:0x020d3170
 func_020d39dc kind:function(arm,size=0x22c) addr:0x020d39ec
 func_020d3c08 kind:function(arm,size=0x20) addr:0x020d3c18
@@ -5583,15 +5583,15 @@ func_020d3dcc kind:function(arm,size=0x2c) addr:0x020d3ddc
 func_020d3df8 kind:function(arm,size=0x1e4) addr:0x020d3e08
 func_020d3fdc kind:function(arm,size=0x70) addr:0x020d3fec
 func_020d404c kind:function(arm,size=0x18) addr:0x020d405c
-func_020d4064 kind:function(arm,size=0x58) addr:0x020d4074
+func_020d4064 kind:function(arm,size=0x58) addr:0x020d4074 local
 func_020d40bc kind:function(arm,size=0xac) addr:0x020d40cc
 func_020d4168 kind:function(arm,size=0x70) addr:0x020d4178
 func_020d41d8 kind:function(arm,size=0x10) addr:0x020d41e8
 func_020d41e8 kind:function(arm,size=0x1c) addr:0x020d41f8
 func_020d4204 kind:function(arm,size=0x48) addr:0x020d4214
 func_020d424c kind:function(arm,size=0x94) addr:0x020d425c
-func_020d42e0 kind:function(arm,size=0x3ac) addr:0x020d42f0
-func_020d468c kind:function(arm,size=0x1c) addr:0x020d469c
+func_020d42e0 kind:function(arm,size=0x3ac) addr:0x020d42f0 local
+func_020d468c kind:function(arm,size=0x1c) addr:0x020d469c local
 func_020d46a8 kind:function(arm,size=0x24) addr:0x020d46b8
 func_020d46cc kind:function(arm,size=0x30) addr:0x020d46dc
 func_020d46fc kind:function(arm,size=0x30) addr:0x020d470c
@@ -5618,7 +5618,7 @@ func_020d4fa4 kind:function(arm,size=0x60) addr:0x020d4fb4
 func_020d5004 kind:function(arm,size=0x38) addr:0x020d5014
 func_020d503c kind:function(arm,size=0x40) addr:0x020d504c
 func_020d507c kind:function(arm,size=0xdc) addr:0x020d508c
-func_020d5158 kind:function(arm,size=0x50) addr:0x020d5168
+func_020d5158 kind:function(arm,size=0x50) addr:0x020d5168 local
 func_020d51a8 kind:function(arm,size=0x5c) addr:0x020d51b8
 func_020d5204 kind:function(arm,size=0x10) addr:0x020d5214
 func_020d5214 kind:function(arm,size=0x40) addr:0x020d5224
@@ -6495,6 +6495,7 @@ data_020ed66c kind:data(any) addr:0x020ed67c
 defaultCommands$319 kind:data(any) addr:0x020ed6d8 local
 data_020ed6ec kind:data(any) addr:0x020ed6fc
 data_020ed82c kind:data(any) addr:0x020ed83c
+data_020ed92c kind:data(any) addr:0x020ed93c
 data_020edf2c kind:data(any) addr:0x020edf3c
 data_020ee200 kind:data(any) addr:0x020ee210
 data_020ee20c kind:data(any) addr:0x020ee21c
@@ -7468,7 +7469,7 @@ data_020f22cc kind:data(any) addr:0x020f22cc
 data_020f22d0 kind:data(any) addr:0x020f22d0
 data_020f22e0 kind:data(any) addr:0x020f22e0
 data_020f22f4 kind:data(any) addr:0x020f22f4
-data_020f2304 kind:data(any) addr:0x020f2304
+sTgid kind:data(any) addr:0x020f2304 local
 data_020f2308 kind:data(any) addr:0x020f2308
 data_020f2330 kind:data(any) addr:0x020f2330
 data_020f2334 kind:data(any) addr:0x020f2334
@@ -7918,24 +7919,29 @@ taskWork kind:bss addr:0x02112240 local
 taskWork kind:bss addr:0x02112328 local
 taskList kind:bss addr:0x0211232c local
 cartridgeTaskStack kind:bss addr:0x02112350
-data_02112750 kind:bss addr:0x02112750
-data_02112754 kind:bss addr:0x02112754
-data_02112780 kind:bss addr:0x02112780
-data_021127a4 kind:bss addr:0x021127a4
-data_021127e0 kind:bss addr:0x021127e0
-data_02112a60 kind:bss addr:0x02112a60
-data_02113780 kind:bss addr:0x02113780
-data_02114248 kind:bss addr:0x02114248
-data_02114260 kind:bss addr:0x02114260
+initialized$101 kind:bss addr:0x02112750 local
+sSoundMutex kind:bss(size=0x18) addr:0x02112754 local
+sFreeList kind:bss addr:0x02112780 local
+sFinishedTag kind:bss addr:0x02112784 local
+sReserveList kind:bss addr:0x02112788 local
+sReserveListEnd kind:bss addr:0x0211278c local
+sFreeListEnd kind:bss addr:0x02112790 local
+sWaitingCommandListQueueRead kind:bss addr:0x02112794 local
+sWaitingCommandListQueueWrite kind:bss addr:0x02112798 local
+sWaitingCommandListCount kind:bss addr:0x0211279c local
+sCurrentTag kind:bss addr:0x021127a0 local
+sWaitingCommandListQueue kind:bss addr:0x021127a4 local
+sSharedWork kind:bss addr:0x021127e0 local
+sCommandArray kind:bss addr:0x02112a60 local
+sAlarms kind:bss addr:0x02114260 local
 data_021142c0 kind:bss addr:0x021142c0
 data_021142c4 kind:bss addr:0x021142c4
-data_021142e0 kind:bss addr:0x021142e0
-data_021142e8 kind:bss addr:0x021142e8
-data_02114308 kind:bss addr:0x02114308
-data_02114330 kind:bss addr:0x02114330
-data_02114344 kind:bss addr:0x02114344
-data_02114354 kind:bss addr:0x02114354
-data_02114380 kind:bss addr:0x02114380
+wmInitialized kind:bss addr:0x021142e0 local
+wm9buf kind:bss addr:0x021142e4 local
+bufMsgQ kind:bss addr:0x021142e8 local
+bufMsg kind:bss addr:0x02114308 local
+portRecvCallback kind:bss addr:0x02114330 local
+fifoBuf kind:bss addr:0x02114380 local
 data_02114d80 kind:bss addr:0x02114d80
 data_02114e00 kind:bss addr:0x02114e00
 data_02114e04 kind:bss addr:0x02114e04

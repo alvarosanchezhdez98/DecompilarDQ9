@@ -216,8 +216,58 @@ struct SoundBlockHeader
     unsigned long size;
 };
 
-// The NitroSDK's SNDBankData: an instrument bank (.sbnk)
-struct SoundBank;
+struct SoundWaveArchive;
+
+// The NitroSDK's SNDWaveArcLink: links the banks that use a wave archive
+struct SoundWaveArchiveLink
+{
+    SoundWaveArchive* waveArc;
+    SoundWaveArchiveLink* next;
+};
+
+// The NitroSDK's SND_BANK_TO_WAVEARC_MAX
+#define BANK_WAVE_ARCHIVE_COUNT 4
+
+// The NitroSDK's SNDBankData: an instrument bank (.sbnk). instOffset has the type of each instrument in its low byte,
+// and the offset of its data in the others.
+struct SoundBank
+{
+    SoundFileHeader fileHeader;
+    SoundBlockHeader blockHeader;
+    SoundWaveArchiveLink waveArcLink[BANK_WAVE_ARCHIVE_COUNT];
+    unsigned long instCount;
+    unsigned long instOffset[];
+};
+
+// The NitroSDK's SND_INST_PCM: an instrument that plays a wave
+#define INSTRUMENT_PCM 1
+
+// The NitroSDK's SNDInstParam and SNDInstData: an instrument of a bank. wave is the wave number and the bank's wave
+// archive.
+struct InstrumentParameters
+{
+    unsigned short wave[2];
+    unsigned char originalKey;
+    unsigned char attack;
+    unsigned char decay;
+    unsigned char sustain;
+    unsigned char release;
+    unsigned char pan;
+};
+
+struct InstrumentData
+{
+    unsigned char type;
+    unsigned char padding;
+    InstrumentParameters param;
+};
+
+// The NitroSDK's SNDInstPos: where SND_GetNextInstData continues
+struct InstrumentPosition
+{
+    unsigned long prgNo;
+    unsigned long index;
+};
 
 // NitroSystem's NNSSndSeqData: a sequence (.sseq)
 struct SoundSequence
@@ -234,7 +284,7 @@ struct SoundWaveArchive
 {
     SoundFileHeader fileHeader;
     SoundBlockHeader blockHeader;
-    void* topLink;
+    SoundWaveArchiveLink* topLink;
     unsigned long reserved[7];
     unsigned long waveCount;
     unsigned long waveOffset[];

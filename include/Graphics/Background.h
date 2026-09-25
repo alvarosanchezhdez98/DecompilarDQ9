@@ -15,7 +15,9 @@ struct Canvas
     char unk_0[4];
     BackgroundGraphics* background_;
     void* pixels_;
-    char unk_c[0x9c];
+    char unk_c[0x94];
+    int unk_a0;
+    char unk_a4[4];
     // In tiles
     short width_;
     short height_;

@@ -44,36 +44,6 @@ enum LoadResult
     LoadResult_FailedLoadWave,
 };
 
-// The NitroSDK's SND_INST_PCM: an instrument that plays a wave
-#define INSTRUMENT_PCM 1
-
-// The NitroSDK's SNDInstParam and SNDInstData: an instrument of a bank. wave is the wave number and the bank's wave
-// archive.
-struct InstrumentParameters
-{
-    unsigned short wave[2];
-    unsigned char originalKey;
-    unsigned char attack;
-    unsigned char decay;
-    unsigned char sustain;
-    unsigned char release;
-    unsigned char pan;
-};
-
-struct InstrumentData
-{
-    unsigned char type;
-    unsigned char padding;
-    InstrumentParameters param;
-};
-
-// The NitroSDK's SNDInstPos: where SND_GetNextInstData continues
-struct InstrumentPosition
-{
-    unsigned long prgNo;
-    unsigned long index;
-};
-
 // The header of the wave archive that LoadWaveArcTable reads. In NitroSystem, it's a static variable of the function.
 static SoundWaveArchive waveArcHeader;
 

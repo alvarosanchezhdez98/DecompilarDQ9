@@ -79,8 +79,8 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 24 | `0x021d8a40` | 157.8 | 573 | Unclear, no strings | |
 | 25 | `0x021d8a40` | 91.8 | 304 | *Likely* battle spell and skill animations | `actspl.nsarc`, `actskl.nsarc`, `sp%03d.bact`, `stand_battle` |
 | 26 | `0x021d8a40` | 25.2 | 24 | *Likely* spell and skill effects | `skilltable.bin`, `spelltable.bin`, effects |
-| 27 | `0x021d8a40` | 19.7 | 87 | Unclear, no strings | |
-| 28 | `0x021d8a40` | 4.2 | 34 | Staff roll | `staffroll.bin` |
+| 27 | `0x021d8a40` | 19.7 | 87 | The NitroSDK's MB library, DS Download Play's parent (`src/MultiBoot`): it registers a game, sends its beacons and the blocks of its file to the children, and handles the wireless library. Overlay 31 uses it. Decompiled, in 7 files (`mb_parent.c`, `mb_fileinfo.c`, `mb_gameinfo.c`, `mb_wm_base.c`, `mb_cache.c`, `mb_task.c` and the children's requests), 14 functions still in assembly | |
+| 28 | `0x021d8a40` | 4.2 | 34 | The staff roll (`src/Scene/Overlay_28`): `StaffRoll` loads the lines of `staffroll.bin` with a script and scrolls them on the sub screen. Overlay 1 runs one itself, and the overlay has one that a V-count alarm runs (`StartStaffRoll()`). Decompiled, in two files | `staffroll.bin` |
 | 29 | `0x021d8a40` | 7.7 | 1 | *Likely* encrypted code: dsd only finds data, but `main()` calls three addresses in it at startup, as checks that decide whether to load overlay 33 or 34 | Calls from `main()` |
 | 30 | `0x021d8a40` | 4.5 | 11 | Creates, initializes and destroys `GameResources` and its data (`src/Resource/Overlay_30`): `main()` loads it before and after running overlay 17. Decompiled, with `CreateGameResources` and `GameResources::Initialize` in assembly for now. Needs `FORCE_ACTIVE` to be linked | |
 | 31 | `0x02200160` | 306.0 | 1962 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | `nas.nintendowifi.net`, `DWCauth`, `MB_COMM_PSTATE_*` |

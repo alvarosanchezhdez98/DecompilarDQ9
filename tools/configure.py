@@ -33,6 +33,8 @@ MWCC_VERSIONS = { # Files compiled with another version than MWCC_VERSION
     "src/Graphics/NSBXX/JAC.cpp": "2.0/sp2", # NitroSystem
     "src/Sound/SoundArchiveStream.cpp": "2.0/sp2", # NitroSystem
     "src/System/ProcessorContext.cpp": "2.0/sp2", # NitroSDK
+    # OSi_ReloadRomData assigns its registers like 2.0/sp1p5 and older, not like 2.0/sp1p7 and newer
+    "src/System/itcm/ResetITCM.cpp": "2.0/sp1p5", # NitroSDK
     "src/System/RealTimeClockConvert.cpp": "2.0/sp2", # NitroSDK
     "src/System/Trigonometry.cpp": "2.0/sp2", # NitroSDK
 }

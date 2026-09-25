@@ -1,42 +1,49 @@
-func_ov028_021d8a40 kind:function(arm,size=0x34) addr:0x021d8a40
-func_ov028_021d8a74 kind:function(arm,size=0x60) addr:0x021d8a74
-func_ov028_021d8ad4 kind:function(arm,size=0x70) addr:0x021d8ad4
-func_ov028_021d8b44 kind:function(arm,size=0x4c) addr:0x021d8b44
-func_ov028_021d8b90 kind:function(arm,size=0x90) addr:0x021d8b90
-func_ov028_021d8c20 kind:function(arm,size=0x120) addr:0x021d8c20
-func_ov028_021d8d40 kind:function(arm,size=0x90) addr:0x021d8d40
-func_ov028_021d8dd0 kind:function(arm,size=0x3b8) addr:0x021d8dd0
-func_ov028_021d9188 kind:function(arm,size=0x80) addr:0x021d9188
-func_ov028_021d9208 kind:function(arm,size=0x224) addr:0x021d9208
-func_ov028_021d942c kind:function(arm,size=0x68) addr:0x021d942c
-func_ov028_021d9494 kind:function(arm,size=0x50) addr:0x021d9494
-func_ov028_021d94e4 kind:function(arm,size=0x4c) addr:0x021d94e4
-func_ov028_021d9530 kind:function(arm,size=0x44) addr:0x021d9530
-func_ov028_021d9574 kind:function(arm,size=0xb0) addr:0x021d9574
-func_ov028_021d9624 kind:function(arm,size=0x44) addr:0x021d9624
-func_ov028_021d9668 kind:function(arm,size=0x54) addr:0x021d9668
-func_ov028_021d96bc kind:function(arm,size=0x58) addr:0x021d96bc
-func_ov028_021d9714 kind:function(arm,size=0x20) addr:0x021d9714
-func_ov028_021d9734 kind:function(arm,size=0x14) addr:0x021d9734
-func_ov028_021d9748 kind:function(arm,size=0x34) addr:0x021d9748
-func_ov028_021d977c kind:function(arm,size=0x20) addr:0x021d977c
-func_ov028_021d979c kind:function(arm,size=0x14) addr:0x021d979c
-func_ov028_021d97b0 kind:function(arm,size=0x28) addr:0x021d97b0
-func_ov028_021d97d8 kind:function(arm,size=0xa4) addr:0x021d97d8
-func_ov028_021d987c kind:function(arm,size=0x1c) addr:0x021d987c
-func_ov028_021d9898 kind:function(arm,size=0x20) addr:0x021d9898
-func_ov028_021d98b8 kind:function(arm,size=0x1c) addr:0x021d98b8
-func_ov028_021d98d4 kind:function(arm,size=0xc) addr:0x021d98d4
-func_ov028_021d98e0 kind:function(arm,size=0x60) addr:0x021d98e0
-func_ov028_021d9940 kind:function(arm,size=0x5c) addr:0x021d9940
-func_ov028_021d999c kind:function(arm,size=0x5c) addr:0x021d999c
-func_ov028_021d99f8 kind:function(arm,size=0x20) addr:0x021d99f8
-data_ov028_021d9a34 kind:data(any) addr:0x021d9a34
-__sinit_ov028_021d9a54 kind:function(arm,size=0x2c) addr:0x021d9a54
-.p__sinit_ov028_021d9a54 kind:data(word) addr:0x021d9a80
-data_ov028_021d9aa0 kind:data(any) addr:0x021d9aa0
-data_ov028_021d9ac0 kind:data(any) addr:0x021d9ac0
-data_ov028_021d9ae0 kind:bss addr:0x021d9ae0
-data_ov028_021d9aec kind:bss addr:0x021d9aec
-data_ov028_021d9b14 kind:bss addr:0x021d9b14
-data_ov028_021d9bc4 kind:bss addr:0x021d9bc4
+_Z16InitializeCanvasP6CanvasPv kind:function(arm,size=0x34) addr:0x021d8a40 local
+_ZN15StaffRollScroll7AdvanceEf kind:function(arm,size=0x60) addr:0x021d8a74
+_ZN15StaffRollScroll15ClearPassedRowsEPv kind:function(arm,size=0x70) addr:0x021d8ad4
+_ZN9StaffRoll5SetupEP13SafeAllocator kind:function(arm,size=0x4c) addr:0x021d8b44
+_ZN9StaffRoll10InitializeEv kind:function(arm,size=0x90) addr:0x021d8b90
+_ZN9StaffRoll6FinishEv kind:function(arm,size=0x120) addr:0x021d8c20
+_ZN9StaffRoll6UpdateEi kind:function(arm,size=0x90) addr:0x021d8d40
+_ZN9StaffRoll4LoadEi kind:function(arm,size=0x3b8) addr:0x021d8dd0
+_ZN9StaffRoll4DrawEv kind:function(arm,size=0x80) addr:0x021d9188
+_ZN9StaffRoll6ScrollEi kind:function(arm,size=0x224) addr:0x021d9208
+_ZN9StaffRoll9ScrollOutEi kind:function(arm,size=0x68) addr:0x021d942c
+_ZN14TimedStaffRoll10InitializeEv kind:function(arm,size=0x50) addr:0x021d9494
+_ZN14TimedStaffRoll6FinishEv kind:function(arm,size=0x4c) addr:0x021d94e4
+_ZN14TimedStaffRoll5SetupEP13SafeAllocator kind:function(arm,size=0x44) addr:0x021d9530
+_ZN14TimedStaffRoll6UpdateEv kind:function(arm,size=0xb0) addr:0x021d9574
+_ZN14TimedStaffRoll4LoadEv kind:function(arm,size=0x44) addr:0x021d9624
+_Z8OnVCountPv kind:function(arm,size=0x54) addr:0x021d9668 local
+_Z14StartStaffRollP13SafeAllocator kind:function(arm,size=0x58) addr:0x021d96bc
+_Z13StopStaffRollv kind:function(arm,size=0x20) addr:0x021d9714
+_Z13LoadStaffRollv kind:function(arm,size=0x14) addr:0x021d9734
+_Z24GetStaffRollMillisecondsv kind:function(arm,size=0x34) addr:0x021d9748
+_ZN14TimedStaffRollC1Ev kind:function(arm,size=0x20) addr:0x021d977c
+_ZN14TimedStaffRollD1Ev kind:function(arm,size=0x14) addr:0x021d979c
+_Z12SetLineCountPN6Script9ParameterEi kind:function(arm,size=0x28) addr:0x021d97b0 local
+_Z7AddLinePN6Script9ParameterEi kind:function(arm,size=0xa4) addr:0x021d97d8 local
+_ZN13StaffRollLine10InitializeEv kind:function(arm,size=0x1c) addr:0x021d987c
+_Z8SetSpeedPN6Script9ParameterEi kind:function(arm,size=0x20) addr:0x021d9898 local
+_ZN14StaffRollLines10InitializeEv kind:function(arm,size=0x1c) addr:0x021d98b8
+_ZN14StaffRollLines5ClearEv kind:function(arm,size=0xc) addr:0x021d98d4
+_ZN14StaffRollLines4LoadEP13SafeAllocatorPvj kind:function(arm,size=0x60) addr:0x021d98e0
+_ZN14StaffRollLines8AllocateEP13SafeAllocatort kind:function(arm,size=0x5c) addr:0x021d9940
+_ZN14StaffRollLines3AddEPK13StaffRollLine kind:function(arm,size=0x5c) addr:0x021d999c
+_ZN14StaffRollLines3GetEj kind:function(arm,size=0x20) addr:0x021d99f8
+_ZN9StaffRoll14sScreenEntriesE kind:data(any) addr:0x021d9a18
+_ZN9StaffRoll18sCharacterDataSizeE kind:data(any) addr:0x021d9a1c
+_ZN9StaffRoll11sBufferSizeE kind:data(any) addr:0x021d9a20
+_ZN9StaffRoll15sScreenDataSizeE kind:data(any) addr:0x021d9a24
+_ZN9StaffRoll17sScriptBufferSizeE kind:data(any) addr:0x021d9a28
+_ZN9StaffRoll19sCharacterDataSize2E kind:data(any) addr:0x021d9a2c
+_ZN9StaffRoll19sCharacterDataSize3E kind:data(any) addr:0x021d9a30
+@1247 kind:data(any) addr:0x021d9a34 local
+__sinit_StaffRollLines.cpp kind:function(arm,size=0x2c) addr:0x021d9a54 local
+.p__sinit_StaffRollLines.cpp kind:data(word) addr:0x021d9a80 local
+@stringBase0 kind:data(any) addr:0x021d9aa0 local
+sOpcodes kind:data(any) addr:0x021d9ac0 local
+@313 kind:bss addr:0x021d9ae0 local
+gStaffRollAlarm kind:bss addr:0x021d9aec
+gStaffRoll kind:bss addr:0x021d9b14
+gStaffRollLoading kind:bss(size=0x8) addr:0x021d9bc4
