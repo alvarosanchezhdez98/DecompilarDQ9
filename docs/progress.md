@@ -141,9 +141,20 @@ The script keeps everything outside the generated section, so this is the place 
   does with data sharing) and `wm_etc.c`. Their functions keep their `func_` names, with the SDK's in a comment.
   - `wm_ds.c` advances its ring buffer's indexes with `& 3`: `% 4` of a `u16` gives a signed remainder.
   - The code after WM, at `0x020d6bbc`, belongs to another library.
-- Next: the NitroSDK gaps (`python tools/progress.py --remaining main`): PM at `0x020ce138-0x020cf030` (a newer version
-  than the public decompilations) and `card_spi.c` and `card_backup.c` at `0x020d0050-0x020d085c`. Also the upstream
-  sketch in overlay 24 (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
+- Main, NitroSDK: the power management (`pm.c`, `src/System/PowerManagement.cpp`) is complete, 37 functions.
+  - Its version is newer than Sonic Rush Adventure's and pokeheartgold's, which gave most of the names:
+    - Every command is a utility command with a parameter.
+    - The functions retry while the ARM7 is busy.
+    - `PM_ForceToPowerOff` doesn't return.
+    - The LED has patterns (`PM_SetLEDPattern`, which Nintendo Wi-Fi Connection uses).
+  - The sleep callbacks' types moved from `Sound.h` to `include/System/PowerManagement.h`.
+  - Its variables are separate `static` ones, like the NitroSDK's: the compiler addresses them from the first one. Their
+    order comes from `tools/data_order.py`.
+  - An error's result is chosen with a `switch`: an `if` or a `?:` compiles differently.
+  - `RealTimeClockConvert.cpp`'s `daysBeforeMonth[month - 1]` is `daysBeforeMonth - 4`, which is PM's `.data`, so its
+    relocation in `relocs.txt` has `add:-0x4`.
+- Next: the NitroSDK gaps (`python tools/progress.py --remaining main`): `card_spi.c` and `card_backup.c` at
+  `0x020d0050-0x020d085c`. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
   drafts them from Sonic Rush Adventure's C, `tools/data_order.py` finds the order of their data, and
   `tools/complete_file.py` adds them to the build (see [Decompiling.md](../Decompiling.md)).
 - Overlay 14, the bestiary: its three source files are complete, only `UpdateText`'s C is left.
@@ -162,11 +173,11 @@ Last recorded on 2026-09-25.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 265,252 | 2,959,024 | 8.96 % |
-| Functions | 1,945 | 14,779 | 13.16 % |
+| Code (bytes) | 269,084 | 2,959,024 | 9.09 % |
+| Functions | 1,982 | 14,779 | 13.41 % |
 | Modules | 4 complete, 10 in progress, 18 not started | 32 with code |  |
 
-Source files: 195 complete, 1 in progress.
+Source files: 196 complete, 1 in progress.
 
 Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -177,13 +188,13 @@ Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their 
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
 | 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
-| 2026-09-25 | 1,945 (13.16 %) | 265,252 (8.96 %) | 195 |
+| 2026-09-25 | 1,982 (13.41 %) | 269,084 (9.09 %) | 196 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1677 | 4530 | 22.87 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1714 | 4493 | 23.27 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 38 | 0 | 94.02 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -233,7 +244,7 @@ Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their 
 | NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 4 | 62 | 0.77 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 806 | 204 | 75.74 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 843 | 167 | 79.08 % |
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
@@ -273,7 +284,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2224 | 2014 | 262 | 30 | 711.4 |
+| main | 2206 | 1997 | 260 | 30 | 707.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
 | ov002 | 24 | 127 | 57 | 5 | 100.6 |
@@ -300,5 +311,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5202** | **6476** | **1025** | **131** | **2630.6** |
+| **Total** | **5184** | **6459** | **1023** | **131** | **2626.9** |
 <!-- END GENERATED -->

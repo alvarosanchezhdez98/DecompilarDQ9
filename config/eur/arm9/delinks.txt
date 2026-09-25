@@ -596,6 +596,12 @@ src/System/TouchPanel.cpp:
     .text start:0x020cd620 end:0x020ce138
     .bss start:0x021117b0 end:0x021117ec
 
+src/System/PowerManagement.cpp:
+    complete
+    .text start:0x020ce138 end:0x020cf030
+    .data start:0x020f2298 end:0x020f229c
+    .bss start:0x021117ec end:0x02111818
+
 src/System/RealTimeClock.cpp:
     complete
     .text start:0x020cf030 end:0x020cf88c

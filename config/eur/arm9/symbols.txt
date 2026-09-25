@@ -5370,15 +5370,15 @@ func_020cddec kind:function(arm,size=0x1ec) addr:0x020cddfc
 func_020cdfd8 kind:function(arm,size=0x124) addr:0x020cdfe8
 func_020ce0fc kind:function(arm,size=0x18) addr:0x020ce10c
 func_020ce114 kind:function(arm,size=0x14) addr:0x020ce124
-func_020ce128 kind:function(arm,size=0x20) addr:0x020ce138
-func_020ce148 kind:function(arm,size=0x40) addr:0x020ce158
-func_020ce188 kind:function(arm,size=0x50) addr:0x020ce198
-func_020ce1d8 kind:function(arm,size=0x5c) addr:0x020ce1e8
-func_020ce234 kind:function(arm,size=0xc) addr:0x020ce244
-func_020ce240 kind:function(arm,size=0x30) addr:0x020ce250
+func_020ce128 kind:function(arm,size=0x20) addr:0x020ce138 local
+func_020ce148 kind:function(arm,size=0x40) addr:0x020ce158 local
+func_020ce188 kind:function(arm,size=0x50) addr:0x020ce198 local
+func_020ce1d8 kind:function(arm,size=0x5c) addr:0x020ce1e8 local
+func_020ce234 kind:function(arm,size=0xc) addr:0x020ce244 local
+func_020ce240 kind:function(arm,size=0x30) addr:0x020ce250 local
 func_020ce270 kind:function(arm,size=0x98) addr:0x020ce280
 func_020ce308 kind:function(arm,size=0x94) addr:0x020ce318
-func_020ce39c kind:function(arm,size=0xc0) addr:0x020ce3ac
+func_020ce39c kind:function(arm,size=0xc0) addr:0x020ce3ac local
 func_020ce45c kind:function(arm,size=0x8c) addr:0x020ce46c
 func_020ce4e8 kind:function(arm,size=0x84) addr:0x020ce4f8
 func_020ce56c kind:function(arm,size=0x44) addr:0x020ce57c
@@ -7463,7 +7463,7 @@ data_020f2284 kind:data(any) addr:0x020f2284
 data_020f2288 kind:data(any) addr:0x020f2288
 data_020f228c kind:data(any) addr:0x020f228c
 data_020f2290 kind:data(any) addr:0x020f2290
-data_020f2298 kind:data(any) addr:0x020f2298
+PMi_WaitBusyMethod kind:data(any) addr:0x020f2298 local
 daysBeforeMonth kind:data(any) addr:0x020f229c local
 data_020f22cc kind:data(any) addr:0x020f22cc
 data_020f22d0 kind:data(any) addr:0x020f22d0
@@ -7890,10 +7890,14 @@ data_0211174c kind:bss addr:0x0211174c
 data_02111754 kind:bss addr:0x02111754
 isInitialized kind:bss addr:0x021117b0 local
 state kind:bss addr:0x021117b4 local
-data_021117ec kind:bss addr:0x021117ec
-data_02111800 kind:bss addr:0x02111800
-data_02111804 kind:bss addr:0x02111804
-data_02111808 kind:bss addr:0x02111808
+PMi_IsInit kind:bss addr:0x021117ec local
+PMi_LCDCount kind:bss addr:0x021117f0 local
+sInitCount kind:bss addr:0x021117f4 local
+PMi_SleepEndFlag kind:bss addr:0x021117f8 local
+sCommand16Value kind:bss addr:0x021117fc local
+PMi_PostSleepCallbackList kind:bss addr:0x02111800 local
+PMi_PreSleepCallbackList kind:bss addr:0x02111804 local
+PMi_Work kind:bss addr:0x02111808 local
 isInitialized kind:bss addr:0x02111818 local
 isTickInitialized kind:bss addr:0x0211181a local
 initialTotalTicks kind:bss addr:0x0211181c local
