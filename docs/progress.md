@@ -163,6 +163,20 @@ The script keeps everything outside the generated section, so this is the place 
     `CardReadManager` names the backup's request and its page buffer.
   - `SDK_USING_MIDDLEWARE` is a call to an empty function with the address of the middleware's name in `BuildInfo`,
     which the original has as a constant.
+- Overlay 13, the skill up screen: complete (40 functions), in two source files in `src/Scene/Overlay_13`, with the
+  classes in `include/Scene/Overlay_13/SkillUpScreen.h`. Overlays 2 and 23 run them, and overlay 0 draws the menu.
+  - `SkillPointMenu.cpp` (`0x021842a0-0x02186e74`): the menu that spends a party member's skill points on the 5 skills
+    of their vocation (`str_su_<LG>.nat`), on the main screen or on the sub screen with its caller's window.
+  - `SkillAbilityList.cpp` (`0x02186e74-0x02187d88`): the list of the abilities of the selected skill and the points
+    that they need (`sklname_<LG>.bin`, `str_sklc_<LG>.bin`, `bg_skn.pac`), with markers on the sub screen.
+  - Three functions of `SkillPointMenu` are in assembly (`NONMATCHING`): `Initialize` (99.0 %), `OpenMenu` and
+    `DrawIcon` (95.8 %), which differ in a load or the order of a few instructions.
+  - `TextWindow` and `TextMenu` moved from `StartupScene.h` to `include/Graphics/TextWindow.h`, with their common part
+    (`WindowBase`). Its frame and cursor are unions, since the compiler copies a struct of several members with a
+    function, while the game copies them inline.
+  - The unreferenced words in both files' `.rodata` are class constants (`sConfirmButtons`, `sTitleY`...), which the
+    compiler emits although the code uses their values.
+  - `SkillPointMenu::Update` is only called through overlay 9's symbol at the same address, so it's in `FORCE_ACTIVE`.
 - Next: the NitroSDK gaps (`python tools/progress.py --remaining main`). Also the upstream sketch in overlay 24
   (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
   drafts them from Sonic Rush Adventure's C, `tools/data_order.py` finds the order of their data, and
@@ -183,13 +197,13 @@ Last recorded on 2026-09-25.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 271,144 | 2,959,024 | 9.16 % |
-| Functions | 1,992 | 14,779 | 13.48 % |
-| Modules | 4 complete, 10 in progress, 18 not started | 32 with code |  |
+| Code (bytes) | 284,916 | 2,959,024 | 9.63 % |
+| Functions | 2,029 | 14,779 | 13.73 % |
+| Modules | 4 complete, 11 in progress, 17 not started | 32 with code |  |
 
-Source files: 198 complete, 1 in progress.
+Source files: 200 complete, 1 in progress.
 
-Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 26 functions (32,256 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -198,7 +212,7 @@ Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their 
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
 | 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
-| 2026-09-25 | 1,992 (13.48 %) | 271,144 (9.16 %) | 198 |
+| 2026-09-25 | 2,029 (13.73 %) | 284,916 (9.63 %) | 200 |
 
 ## Modules
 
@@ -220,7 +234,7 @@ Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their 
 | ov010 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | 1.9 | 3 | 3 | 0 | 100.00 % | Complete |
 | ov011 | Unclear | 17.6 | 186 | 0 | 186 | 0.00 % | Not started |
 | ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
-| ov013 | *Likely* skill point allocation | 14.7 | 40 | 0 | 40 | 0.00 % | Not started |
+| ov013 | The skill up screen: the menu that spends skill points, and the list of each skill's abilities (`src/Scene/Overlay_13`) | 14.7 | 40 | 37 | 3 | 91.33 % | In progress |
 | ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
 | ov015 | *Likely* character model loading / viewer | 33.8 | 103 | 0 | 103 | 0.00 % | Not started |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 0 | 85 | 0.00 % | Not started |
@@ -267,6 +281,9 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
 | main | `func_020d2f88` | `0x020d2f98` | 0x68 |
 | main | `func_020d3160` | `0x020d3170` | 0x87c |
+| ov013 | `SkillPointMenu::Initialize` | `0x02184360` | 0x340 |
+| ov013 | `SkillPointMenu::OpenMenu` | `0x02185990` | 0x11c |
+| ov013 | `SkillPointMenu::DrawIcon` | `0x02186db4` | 0xc0 |
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
 | ov019 | `SaveErrorScreen::Run` | `0x0218b5a8` | 0xbd0 |
 | ov020 | `StartupScene::Run` | `0x0218b710` | 0x10ac |
@@ -306,7 +323,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov009 | 4 | 26 | 9 | 4 | 25.7 |
 | ov011 | 86 | 100 | 0 | 0 | 17.6 |
 | ov012 | 2 | 52 | 16 | 1 | 27.2 |
-| ov013 | 2 | 29 | 9 | 0 | 14.7 |
+| ov013 | 0 | 2 | 1 | 0 | 1.3 |
 | ov014 | 0 | 0 | 0 | 1 | 3.0 |
 | ov015 | 28 | 57 | 16 | 2 | 33.8 |
 | ov016 | 51 | 26 | 5 | 3 | 21.0 |
@@ -321,5 +338,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5178** | **6456** | **1022** | **131** | **2624.9** |
+| **Total** | **5176** | **6429** | **1014** | **131** | **2611.4** |
 <!-- END GENERATED -->

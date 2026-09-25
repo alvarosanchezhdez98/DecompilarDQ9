@@ -4,3 +4,15 @@
     .data       start:0x02187e00 end:0x02187ee0 kind:data align:32
     .bss        start:0x02187ee0 end:0x02187ee0 kind:bss align:32
 
+src/Scene/Overlay_13/SkillPointMenu.cpp:
+    complete
+    .text start:0x021842a0 end:0x02186e74
+    .rodata start:0x02187d88 end:0x02187db8
+    .data start:0x02187e00 end:0x02187e48
+
+src/Scene/Overlay_13/SkillAbilityList.cpp:
+    complete
+    .text start:0x02186e74 end:0x02187d88
+    .rodata start:0x02187db8 end:0x02187dec
+    .data start:0x02187e48 end:0x02187ec8
+

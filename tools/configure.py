@@ -72,12 +72,14 @@ FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing refe
     # Main calls overlay 34's loader through the symbol of overlay 33's, which is at the same address. The constants of
     # the NitroSDK's SHA-1 are before its function, which loads them relative to its address (see SHA1Block.cpp).
     # Main calls overlay 21's Initialize() and Finish(), overlay 19's and 20's Initialize() and overlay 30's functions
-    # through the symbols of the overlays at the same address too.
+    # through the symbols of the overlays at the same address too, and overlays 2 and 23 call overlay 13's
+    # SkillPointMenu::Update() through overlay 9's.
     "eur": "_Z19CreateGameResourcesP14AllocatorUnionPP17GameResourcesData,"
            "_Z20DestroyGameResourcesP13GameResourcesP14AllocatorUnionPP17GameResourcesData,"
            "_Z28PopulateOv34BackgroundLoaderPvji,sha1Constants,"
            "_ZN22CharacterCreationScene10InitializeEv,_ZN22CharacterCreationScene6FinishEv,"
-           "_ZN15SaveErrorScreen10InitializeEv,_ZN12StartupScene10InitializeEv",
+           "_ZN15SaveErrorScreen10InitializeEv,_ZN12StartupScene10InitializeEv,"
+           "_ZN14SkillPointMenu6UpdateEi",
 }
 LOCAL_SYMBOLS = { # Weak symbols that a file has its own copy of, see tools/localize_symbols.py
     # Overlays 33 and 34 are at the same address, and both have a copy of BackgroundLoader's vtable

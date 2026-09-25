@@ -65,7 +65,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 10 | `0x021842a0` | 2.0 | 3 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | `str_pit`, `ana.chr` ("ana" is a hole in Japanese) |
 | 11 | `0x021842a0` | 18.2 | 186 | Unclear | `data/%s` only |
 | 12 | `0x021842a0` | 28.1 | 71 | *Likely* profile editing (tag mode) | `profstr`, `profsen`, `keyboard_pr.bin` |
-| 13 | `0x021842a0` | 15.1 | 40 | *Likely* skill point allocation | `obj_sklup_i`, `sklname` |
+| 13 | `0x021842a0` | 15.1 | 40 | The skill up screen: the menu that spends skill points, and the list of each skill's abilities (`src/Scene/Overlay_13`) | `str_su`, `obj_sklup_i`, `str_sklc`, `sklname` |
 | 14 | `0x021842a0` | 21.3 | 69 | Bestiary | `mons_info2.nat`, `mon_list`, `mon_trv%d` |
 | 15 | `0x0218b5a0` | 35.9 | 103 | *Likely* character model loading / viewer | `charaview4.bin`, `data/chara/%s.chr`, `%s.nsbca` |
 | 16 | `0x0218b5a0` | 70.8 | 87 | *Likely* video player (Mobiclip) | `data/movie/movielist.bin`, `data/movie/%s` |

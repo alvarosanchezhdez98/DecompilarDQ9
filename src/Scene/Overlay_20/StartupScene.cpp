@@ -92,10 +92,6 @@ extern "C"
     void func_0204c684(Canvas* canvas);
     void func_0204c7a8(Canvas* canvas, SafeAllocator* allocator, void* buffer, int);
     void func_0205a330(void*, int);
-    void func_0205ba68(void*, int columns, int rows, int);
-    void func_0205bacc(void*, int count);
-    void func_0205bb04(void*, int);
-    void func_0205bcdc(void*, int);
     void func_0205c77c(void*);
     void func_0205c790(TextMenu* menu);
     void func_0205c904(TextMenu* menu, int);
@@ -587,8 +583,8 @@ void StartupScene::Run()
         DISPCNTSUB |= 0x10000;
         func_02045cac(messages);
         func_0205c790(&menu_);
-        menu_.unk_b1 = 1;
-        menu_.unk_b0 = 1;
+        menu_.base_.unk_95 = 1;
+        menu_.base_.unk_94 = 1;
         if (func_020ab9c0(1) == 4)
         {
             for (int i = 0; i < 8; i++)
@@ -612,8 +608,8 @@ void StartupScene::Run()
         func_0205cc50(&menu_, 0, -4);
         menu_.SetPosition((0x100 - menu_.width_) >> 1, (0xc0 - menu_.height_) >> 2);
         func_0205cc50(&menu_, 0, -4);
-        func_0205bcdc(menu_.unk_20, 0);
-        func_0205bb04(menu_.unk_70, 0);
+        func_0205bcdc(&menu_.base_.frame_, 0);
+        func_0205bb04(&menu_.base_.cursor_, 0);
         MapVRAMBanksToMainObj(2);
         BackgroundLoader* loader = BackgroundLoader::GetInstance();
         MessageSystem* messages2 = func_020421a0();
@@ -1783,11 +1779,11 @@ asm void StartupScene::Run()
 
 void TextMenu::SetGrid(int columns, int rows)
 {
-    func_0205ba68(unk_20, columns, rows, 0);
-    func_0205ba68(unk_70, columns, rows, 0);
+    func_0205ba68(&base_.frame_, columns, rows, 0);
+    func_0205ba68(&base_.cursor_, columns, rows, 0);
     int count = columns * rows;
-    func_0205bacc(unk_20, count);
-    func_0205bacc(unk_70, count);
+    func_0205bacc(&base_.frame_, count);
+    func_0205bacc(&base_.cursor_, count);
 }
 
 void StartupScene::UpdateMenu()
