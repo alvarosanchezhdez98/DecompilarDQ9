@@ -101,6 +101,30 @@ enum
     WM_STATE_TESTMODE_RX = 12,
 };
 
+// WMStateCode: what the callbacks' state says
+enum
+{
+    WM_STATECODE_CONNECTED = 7,
+    WM_STATECODE_DISCONNECTED = 9,
+    // The MP communication's answers that bring data
+    WM_STATECODE_MP_IND = 11,
+    WM_STATECODE_MPACK_IND = 12,
+    // A port received data
+    WM_STATECODE_PORT_RECV = 21,
+    // What a port's callback gets when it's set
+    WM_STATECODE_PORT_INIT = 25,
+    WM_STATECODE_DISCONNECTED_FROM_MYSELF = 26,
+};
+
+// WMPriorityLevel: the priority of the data that MP communication sends
+enum
+{
+    WM_PRIORITY_URGENT = 0,
+    WM_PRIORITY_HIGH = 1,
+    WM_PRIORITY_NORMAL = 2,
+    WM_PRIORITY_LOW = 3,
+};
+
 typedef void (*WMCallbackFunc)(void* arg);
 
 // WMStatus: the state that the ARM7 shares. Only the members that the ARM9 reads are named.
@@ -108,18 +132,31 @@ struct WMStatus
 {
     unsigned short state;
     char unk_2[0xc - 0x2];
-    // Whether MP communication is running
+    // Whether MP communication and DCF communication are running
     unsigned long mp_flag;
-    char unk_10[0x3c - 0x10];
+    unsigned long dcf_flag;
+    char unk_14[0x3c - 0x14];
     // The sizes of the data that MP communication sends and receives
     unsigned short mp_sendSize;
     unsigned short mp_recvSize;
     char unk_40[0x72 - 0x40];
     // The size of the buffer of the data that MP communication receives
     unsigned short mp_recvBufSize;
-    char unk_74[0xbc - 0x74];
+    char unk_74[0x7c - 0x74];
+    // The buffer of the data that MP communication is sending
+    unsigned long* mp_sendBuf;
+    char unk_80[0x86 - 0x80];
+    // Probably the children that are ready for MP communication: WM_SetMPDataToPortEx invalidates it but doesn't read it
+    unsigned short mp_readyBitmap;
+    char unk_88[0x9c - 0x88];
+    // Whether WM_StartMP doesn't check the sizes of the buffers
+    unsigned short mp_ignoreSizePrecheckMode;
+    char unk_9e[0xbc - 0x9e];
     unsigned short linkLevel;
-    char unk_be[0xf8 - 0xbe];
+    char unk_be[0xc6 - 0xbe];
+    // The child's power management: 1 while it's always awake, which MP communication needs
+    unsigned short pwrMgtMode;
+    char unk_c8[0xf8 - 0xc8];
     // The parent's parameters (WMParentParam): maxEntry
     unsigned short pparam_maxEntry;
     char unk_fa[0x182 - 0xfa];
@@ -156,6 +193,28 @@ struct WMCallback
     unsigned short errcode;
     unsigned short wlCmdID;
     unsigned short wlResult;
+};
+
+// What the callbacks of the data that a port sent get (WMPortSendCallback)
+struct WMPortSendCallback
+{
+    unsigned short apiid;
+    unsigned short errcode;
+    unsigned short wlCmdID;
+    unsigned short wlResult;
+    unsigned short state;
+    unsigned short port;
+    unsigned short destBitmap;
+    unsigned short restBitmap;
+    unsigned short sentBitmap;
+    unsigned short rsv;
+    const unsigned short* data;
+    unsigned short length;
+    unsigned short seqNo;
+    WMCallbackFunc callback;
+    void* arg;
+    unsigned short maxSendDataSize;
+    unsigned short maxRecvDataSize;
 };
 
 // What the ports' callbacks get (WMPortRecvCallback)
@@ -199,4 +258,12 @@ extern "C"
     int func_020d424c(int paramNum, ...);
     // WM_Finish
     int func_020d3fdc();
+    // WM_GetAID and WM_GetConnectedAIDs
+    unsigned short func_020d46cc();
+    unsigned short func_020d46fc();
+    // WM_SetPortCallback
+    int func_020d4770(unsigned short port, WMCallbackFunc callback, void* arg);
+    // WM_SetMPDataToPortEx
+    int func_020d59bc(WMCallbackFunc callback, void* arg, const unsigned short* sendData, unsigned short sendDataSize,
+                      unsigned short destBitmap, unsigned short port, unsigned short prio);
 }
