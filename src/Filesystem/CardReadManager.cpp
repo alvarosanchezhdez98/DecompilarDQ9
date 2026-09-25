@@ -127,7 +127,7 @@ void DMAChainSegmentInterruptHandler()
         unsigned int romChipID = SetupNormalGamecardBusCommandMode();
         func_020d1234(romChipID);
 
-        readManager->pSharedData->unknown_0 = 0;
+        readManager->pSharedData->result = 0;
         CardReadManager::CompletionCallback cleanProc = readManager->onComplete;
         NitroHandle* handle = readManager->handle;
 
@@ -316,7 +316,7 @@ extern "C" void SafeReadBlocksFromCartridge(CardReadManager*)
     // so it's some kind of cleanup
     func_020d1234(romChipID);
 
-    readManager->pSharedData->unknown_0 = 0;
+    readManager->pSharedData->result = 0;
     CardReadManager::CompletionCallback callback = readManager->onComplete;
     NitroHandle* handle = readManager->handle;
 
@@ -504,8 +504,8 @@ extern "C"
                 SetIRQInterruptState(priorState);
             }
             InvalidateDataCacheRange(manager->pSharedData, sizeof(Arm7CardReadData));
-        } while (manager->pSharedData->unknown_0 == CARD_RESULT_TIMEOUT && --retries > 0);
+        } while (manager->pSharedData->result == CARD_RESULT_TIMEOUT && --retries > 0);
 
-        return manager->pSharedData->unknown_0 == CARD_RESULT_SUCCESS;
+        return manager->pSharedData->result == CARD_RESULT_SUCCESS;
     }
 }
