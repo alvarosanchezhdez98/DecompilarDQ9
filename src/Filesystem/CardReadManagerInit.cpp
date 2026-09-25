@@ -60,7 +60,7 @@ void LockCardReadManager(unsigned short ownerID, int taskType)
     }
     
     volMan->lock.multiplicity++;
-    manager->pSharedData->unknown_0 = 0;
+    manager->pSharedData->result = 0;
     SetIRQInterruptState(priorState);
 }
 
@@ -88,7 +88,7 @@ void UnlockCardReadManager(unsigned short ownerID, int taskType)
         }
     }
     
-    manager->pSharedData->unknown_0 = 0;
+    manager->pSharedData->result = 0;
     SetIRQInterruptState(priorState);
 }
 
@@ -152,7 +152,7 @@ bool AwaitCardReadManagerIdle()
     while (manager->flags & (1 << READ_MANAGER_FLAG_HARDWARE_READ_IN_PROGRESS))
         BlockCurrentContext(&manager->ongoingReadBlock);
     SetIRQInterruptState(priorState);
-    return manager->pSharedData->unknown_0 == 0;
+    return manager->pSharedData->result == 0;
 }
 
 bool IsCardReadManagerIdle()
@@ -164,5 +164,5 @@ bool IsCardReadManagerIdle()
 int GetCardReadManagerSharedStatus()
 {
     CardReadManager* manager = &data_021118e0;
-    return manager->pSharedData->unknown_0;
+    return manager->pSharedData->result;
 }
