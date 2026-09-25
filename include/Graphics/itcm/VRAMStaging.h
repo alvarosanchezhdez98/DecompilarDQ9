@@ -59,6 +59,8 @@ public:
         // I don't see any other flags being used!
         unsigned short flags_;
 
+        StagingSpaceAllocation();
+
         // usa: func_01ff8ab4
         void SetFlagBitValue(int bit, bool value);
     };
@@ -81,7 +83,9 @@ public:
         int flags_ : 4; 
         int wordsCopied_ : 20;
         const void* copySource_;
-    
+
+        Task();
+
         // usa: func_01ff8e40
         void Reset();
         // usa: func_01ff8ebc
@@ -98,6 +102,8 @@ public:
         // 0 = regular, 1 = high priority
         unsigned short numTasksPerPriority_[2];
         unsigned short numTasks_;
+
+        CommonVRAMRegionTaskSet(unsigned char* pendingTaskIndices, unsigned short maxNumTasks);
 
         // usa: func_01ff96ac
         // Only resets the counters as no need to clear the task index
@@ -122,6 +128,13 @@ public:
     // not execute. (All other tasks will execute as normal)
     unsigned int textureLockMask_; 
     unsigned char frameBufferIndex_; // might be bool
+
+#ifdef VRAM_STAGING_MANAGER_CONSTRUCTOR
+    // Nothing in the ROM calls them: g_stagingManagerInstance has no static constructor, so only
+    // VRAMStagingITCM.cpp, which defines them, declares them
+    VRAMStagingManager();
+    ~VRAMStagingManager();
+#endif
 
     // usa: func_01ff8810
     void ZeroInitialize();

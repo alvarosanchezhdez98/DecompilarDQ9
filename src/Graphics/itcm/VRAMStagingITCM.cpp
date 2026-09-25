@@ -1,3 +1,4 @@
+#define VRAM_STAGING_MANAGER_CONSTRUCTOR
 #include "Graphics/itcm/VRAMStaging.h"
 #include "System/VRAM.h"
 #include "System/LoadToVRAM.h"
@@ -704,4 +705,36 @@ void SendStagedVRAMDataToVRAM(void* vramStagingManagerUserdata)
     if (vramStagingManagerUserdata == NULL)
         return;
     ((VRAMStagingManager*)vramStagingManagerUserdata)->SendReadyDataToVRAM();
+}
+
+// The constructors and the destructor, which nothing in the ROM calls
+
+VRAMStagingManager::Task::Task()
+{
+    Reset();
+}
+
+VRAMStagingManager::StagingSpaceAllocation::StagingSpaceAllocation()
+{
+    flags_ = 0;
+    start_ = 0;
+    size_ = 0;
+}
+
+VRAMStagingManager::CommonVRAMRegionTaskSet::CommonVRAMRegionTaskSet(unsigned char* pendingTaskIndices,
+                                                                     unsigned short maxNumTasks)
+{
+    pendingTaskIndices_ = pendingTaskIndices;
+    maxNumTasks_ = maxNumTasks;
+    Reset();
+}
+
+VRAMStagingManager::VRAMStagingManager()
+{
+    ZeroInitialize();
+}
+
+VRAMStagingManager::~VRAMStagingManager()
+{
+    CancelAllTasks();
 }

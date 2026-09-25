@@ -153,17 +153,17 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-09-24.
+Last recorded on 2026-09-25.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 234,692 | 2,959,024 | 7.93 % |
-| Functions | 1,681 | 14,779 | 11.37 % |
-| Modules | 3 complete, 9 in progress, 20 not started | 32 with code |  |
+| Code (bytes) | 259,836 | 2,959,024 | 8.78 % |
+| Functions | 1,917 | 14,779 | 12.97 % |
+| Modules | 4 complete, 10 in progress, 18 not started | 32 with code |  |
 
-Source files: 166 complete, 1 in progress.
+Source files: 190 complete, 1 in progress.
 
-Not counted as decompiled: 7 functions (17,024 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -172,13 +172,14 @@ Not counted as decompiled: 7 functions (17,024 bytes) in assembly, since their C
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
 | 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
+| 2026-09-25 | 1,917 (12.97 %) | 259,836 (8.78 %) | 190 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1535 | 4672 | 21.11 % | In progress |
-| itcm | Always loaded, fast memory | 5.8 | 38 | 23 | 15 | 70.56 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1649 | 4558 | 22.29 % | In progress |
+| itcm | Always loaded, fast memory | 5.8 | 38 | 38 | 0 | 94.02 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
 | ov001 | *Likely* events and cutscenes | 69.1 | 515 | 0 | 515 | 0.00 % | Not started |
@@ -207,8 +208,8 @@ Not counted as decompiled: 7 functions (17,024 bytes) in assembly, since their C
 | ov024 | Unclear, no strings | 151.1 | 573 | 0 | 573 | 0.00 % | In progress |
 | ov025 | *Likely* battle spell and skill animations | 89.5 | 304 | 0 | 304 | 0.00 % | Not started |
 | ov026 | *Likely* spell and skill effects | 23.1 | 24 | 0 | 24 | 0.00 % | Not started |
-| ov027 | Unclear, no strings | 19.6 | 87 | 0 | 87 | 0.00 % | Not started |
-| ov028 | Staff roll | 4.0 | 34 | 0 | 34 | 0.00 % | Not started |
+| ov027 | The NitroSDK's MB library, DS Download Play's parent (`src/MultiBoot`): it registers a game, sends its beacons and the blocks of its file to the children, and handles the wireless library. Overlay 31 uses it. Decompiled, in 7 files (`mb_parent.c`, `mb_fileinfo.c`, `mb_gameinfo.c`, `mb_wm_base.c`, `mb_cache.c`, `mb_task.c` and the children's requests), 14 functions still in assembly | 19.6 | 87 | 73 | 14 | 42.02 % | In progress |
+| ov028 | The staff roll (`src/Scene/Overlay_28`): `StaffRoll` loads the lines of `staffroll.bin` with a script and scrolls them on the sub screen. Overlay 1 runs one itself, and the overlay has one that a V-count alarm runs (`StartStaffRoll()`). Decompiled, in two files | 4.0 | 34 | 34 | 0 | 100.00 % | Complete |
 | ov029 | *Likely* encrypted code: dsd only finds data, but `main()` calls three addresses in it at startup, as checks that decide whether to load overlay 33 or 34 | 0.0 | 0 | 0 | 0 | - | No code |
 | ov030 | Creates, initializes and destroys `GameResources` and its data (`src/Resource/Overlay_30`): `main()` loads it before and after running overlay 17. Decompiled, with `CreateGameResources` and `GameResources::Initialize` in assembly for now. Needs `FORCE_ACTIVE` to be linked | 4.5 | 11 | 9 | 2 | 5.18 % | In progress |
 | ov031 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | 279.6 | 1962 | 0 | 1962 | 0.00 % | Not started |
@@ -227,7 +228,7 @@ Not counted as decompiled: 7 functions (17,024 bytes) in assembly, since their C
 | NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 4 | 62 | 0.77 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 662 | 348 | 61.24 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 778 | 232 | 71.01 % |
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
@@ -238,10 +239,26 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | Module | Function | Address | Size |
 | ------ | -------- | ------- | ----: |
 | main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
+| main | `func_020d2f88` | `0x020d2f98` | 0x68 |
+| main | `func_020d3160` | `0x020d3170` | 0x87c |
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
 | ov019 | `SaveErrorScreen::Run` | `0x0218b5a8` | 0xbd0 |
 | ov020 | `StartupScene::Run` | `0x0218b710` | 0x10ac |
 | ov021 | `CharacterCreationScene::Run` | `0x0218b5fc` | 0x4fc |
+| ov027 | `MBi_CommParentCallback` | `0x021d8c94` | 0x4a0 |
+| ov027 | `MBi_CommParentRecvDataPerChild` | `0x021d9134` | 0x4e4 |
+| ov027 | `MBi_CommParentSendBlock` | `0x021d9940` | 0x29c |
+| ov027 | `MBi_calc_sendblock` | `0x021d9d5c` | 0x7c |
+| ov027 | `MB_ReadSegment` | `0x021d9e9c` | 0x478 |
+| ov027 | `MB_RegisterFile` | `0x021da38c` | 0x290 |
+| ov027 | `MBi_SetSegmentInfo` | `0x021da690` | 0x178 |
+| ov027 | `MBi_ReadyBeaconSendStatus` | `0x021daecc` | 0xa0 |
+| ov027 | `MBi_SendFixedBeacon` | `0x021dafc0` | 0x164 |
+| ov027 | `MBi_SendVolatBeacon` | `0x021db154` | 0x26c |
+| ov027 | `MBi_ParentCallback` | `0x021db524` | 0x858 |
+| ov027 | `MBi_ChildCallback` | `0x021dbdec` | 0x82c |
+| ov027 | `MB_Init` | `0x021dc680` | 0x1e4 |
+| ov027 | `MB_DisconnectChild` | `0x021dcd5c` | 0x18c |
 | ov030 | `CreateGameResources` | `0x021d8a40` | 0x810 |
 | ov030 | `GameResources::Initialize` | `0x021d9340` | 0x91c |
 
@@ -251,8 +268,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2283 | 2094 | 265 | 30 | 727.6 |
-| itcm | 10 | 5 | 0 | 0 | 1.7 |
+| main | 2227 | 2037 | 264 | 30 | 716.7 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
 | ov002 | 24 | 127 | 57 | 5 | 100.6 |
@@ -276,9 +292,8 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov024 | 142 | 387 | 36 | 8 | 151.1 |
 | ov025 | 126 | 137 | 33 | 8 | 89.5 |
 | ov026 | 5 | 9 | 8 | 2 | 23.1 |
-| ov027 | 25 | 54 | 6 | 2 | 19.6 |
-| ov028 | 13 | 19 | 2 | 0 | 4.0 |
+| ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5309** | **6628** | **1030** | **131** | **2660.5** |
+| **Total** | **5205** | **6499** | **1027** | **131** | **2635.9** |
 <!-- END GENERATED -->

@@ -4,3 +4,41 @@
     .data       start:0x021dd8e0 end:0x021dd920 kind:data align:32
     .bss        start:0x021dd920 end:0x021e3440 kind:bss align:32
 
+src/MultiBoot/MultiBootParent.cpp:
+    complete
+    .text start:0x021d8a40 end:0x021d9e1c
+    .data start:0x021dd8e0 end:0x021dd8e4
+    .bss start:0x021dd920 end:0x021dd924
+
+src/MultiBoot/MultiBootFileInfo.cpp:
+    complete
+    .text start:0x021d9e1c end:0x021dab84
+    .rodata start:0x021dd8b8 end:0x021dd8dc
+    .data start:0x021dd8e4 end:0x021dd8ec
+    .bss start:0x021dd924 end:0x021dd940
+
+src/MultiBoot/MultiBootGameInfo.cpp:
+    complete
+    .text start:0x021dab84 end:0x021db430
+    .bss start:0x021dd940 end:0x021e33e0
+
+src/MultiBoot/MultiBootWireless.cpp:
+    complete
+    .text start:0x021db430 end:0x021dd104
+    .data start:0x021dd8ec end:0x021dd920
+    .bss start:0x021e33e0 end:0x021e3420
+
+src/MultiBoot/MultiBootCache.cpp:
+    complete
+    .text start:0x021dd104 end:0x021dd218
+
+src/MultiBoot/MultiBootTask.cpp:
+    complete
+    .text start:0x021dd218 end:0x021dd5a4
+    .bss start:0x021e3420 end:0x021e3424
+
+src/MultiBoot/MultiBootRequest.cpp:
+    complete
+    .text start:0x021dd5a4 end:0x021dd8b8
+    .bss start:0x021e3424 end:0x021e3440
+

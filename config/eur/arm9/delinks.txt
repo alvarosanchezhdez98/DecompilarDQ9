@@ -654,6 +654,61 @@ src/System/Checksum.cpp:
     complete
     .text start:0x020d1d2c end:0x020d1df8
 
+src/Sound/SoundDriverInterface.cpp:
+    complete
+    .text start:0x020d1df8 end:0x020d21d0
+
+src/Sound/SoundDriverMain.cpp:
+    complete
+    .text start:0x020d21d0 end:0x020d2230
+    .bss start:0x02112750 end:0x0211276c
+
+src/Sound/SoundDriverCommand.cpp:
+    complete
+    .text start:0x020d2230 end:0x020d2940
+    .bss start:0x02112780 end:0x02114260
+
+src/Sound/SoundDriverAlarm.cpp:
+    complete
+    .text start:0x020d2940 end:0x020d2a04
+    .bss start:0x02114260 end:0x021142c0
+
+src/Sound/SoundDriverWork.cpp:
+    complete
+    .text start:0x020d2a04 end:0x020d2ad4
+    .bss start:0x021142c0 end:0x021142c4
+
+src/Sound/SoundDriverUtil.cpp:
+    complete
+    .text start:0x020d2ad4 end:0x020d2b44
+    .rodata start:0x020ed83c end:0x020ee210
+
+src/Sound/SoundDriverBank.cpp:
+    complete
+    .text start:0x020d2b44 end:0x020d2f38
+
+src/System/StdString.cpp:
+    complete
+    .text start:0x020d2f38 end:0x020d3094
+
+src/System/StdPrintf.cpp:
+    complete
+    .text start:0x020d3094 end:0x020d39ec
+
+src/Wireless/WirelessSystem.cpp:
+    complete
+    .text start:0x020d3ddc end:0x020d473c
+    .bss start:0x021142e0 end:0x02114d80
+
+src/Wireless/WirelessSync.cpp:
+    complete
+    .text start:0x020d473c end:0x020d4e58
+    .data start:0x020f2304 end:0x020f2308
+
+src/Wireless/WirelessStandard.cpp:
+    complete
+    .text start:0x020d4e58 end:0x020d5694
+
 src/Filesystem/ExtendedNitroVM.cpp:
     complete
     .text start:0x020d8724 end:0x020d8fdc
