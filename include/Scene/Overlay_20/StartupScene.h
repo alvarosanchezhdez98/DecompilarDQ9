@@ -1,60 +1,8 @@
 #pragma once
 
 #include "Graphics/Background.h"
+#include "Graphics/TextWindow.h"
 #include "Memory/SafeAllocator.h"
-
-// A menu of text items, which main's code runs (func_0205c790 initializes it, func_0205cb74 adds an item)
-struct TextMenu
-{
-    char unk_0[4];
-    char unk_4[0x1c];
-    char unk_20[0x50];
-    char unk_70[0x40];
-    unsigned char unk_b0;
-    unsigned char unk_b1;
-    char unk_b2[2];
-    short x_;
-    short y_;
-    short width_;
-    short height_;
-    char unk_bc[0x233 - 0xbc];
-    unsigned char unk_233;
-    unsigned char unk_234;
-    char unk_235[3];
-
-    // Sets the number of columns and rows of the items
-    void SetGrid(int columns, int rows);
-
-    void SetPosition(short x, short y)
-    {
-        x_ = x;
-        y_ = y;
-    }
-};
-
-// What func_0205cfd4 initializes, *likely* a text window: StartupScene draws the library versions with it
-struct TextWindow
-{
-    char unk_0[0x98];
-    BackgroundGraphics* background_;
-    char unk_9c[4];
-    // In tiles
-    short width_;
-    short height_;
-    short unk_a4;
-    short unk_a6;
-    short unk_a8;
-    short unk_aa;
-    short unk_ac;
-    short unk_ae;
-    char unk_b0;
-    unsigned char unk_b1;
-    unsigned char unk_b2;
-    char unk_b3[2];
-    unsigned char unk_b5;
-    unsigned char unk_b6;
-    char unk_b7[5];
-};
 
 // The only code of overlay 20, *likely* what the game starts with: main() runs it in mode 6 (the title), where it shows
 // the logos (nintendo.pac, bg_mobi_2.pac, bg_lv5.pac) and then starts the game, and in the other modes, where it

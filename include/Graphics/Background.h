@@ -26,5 +26,11 @@ struct Canvas
     char unk_b0[4];
     short unk_b4;
     short unk_b6;
-    char unk_b8[0x28];
+    char unk_b8[4];
+    short unk_bc;
+    short unk_be;
+    char unk_c0[5];
+    // 0x2: hidden?, 0x20: ?, 0x40: ?
+    unsigned char flags_;
+    char unk_c6[0x1a];
 };

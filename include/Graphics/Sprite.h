@@ -4,12 +4,16 @@
 
 struct Sprite
 {
-    char unk_0[0x14];
+    char unk_0[8];
+    // The OAM attributes
+    void* unk_8;
+    char unk_c[8];
     fix32_t x_;
     fix32_t y_;
     char unk_1c[6];
     unsigned char unk_22;
-    char unk_23[3];
+    char unk_23[2];
+    unsigned char unk_25;
     unsigned char unk_26;
     char unk_27;
 };
@@ -36,7 +40,7 @@ struct SpriteRenderer
     Sprite* sprites_;
     char unk_44[8];
     short numSprites_;
-    char unk_4e[2];
+    unsigned short capacity_;
     unsigned char unk_50;
     char unk_51[3];
 
