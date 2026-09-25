@@ -23,14 +23,6 @@
 // WM_SYSTEM_BUF_SIZE
 #define SYSTEM_BUFFER_SIZE 0xf00
 
-// WMStateCode: what the answers of the parent and the child say about the connections
-#define STATECODE_CONNECTED 7
-#define STATECODE_DISCONNECTED 9
-#define STATECODE_DISCONNECTED_FROM_MYSELF 26
-// And the MP communication's answers that bring data
-#define STATECODE_MP_IND 11
-#define STATECODE_MPACK_IND 12
-
 // HW_ARM7_FIFO_RECV_FLAG? The flag that the ARM7 sets when it sent an answer
 #define FIFO_RECEIVE_FLAG (*(volatile unsigned short*)0x027fff96)
 
@@ -72,14 +64,6 @@ struct WMStartMPCallback
     unsigned short state;
     unsigned char reserved[2];
     void* recvBuf;
-};
-
-struct WMPortSendCallback
-{
-    unsigned short apiid;
-    unsigned short errcode;
-    char unk_4[0x1c - 0x4];
-    WMCallbackFunc callback;
 };
 
 // The variables are laid out like the original: the compiler sorts them by size
@@ -337,7 +321,7 @@ extern "C"
             if (callback->apiid == WM_APIID_START_MP)
             {
                 WMStartMPCallback* const mp = (WMStartMPCallback*)callback;
-                if ((mp->state == STATECODE_MP_IND || mp->state == STATECODE_MPACK_IND) &&
+                if ((mp->state == WM_STATECODE_MP_IND || mp->state == WM_STATECODE_MPACK_IND) &&
                     mp->errcode == WM_ERRCODE_SUCCESS)
                     InvalidateDataCacheRange(mp->recvBuf, w9b->status->mp_recvBufSize);
             }
@@ -389,10 +373,10 @@ extern "C"
                     parentSize = connect->parentSize;
                     childSize = connect->childSize;
                 }
-                if (state == STATECODE_CONNECTED || state == STATECODE_DISCONNECTED ||
-                    state == STATECODE_DISCONNECTED_FROM_MYSELF)
+                if (state == WM_STATECODE_CONNECTED || state == WM_STATECODE_DISCONNECTED ||
+                    state == WM_STATECODE_DISCONNECTED_FROM_MYSELF)
                 {
-                    if (state == STATECODE_CONNECTED)
+                    if (state == WM_STATECODE_CONNECTED)
                         w9b->connectedAidBitmap |= 1 << aid;
                     else
                         w9b->connectedAidBitmap &= ~(1 << aid);

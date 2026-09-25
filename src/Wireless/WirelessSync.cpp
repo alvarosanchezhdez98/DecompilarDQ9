@@ -9,8 +9,6 @@
 
 // The NitroSDK's wm_sync.c: the wireless manager's functions that answer at once, without the ARM7
 
-// WM_STATECODE_PORT_INIT: what a port's callback gets when it's set
-#define STATECODE_PORT_INIT 25
 // WM_NUM_MAX_CHILD
 #define MAX_CHILDREN 15
 // WM_SCAN_OTHER_ELEMENT_MAX
@@ -78,9 +76,6 @@ extern "C"
     void func_020c99ac(unsigned char* mac);
     // MIi_CpuCopyFast
     void func_020ca4b4(const void* src, void* dst, unsigned long size);
-    // WMi_GetStatusAddress, WM_GetAID and WM_GetConnectedAIDs
-    unsigned short func_020d46cc();
-    unsigned short func_020d46fc();
 
     // WM_SetIndCallback
     int func_020d472c(WMCallbackFunc callback)
@@ -109,7 +104,7 @@ extern "C"
             VectorizedMemset(&cb, 0, sizeof(WMPortRecvCallback));
             cb.apiid = WM_APIID_PORT_RECV;
             cb.errcode = WM_ERRCODE_SUCCESS;
-            cb.state = STATECODE_PORT_INIT;
+            cb.state = WM_STATECODE_PORT_INIT;
             cb.port = port;
             cb.recvBuf = NULL;
             cb.data = NULL;
@@ -156,7 +151,7 @@ extern "C"
     }
 
     // WM_GetMPSendBufferSize
-    unsigned long func_020d4894()
+    int func_020d4894()
     {
         WMArm9Buf* const w9b = func_020d41d8();
         if (func_020d424c(2, WM_STATE_PARENT, WM_STATE_CHILD) != WM_ERRCODE_SUCCESS)
@@ -169,7 +164,7 @@ extern "C"
     }
 
     // WM_GetMPReceiveBufferSize
-    unsigned long func_020d4900()
+    int func_020d4900()
     {
         WMArm9Buf* const w9b = func_020d41d8();
         int isParent;

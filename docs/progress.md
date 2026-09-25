@@ -136,9 +136,14 @@ The script keeps everything outside the generated section, so this is the place 
 - Official names, from pokeheartgold's assembly (`tools/find_signatures.py --exact --rename`): 75 functions of main's C
   runtime (`0x02001578-0x0200f398`, now a region of its own, like NitroSystem's FND and G2D at `0x020afe44`) and 1,234
   of overlay 31's wireless libraries (NitroWiFi and NitroDWC). Nothing is decompiled there yet.
+- Main, NitroSDK: the wireless manager (WM, `src/Wireless`) is complete, 76 functions in 8 files: `wm_system.c`,
+  `wm_sync.c`, `wm_standard.c`, `wm_mp.c`, `wm_dcf.c`, `wm_ds.c` (data sharing), `wm_ks.c` (key sharing, which the SDK
+  does with data sharing) and `wm_etc.c`. Their functions keep their `func_` names, with the SDK's in a comment.
+  - `wm_ds.c` advances its ring buffer's indexes with `& 3`: `% 4` of a `u16` gives a signed remainder.
+  - The code after WM, at `0x020d6bbc`, belongs to another library.
 - Next: the NitroSDK gaps (`python tools/progress.py --remaining main`): PM at `0x020ce138-0x020cf030` (a newer version
-  than the public decompilations), `card_spi.c` and `card_backup.c` at `0x020d0050-0x020d085c`, then SND, STD and WM
-  after `0x020d1df8`. Also the upstream sketch in overlay 24 (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
+  than the public decompilations) and `card_spi.c` and `card_backup.c` at `0x020d0050-0x020d085c`. Also the upstream
+  sketch in overlay 24 (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
   drafts them from Sonic Rush Adventure's C, `tools/data_order.py` finds the order of their data, and
   `tools/complete_file.py` adds them to the build (see [Decompiling.md](../Decompiling.md)).
 - Overlay 14, the bestiary: its three source files are complete, only `UpdateText`'s C is left.
@@ -157,11 +162,11 @@ Last recorded on 2026-09-25.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 259,836 | 2,959,024 | 8.78 % |
-| Functions | 1,917 | 14,779 | 12.97 % |
+| Code (bytes) | 265,252 | 2,959,024 | 8.96 % |
+| Functions | 1,945 | 14,779 | 13.16 % |
 | Modules | 4 complete, 10 in progress, 18 not started | 32 with code |  |
 
-Source files: 190 complete, 1 in progress.
+Source files: 195 complete, 1 in progress.
 
 Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -172,13 +177,13 @@ Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their 
 | 2026-09-22 | 1,075 (7.27 %) | 143,400 (4.85 %) | 84 |
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
 | 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
-| 2026-09-25 | 1,917 (12.97 %) | 259,836 (8.78 %) | 190 |
+| 2026-09-25 | 1,945 (13.16 %) | 265,252 (8.96 %) | 195 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1649 | 4558 | 22.29 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 1677 | 4530 | 22.87 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 38 | 0 | 94.02 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 8 | 818 | 0.58 % | In progress |
@@ -228,7 +233,7 @@ Not counted as decompiled: 23 functions (30,948 bytes) in assembly, since their 
 | NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 4 | 62 | 0.77 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 778 | 232 | 71.01 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 806 | 204 | 75.74 % |
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
@@ -268,7 +273,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 2227 | 2037 | 264 | 30 | 716.7 |
+| main | 2224 | 2014 | 262 | 30 | 711.4 |
 | ov000 | 273 | 450 | 86 | 9 | 188.2 |
 | ov001 | 236 | 257 | 21 | 1 | 69.1 |
 | ov002 | 24 | 127 | 57 | 5 | 100.6 |
@@ -295,5 +300,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5205** | **6499** | **1027** | **131** | **2635.9** |
+| **Total** | **5202** | **6476** | **1025** | **131** | **2630.6** |
 <!-- END GENERATED -->

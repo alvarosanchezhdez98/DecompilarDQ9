@@ -116,8 +116,8 @@ extern "C"
     // WM_Init
     int func_020d3dcc(void* sysBuf, unsigned short dmaNo);
     // WM_GetMPReceiveBufferSize and WM_GetMPSendBufferSize
-    unsigned long func_020d4900();
-    unsigned long func_020d4894();
+    int func_020d4900();
+    int func_020d4894();
 
     int func_020d4e58(WMCallbackFunc callback, unsigned long miscFlags);
     int func_020d4fa4(void* wmSysBuf, WMCallbackFunc callback, unsigned short dmaNo, unsigned long miscFlags);
