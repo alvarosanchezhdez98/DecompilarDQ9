@@ -23757,7 +23757,7 @@ from:0x020cf8a8 kind:load to:0x020cf8cc module:main
 from:0x020cf8b8 kind:load to:0x020cf8cc module:main
 from:0x020cf8c8 kind:load to:0x020cf8cc module:main
 from:0x020cf8e0 kind:arm_call to:0x020caea4 module:main
-from:0x020cf980 kind:load to:0x020f2298 module:main
+from:0x020cf980 kind:load to:0x020f229c add:-0x4 module:main
 from:0x020cf9a8 kind:arm_call to:0x020cf8f4 module:main
 from:0x020cf9c4 kind:arm_call to:0x020cf988 module:main
 from:0x020cfb00 kind:load to:0x020f229c module:main

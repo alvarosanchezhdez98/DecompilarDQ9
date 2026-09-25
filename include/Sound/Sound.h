@@ -3,6 +3,7 @@
 #include "Memory/HMRFAllocator.h"
 #include "Memory/SignedAllocator.h"
 #include "Filesystem/NitroVM.h"
+#include "System/PowerManagement.h"
 
 // NitroSystem's sound library (NNS_Snd*), which plays the sound archive (.sdat) with the NitroSDK's sound driver (SND)
 
@@ -59,23 +60,6 @@ static inline void* GetNextListObject(SignedAllocatorList* list, void* object)
 static inline void* GetPrevListObject(SignedAllocatorList* list, void* object)
 {
     return list->ElementBefore((SignedAllocatorHeader*)object);
-}
-
-typedef void (*SleepCallback)(void* arg);
-
-// The NitroSDK's PMSleepCallbackInfo: a function called before or after the console sleeps
-struct SleepCallbackInfo
-{
-    SleepCallback callback;
-    void* arg;
-    SleepCallbackInfo* next;
-};
-
-// The NitroSDK's PM_SetSleepCallbackInfo
-static inline void SetSleepCallbackInfo(SleepCallbackInfo* info, SleepCallback callback, void* arg)
-{
-    info->callback = callback;
-    info->arg = arg;
 }
 
 // NitroSystem's NNSSndFader: moves a value from origin to target in a number of frames
@@ -541,21 +525,6 @@ extern "C"
     // usa: func_020d2ac4
     // SND_CalcChannelVolume: the volume in the low byte and the shift in the high byte
     unsigned short func_020d2ac4(int decibels);
-
-    // The NitroSDK's power management (PM)
-
-    // usa: func_020cef34
-    // PM_PrependPreSleepCallback
-    void func_020cef34(SleepCallbackInfo* info);
-    // usa: func_020cef4c
-    // PM_AppendPostSleepCallback
-    void func_020cef4c(SleepCallbackInfo* info);
-    // usa: func_020cef64
-    // PM_DeletePreSleepCallback
-    void func_020cef64(SleepCallbackInfo* info);
-    // usa: func_020cef7c
-    // PM_DeletePostSleepCallback
-    void func_020cef7c(SleepCallbackInfo* info);
 
     // NitroSystem's sound library
 
