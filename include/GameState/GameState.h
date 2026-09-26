@@ -66,7 +66,10 @@ public:
     unsigned char* treasureMapLanguageData_;
     GrottoStruct grottoInfo_;
 
-    char unk_6fc0[0x7ff4 - 0x6fc0];
+    char unk_6fc0[0x7f71 - 0x6fc0];
+    // The demo that the title runs next (0 to 2), see MenuScript::RunScript
+    unsigned char titleDemo_;
+    char unk_7f72[0x7ff4 - 0x7f72];
 
 public:
     // --- GameStateInstance.cpp ---
