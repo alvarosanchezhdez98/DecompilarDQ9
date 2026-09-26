@@ -17,7 +17,7 @@ struct MessageSystem
     char unk_2e8[0x998 - 0x2e8];
     // While the message is shown
     int busy_;
-    char unk_99c[4];
+    int unk_99c;
     // The state of the message window: SaveErrorScreen waits for 4 before deleting the save data and for 3 before
     // checking the buttons
     int unk_9a0;
@@ -25,6 +25,10 @@ struct MessageSystem
     unsigned char unk_19b2;
     char unk_19b3[0x19be - 0x19b3];
     unsigned char unk_19be;
-    char unk_19bf[0x1e28 - 0x19bf];
+    char unk_19bf[0x19ca - 0x19bf];
+    unsigned char unk_19ca;
+    char unk_19cb[0x19d2 - 0x19cb];
+    unsigned char unk_19d2;
+    char unk_19d3[0x1e28 - 0x19d3];
     void* unk_1e28;
 };

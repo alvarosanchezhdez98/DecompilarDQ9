@@ -4,3 +4,13 @@
     .data       start:0x021889a0 end:0x02188b80 kind:data align:32
     .bss        start:0x02188b80 end:0x02188b80 kind:bss align:32
 
+src/Scene/Overlay_11/MenuScript.cpp:
+    complete
+    .text start:0x021842a0 end:0x02184c30
+
+src/Scene/Overlay_11/MenuScriptCommands.cpp:
+    complete
+    .text start:0x02184c30 end:0x02188904
+    .rodata start:0x02188904 end:0x02188998
+    .data start:0x021889a0 end:0x02188b74
+
