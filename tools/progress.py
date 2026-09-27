@@ -57,7 +57,7 @@ HISTORY_FIELDS = ["date", "functions_done", "functions_total", "bytes_done", "by
 SECTION = re.compile(r"^\s*(\.\w+)\s+start:(0x[0-9a-f]+)\s+end:(0x[0-9a-f]+)(?:\s+kind:(\w+))?")
 FUNCTION = re.compile(r"^(\S+) kind:function\((?:arm|thumb),size=(0x[0-9a-f]+)[^)]*\) addr:(0x[0-9a-f]+)")
 NONMATCHING_BLOCK = re.compile(r"^#ifdef NONMATCHING\b.*?^#else\b(.*?)^#endif\b", re.MULTILINE | re.DOTALL)
-ASM_FUNCTION = re.compile(r"^\s*asm\s[^;{}()]*?([\w:~]+)\s*\(", re.MULTILINE)
+ASM_FUNCTION = re.compile(r"^\s*(?:static\s+)?asm\s[^;{}()]*?([\w:~]+)\s*\(", re.MULTILINE)
 
 
 @dataclass

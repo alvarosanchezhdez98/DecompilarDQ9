@@ -177,6 +177,19 @@ The script keeps everything outside the generated section, so this is the place 
   - The unreferenced words in both files' `.rodata` are class constants (`sConfirmButtons`, `sTitleY`...), which the
     compiler emits although the code uses their values.
   - `SkillPointMenu::Update` is only called through overlay 9's symbol at the same address, so it's in `FORCE_ACTIVE`.
+- Overlay 11, the menus that run a script (`data/menu/*.stb`, "SB2"): complete (186 functions), in two source files in
+  `src/Scene/Overlay_11`, with the classes in `include/Scene/Overlay_11/MenuScript.h`.
+  - `MenuScript.cpp` (`0x021842a0-0x02184c30`): the system that overlay 17 creates for a menu's script. It runs the
+    script's entries with overlay 17's interpreter, the menu's heaps, the native functions of overlay 4 (callbacks),
+    the answers of the questions and the title's demo (entry 999 after a minute without input).
+  - `MenuScriptCommands.cpp` (`0x02184c30-0x02188904`): the 114 commands of the scripts. Most of them create or change
+    the objects of overlay 23 (and one of overlay 4), whose vtables are in overlay 23: the objects keep their vtable as
+    a member, and the commands call their virtual functions through `MenuObjectFunctions`.
+  - Three commands are in assembly (`NONMATCHING`): `Command_CreateChildHeap` (55.4 %), `Command_2a` (80.8 %) and
+    `Command_4a` (62.3 %), whose registers differ.
+  - The file has `#pragma ipa file`: only then does the compiler put the NitroSDK's `G2_SetBGxControl` and
+    `G2_SetBGxPriority` (whose addresses the commands take) before the command, in reverse order.
+  - `MenuScript::GetUnk1b2` is only called through overlay 9's symbol at the same address, so it's in `FORCE_ACTIVE`.
 - Next: the NitroSDK gaps (`python tools/progress.py --remaining main`). Also the upstream sketch in overlay 24
   (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
   drafts them from Sonic Rush Adventure's C, `tools/data_order.py` finds the order of their data, and
@@ -193,17 +206,17 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-09-25.
+Last recorded on 2026-09-26.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 284,916 | 2,959,024 | 9.63 % |
-| Functions | 2,029 | 14,779 | 13.73 % |
-| Modules | 4 complete, 11 in progress, 17 not started | 32 with code |  |
+| Code (bytes) | 302,008 | 2,959,024 | 10.21 % |
+| Functions | 2,212 | 14,779 | 14.97 % |
+| Modules | 4 complete, 12 in progress, 16 not started | 32 with code |  |
 
-Source files: 200 complete, 1 in progress.
+Source files: 202 complete, 1 in progress.
 
-Not counted as decompiled: 26 functions (32,256 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 29 functions (33,184 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -213,6 +226,7 @@ Not counted as decompiled: 26 functions (32,256 bytes) in assembly, since their 
 | 2026-09-23 | 1,363 (9.22 %) | 194,208 (6.56 %) | 126 |
 | 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
 | 2026-09-25 | 2,029 (13.73 %) | 284,916 (9.63 %) | 200 |
+| 2026-09-26 | 2,212 (14.97 %) | 302,008 (10.21 %) | 202 |
 
 ## Modules
 
@@ -232,7 +246,7 @@ Not counted as decompiled: 26 functions (32,256 bytes) in assembly, since their 
 | ov008 | *Likely* battle records and profile | 28.1 | 63 | 0 | 63 | 0.00 % | Not started |
 | ov009 | *Likely* character creation / name entry | 25.7 | 43 | 0 | 43 | 0.00 % | Not started |
 | ov010 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | 1.9 | 3 | 3 | 0 | 100.00 % | Complete |
-| ov011 | Unclear | 17.6 | 186 | 0 | 186 | 0.00 % | Not started |
+| ov011 | The system of the menus that run a script (`data/menu/*.stb`: the title, the treasure maps, the accolades...), and its 114 script commands (`src/Scene/Overlay_11`). Overlay 17 loads the script and overlay 23 has the objects that the commands create. Decompiled, with 3 commands in assembly for now. Needs `FORCE_ACTIVE` | 17.6 | 186 | 183 | 3 | 94.85 % | In progress |
 | ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
 | ov013 | The skill up screen: the menu that spends skill points, and the list of each skill's abilities (`src/Scene/Overlay_13`) | 14.7 | 40 | 37 | 3 | 91.33 % | In progress |
 | ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
@@ -281,6 +295,9 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
 | main | `func_020d2f88` | `0x020d2f98` | 0x68 |
 | main | `func_020d3160` | `0x020d3170` | 0x87c |
+| ov011 | `Command_CreateChildHeap` | `0x02184ed0` | 0xe0 |
+| ov011 | `Command_2a` | `0x021869b8` | 0x18c |
+| ov011 | `Command_4a` | `0x02187720` | 0x134 |
 | ov013 | `SkillPointMenu::Initialize` | `0x02184360` | 0x340 |
 | ov013 | `SkillPointMenu::OpenMenu` | `0x02185990` | 0x11c |
 | ov013 | `SkillPointMenu::DrawIcon` | `0x02186db4` | 0xc0 |
@@ -321,7 +338,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov006 | 24 | 82 | 22 | 4 | 50.1 |
 | ov008 | 11 | 38 | 12 | 2 | 28.1 |
 | ov009 | 4 | 26 | 9 | 4 | 25.7 |
-| ov011 | 86 | 100 | 0 | 0 | 17.6 |
+| ov011 | 0 | 3 | 0 | 0 | 0.9 |
 | ov012 | 2 | 52 | 16 | 1 | 27.2 |
 | ov013 | 0 | 2 | 1 | 0 | 1.3 |
 | ov014 | 0 | 0 | 0 | 1 | 3.0 |
@@ -338,5 +355,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5176** | **6429** | **1014** | **131** | **2611.4** |
+| **Total** | **5090** | **6332** | **1014** | **131** | **2594.7** |
 <!-- END GENERATED -->
