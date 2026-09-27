@@ -29,7 +29,9 @@ struct Canvas
     char unk_b8[4];
     short unk_bc;
     short unk_be;
-    char unk_c0[5];
+    char unk_c0[4];
+    // *Likely* the canvas' item (overlay 12)
+    unsigned char unk_c4;
     // 0x2: hidden?, 0x20: ?, 0x40: ?
     unsigned char flags_;
     char unk_c6[0x1a];

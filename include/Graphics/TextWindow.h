@@ -19,6 +19,9 @@ union WindowFrame
     {
         char unk_0[4];
         int unk_4;
+        char unk_8[0x28];
+        // Negative when the frame isn't touched?
+        int unk_30;
     };
 };
 
@@ -98,4 +101,22 @@ struct TextWindow
     unsigned char unk_b9;
     unsigned char unk_ba;
     unsigned char unk_bb;
+
+    void SetUnkA8(short a, short b)
+    {
+        unk_a8 = a;
+        unk_aa = b;
+    }
+
+    void SetSize(short width, short height)
+    {
+        width_ = width;
+        height_ = height;
+    }
+
+    void SetUnkAc(short a, short b)
+    {
+        unk_ac = a;
+        unk_ae = b;
+    }
 };

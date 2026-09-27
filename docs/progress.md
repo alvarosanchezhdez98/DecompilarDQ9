@@ -190,6 +190,19 @@ The script keeps everything outside the generated section, so this is the place 
   - The file has `#pragma ipa file`: only then does the compiler put the NitroSDK's `G2_SetBGxControl` and
     `G2_SetBGxPriority` (whose addresses the commands take) before the command, in reverse order.
   - `MenuScript::GetUnk1b2` is only called through overlay 9's symbol at the same address, so it's in `FORCE_ACTIVE`.
+- Overlay 12, the editor of tag mode's profile: complete (71 functions) in `src/Scene/Overlay_12/ProfileEditor.cpp`,
+  with the classes in `include/Scene/Overlay_12/ProfileEditor.h`. A state machine edits the card's title (from
+  `ttlname`), accolade, birthday, design and message (overlay 3's keyboard, `keyboard_pr.bin`), and
+  `ForbiddenWordChecker` looks for the forbidden words of the message. Overlay 23 draws the card.
+  - Seven functions are in assembly (`NONMATCHING`): `ForbiddenWordChecker::Check` and `Match`, whose loops compile
+    differently, and `LoadProfile` (88.6 %), `State_TitleCategory` (97.8 %), `State_0d` (81.8 %), `Text_0d` (94.2 %)
+    and `Text_0e` (89.9 %).
+  - The original computes some addresses apart from their fields' offset (`add r0, r10, #0x100` and `[r0, #0x14]`):
+    inline functions that compute the pointer with `char*` arithmetic, like `GetProfile()`, give that
+    (`GetCursor()`, `GetFrame()`).
+  - The file has `#pragma ipa file`: its function-local arrays and `static const` variables are sorted with the rest.
+    The unreferenced constants in `.rodata` are such variables of a function, and two tables are aligned to 4.
+  - `include/GameState/PartyMemberData.h` has the party member's data that overlays 12 and 13 read.
 - Next: the NitroSDK gaps (`python tools/progress.py --remaining main`). Also the upstream sketch in overlay 24
   (`GetAttackBaseDamage.cpp`). `tools/library_draft.py`
   drafts them from Sonic Rush Adventure's C, `tools/data_order.py` finds the order of their data, and
@@ -206,17 +219,17 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-09-26.
+Last recorded on 2026-09-27.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 302,008 | 2,959,024 | 10.21 % |
-| Functions | 2,212 | 14,779 | 14.97 % |
-| Modules | 4 complete, 12 in progress, 16 not started | 32 with code |  |
+| Code (bytes) | 324,504 | 2,959,024 | 10.97 % |
+| Functions | 2,276 | 14,779 | 15.40 % |
+| Modules | 4 complete, 13 in progress, 15 not started | 32 with code |  |
 
-Source files: 202 complete, 1 in progress.
+Source files: 203 complete, 1 in progress.
 
-Not counted as decompiled: 29 functions (33,184 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 36 functions (38,548 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -227,6 +240,7 @@ Not counted as decompiled: 29 functions (33,184 bytes) in assembly, since their 
 | 2026-09-24 | 1,681 (11.37 %) | 234,692 (7.93 %) | 166 |
 | 2026-09-25 | 2,029 (13.73 %) | 284,916 (9.63 %) | 200 |
 | 2026-09-26 | 2,212 (14.97 %) | 302,008 (10.21 %) | 202 |
+| 2026-09-27 | 2,276 (15.40 %) | 324,504 (10.97 %) | 203 |
 
 ## Modules
 
@@ -247,7 +261,7 @@ Not counted as decompiled: 29 functions (33,184 bytes) in assembly, since their 
 | ov009 | *Likely* character creation / name entry | 25.7 | 43 | 0 | 43 | 0.00 % | Not started |
 | ov010 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | 1.9 | 3 | 3 | 0 | 100.00 % | Complete |
 | ov011 | The system of the menus that run a script (`data/menu/*.stb`: the title, the treasure maps, the accolades...), and its 114 script commands (`src/Scene/Overlay_11`). Overlay 17 loads the script and overlay 23 has the objects that the commands create. Decompiled, with 3 commands in assembly for now. Needs `FORCE_ACTIVE` | 17.6 | 186 | 183 | 3 | 94.85 % | In progress |
-| ov012 | *Likely* profile editing (tag mode) | 27.2 | 71 | 0 | 71 | 0.00 % | Not started |
+| ov012 | The editor of the profile that tag mode's card shows: its title, accolade, birthday, design and message, with overlay 3's keyboard and a check of forbidden words (`src/Scene/Overlay_12`). Overlay 23 draws the card. Decompiled, with 7 functions in assembly for now | 27.2 | 71 | 64 | 7 | 80.75 % | In progress |
 | ov013 | The skill up screen: the menu that spends skill points, and the list of each skill's abilities (`src/Scene/Overlay_13`) | 14.7 | 40 | 37 | 3 | 91.33 % | In progress |
 | ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
 | ov015 | *Likely* character model loading / viewer | 33.8 | 103 | 0 | 103 | 0.00 % | Not started |
@@ -298,6 +312,13 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov011 | `Command_CreateChildHeap` | `0x02184ed0` | 0xe0 |
 | ov011 | `Command_2a` | `0x021869b8` | 0x18c |
 | ov011 | `Command_4a` | `0x02187720` | 0x134 |
+| ov012 | `ProfileEditor::LoadProfile` | `0x02184654` | 0x230 |
+| ov012 | `ForbiddenWordChecker::Check` | `0x02184d80` | 0x80c |
+| ov012 | `ForbiddenWordChecker::Match` | `0x02185684` | 0x370 |
+| ov012 | `ProfileEditor::State_TitleCategory` | `0x02186c1c` | 0x21c |
+| ov012 | `ProfileEditor::State_0d` | `0x02188aec` | 0x1e4 |
+| ov012 | `ProfileEditor::Text_0d` | `0x0218a9ec` | 0xd0 |
+| ov012 | `ProfileEditor::Text_0e` | `0x0218ab34` | 0x278 |
 | ov013 | `SkillPointMenu::Initialize` | `0x02184360` | 0x340 |
 | ov013 | `SkillPointMenu::OpenMenu` | `0x02185990` | 0x11c |
 | ov013 | `SkillPointMenu::DrawIcon` | `0x02186db4` | 0xc0 |
@@ -339,7 +360,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov008 | 11 | 38 | 12 | 2 | 28.1 |
 | ov009 | 4 | 26 | 9 | 4 | 25.7 |
 | ov011 | 0 | 3 | 0 | 0 | 0.9 |
-| ov012 | 2 | 52 | 16 | 1 | 27.2 |
+| ov012 | 0 | 2 | 4 | 1 | 5.2 |
 | ov013 | 0 | 2 | 1 | 0 | 1.3 |
 | ov014 | 0 | 0 | 0 | 1 | 3.0 |
 | ov015 | 28 | 57 | 16 | 2 | 33.8 |
@@ -355,5 +376,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5090** | **6332** | **1014** | **131** | **2594.7** |
+| **Total** | **5088** | **6282** | **1002** | **131** | **2572.8** |
 <!-- END GENERATED -->

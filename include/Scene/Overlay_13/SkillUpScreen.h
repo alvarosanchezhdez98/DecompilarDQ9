@@ -3,25 +3,9 @@
 #include "Graphics/Background.h"
 #include "Graphics/Sprite.h"
 #include "Graphics/TextWindow.h"
+#include "GameState/PartyMemberData.h"
 #include "Memory/SafeAllocator.h"
 #include "Text/TextTable.h"
-
-// A party member's data, which func_02053c6c returns
-struct PartyMemberData
-{
-    char unk_0[0x16c];
-    // The level of each vocation
-    unsigned short levels_[0xd];
-    // For each vocation
-    unsigned char unk_186[0xd];
-    char unk_193[0x464 - 0x193];
-    // The points spent on each skill
-    unsigned char skillPoints_[0x100];
-    // The skill points that aren't spent yet
-    unsigned short unspentSkillPoints_;
-    char unk_566[0x950 - 0x566];
-    int vocation_;
-};
 
 // An ability that a skill teaches, from sklname_<LG>.bin
 struct SkillAbility

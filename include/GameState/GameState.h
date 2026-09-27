@@ -16,6 +16,9 @@ public:
     char unk_ac[0x134 - 0xac];
     BaseCombatStats* baseStats_;
     ModifiableCombatStats* currentStats_;
+    char unk_13c[0x14];
+    // A party member's data
+    struct PartyMemberData* partyData_;
 };
 
 // sizeof is probably 0x7ff4 but could be 0x7ff8. (Definitely no lower/higher)

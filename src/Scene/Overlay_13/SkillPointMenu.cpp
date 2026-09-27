@@ -709,10 +709,10 @@ void SkillPointMenu::SetMember(PartyMember* member)
         return;
     PartyMemberData* data = func_02053c6c(member);
     status_ = member->status_;
-    availablePoints_ = remainingPoints_ = data->unspentSkillPoints_;
+    availablePoints_ = remainingPoints_ = data->details_.unspentSkillPoints_;
     vocation_ = data->vocation_;
-    level_ = data->levels_[vocation_];
-    unk_6b8 = data->unk_186[vocation_];
+    level_ = data->details_.levels_[vocation_];
+    unk_6b8 = data->details_.unk_fe[vocation_];
     unk_6c0 = member->status_->unk_30;
     unk_6c4 = member->status_->unk_32;
     unk_6c6 = member->status_->unk_34;
@@ -735,7 +735,7 @@ void SkillPointMenu::SetMember(PartyMember* member)
     {
         skills_[i] = func_020dd11c(vocation_, i);
         locked_[i] = 0;
-        points_[i] = data->skillPoints_[skills_[i]];
+        points_[i] = data->details_.skillPoints_[skills_[i]];
     }
 }
 
@@ -744,10 +744,10 @@ void SkillPointMenu::Apply(PartyMember* member)
     if (member == NULL || !apply_)
         return;
     PartyMemberData* data = func_02053c6c(member);
-    data->unspentSkillPoints_ = remainingPoints_;
+    data->details_.unspentSkillPoints_ = remainingPoints_;
     for (int i = 0; i < 5; i++)
     {
-        data->skillPoints_[skills_[i]] = points_[i] + addedPoints_[i];
+        data->details_.skillPoints_[skills_[i]] = points_[i] + addedPoints_[i];
     }
 }
 
