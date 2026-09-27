@@ -17,12 +17,23 @@ objdiff's report counts them as matching.
 
 After decompiling something:
 1. Check that it matches with `ninja min`.
-2. Run `python tools/progress.py --record` to update this page and its history
-   ([progress-history.csv](progress-history.csv)).
-3. Commit both files with the change. CI fails if they're out of date.
+2. Run `python tools/progress.py --record` to update this page, its history
+   ([progress-history.csv](progress-history.csv)) and the status page's data ([status/data](status/data)).
+3. Commit them with the change. CI fails if they're out of date.
 
 To pick what to decompile next, `python tools/progress.py --remaining <module>` lists the functions left in a module,
 e.g. `ov014`.
+
+## Status page
+
+[status/index.html](status/index.html) shows the same numbers visually: the progress over time, each module with a map
+of its functions along its addresses, every source file, and the functions in assembly with why their C doesn't match
+yet. Open it with `python tools/progress.py --serve`, since a browser doesn't let a page opened as a file read its data.
+
+Its data is generated with this page, so it's never edited by hand: `status/data/summary.json` has the totals, the
+history, the modules, main's regions and the functions in assembly (with the comment before their `#ifdef NONMATCHING`
+and its percentage), and `status/data/modules/<module>.json` has each module's source files and functions, one per
+line, so a commit's diff shows which functions it decompiled.
 
 ## Working notes
 
@@ -296,7 +307,7 @@ Not counted as decompiled: 36 functions (38,548 bytes) in assembly, since their 
 | NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 4 | 62 | 0.77 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 154 | 59 | 93.89 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 853 | 157 | 80.88 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 850 | 160 | 80.88 % |
 | Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 0 | 310 | 0.00 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 

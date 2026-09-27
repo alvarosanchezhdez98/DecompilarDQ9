@@ -11,19 +11,29 @@ A function whose C doesn't match yet can be written in assembly, so that the res
 `#ifdef NONMATCHING` and `#else`, and the `asm` function between `#else` and `#endif` (see Decompiling.md). Those
 functions are counted apart, not as decompiled.
 
+The same numbers are the data of the status page, docs/status/index.html: docs/status/data/summary.json, and a file for
+each module in docs/status/data/modules with its source files and functions, one function per line.
+
   python tools/progress.py                     Prints the summary
   python tools/progress.py --record            Adds the current numbers to the history and regenerates docs/progress.md
-  python tools/progress.py --check             Fails if docs/progress.md or its history are out of date
+                                               and the status page's data
+  python tools/progress.py --check             Fails if docs/progress.md, its history or the status page's data are out
+                                               of date
   python tools/progress.py --remaining ov014   Lists the functions left to decompile in a module
+  python tools/progress.py --serve             Opens the status page in the browser, from a local server
 '''
 
 import argparse
 import csv
 from dataclasses import dataclass, field
 import datetime
+import functools
+import http.server
+import json
 from pathlib import Path
 import re
 import sys
+import webbrowser
 
 
 root_path = Path(__file__).parent.parent
@@ -31,6 +41,8 @@ config_path = root_path / "config" / "eur" / "arm9"
 module_map_path = root_path / "docs" / "module-map.md"
 progress_path = root_path / "docs" / "progress.md"
 history_path = root_path / "docs" / "progress-history.csv"
+status_path = root_path / "docs" / "status" # The status page, which shows the files in its data folder
+data_path = status_path / "data"
 
 BEGIN_MARKER = "<!-- BEGIN GENERATED: tools/progress.py -->"
 END_MARKER = "<!-- END GENERATED -->"
@@ -57,6 +69,7 @@ HISTORY_FIELDS = ["date", "functions_done", "functions_total", "bytes_done", "by
 SECTION = re.compile(r"^\s*(\.\w+)\s+start:(0x[0-9a-f]+)\s+end:(0x[0-9a-f]+)(?:\s+kind:(\w+))?")
 FUNCTION = re.compile(r"^(\S+) kind:function\((?:arm|thumb),size=(0x[0-9a-f]+)[^)]*\) addr:(0x[0-9a-f]+)")
 NONMATCHING_BLOCK = re.compile(r"^#ifdef NONMATCHING\b.*?^#else\b(.*?)^#endif\b", re.MULTILINE | re.DOTALL)
+MATCH_PERCENT = re.compile(r"(\d+(?:\.\d+)?) ?%")
 ASM_FUNCTION = re.compile(r"^\s*(?:static\s+)?asm\s[^;{}()]*?([\w:~]+)\s*\(", re.MULTILINE)
 
 
@@ -67,10 +80,21 @@ class Function:
     size: int
     done: bool # In a complete file
     nonmatching: bool = False # Written in assembly, see NONMATCHING above
+    note: str = "" # Why it's in assembly, from the comment before its #ifdef NONMATCHING
 
     @property
     def decompiled(self) -> bool:
         return self.done and not self.nonmatching
+
+
+@dataclass
+class SourceFile:
+    name: str
+    complete: bool
+    ranges: list[tuple[int, int]] # Its code (.text and .init)
+
+    def contains(self, address: int) -> bool:
+        return any(start <= address < end for start, end in self.ranges)
 
 
 @dataclass
@@ -79,6 +103,7 @@ class Module:
     code_sections: list[tuple[int, int]] = field(default_factory=list)
     done_ranges: list[tuple[int, int]] = field(default_factory=list)
     functions: list[Function] = field(default_factory=list)
+    files: list[SourceFile] = field(default_factory=list)
     complete_files: int = 0
     partial_files: int = 0
 
@@ -139,12 +164,30 @@ def qualified_name(symbol: str) -> str:
     return "::".join(names)
 
 
-def nonmatching_names(source: Path) -> list[str]:
-    '''The names of the functions that a source file writes in assembly, since their C doesn't match yet'''
+def nonmatching_names(source: Path) -> list[tuple[str, str]]:
+    '''The names of the functions that a source file writes in assembly, since their C doesn't match yet, and the
+    comment before their #ifdef NONMATCHING, which says why'''
     if not source.is_file():
         return []
     text = source.read_text(encoding="utf-8", errors="replace")
-    return [match[1] for block in NONMATCHING_BLOCK.finditer(text) for match in ASM_FUNCTION.finditer(block[1])]
+    functions = []
+    for block in NONMATCHING_BLOCK.finditer(text):
+        comment = []
+        for line in reversed(text[:block.start()].splitlines()):
+            if not line.strip().startswith("//"):
+                break
+            comment.insert(0, line.strip().removeprefix("//").strip())
+            if comment[0].startswith("NONMATCHING"):
+                break # The comment before it describes the function
+        note = " ".join(comment) if comment and comment[0].startswith("NONMATCHING") else ""
+        functions += [(match[1], note) for match in ASM_FUNCTION.finditer(block[1])]
+    return functions
+
+
+def match_percent(note: str) -> float | None:
+    '''How much the C matches, from the first percentage in a function's NONMATCHING comment'''
+    match = MATCH_PERCENT.search(note)
+    return float(match[1]) if match else None
 
 
 def load_module(name: str, path: Path) -> Module:
@@ -157,6 +200,7 @@ def load_module(name: str, path: Path) -> Module:
     def finish_file():
         if current_ranges is None:
             return
+        module.files.append(SourceFile(current_file, complete, current_ranges))
         if complete:
             module.complete_files += 1
             module.done_ranges.extend(current_ranges)
@@ -198,12 +242,13 @@ def load_module(name: str, path: Path) -> Module:
     for file, ranges in complete_files:
         in_file = [function for function in module.functions
                    if any(start <= function.address < end for start, end in ranges)]
-        for name in nonmatching_names(root_path / file):
+        for name, note in nonmatching_names(root_path / file):
             matches = [function for function in in_file if qualified_name(function.name) == name]
             if len(matches) != 1:
                 sys.exit(f"{file}: {len(matches)} functions of {name} in its code, instead of 1 (see NONMATCHING in "
                          f"tools/progress.py)")
             matches[0].nonmatching = True
+            matches[0].note = note
     return module
 
 
@@ -279,6 +324,160 @@ def history_matches(row: dict[str, str], current: dict[str, int]) -> bool:
     return all(int(row[key]) == value for key, value in current.items())
 
 
+def remaining_by_size(module: Module) -> list[int]:
+    '''How many functions are left in each of SIZE_BUCKETS'''
+    counts = [0] * len(SIZE_BUCKETS)
+    for function in module.remaining:
+        counts[next(i for i, (_, limit) in enumerate(SIZE_BUCKETS) if limit is None or function.size < limit)] += 1
+    return counts
+
+
+def main_regions(main: Module) -> list[dict]:
+    regions = []
+    for name, start, end in MAIN_REGIONS:
+        functions = [function for function in main.functions if start <= function.address < end]
+        decompiled = [function for function in functions if function.decompiled]
+        nonmatching = [function for function in functions if function.nonmatching]
+        regions.append({
+            "name": name,
+            "range": f"0x{start:08x}-0x{end:08x}",
+            "code_bytes": sum(max(0, min(end, e) - max(start, s)) for s, e in main.code_sections),
+            "done_bytes": main.done_size_in(start, end),
+            "nonmatching_bytes": sum(function.size for function in nonmatching),
+            "functions": len(functions),
+            "decompiled": len(decompiled),
+            "nonmatching": len(nonmatching),
+            "remaining": len(functions) - len(decompiled),
+        })
+    return regions
+
+
+def function_state(function: Function) -> str:
+    if function.decompiled:
+        return "decompiled"
+    return "assembly" if function.nonmatching else "remaining"
+
+
+def file_of(module: Module, address: int) -> str | None:
+    return next((file.name for file in module.files if file.contains(address)), None)
+
+
+def module_summary(module: Module, purposes: dict[str, str]) -> dict:
+    return {
+        "name": module.name,
+        "purpose": purposes.get(module.name, ""),
+        "status": module.status,
+        "range": (f"0x{min(start for start, _ in module.code_sections):08x}-"
+                  f"0x{max(end for _, end in module.code_sections):08x}") if module.code_sections else None,
+        "code_bytes": module.code_size,
+        "done_bytes": module.done_size,
+        "nonmatching_bytes": module.nonmatching_size,
+        "functions": len(module.functions),
+        "decompiled": len(module.functions) - len(module.remaining),
+        "nonmatching": len(module.nonmatching),
+        "remaining": len(module.remaining),
+        "complete_files": module.complete_files,
+        "partial_files": module.partial_files,
+        "remaining_by_size": remaining_by_size(module),
+    }
+
+
+def module_data(module: Module, purposes: dict[str, str]) -> dict:
+    files = []
+    for file in module.files:
+        functions = [function for function in module.functions if file.contains(function.address)]
+        files.append({
+            "name": file.name,
+            "complete": file.complete,
+            "ranges": [f"0x{start:08x}-0x{end:08x}" for start, end in file.ranges],
+            "code_bytes": sum(end - start for start, end in file.ranges),
+            "functions": len(functions),
+            "decompiled": sum(function.decompiled for function in functions),
+            "nonmatching": sum(function.nonmatching for function in functions),
+        })
+    functions = []
+    for function in module.functions:
+        entry = {"address": f"0x{function.address:08x}", "size": function.size, "state": function_state(function),
+                 "symbol": function.name}
+        if (name := qualified_name(function.name)) != function.name:
+            entry["name"] = name
+        if file := file_of(module, function.address):
+            entry["file"] = file
+        functions.append(entry)
+    return {
+        "about": "Generated by tools/progress.py from config/eur/arm9, don't edit it",
+        "summary": module_summary(module, purposes),
+        "sections": [f"0x{start:08x}-0x{end:08x}" for start, end in module.code_sections],
+        "files": files,
+        "functions": functions,
+    }
+
+
+def to_json(value, indent: int = 0, in_list: bool = False) -> str:
+    '''JSON that's easy to diff: the objects in a list, like the functions, take one line each'''
+    scalar = lambda item: not isinstance(item, (dict, list))
+    flat = lambda item: scalar(item) or (isinstance(item, list) and all(map(scalar, item)))
+    if isinstance(value, dict) and value and not (in_list and all(map(flat, value.values()))):
+        pad = "  " * (indent + 1)
+        items = [f"{pad}{json.dumps(key)}: {to_json(item, indent + 1)}" for key, item in value.items()]
+        return "{\n" + ",\n".join(items) + "\n" + "  " * indent + "}"
+    if isinstance(value, list) and value and not all(map(scalar, value)):
+        pad = "  " * (indent + 1)
+        return "[\n" + ",\n".join(pad + to_json(item, indent + 1, True) for item in value) + "\n" + "  " * indent + "]"
+    return json.dumps(value, ensure_ascii=False, separators=(", ", ": "))
+
+
+def generate_data(modules: list[Module], history: list[dict[str, str]]) -> dict[Path, str]:
+    '''The data of the status page (docs/status), a file for the summary and one for each module'''
+    purposes = load_purposes()
+    statuses = [module.status for module in modules]
+    summary = {
+        "about": "Generated by tools/progress.py from config/eur, don't edit it. See docs/progress.md",
+        "version": "eur",
+        "recorded": history[-1]["date"] if history else None,
+        "totals": {
+            **totals(modules),
+            "partial_files": sum(module.partial_files for module in modules),
+            "modules_complete": statuses.count("Complete"),
+            "modules_in_progress": statuses.count("In progress"),
+            "modules_not_started": statuses.count("Not started"),
+            "modules_without_code": statuses.count("No code"),
+        },
+        "size_buckets": [label for label, _ in SIZE_BUCKETS],
+        "history": [{key: row[key] if key == "date" else int(row[key]) for key in HISTORY_FIELDS} for row in history],
+        "modules": [module_summary(module, purposes) for module in modules],
+        "main_regions": main_regions(modules[0]),
+        "nonmatching": [
+            {"module": module.name, "name": qualified_name(function.name), "symbol": function.name,
+             "address": f"0x{function.address:08x}", "size": function.size, "file": file_of(module, function.address),
+             "match": match_percent(function.note), "note": function.note}
+            for module in modules for function in module.nonmatching
+        ],
+    }
+    files = {data_path / "summary.json": to_json(summary) + "\n"}
+    for module in modules:
+        files[data_path / "modules" / f"{module.name}.json"] = to_json(module_data(module, purposes)) + "\n"
+    return files
+
+
+def stale_data(files: dict[Path, str]) -> list[Path]:
+    '''Files of the data that aren't generated anymore'''
+    return [path for path in sorted(data_path.rglob("*.json")) if path not in files]
+
+
+def serve(port: int, open_browser: bool):
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=status_path)
+    with http.server.ThreadingHTTPServer(("127.0.0.1", port), handler) as server:
+        url = f"http://127.0.0.1:{port}/"
+        print(f"Serving {display(status_path)} at {url} (Ctrl+C to stop)")
+        if open_browser:
+            webbrowser.open(url)
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+
+
 def table(headers: list[str], rows: list[list[str]], align: str) -> list[str]:
     '''Markdown table, where `align` has an "l" or "r" for each column'''
     separators = ["-" * max(3, len(header)) + (":" if a == "r" else "") for header, a in zip(headers, align)]
@@ -331,13 +530,10 @@ def generate(modules: list[Module], history: list[dict[str, str]]) -> str:
 
     lines += ["## ARM9 main by region", ""]
     rows = []
-    for name, start, end in MAIN_REGIONS:
-        functions = [function for function in main.functions if start <= function.address < end]
-        remaining = [function for function in functions if not function.done]
-        size = sum(max(0, min(end, e) - max(start, s)) for s, e in main.code_sections)
-        rows.append([name, f"`0x{start:08x}-0x{end:08x}`", kilobytes(size), str(len(functions)),
-                     str(len(functions) - len(remaining)), str(len(remaining)),
-                     percent(main.done_size_in(start, end), size)])
+    for region in main_regions(main):
+        rows.append([region["name"], f"`{region['range']}`", kilobytes(region["code_bytes"]), str(region["functions"]),
+                     str(region["decompiled"]), str(region["remaining"]),
+                     percent(region["done_bytes"], region["code_bytes"])])
     lines += table(["Region", "Range", "Code (KB)", "Functions", "Decompiled", "Remaining", "Progress"], rows,
                    "llrrrrr")
     lines += [""]
@@ -360,11 +556,8 @@ def generate(modules: list[Module], history: list[dict[str, str]]) -> str:
     for module in modules:
         if not module.remaining:
             continue
-        counts = [0] * len(SIZE_BUCKETS)
-        for function in module.remaining:
-            index = next(i for i, (_, limit) in enumerate(SIZE_BUCKETS) if limit is None or function.size < limit)
-            counts[index] += 1
-            bucket_totals[index] += 1
+        counts = remaining_by_size(module)
+        bucket_totals = [total + count for total, count in zip(bucket_totals, counts)]
         remaining_size = module.code_size - module.done_size
         rows.append([module.name, *map(str, counts), kilobytes(remaining_size)])
     rows.append(["**Total**", *(f"**{count}**" for count in bucket_totals),
@@ -412,7 +605,14 @@ def main():
     group.add_argument("--record", action="store_true", help="Record the current numbers and regenerate docs/progress.md")
     group.add_argument("--check", action="store_true", help="Fail if docs/progress.md or its history are out of date")
     group.add_argument("--remaining", metavar="MODULE", help="List the functions left to decompile in a module")
+    group.add_argument("--serve", action="store_true", help="Open the status page (docs/status) from a local server")
+    parser.add_argument("--port", type=int, default=8009, help="The port of --serve (default: 8009)")
+    parser.add_argument("--no-browser", action="store_true", help="With --serve, don't open the browser")
     args = parser.parse_args()
+
+    if args.serve:
+        serve(args.port, not args.no_browser)
+        return
 
     modules = load_modules()
     history = read_history()
@@ -428,18 +628,31 @@ def main():
             history.append({"date": today, **{key: str(value) for key, value in current.items()}})
         write_history(history)
         progress_path.write_text(render_page(generate(modules, history)), encoding="utf-8", newline="\n")
+        data = generate_data(modules, history)
+        for path in stale_data(data):
+            path.unlink()
+        for path, text in data.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if not path.is_file() or path.read_text(encoding="utf-8") != text:
+                path.write_text(text, encoding="utf-8", newline="\n")
         print_summary(modules)
-        print(f"Updated {display(progress_path)} and {display(history_path)}")
+        print(f"Updated {display(progress_path)}, {display(history_path)} and {display(data_path)}")
     elif args.check:
         errors = []
         if not history or not history_matches(history[-1], current):
             errors.append(f"{display(history_path)} doesn't have the current numbers")
         if render_page(generate(modules, history)) != progress_path.read_text(encoding="utf-8"):
             errors.append(f"{display(progress_path)} is out of date")
+        data = generate_data(modules, history)
+        for path, text in data.items():
+            if not path.is_file() or path.read_text(encoding="utf-8") != text:
+                errors.append(f"{display(path)} is out of date")
+        for path in stale_data(data):
+            errors.append(f"{display(path)} isn't generated anymore")
         if errors:
             print("\n".join(errors))
             sys.exit("Run `python tools/progress.py --record` and commit the changes")
-        print(f"{display(progress_path)} is up to date")
+        print(f"{display(progress_path)} and {display(data_path)} are up to date")
     else:
         print_summary(modules)
 
