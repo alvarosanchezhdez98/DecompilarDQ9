@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DQIX Decompilation Status</title>
+<meta name="description" content="What's decompiled in the European version of Dragon Quest IX, generated from config/eur by tools/progress.py">
+<!--
+  The status page of the decompilation. Its data is in data/, which `python tools/progress.py --record` generates from
+  config/eur, and which CI checks with `--check`: nothing on this page is written by hand. Open it with
+  `python tools/progress.py --serve`, since browsers don't let a page opened as a file read its data.
+-->
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --wash: rgba(11, 11, 11, 0.04);
+  --track: #dddcd5;
+  --done: #2a78d6;
+  --asm: #eb6834;
+  --bytes: #1baf7a;
+  --up: #006300;
+  --link: #1c5cab;
+  --code-bg: rgba(11, 11, 11, 0.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --wash: rgba(255, 255, 255, 0.05);
+    --track: #383835;
+    --done: #3987e5;
+    --asm: #d95926;
+    --bytes: #199e70;
+    --up: #0ca30c;
+    --link: #6da7ec;
+    --code-bg: rgba(255, 255, 255, 0.07);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.10);
+  --wash: rgba(255, 255, 255, 0.05);
+  --track: #383835;
+  --done: #3987e5;
+  --asm: #d95926;
+  --bytes: #199e70;
+  --up: #0ca30c;
+  --link: #6da7ec;
+  --code-bg: rgba(255, 255, 255, 0.07);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92em; }
+code { background: var(--code-bg); padding: 0.05em 0.3em; border-radius: 4px; }
+h1, h2, h3 { margin: 0; line-height: 1.25; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--done); outline-offset: 2px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+header.top { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+header.top .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding-top: 12px; padding-bottom: 0; }
+.brand h1 { font-size: 17px; font-weight: 650; }
+.brand p { color: var(--ink-2); font-size: 12.5px; }
+nav.tabs { display: flex; gap: 4px; overflow-x: auto; max-width: 100%; }
+nav.tabs a { color: var(--ink-2); padding: 10px 12px; border-bottom: 2px solid transparent; white-space: nowrap; font-weight: 500; }
+nav.tabs a:hover { color: var(--ink); text-decoration: none; background: var(--wash); }
+nav.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+main { padding-top: 20px; padding-bottom: 32px; display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; min-width: 0; }
+.card > h3 + * { margin-top: 12px; }
+.card > .card-head + .legend { margin-top: 10px; }
+.card > .legend + div { margin-top: 6px; }
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.card-head p { color: var(--ink-2); font-size: 13px; }
+.lede { color: var(--ink-2); max-width: 80ch; }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 880px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* Figures */
+.figures { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1080px) { .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); } .figures .hero { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .figures { grid-template-columns: minmax(0, 1fr); } }
+.tile .label { color: var(--ink-2); font-size: 13px; }
+.tile .value { font-size: 26px; font-weight: 600; margin-top: 4px; }
+.tile .sub { color: var(--ink-2); font-size: 12.5px; margin-top: 2px; }
+.tile .delta { color: var(--up); font-size: 12.5px; margin-top: 6px; font-weight: 500; }
+.hero .value { font-size: 52px; line-height: 1.05; }
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+
+/* Bars */
+.bar { display: flex; gap: 2px; height: 12px; border-radius: 4px; overflow: hidden; background: var(--surface); min-width: 60px; }
+.bar.big { height: 22px; }
+.bar > span { display: block; min-width: 0; }
+.bar > span.nz { min-width: 2px; }
+.bar > .s-decompiled { background: var(--done); }
+.bar > .s-assembly { background: var(--asm); }
+.bar > .s-remaining { background: var(--track); }
+.bar:hover > span, .bar:focus-visible > span { filter: brightness(1.08); }
+.meter { display: inline-flex; align-items: center; gap: 8px; }
+.meter .bar { width: 70px; height: 8px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--ink-2); font-size: 13px; }
+.legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.legend .key b { color: var(--ink); font-weight: 600; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+.swatch.decompiled { background: var(--done); }
+.swatch.assembly { background: var(--asm); }
+.swatch.remaining { background: var(--track); }
+.linekey { width: 14px; height: 2px; border-radius: 1px; display: inline-block; flex: none; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--ink-2); font-weight: 600; font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--ink); }
+th .arrow { color: var(--ink); margin-left: 4px; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+tbody tr:hover td { background: var(--wash); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.nowrap { white-space: nowrap; }
+td .small { display: block; color: var(--muted); font-size: 11.5px; word-break: break-all; }
+td.purpose { min-width: 260px; max-width: 520px; color: var(--ink-2); }
+td.bar-cell { min-width: 140px; }
+td.bar-cell .pct { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+.more { margin-top: 12px; display: flex; align-items: center; gap: 12px; color: var(--ink-2); font-size: 13px; }
+
+/* Controls */
+.filters { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.filters label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); font-size: 13px; }
+input[type="search"], select, button {
+  font: inherit; font-size: 13px; color: var(--ink); background: var(--page);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px;
+}
+input[type="search"] { min-width: 220px; max-width: 100%; }
+button { cursor: pointer; }
+button:hover { background: var(--wash); }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--ink-2); }
+.chip svg { flex: none; }
+.state { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* Module page */
+.module-head { display: grid; gap: 8px; }
+.module-head .title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.module-head h2 { font-size: 26px; }
+.back { font-size: 13px; }
+.map-wrap { position: relative; margin-top: 12px; }
+canvas.map { width: 100%; display: block; cursor: crosshair; }
+.caption { color: var(--muted); font-size: 12px; margin-top: 8px; }
+.notes { display: grid; gap: 10px; }
+.note { border-top: 1px solid var(--grid); padding-top: 10px; }
+.note:first-child { border-top: 0; padding-top: 0; }
+.note .head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.note p { color: var(--ink-2); font-size: 13px; margin-top: 4px; }
+details summary { cursor: pointer; color: var(--link); font-size: 13px; }
+details[open] summary { margin-bottom: 10px; }
+td details summary { color: var(--ink-2); }
+td details p { color: var(--ink-2); max-width: 70ch; }
+
+.message { color: var(--ink-2); padding: 24px 0; }
+.message code { user-select: all; }
+
+/* Tooltip */
+#tooltip {
+  position: fixed; z-index: 20; pointer-events: none; max-width: 340px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14); padding: 8px 10px; font-size: 12.5px;
+}
+#tooltip .t-title { color: var(--ink-2); margin-bottom: 4px; word-break: break-all; }
+#tooltip .t-row { display: flex; align-items: center; gap: 8px; }
+#tooltip .t-row b { font-variant-numeric: tabular-nums; }
+#tooltip .t-row span:last-child { color: var(--ink-2); }
+#tooltip .t-note { color: var(--muted); margin-top: 4px; word-break: break-all; }
+
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+footer { color: var(--muted); font-size: 12.5px; padding-bottom: 32px; }
+footer p + p { margin-top: 6px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Dragon Quest IX decompilation</h1>
+      <p id="recorded">European version</p>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <a href="#/" data-view="">Overview</a>
+      <a href="#/modules" data-view="modules">Modules</a>
+      <a href="#/files" data-view="files">Source files</a>
+      <a href="#/assembly" data-view="assembly">In assembly</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="view" aria-live="polite"></main>
+<footer class="wrap">
+  <p>A function counts as decompiled when it's in a source file marked <code>complete</code> in its module's
+    <code>delinks.txt</code>, since <code>ninja min</code> checks that those files build to the same bytes as the
+    original. Functions whose C doesn't match yet are in assembly (<code>NONMATCHING</code>) and count as remaining.</p>
+  <p>The data in <code>docs/status/data</code> is generated from <code>config/eur</code> by
+    <code>python tools/progress.py --record</code>, and CI checks that it's up to date. See
+    <a id="link-progress" href="#">progress.md</a>, <a id="link-map" href="#">module-map.md</a> and
+    <a id="link-decompiling" href="#">Decompiling.md</a>.</p>
+</footer>
+<div id="tooltip" role="tooltip" hidden></div>
+
+<script>
+'use strict';
+
+const REPO = 'https://github.com/alvarosanchezhdez98/DecompilarDQ9/blob/main/';
+const STATES = {
+  decompiled: { label: 'Decompiled', color: '--done' },
+  assembly: { label: 'In assembly', color: '--asm' },
+  remaining: { label: 'Remaining', color: '--track' },
+};
+const cache = { summary: null, modules: new Map() };
+// What the views remember while the page is open
+const ui = {
+  modules: { search: '', status: '', sort: 'code_bytes', dir: -1 },
+  files: { search: '', status: '' },
+  functions: { search: '', state: '' },
+};
+const view = document.getElementById('view');
+const tip = document.getElementById('tooltip');
+let redraws = []; // Canvases of the current view, drawn again on resize and on a change of theme
+
+document.getElementById('link-progress').href = REPO + 'docs/progress.md';
+document.getElementById('link-map').href = REPO + 'docs/module-map.md';
+document.getElementById('link-decompiling').href = REPO + 'Decompiling.md';
+
+// ---------------------------------------------------------------- Helpers
+
+function el(tag, props, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(props || {})) {
+    if (value == null || value === false) continue;
+    if (key === 'class') node.className = value;
+    else if (key === 'text') node.textContent = value;
+    else if (key.startsWith('on')) node.addEventListener(key.slice(2), value);
+    else node.setAttribute(key, value === true ? '' : value);
+  }
+  for (const child of children.flat()) {
+    if (child == null || child === false) continue;
+    node.append(child instanceof Node ? child : String(child));
+  }
+  return node;
+}
+
+function svg(tag, attributes, ...children) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [key, value] of Object.entries(attributes || {})) {
+    if (key === 'style') node.style.cssText = value;
+    else if (key === 'text') node.textContent = value;
+    else node.setAttribute(key, value);
+  }
+  node.append(...children);
+  return node;
+}
+
+const number = n => n.toLocaleString('en-US');
+const percent = (done, total, digits = 2) => total ? `${(100 * done / total).toFixed(digits)} %` : '–';
+const kilobytes = bytes => `${(bytes / 1024).toFixed(1)} KB`;
+const hex = n => '0x' + n.toString(16);
+const token = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const moduleLink = name => el('a', { href: `#/module/${name}` }, name);
+
+// The purposes in module-map.md have `code` and *emphasis*
+function rich(text) {
+  const nodes = [];
+  for (const part of (text || '').split(/(`[^`]+`|\*[^*]+\*)/)) {
+    if (!part) continue;
+    if (part.startsWith('`')) nodes.push(el('code', { text: part.slice(1, -1) }));
+    else if (part.startsWith('*') && part.length > 2) nodes.push(el('em', { text: part.slice(1, -1) }));
+    else nodes.push(document.createTextNode(part));
+  }
+  return nodes;
+}
+
+function statusChip(status) {
+  const icons = {
+    'Complete': [svg('circle', { cx: 6, cy: 6, r: 5, style: 'fill: var(--ink-2)' })],
+    'In progress': [svg('circle', { cx: 6, cy: 6, r: 4.5, style: 'fill: none; stroke: var(--ink-2); stroke-width: 1.5' }),
+                    svg('path', { d: 'M6 1.5 A4.5 4.5 0 0 1 6 10.5 Z', style: 'fill: var(--ink-2)' })],
+    'Not started': [svg('circle', { cx: 6, cy: 6, r: 4.5, style: 'fill: none; stroke: var(--ink-2); stroke-width: 1.5' })],
+    'No code': [svg('path', { d: 'M2.5 6 H9.5', style: 'stroke: var(--ink-2); stroke-width: 1.5' })],
+  };
+  return el('span', { class: 'chip' },
+    svg('svg', { width: 12, height: 12, viewBox: '0 0 12 12', 'aria-hidden': 'true' }, ...(icons[status] || [])), status);
+}
+
+function stateChip(state) {
+  return el('span', { class: 'state' }, el('span', { class: `swatch ${state}`, 'aria-hidden': 'true' }), STATES[state].label);
+}
+
+async function fetchJSON(path) {
+  const response = await fetch(path, { cache: 'no-cache' });
+  if (!response.ok) throw new Error(`${path}: ${response.status} ${response.statusText}`);
+  return response.json();
+}
+
+async function getSummary() {
+  cache.summary ??= await fetchJSON('data/summary.json');
+  return cache.summary;
+}
+
+async function getModule(name) {
+  if (!cache.modules.has(name)) cache.modules.set(name, await fetchJSON(`data/modules/${name}.json`));
+  return cache.modules.get(name);
+}
+
+// ---------------------------------------------------------------- Tooltip
+
+function tipRow(value, label, color, line) {
+  return el('div', { class: 't-row' },
+    color ? el('span', { class: line ? 'linekey' : 'swatch', style: `background: var(${color})` }) : null,
+    el('b', { text: value }), el('span', { text: label }));
+}
+
+function showTip(event, title, rows, note) {
+  tip.replaceChildren(el('div', { class: 't-title', text: title }), ...rows);
+  if (note) tip.append(el('div', { class: 't-note', text: note }));
+  tip.hidden = false;
+  let x = event.clientX, y = event.clientY;
+  if (x === undefined) { // Keyboard focus
+    const rect = event.target.getBoundingClientRect();
+    x = rect.left + rect.width / 2; y = rect.bottom;
+  }
+  const box = tip.getBoundingClientRect();
+  let left = x + 14, top = y + 14;
+  if (left + box.width > innerWidth - 8) left = x - box.width - 14;
+  if (top + box.height > innerHeight - 8) top = y - box.height - 14;
+  tip.style.left = `${Math.max(8, left)}px`;
+  tip.style.top = `${Math.max(8, top)}px`;
+}
+
+function hideTip() { tip.hidden = true; }
+
+function withTip(node, content) {
+  const show = event => { const [title, rows, note] = content(); showTip(event, title, rows, note); };
+  node.addEventListener('pointermove', show);
+  node.addEventListener('focus', show);
+  node.addEventListener('pointerleave', hideTip);
+  node.addEventListener('blur', hideTip);
+  return node;
+}
+
+// ---------------------------------------------------------------- Charts
+
+// A bar of the code of something: decompiled, in assembly and remaining bytes
+function codeBar(title, done, assembly, total, big) {
+  const remaining = Math.max(0, total - done - assembly);
+  const parts = [['decompiled', done], ['assembly', assembly], ['remaining', remaining]].filter(([, value]) => value > 0);
+  const bar = el('div', {
+    class: big ? 'bar big' : 'bar', tabindex: 0, role: 'img',
+    'aria-label': `${title}: ${percent(done, total)} decompiled, ${percent(assembly, total)} in assembly, ${percent(remaining, total)} remaining`,
+  }, parts.map(([state, value]) => el('span', { class: `s-${state} nz`, style: `flex: ${value} 1 0px` })));
+  return withTip(bar, () => [title, parts.map(([state, value]) =>
+    tipRow(`${percent(value, total)}`, `${STATES[state].label.toLowerCase()} · ${number(value)} bytes`, STATES[state].color))]);
+}
+
+function barCell(title, done, assembly, total) {
+  return el('td', { class: 'bar-cell' }, codeBar(title, done, assembly, total), el('div', { class: 'pct', text: percent(done, total) }));
+}
+
+function stateLegend(values) {
+  return el('div', { class: 'legend' }, Object.entries(STATES).map(([state, { label }]) =>
+    el('span', { class: 'key' }, el('span', { class: `swatch ${state}` }), label,
+      values ? el('b', { text: values[state] }) : null)));
+}
+
+function historyChart(history) {
+  const series = [
+    { name: 'Functions', color: '--done', value: row => 100 * row.functions_done / row.functions_total,
+      detail: row => `${number(row.functions_done)} of ${number(row.functions_total)} functions` },
+    { name: 'Code', color: '--bytes', value: row => 100 * row.bytes_done / row.bytes_total,
+      detail: row => `${number(row.bytes_done)} of ${number(row.bytes_total)} bytes` },
+  ];
+  const W = 760, H = 270, m = { top: 14, right: 130, bottom: 30, left: 44 };
+  const time = row => Date.parse(row.date + 'T00:00:00Z');
+  const t0 = time(history[0]), t1 = time(history[history.length - 1]);
+  const x = row => m.left + (t1 === t0 ? 0.5 : (time(row) - t0) / (t1 - t0)) * (W - m.left - m.right);
+  const top = Math.max(...history.flatMap(row => series.map(s => s.value(row))));
+  const step = top > 40 ? 10 : 5;
+  const ymax = Math.max(step, Math.ceil(top * 1.1 / step) * step);
+  const y = value => m.top + (1 - value / ymax) * (H - m.top - m.bottom);
+
+  const chart = svg('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img',
+    'aria-label': 'Progress over time, as a percentage of the functions and of the code' });
+  for (let value = 0; value <= ymax; value += step) {
+    chart.append(svg('line', { x1: m.left, x2: W - m.right, y1: y(value), y2: y(value),
+      style: `stroke: var(${value === 0 ? '--axis' : '--grid'}); stroke-width: 1` }));
+    chart.append(svg('text', { x: m.left - 8, y: y(value) + 4, 'text-anchor': 'end',
+      style: 'fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums', text: `${value} %` }));
+  }
+  const every = Math.ceil(history.length / 8);
+  history.forEach((row, i) => {
+    if (i % every && i !== history.length - 1) return;
+    chart.append(svg('text', { x: x(row), y: H - m.bottom + 18, 'text-anchor': 'middle',
+      style: 'fill: var(--muted); font-size: 11px', text: row.date.slice(5) }));
+  });
+
+  const labels = [];
+  for (const s of series) {
+    const d = history.map((row, i) => `${i ? 'L' : 'M'}${x(row).toFixed(1)},${y(s.value(row)).toFixed(1)}`).join(' ');
+    chart.append(svg('path', { d, style: `fill: none; stroke: var(${s.color}); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round` }));
+    const last = history[history.length - 1];
+    chart.append(svg('circle', { cx: x(last), cy: y(s.value(last)), r: 4,
+      style: `fill: var(${s.color}); stroke: var(--surface); stroke-width: 2` }));
+    labels.push({ s, y: y(s.value(last)), text: `${s.name} ${s.value(last).toFixed(2)} %` });
+  }
+  // Direct labels at the end, kept apart when the lines converge
+  labels.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < labels.length; i++) labels[i].y = Math.max(labels[i].y, labels[i - 1].y + 16);
+  for (const label of labels) {
+    chart.append(svg('text', { x: W - m.right + 10, y: label.y + 4, style: 'fill: var(--ink-2); font-size: 12px', text: label.text }));
+  }
+
+  // Crosshair: the nearest record to the pointer
+  const cross = svg('line', { y1: m.top, y2: H - m.bottom, style: 'stroke: var(--axis); stroke-width: 1', visibility: 'hidden' });
+  const dots = series.map(s => svg('circle', { r: 4, style: `fill: var(${s.color}); stroke: var(--surface); stroke-width: 2`, visibility: 'hidden' }));
+  const hit = svg('rect', { x: m.left, y: m.top, width: W - m.left - m.right, height: H - m.top - m.bottom, style: 'fill: transparent' });
+  chart.append(cross, ...dots, hit);
+  hit.addEventListener('pointermove', event => {
+    const box = chart.getBoundingClientRect();
+    const px = (event.clientX - box.left) * W / box.width;
+    const row = history.reduce((best, row) => Math.abs(x(row) - px) < Math.abs(x(best) - px) ? row : best);
+    cross.setAttribute('x1', x(row)); cross.setAttribute('x2', x(row)); cross.setAttribute('visibility', 'visible');
+    series.forEach((s, i) => {
+      dots[i].setAttribute('cx', x(row)); dots[i].setAttribute('cy', y(s.value(row))); dots[i].setAttribute('visibility', 'visible');
+    });
+    showTip(event, row.date, series.map(s => tipRow(`${s.value(row).toFixed(2)} %`, `${s.name.toLowerCase()} · ${s.detail(row)}`, s.color, true)),
+      `${number(row.complete_files)} complete source files`);
+  });
+  hit.addEventListener('pointerleave', () => {
+    hideTip();
+    cross.setAttribute('visibility', 'hidden');
+    dots.forEach(dot => dot.setAttribute('visibility', 'hidden'));
+  });
+
+  const legend = el('div', { class: 'legend' }, series.map(s =>
+    el('span', { class: 'key' }, el('span', { class: 'linekey', style: `background: var(${s.color})` }),
+      s.name === 'Code' ? 'Code (bytes)' : s.name)));
+  return el('div', {}, legend, el('div', { style: 'margin-top: 8px' }, chart));
+}
+
+// The functions of a module along its addresses, a row for each part of its code
+function addressMap(module, onPick) {
+  const sections = module.sections.map(range => range.split('-').map(value => parseInt(value, 16)));
+  const total = sections.reduce((sum, [start, end]) => sum + end - start, 0);
+  const offsetOf = address => {
+    let offset = 0;
+    for (const [start, end] of sections) {
+      if (address >= start && address < end) return offset + address - start;
+      offset += end - start;
+    }
+    return -1;
+  };
+  const functions = module.functions.map(f => ({ ...f, offset: offsetOf(parseInt(f.address, 16)) })).filter(f => f.offset >= 0);
+  const rows = Math.min(40, Math.max(1, Math.ceil(total / 4096)));
+  const perRow = Math.ceil(total / rows);
+  const ROW = 16, GAP = 6;
+  const canvas = el('canvas', { class: 'map', role: 'img',
+    'aria-label': `The functions of ${module.summary.name} along its addresses; the table below lists them` });
+  const caption = el('p', { class: 'caption', text: `Each row is ${kilobytes(perRow)} of code, from ${module.sections[0].split('-')[0]}. Hover a function to see it, click it to find it in the table.` });
+
+  function draw() {
+    const width = canvas.clientWidth || canvas.parentElement.clientWidth;
+    const height = rows * ROW + (rows - 1) * GAP;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    canvas.style.height = `${height}px`;
+    const context = canvas.getContext('2d');
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const scale = width / perRow;
+    const colors = { decompiled: token('--done'), assembly: token('--asm'), remaining: token('--track') };
+    const surface = token('--surface');
+    const span = (offset, size, color) => {
+      while (size > 0) {
+        const row = Math.floor(offset / perRow), column = offset % perRow;
+        const length = Math.min(size, perRow - column);
+        context.fillStyle = color;
+        context.fillRect(column * scale, row * (ROW + GAP), Math.max(length * scale, 0.5), ROW);
+        offset += length; size -= length;
+      }
+    };
+    context.fillStyle = surface;
+    context.fillRect(0, 0, width, height);
+    span(0, total, colors.remaining);
+    for (const f of functions) if (f.state !== 'remaining') span(f.offset, f.size, colors[f.state]);
+    // A 1px gap where a function starts, when the functions are wide enough to tell apart
+    if (functions.length && total / functions.length * scale >= 5) {
+      for (const f of functions) span(f.offset, Math.max(1, 1 / scale), surface);
+    }
+  }
+
+  function functionAt(event) {
+    const box = canvas.getBoundingClientRect();
+    const px = event.clientX - box.left, py = event.clientY - box.top;
+    const row = Math.floor(py / (ROW + GAP));
+    if (row < 0 || row >= rows || py - row * (ROW + GAP) > ROW) return null;
+    const offset = row * perRow + Math.floor(px / (box.width / perRow));
+    let low = 0, high = functions.length - 1, found = null;
+    while (low <= high) {
+      const middle = (low + high) >> 1;
+      if (functions[middle].offset <= offset) { found = functions[middle]; low = middle + 1; } else high = middle - 1;
+    }
+    return found && offset < found.offset + Math.max(found.size, 1) ? found : null;
+  }
+
+  canvas.addEventListener('pointermove', event => {
+    const f = functionAt(event);
+    if (!f) return hideTip();
+    showTip(event, f.name || f.symbol, [tipRow(STATES[f.state].label, `${f.address} · ${number(f.size)} bytes`, STATES[f.state].color)],
+      f.file || (f.name ? f.symbol : null));
+  });
+  canvas.addEventListener('pointerleave', hideTip);
+  canvas.addEventListener('click', event => { const f = functionAt(event); if (f) onPick(f); });
+  redraws.push(draw);
+  requestAnimationFrame(draw);
+  return el('div', {}, stateLegend(), el('div', { class: 'map-wrap' }, canvas), caption);
+}
+
+// ---------------------------------------------------------------- Tables
+
+// A table sorted by clicking its headers. Each column has a label, a cell(row) and optionally a value(row) to sort by
+function sortedTable(columns, rows, { sort, dir = 1, limit = Infinity, empty = 'Nothing matches the filters.' } = {}) {
+  let key = sort, direction = dir, shown = limit;
+  const tbody = el('tbody');
+  const head = el('tr');
+  const more = el('div', { class: 'more' });
+  const table = el('div', {}, el('div', { class: 'table-wrap' }, el('table', {}, el('thead', {}, head), tbody)), more);
+
+  function render() {
+    const column = columns.find(c => c.key === key);
+    const sorted = column?.value ? [...rows].sort((a, b) => {
+      const va = column.value(a), vb = column.value(b);
+      return (va < vb ? -1 : va > vb ? 1 : 0) * direction;
+    }) : rows;
+    head.replaceChildren(...columns.map(c => {
+      const th = el('th', { class: [c.num ? 'num' : '', c.value ? 'sortable' : ''].join(' '), scope: 'col',
+        'aria-sort': c.key === key ? (direction > 0 ? 'ascending' : 'descending') : null,
+        tabindex: c.value ? 0 : null }, c.label, c.key === key ? el('span', { class: 'arrow', text: direction > 0 ? '↑' : '↓' }) : null);
+      if (c.value) {
+        const toggle = () => { direction = c.key === key ? -direction : (c.num ? -1 : 1); key = c.key; render(); };
+        th.addEventListener('click', toggle);
+        th.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(); } });
+      }
+      return th;
+    }));
+    tbody.replaceChildren(...sorted.slice(0, shown).map(row => el('tr', {}, columns.map(c => {
+      const cell = c.cell(row);
+      return cell instanceof HTMLTableCellElement ? cell : el('td', { class: c.num ? 'num' : c.class || null }, cell);
+    }))));
+    if (!sorted.length) tbody.append(el('tr', {}, el('td', { colspan: columns.length, class: 'message', text: empty })));
+    more.replaceChildren();
+    if (sorted.length > shown) {
+      more.append(`Showing ${number(shown)} of ${number(sorted.length)}`,
+        el('button', { type: 'button', onclick: () => { shown += 500; render(); } }, 'Show 500 more'),
+        el('button', { type: 'button', onclick: () => { shown = Infinity; render(); } }, 'Show all'));
+    } else if (sorted.length > 10) {
+      more.append(`${number(sorted.length)} rows`);
+    }
+  }
+  render();
+  return table;
+}
+
+function searchBox(placeholder, value, onInput) {
+  return el('input', { type: 'search', placeholder, value, 'aria-label': placeholder,
+    oninput: event => onInput(event.target.value.trim().toLowerCase()) });
+}
+
+function selectBox(label, options, value, onChange) {
+  return el('label', {}, label, el('select', { onchange: event => onChange(event.target.value) },
+    options.map(([key, text]) => el('option', { value: key, selected: key === value }, text))));
+}
+
+// ---------------------------------------------------------------- Views
+
+function figure(label, value, sub, delta, hero) {
+  return el('div', { class: `card tile${hero ? ' hero' : ''}` },
+    el('div', { class: 'label', text: label }), el('div', { class: 'value', text: value }),
+    sub ? el('div', { class: 'sub' }, sub) : null, delta ? el('div', { class: 'delta', text: delta }) : null);
+}
+
+function renderOverview(summary) {
+  const t = summary.totals;
+  const history = summary.history;
+  const previous = history.length > 1 ? history[history.length - 2] : null;
+  const since = (value, key, noun) => previous && value - previous[key] > 0
+    ? `▲ ${number(value - previous[key])} ${noun}${value - previous[key] === 1 ? '' : 's'} since ${previous.date}` : null;
+  const withCode = summary.modules.length - t.modules_without_code;
+
+  const figures = el('section', { class: 'figures', 'aria-label': 'Summary' },
+    figure('Functions decompiled', percent(t.functions_done, t.functions_total),
+      `${number(t.functions_done)} of ${number(t.functions_total)} functions`, since(t.functions_done, 'functions_done', 'function'), true),
+    figure('Code decompiled', percent(t.bytes_done, t.bytes_total), `${number(t.bytes_done)} of ${number(t.bytes_total)} bytes`,
+      since(t.bytes_done, 'bytes_done', 'byte')),
+    figure('Complete source files', number(t.complete_files), `${number(t.partial_files)} more in progress`,
+      since(t.complete_files, 'complete_files', 'file')),
+    figure('Functions in assembly', number(t.functions_nonmatching),
+      el('span', {}, `${kilobytes(t.bytes_nonmatching)} whose C doesn't match yet · `, el('a', { href: '#/assembly' }, 'list'))),
+    figure('Modules complete', `${t.modules_complete} of ${withCode}`,
+      `${t.modules_in_progress} in progress, ${t.modules_not_started} not started`));
+
+  const remaining = t.bytes_total - t.bytes_done - t.bytes_nonmatching;
+  const whole = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'The code of the whole game' }),
+      el('p', { text: `${kilobytes(t.bytes_total)} in main, the ITCM and ${withCode - 2} overlays` })),
+    codeBar('The whole game', t.bytes_done, t.bytes_nonmatching, t.bytes_total, true),
+    el('div', { style: 'margin-top: 10px' }, stateLegend({
+      decompiled: percent(t.bytes_done, t.bytes_total), assembly: percent(t.bytes_nonmatching, t.bytes_total),
+      remaining: percent(remaining, t.bytes_total) })));
+
+  const historyTable = el('details', { style: 'margin-top: 12px' }, el('summary', { text: 'Table' }),
+    sortedTable([
+      { key: 'date', label: 'Date', cell: r => r.date, value: r => r.date },
+      { key: 'functions', label: 'Functions', num: true, cell: r => `${number(r.functions_done)} (${percent(r.functions_done, r.functions_total)})`, value: r => r.functions_done },
+      { key: 'bytes', label: 'Code (bytes)', num: true, cell: r => `${number(r.bytes_done)} (${percent(r.bytes_done, r.bytes_total)})`, value: r => r.bytes_done },
+      { key: 'files', label: 'Complete files', num: true, cell: r => number(r.complete_files), value: r => r.complete_files },
+      { key: 'asm', label: 'In assembly', num: true, cell: r => number(r.functions_nonmatching), value: r => r.functions_nonmatching },
+    ], history, { sort: 'date', dir: -1 }));
+  const progress = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Progress over time' }),
+      el('p', { text: `${history.length} records, from ${history[0].date}` })),
+    historyChart(history), historyTable);
+
+  const regions = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', {}, 'ARM9 ', moduleLink('main'), ' by region'),
+      el('p', { text: 'Where main\'s code comes from (see module-map.md)' })),
+    stateLegend(),
+    sortedTable([
+      { key: 'name', label: 'Region', cell: r => el('span', {}, r.name, el('span', { class: 'small mono', text: r.range })) },
+      { key: 'progress', label: 'Code', cell: r => barCell(r.name, r.done_bytes, r.nonmatching_bytes, r.code_bytes), value: r => r.done_bytes / r.code_bytes },
+      { key: 'functions', label: 'Functions', num: true, cell: r => `${number(r.decompiled)} / ${number(r.functions)}`, value: r => r.functions },
+    ], summary.main_regions));
+
+  const closest = summary.modules.filter(m => m.status === 'In progress')
+    .sort((a, b) => (a.code_bytes - a.done_bytes) - (b.code_bytes - b.done_bytes)).slice(0, 10);
+  const next = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Closest to complete' }),
+      el('p', { text: 'Modules in progress, by the code they have left' })),
+    stateLegend(),
+    sortedTable([
+      { key: 'name', label: 'Module', cell: r => moduleLink(r.name) },
+      { key: 'progress', label: 'Code', cell: r => barCell(r.name, r.done_bytes, r.nonmatching_bytes, r.code_bytes) },
+      { key: 'left', label: 'Left', num: true, cell: r => kilobytes(r.code_bytes - r.done_bytes) },
+      { key: 'functions', label: 'Functions left', num: true, cell: r => r.nonmatching ? `${number(r.remaining)} (${number(r.nonmatching)} in asm)` : number(r.remaining) },
+    ], closest));
+
+  const bySize = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Functions left by size' }),
+      el('p', { text: 'An estimate of the work left in each module. Functions in assembly count as left.' })),
+    sortedTable([
+      { key: 'name', label: 'Module', cell: r => moduleLink(r.name), value: r => r.name },
+      ...summary.size_buckets.map((label, i) => ({ key: `b${i}`, label, num: true, cell: r => number(r.remaining_by_size[i]), value: r => r.remaining_by_size[i] })),
+      { key: 'left', label: 'Code left', num: true, cell: r => kilobytes(r.code_bytes - r.done_bytes), value: r => r.code_bytes - r.done_bytes },
+    ], summary.modules.filter(m => m.remaining), { sort: 'left', dir: -1 }));
+
+  view.replaceChildren(figures, whole, progress, el('div', { class: 'cols' }, regions, next), bySize);
+}
+
+function renderModules(summary) {
+  const state = ui.modules;
+  const holder = el('div');
+  const draw = () => {
+    const rows = summary.modules.filter(m => (!state.status || m.status === state.status) &&
+      (!state.search || `${m.name} ${m.purpose}`.toLowerCase().includes(state.search)));
+    holder.replaceChildren(sortedTable([
+      { key: 'name', label: 'Module', cell: r => moduleLink(r.name), value: r => r.name },
+      { key: 'purpose', label: 'Purpose', class: 'purpose', cell: r => rich(r.purpose) },
+      { key: 'code_bytes', label: 'Code', num: true, cell: r => kilobytes(r.code_bytes), value: r => r.code_bytes },
+      { key: 'functions', label: 'Functions', num: true, cell: r => number(r.functions), value: r => r.functions },
+      { key: 'decompiled', label: 'Decompiled', num: true, cell: r => number(r.decompiled), value: r => r.decompiled },
+      { key: 'nonmatching', label: 'In asm', num: true, cell: r => r.nonmatching ? number(r.nonmatching) : '', value: r => r.nonmatching },
+      { key: 'remaining', label: 'Left', num: true, cell: r => number(r.remaining), value: r => r.remaining },
+      { key: 'progress', label: 'Progress (code)', cell: r => r.code_bytes ? barCell(r.name, r.done_bytes, r.nonmatching_bytes, r.code_bytes) : el('td', {}, '–'),
+        value: r => r.code_bytes ? r.done_bytes / r.code_bytes : -1 },
+      { key: 'status', label: 'Status', cell: r => statusChip(r.status), value: r => ['Complete', 'In progress', 'Not started', 'No code'].indexOf(r.status) },
+    ], rows, { sort: state.sort, dir: state.dir }));
+  };
+  const statuses = ['Complete', 'In progress', 'Not started', 'No code'];
+  view.replaceChildren(
+    el('section', { class: 'card' },
+      el('div', { class: 'card-head' }, el('h2', { text: 'Modules' }),
+        el('p', { text: `${summary.modules.length} modules: main, the ITCM and DTCM, and 35 overlays` })),
+      el('p', { class: 'lede', style: 'margin-top: 6px' }, 'Overlays at the same address replace each other. The purposes come from ',
+        el('a', { href: REPO + 'docs/module-map.md' }, 'module-map.md'), '; the ones marked ', el('em', { text: 'likely' }),
+        ' aren\'t confirmed yet.'),
+      el('div', { class: 'filters', style: 'margin-top: 14px' },
+        searchBox('Search modules', state.search, value => { state.search = value; draw(); }),
+        selectBox('Status', [['', 'All'], ...statuses.map(s => [s, s])], state.status, value => { state.status = value; draw(); }),
+        stateLegend()),
+      el('div', { style: 'margin-top: 12px' }, holder)));
+  draw();
+}
+
+async function renderModule(name) {
+  const [summary, module] = await Promise.all([getSummary(), getModule(name)]);
+  const s = module.summary;
+  const head = el('section', { class: 'card module-head' },
+    el('a', { class: 'back', href: '#/modules' }, '← Modules'),
+    el('div', { class: 'title' }, el('h2', { text: s.name }), statusChip(s.status),
+      s.range ? el('span', { class: 'mono', style: 'color: var(--ink-2)', text: s.range }) : null),
+    el('p', { class: 'lede' }, rich(s.purpose)));
+  if (!s.code_bytes) {
+    view.replaceChildren(head, el('section', { class: 'card message', text: 'This module has no code to decompile.' }));
+    return;
+  }
+  const figures = el('section', { class: 'tile-grid' },
+    figure('Code decompiled', percent(s.done_bytes, s.code_bytes), `${number(s.done_bytes)} of ${number(s.code_bytes)} bytes`),
+    figure('Functions decompiled', `${number(s.decompiled)} / ${number(s.functions)}`, `${number(s.remaining)} left`),
+    figure('In assembly', number(s.nonmatching), s.nonmatching ? `${kilobytes(s.nonmatching_bytes)} whose C doesn't match yet` : 'None'),
+    figure('Source files', number(s.complete_files), s.partial_files ? `complete, ${s.partial_files} more in progress` : 'complete'));
+
+  const state = ui.functions;
+  state.search = ''; state.state = '';
+  const search = searchBox('Search by name, symbol, address or file', '', value => { state.search = value; drawFunctions(); });
+  const holder = el('div');
+  const functionsCard = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Functions' }), el('p', { text: `${number(module.functions.length)} functions, in the order of their addresses` })),
+    el('div', { class: 'filters', style: 'margin-top: 12px' }, search,
+      selectBox('State', [['', 'All'], ...Object.entries(STATES).map(([key, { label }]) => [key, label])], '', value => { state.state = value; drawFunctions(); })),
+    el('div', { style: 'margin-top: 12px' }, holder));
+  function drawFunctions() {
+    const rows = module.functions.filter(f => (!state.state || f.state === state.state) &&
+      (!state.search || `${f.name || ''} ${f.symbol} ${f.address} ${f.file || ''}`.toLowerCase().includes(state.search)));
+    holder.replaceChildren(sortedTable([
+      { key: 'address', label: 'Address', cell: r => el('span', { class: 'mono', text: r.address }), value: r => r.address },
+      { key: 'size', label: 'Size', num: true, cell: r => el('span', { title: hex(r.size) }, number(r.size)), value: r => r.size },
+      { key: 'name', label: 'Function', cell: r => el('span', {}, r.name || r.symbol, r.name ? el('span', { class: 'small mono', text: r.symbol }) : null),
+        value: r => (r.name || r.symbol).toLowerCase() },
+      { key: 'state', label: 'State', cell: r => stateChip(r.state), value: r => Object.keys(STATES).indexOf(r.state) },
+      { key: 'file', label: 'Source file', cell: r => r.file ? el('span', { class: 'mono', text: r.file }) : '', value: r => r.file || '~' },
+    ], rows, { sort: 'address', limit: 250 }));
+  }
+  drawFunctions();
+
+  const pick = f => {
+    search.value = f.address; state.search = f.address; drawFunctions();
+    functionsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const map = el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Address map' }), el('p', { text: `${kilobytes(s.code_bytes)} of code, ${module.sections.join(', ')}` })),
+    addressMap(module, pick));
+
+  const files = module.files.length ? el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Source files' }), el('p', { text: 'In the order of delinks.txt' })),
+    sortedTable([
+      { key: 'name', label: 'File', cell: r => el('span', { class: 'mono', text: r.name }), value: r => r.name },
+      { key: 'complete', label: 'Status', cell: r => statusChip(r.complete ? 'Complete' : 'In progress'), value: r => r.complete ? 0 : 1 },
+      { key: 'ranges', label: 'Code', cell: r => el('span', { class: 'mono', text: r.ranges.join(', ') }) },
+      { key: 'functions', label: 'Functions', num: true, cell: r => number(r.functions), value: r => r.functions },
+      { key: 'nonmatching', label: 'In asm', num: true, cell: r => r.nonmatching ? number(r.nonmatching) : '', value: r => r.nonmatching },
+      { key: 'code_bytes', label: 'Size', num: true, cell: r => kilobytes(r.code_bytes), value: r => r.code_bytes },
+    ], module.files)) : null;
+
+  const nonmatching = summary.nonmatching.filter(f => f.module === name);
+  const notes = nonmatching.length ? el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h3', { text: 'Functions in assembly' }), el('p', { text: 'Why their C doesn\'t match yet, from the source' })),
+    el('div', { class: 'notes' }, nonmatching.map(f => el('div', { class: 'note' },
+      el('div', { class: 'head' }, el('b', { text: f.name }), el('span', { class: 'mono', style: 'color: var(--ink-2)', text: f.address }),
+        f.match != null ? el('span', { style: 'color: var(--ink-2)', text: `C matches ${f.match} %` }) : null),
+      el('p', { text: f.note || 'No comment in the source.' }))))) : null;
+
+  view.replaceChildren(head, figures, map, files, notes, functionsCard);
+}
+
+async function renderFiles() {
+  const summary = await getSummary();
+  view.replaceChildren(el('p', { class: 'message', text: 'Loading the files of every module…' }));
+  const modules = await Promise.all(summary.modules.map(m => getModule(m.name)));
+  const all = modules.flatMap(m => m.files.map(file => ({ ...file, module: m.summary.name })));
+  const state = ui.files;
+  const holder = el('div');
+  const draw = () => {
+    const rows = all.filter(f => (!state.status || (state.status === 'complete') === f.complete) &&
+      (!state.search || `${f.name} ${f.module}`.toLowerCase().includes(state.search)));
+    holder.replaceChildren(sortedTable([
+      { key: 'name', label: 'File', cell: r => el('span', { class: 'mono', text: r.name }), value: r => r.name },
+      { key: 'module', label: 'Module', cell: r => moduleLink(r.module), value: r => r.module },
+      { key: 'complete', label: 'Status', cell: r => statusChip(r.complete ? 'Complete' : 'In progress'), value: r => r.complete ? 0 : 1 },
+      { key: 'functions', label: 'Functions', num: true, cell: r => number(r.functions), value: r => r.functions },
+      { key: 'nonmatching', label: 'In asm', num: true, cell: r => r.nonmatching ? number(r.nonmatching) : '', value: r => r.nonmatching },
+      { key: 'code_bytes', label: 'Code', num: true, cell: r => kilobytes(r.code_bytes), value: r => r.code_bytes },
+      { key: 'ranges', label: 'Addresses', cell: r => el('span', { class: 'mono', text: r.ranges.join(', ') }) },
+    ], rows, { sort: 'name' }));
+  };
+  const complete = all.filter(f => f.complete).length;
+  view.replaceChildren(el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h2', { text: 'Source files' }),
+      el('p', { text: `${number(all.length)} files in delinks.txt: ${number(complete)} complete, ${number(all.length - complete)} in progress` })),
+    el('p', { class: 'lede', style: 'margin-top: 6px' }, 'A file marked complete builds to the same bytes as the original, which ',
+      el('code', { text: 'ninja min' }), ' checks. The build leaves out the files that aren\'t complete.'),
+    el('div', { class: 'filters', style: 'margin-top: 14px' },
+      searchBox('Search files', state.search, value => { state.search = value; draw(); }),
+      selectBox('Status', [['', 'All'], ['complete', 'Complete'], ['partial', 'In progress']], state.status, value => { state.status = value; draw(); })),
+    el('div', { style: 'margin-top: 12px' }, holder)));
+  draw();
+}
+
+function renderAssembly(summary) {
+  const rows = summary.nonmatching;
+  const total = rows.reduce((sum, f) => sum + f.size, 0);
+  const meter = f => {
+    if (f.match == null) return el('td', {}, '–');
+    const bar = el('div', { class: 'bar', role: 'img', 'aria-label': `C matches ${f.match} %` },
+      el('span', { class: 's-decompiled nz', style: `flex: ${f.match} 1 0px` }), el('span', { class: 's-remaining', style: `flex: ${100 - f.match} 1 0px` }));
+    return el('td', { class: 'nowrap' }, el('span', { class: 'meter' }, bar, el('span', { style: 'font-variant-numeric: tabular-nums', text: `${f.match} %` })));
+  };
+  view.replaceChildren(el('section', { class: 'card' },
+    el('div', { class: 'card-head' }, el('h2', { text: 'Functions in assembly' }),
+      el('p', { text: `${rows.length} functions, ${kilobytes(total)}` })),
+    el('p', { class: 'lede', style: 'margin-top: 6px' },
+      'Their files are complete, since the build uses the original\'s instructions after ', el('code', { text: '#else' }),
+      ', but the C between ', el('code', { text: '#ifdef NONMATCHING' }), ' and ', el('code', { text: '#else' }),
+      ' doesn\'t match yet, so they count as left. The match is the percentage in each function\'s NONMATCHING comment, which objdiff measured; ',
+      el('code', { text: 'python tools/diff_function.py <file> --nonmatching' }), ' measures it again.'),
+    el('div', { style: 'margin-top: 14px' }, sortedTable([
+      { key: 'module', label: 'Module', cell: r => moduleLink(r.module), value: r => r.module },
+      { key: 'name', label: 'Function', cell: r => el('span', {}, r.name, el('span', { class: 'small mono', text: r.address })), value: r => r.name.toLowerCase() },
+      { key: 'match', label: 'C matches', cell: meter, value: r => r.match ?? -1 },
+      { key: 'size', label: 'Size', num: true, cell: r => el('span', { title: hex(r.size) }, number(r.size)), value: r => r.size },
+      { key: 'file', label: 'Source file', cell: r => el('span', { class: 'mono', text: r.file }), value: r => r.file },
+      { key: 'note', label: 'Why', cell: r => r.note ? el('details', {}, el('summary', { text: 'Show' }), el('p', { text: r.note })) : '' },
+    ], rows, { sort: 'match', dir: -1 }))));
+}
+
+// ---------------------------------------------------------------- Router
+
+let lastView = null;
+async function route() {
+  const [name = '', argument] = location.hash.replace(/^#\/?/, '').split('/');
+  const current = name === 'module' ? 'modules' : name;
+  for (const link of document.querySelectorAll('nav.tabs a')) {
+    if (link.dataset.view === current) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+  }
+  hideTip();
+  redraws = [];
+  view.style.opacity = '0.5'; // Keeps the previous view while the data loads
+  try {
+    const summary = await getSummary();
+    document.getElementById('recorded').textContent =
+      `European version · recorded on ${summary.recorded} · generated from config/eur by tools/progress.py`;
+    if (name === 'modules') renderModules(summary);
+    else if (name === 'module' && argument) await renderModule(argument);
+    else if (name === 'files') await renderFiles();
+    else if (name === 'assembly') renderAssembly(summary);
+    else renderOverview(summary);
+    document.title = name === 'module' && argument ? `${argument} · DQIX Decompilation Status` : 'DQIX Decompilation Status';
+  } catch (error) {
+    const opened = location.protocol === 'file:';
+    view.replaceChildren(el('section', { class: 'card message' },
+      el('h3', { text: opened ? 'The page can\'t read its data when it\'s opened as a file' : 'The data couldn\'t be loaded' }),
+      el('p', { style: 'margin-top: 8px' }, opened
+        ? ['Run ', el('code', { text: 'python tools/progress.py --serve' }), ' in the repository, which opens it at ',
+           el('code', { text: 'http://127.0.0.1:8009/' }), '.']
+        : ['Check that ', el('code', { text: 'docs/status/data' }), ' exists, or run ',
+           el('code', { text: 'python tools/progress.py --record' }), '. ', String(error.message || error)])));
+  }
+  view.style.opacity = '';
+  if (lastView !== location.hash) window.scrollTo(0, 0);
+  lastView = location.hash;
+}
+
+let resizeTimer;
+addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => redraws.forEach(draw => draw()), 100); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => redraws.forEach(draw => draw()));
+addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
