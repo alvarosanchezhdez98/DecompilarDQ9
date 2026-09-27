@@ -16,7 +16,7 @@ are counted apart: they aren't decompiled, and they're listed in [Functions in a
 objdiff's report counts them as matching.
 
 After decompiling something:
-1. Check that it matches with `ninja min`.
+1. Check that it matches with `ninja check` (`ninja min` also builds the ROM).
 2. Run `python tools/progress.py --record` to update this page, its history
    ([progress-history.csv](progress-history.csv)) and the status page's data ([status/data](status/data)).
 3. Commit them with the change. CI fails if they're out of date.

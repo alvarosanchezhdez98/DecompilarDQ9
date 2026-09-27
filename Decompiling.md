@@ -7,11 +7,36 @@ If you are receiving an error when trying to load the config.yaml, make sure you
 ## The basics
 Decide on a piece of code you want to decompile; either from looking at already decompiled code and wishing to decompile functions it references, or through other means such as debugging. Once you have it, Ghidra can be an excellent base for understanding what the code is trying to achieve, and decomp.me can ensure the code you write matches the assembly.
 
+## The workflow
+Each step has a tool, so that the time goes into the code and not into bookkeeping:
+
+| Step | Tool |
+| ---- | ---- |
+| Choose what to decompile | `python tools/progress.py --remaining <module>`, the status page (`python tools/progress.py --serve`), and `python tools/find_signatures.py --duplicates` for groups of functions with the same instructions: decompiling one gives the C of the others |
+| Library code (NitroSDK, NitroSystem) | `tools/find_signatures.py` names it and finds its files, `tools/library_draft.py` drafts it from a public decompilation (see [Identifying library code](#identifying-library-code)) |
+| Game code: a first draft | `python tools/draft.py <module> <start> <end>`: m2c's C of each function, with its callers, its strings, and our decompiled function with the same instructions, if there's one (see below) |
+| Diff the file while writing it | `python tools/rename_symbols.py <file> <module> <start>` gives the functions of `symbols.txt` the file's names, then `ninja delink` and `python tools/diff_function.py <file>` |
+| Registers or instructions in another order | `python tools/permute.py <file> <function>` searches the order of the declarations and statements, and the types, that match; `tools/try_variants.py` tries your own ideas |
+| A function that still doesn't match | `python tools/nonmatching.py <file> <function> "why"` writes it in assembly (see [Functions that don't match yet](#functions-that-dont-match-yet)) |
+| The file's data | `tools/data_order.py` |
+| Add the file to the build | `python tools/complete_file.py <file> --build`, which checks it with `ninja check` |
+| Record the progress | `python tools/progress.py --record` |
+
+`ninja check` verifies every module and symbol against the original in about 13 seconds; `ninja min` does the same and
+also builds the ROM, which takes about 40.
+
 ## First drafts of game code
 For the game's own code, [m2c](https://github.com/matt-kempster/m2c) turns a function of the disassembly into a C draft, with its `if`s, loops and `switch`es. It isn't part of the repository: clone it into `build/`, which git ignores, and run it on the disassembly of the module:
 ```shell
 git clone --depth 1 https://github.com/matt-kempster/m2c build/m2c
 python build/m2c/m2c.py -t arm-mwcc-c++ build/eur/asm/ov010_2.s -f func_ov010_02184354
+```
+`tools/draft.py` does it for all the functions of a range, in one file in `build/draft`, and writes above each function
+what's known about it: which functions call it (in other overlays too, which often tells what it's for), the strings
+that it loads, and a decompiled function with the same instructions, whose C can be reused as it is (e.g. overlay 9 has
+a copy of overlay 12's `ForbiddenWordChecker`):
+```shell
+python tools/draft.py ov009 0x021842a0 0x0218b000
 ```
 The draft names members by their offsets (`arg0->unk4`) and calls functions by their symbols, since m2c can't read our C++ headers. Give it the types from the headers, and the structures that the offsets suggest, then diff it (see `src/World/Overlay_10/PitEvent.cpp`, drafted this way). It's a draft of what the code does, not of how the source was written: the order of the declarations, the local variables and the repeated blocks still come from the diff.
 
@@ -32,6 +57,16 @@ Under the diff of a function that doesn't match, `Hint:` lines tell likely cause
 ```shell
 python tools/try_variants.py src/System/VRAMExclusive.cpp func_020c9a88 variants.cpp           # the match of each variant
 python tools/try_variants.py src/System/VRAMExclusive.cpp func_020c9a88 variants.cpp --apply b # writes variant b to the file
+```
+
+`tools/permute.py` searches without ideas: it changes the function the ways that fixed most register and scheduling
+differences (the order of consecutive statements, where a variable is declared, a declaration split from its
+initialization, `int` and `long`, the operands of `==` or `+`), keeps what doesn't make the match worse, with one
+worker per core, and at the end undoes the changes that the match doesn't need. A match of 100 % means the original's
+instructions; a better percentage alone may have changed what the code does, so read its diff:
+```shell
+python tools/permute.py src/Scene/Overlay_13/SkillAbilityList.cpp SkillAbilityList::Draw --time 300   # prints the diff
+python tools/permute.py src/Scene/Overlay_13/SkillAbilityList.cpp SkillAbilityList::Draw --apply      # writes it
 ```
 
 A function whose instructions only differ in the symbols they reference is shown as `100.0 % (except ...)`. References to the same external symbols happen because the original object defines data that ours only declares. References to symbols with other names are listed as `original = ours`, so you can rename the data in `symbols.txt`.
@@ -87,6 +122,11 @@ asm void MonsterInfoScreen::UpdateText()
 }
 #endif
 ```
+`python tools/nonmatching.py <file> <function> "why"` does all of it: it measures how much the C matches, writes the
+comment (the status page and `progress.md` show its percentage and its reason), converts the original's instructions,
+and checks that they match and that the C still compiles, leaving the file as it was otherwise. A function that uses
+the file's pool of strings needs them in one array first, and the tool lists them (see below).
+
 `tools/asm_to_mwcc.py` converts the function (`python tools/asm_to_mwcc.py ov014 _ZN17MonsterInfoScreen10UpdateTextEv`).
 Give the `asm` function the C function's return and parameter types. MWCC's assembler doesn't take qualified names like
 `NatTable::FindEntry`, so the code calls member functions by their symbols, and the tool prints them declared as
@@ -123,4 +163,4 @@ python tools/complete_file.py src/System/CardBackup.cpp --text-start 0x020d0050
 python tools/configure.py eur
 ```
 
-Once `ninja min` confirms that everything still matches, run `python tools/progress.py --record` to update [docs/progress.md](docs/progress.md), and commit it with your changes.
+Once `ninja check` confirms that everything still matches, run `python tools/progress.py --record` to update [docs/progress.md](docs/progress.md), and commit it with your changes.
