@@ -1,0 +1,303 @@
+#pragma once
+
+#include "Graphics/Background.h"
+#include "Graphics/Sprite.h"
+#include "Graphics/TextWindow.h"
+#include "Memory/SafeAllocator.h"
+#include "Text/TextTable.h"
+
+// The profile of the player in the save data (GameState + 0x569c), which the profile editor edits
+struct ProfileData
+{
+    unsigned int year_ : 12;
+    unsigned int month_ : 4;
+    unsigned int day_ : 5;
+    // The protagonist's sex, twice
+    unsigned int unk_0_21 : 4;
+    unsigned int female_ : 1;
+    // Overlay 12 initialized the profile
+    unsigned int initialized_ : 1;
+    // The card's design, the birthday and the accolade were chosen
+    unsigned int designChosen_ : 1;
+    unsigned int birthdayChosen_ : 1;
+    unsigned int accoladeChosen_ : 1;
+    // The accolade is the vocation's
+    unsigned int vocationAccolade_ : 1;
+    // The birthday is shown
+    unsigned int showBirthday_ : 1;
+    // What func_02098f20 returns for the birthday
+    unsigned int unk_4_0 : 9;
+    // The title (0 to 511)
+    int title_ : 10;
+    // The accolade: under 700, a text of profsen_<LG>.bin, else of profstr_<LG>.bin
+    int accolade_ : 11;
+    // The profile was edited once
+    int edited_ : 1;
+    unsigned int unk_4_31 : 1;
+    char unk_8[0x74];
+};
+
+// A loaded .bin file of texts: func_020727d8 initializes it, func_020728ac loads it and func_02072a68 returns a text
+struct BinTextTable
+{
+    char unk_0[8];
+};
+
+// A pattern of forbidden words (0x20 bytes): up to 5 words, and how each matches
+struct ForbiddenWordPattern
+{
+    // The file has offsets in its texts, which ResolvePattern() replaces
+    const char* words_[5];
+    signed char lengths_[5];
+    // 0 to 3: the word is the whole word, somewhere in it, at its end or at its start; 4 to 7: the same with a
+    // pattern (see ForbiddenWordChecker::Match)
+    unsigned char types_[5];
+    unsigned char count_;
+    char unk_1f;
+};
+
+// The loaded file of the forbidden words
+struct ForbiddenWordFile
+{
+    // The count of the patterns (12 bits), and the patterns were prepared (bit 31)
+    unsigned int header_;
+    // The patterns (0x20 bytes each) and their texts
+    ForbiddenWordPattern* patterns_;
+    char* texts_;
+};
+
+// A word of the checked text, in its codes
+struct ForbiddenWordRange
+{
+    short start_;
+    short length_;
+    // The word ends its line, or a separator follows it
+    unsigned char lineEnd_;
+    unsigned char active_;
+};
+
+// What func_020425b4 returns for a character's code
+struct CharacterInfo
+{
+    const char* text_;
+    char unk_4;
+    signed char length_ : 6;
+    signed char unk_5_6 : 1;
+    signed char uppercase_ : 1;
+};
+
+// The checker of the forbidden words of the profile's message (data_020f285c is its file). func_ov012_021845f8
+// initializes it and func_ov012_02184d80 checks a text
+struct ForbiddenWordChecker
+{
+    char unk_0[0x18];
+    ForbiddenWordFile file_;
+    void* unk_24;
+    short unk_28;
+    // The codes of the symbols that the patterns use (sSymbols)
+    unsigned char symbols_[15];
+    char unk_39[3];
+
+    void Initialize();
+    void LoadFile(void* data, int extra, int (*prepare)(ForbiddenWordFile* file, ForbiddenWordPattern* pattern));
+    int Check(const char* text);
+    void ToUpper(const char* text, char* output);
+    int FindText(const char* word, const char* text, int length, int positions);
+    int Match(const char* pattern, const char* text, int length, int positions);
+    int Contains(const unsigned char* text, int length, unsigned char character);
+};
+
+// What func_ov023_021e7220 initializes: the windows of the profile editor, which overlay 23 runs
+struct Unknown_021e7220
+{
+    char unk_0[0x5f4];
+    BinTextTable* strings_;
+    TextTable* texts_;
+    void* unk_5fc;
+    // The message being edited
+    char* message_;
+    SpriteRenderer* renderer_;
+    Sprite* sprites_;
+    // The page of the card, and the card has two
+    unsigned char unk_60c;
+    unsigned char unk_60d;
+    char unk_60e[0x614 - 0x60e];
+};
+
+// A key of a keyboard's layout (0x14 bytes)
+struct KeyboardKey
+{
+    short x_;
+    short y_;
+    const char* text_;
+    const char* shiftedText_;
+    unsigned char flags_;
+    unsigned char unk_d;
+    unsigned char size_;
+    char unk_f[5];
+};
+
+// A keyboard's layout (keyboard_pr.bin), which overlay 3 has: func_ov003_0215e6d8 initializes it
+struct KeyboardLayout
+{
+    KeyboardKey* keys_;
+    char unk_4[2];
+    short count_;
+    char unk_8[8];
+};
+
+// The keyboard of overlay 3: func_ov003_0215efb8 initializes it and func_ov003_0215f000 updates it
+struct Keyboard
+{
+    int unk_0;
+    KeyboardLayout* layout_;
+    // The text that it edits
+    char* text_;
+    char unk_c[4];
+    int size_;
+    int unk_14;
+    int unk_18;
+    short unk_1c;
+    unsigned char unk_1e;
+    unsigned char unk_1f;
+    unsigned char unk_20;
+    unsigned char unk_21;
+    unsigned char unk_22;
+    unsigned char unk_23;
+    unsigned char unk_24;
+    char unk_25[3];
+};
+
+// Overlay 12, the editor of the player's profile (for tag mode): its message, title and accolade, which overlay 17
+// runs. Overlay 17 calls Initialize(), Load() and Update() until it returns nonzero, then Finish()
+struct ProfileEditor
+{
+    void* unk_0;
+    void* unk_4;
+    // func_02074af4 initializes it
+    char unk_8[0x10];
+    unsigned char unk_18;
+    unsigned char unk_19;
+    char unk_1a[2];
+    // The main screen's enabled backgrounds (bits 8 to 12 of DISPCNT) before the editor
+    int planes_;
+    SafeAllocator allocators_[7];
+    TextWindow window_;
+    BackgroundGraphics backgrounds_[3];
+    Canvas canvases_[13];
+    Unknown_021e7220 windows_;
+    BinTextTable strings_;
+    TextTable texts_;
+    SpriteRenderer* renderer_;
+    void* unk_1360;
+    Sprite* sprites_;
+    SpriteRenderer* renderer2_;
+    Sprite* sprites2_;
+    unsigned char step_;
+    unsigned char state_;
+    char unk_1372[2];
+    char* text_;
+    const char* unk_1378;
+    void* pixels_;
+    // The BackgroundLoader tasks of the files
+    int tasks_[6];
+    int unk_1398;
+    int result_;
+    unsigned char unk_13a0;
+    char unk_13a1[3];
+    int unk_13a4;
+    signed char unk_13a8;
+    signed char unk_13a9;
+    unsigned char unk_13aa;
+    unsigned char unk_13ab;
+    void* unk_13ac;
+    char* name_;
+    void* unk_13b4;
+    unsigned int unk_13b8;
+    void* unk_13bc;
+    signed char* unk_13c0;
+    unsigned short unk_13c4_0 : 5;
+    unsigned short unk_13c4_5 : 11;
+    char unk_13c6[2];
+    unsigned short* unk_13c8;
+    unsigned int* unk_13cc;
+    char* message_;
+    unsigned int selection_;
+    int selections_[6];
+    int unk_13f0;
+    unsigned int design_;
+    unsigned int unk_13f8;
+    // The birthday being edited
+    unsigned short year_;
+    unsigned char month_;
+    unsigned char day_;
+    char accoladeText_[0x40];
+    char titleText_[0x40];
+    ForbiddenWordChecker checker_;
+    unsigned char finished_;
+    unsigned char unk_14bd;
+    char unk_14be[2];
+
+    void SetCanvasColors(int canvas, int color, int shadow);
+    void Initialize();
+    void LoadProfile();
+    void Load(SafeAllocator* allocator);
+    int Update(int input);
+    void Draw1();
+    void Draw2();
+    void Finish();
+    void DrawItemText(unsigned char item, int selected);
+    void UpdateText();
+    void LoadStrings();
+    void LoadSentences();
+    void LoadTexts();
+    void LoadBackgrounds();
+    void LoadSprites();
+    void LoadSprites2();
+    void State_Load();
+    void State_Menu();
+    void State_TitleCategory();
+    void State_Title0();
+    void State_Title1();
+    void State_Title2();
+    void State_06();
+    void State_07();
+    void State_08();
+    void State_09();
+    void State_0a();
+    void State_0b();
+    void State_0c();
+    void State_0d();
+    void State_0e();
+    void State_Finish();
+    void RefreshCard(int animate, int design, int keepPage);
+    int FormatCard(ProfileData* profile);
+    void SelectItem(int cancel);
+    void SetItemWindow(unsigned char item, short x, short y);
+    void OpenMenu();
+    void OpenTitleCategories();
+    void OpenTitles0();
+    void OpenTitles1();
+    void OpenTitles2();
+    void OpenQuestion();
+    void OpenBirthday();
+    void OpenAccoladeKinds();
+    void OpenAccolades0();
+    void OpenAccolades1();
+    void OpenDesigns();
+    void OpenMessage();
+    void Text_01(char* text, int hidden);
+    void Text_02(char* text, int hidden);
+    void Text_03(char* text, int hidden);
+    void Text_04(char* text, int hidden);
+    void Text_05(char* text, int hidden);
+    void Text_06(char* text, int hidden);
+    void Text_07(char* text, int hidden);
+    void Text_08(char* text, int hidden);
+    void Text_09(char* text, int hidden);
+    void Text_0a(char* text, int hidden);
+    void Text_0b(char* text, int hidden);
+    void Text_0c(char* text, int hidden);
+    void Text_0d(char* text, int hidden);
+    void Text_0e(char* text, int hidden);
+};

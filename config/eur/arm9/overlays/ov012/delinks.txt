@@ -4,3 +4,9 @@
     .data       start:0x0218b220 end:0x0218b320 kind:data align:32
     .bss        start:0x0218b320 end:0x0218b320 kind:bss align:32
 
+src/Scene/Overlay_12/ProfileEditor.cpp:
+    complete
+    .text start:0x021842a0 end:0x0218af74
+    .rodata start:0x0218af74 end:0x0218b210
+    .data start:0x0218b220 end:0x0218b31c
+

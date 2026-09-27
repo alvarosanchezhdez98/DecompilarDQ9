@@ -64,7 +64,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 9 | `0x021842a0` | 26.7 | 43 | *Likely* character creation / name entry | `keyboard_cm.bin`, `keyboard_cs.bin`, `str_cm` |
 | 10 | `0x021842a0` | 2.0 | 3 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | `str_pit`, `ana.chr` ("ana" is a hole in Japanese) |
 | 11 | `0x021842a0` | 18.2 | 186 | The system of the menus that run a script (`data/menu/*.stb`: the title, the treasure maps, the accolades...), and its 114 script commands (`src/Scene/Overlay_11`). Overlay 17 loads the script and overlay 23 has the objects that the commands create. Decompiled, with 3 commands in assembly for now. Needs `FORCE_ACTIVE` | `data/%s` only |
-| 12 | `0x021842a0` | 28.1 | 71 | *Likely* profile editing (tag mode) | `profstr`, `profsen`, `keyboard_pr.bin` |
+| 12 | `0x021842a0` | 28.1 | 71 | The editor of the profile that tag mode's card shows: its title, accolade, birthday, design and message, with overlay 3's keyboard and a check of forbidden words (`src/Scene/Overlay_12`). Overlay 23 draws the card. Decompiled, with 7 functions in assembly for now | `profstr`, `profsen`, `keyboard_pr.bin`, `ttlname` |
 | 13 | `0x021842a0` | 15.1 | 40 | The skill up screen: the menu that spends skill points, and the list of each skill's abilities (`src/Scene/Overlay_13`) | `str_su`, `obj_sklup_i`, `str_sklc`, `sklname` |
 | 14 | `0x021842a0` | 21.3 | 69 | Bestiary | `mons_info2.nat`, `mon_list`, `mon_trv%d` |
 | 15 | `0x0218b5a0` | 35.9 | 103 | *Likely* character model loading / viewer | `charaview4.bin`, `data/chara/%s.chr`, `%s.nsbca` |
