@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GameState/PartyMember.h"
+
 #include "Graphics/Background.h"
 #include "Graphics/Sprite.h"
 #include "Graphics/TextWindow.h"
@@ -87,26 +89,6 @@ struct SkillAbilityList
     void Select(int member, unsigned int skill);
     void Reload();
     void Draw(Canvas* canvas);
-};
-
-// A party member's name and status
-struct PartyMemberStatus
-{
-    char name_[0x30];
-    unsigned short unk_30;
-    unsigned short unk_32;
-    unsigned short unk_34;
-    unsigned short unk_36;
-    unsigned short unk_38;
-};
-
-// A party member, which func_0200ff1c returns: func_02053c6c returns their data
-struct PartyMember
-{
-    char unk_0[0x130];
-    unsigned short* unk_130;
-    PartyMemberStatus* status_;
-    unsigned short* unk_138;
 };
 
 // What the caller of SkillPointMenu::Initialize() has: its window, which the menu copies on the sub screen

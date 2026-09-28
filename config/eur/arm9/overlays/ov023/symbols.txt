@@ -147,38 +147,38 @@ _ZN6Layout11GetPositionEsPsS0_ kind:function(arm,size=0x5c) addr:0x021e2bdc
 _ZN6Layout9IsVisibleEs kind:function(arm,size=0x70) addr:0x021e2c38
 _ZN6Layout11SetPositionEsss kind:function(arm,size=0x20) addr:0x021e2ca8
 _ZN6Layout7SetSizeEsss kind:function(arm,size=0x20) addr:0x021e2cc8
-func_ov023_021e2ce8 kind:function(arm,size=0xf0) addr:0x021e2ce8
-func_ov023_021e2dd8 kind:function(arm,size=0x160) addr:0x021e2dd8
-func_ov023_021e2f38 kind:function(arm,size=0xf8) addr:0x021e2f38
-func_ov023_021e3030 kind:function(arm,size=0x54) addr:0x021e3030
-func_ov023_021e3084 kind:function(arm,size=0xb0) addr:0x021e3084
-func_ov023_021e3134 kind:function(arm,size=0x50) addr:0x021e3134
-func_ov023_021e3184 kind:function(arm,size=0x2c) addr:0x021e3184
-func_ov023_021e31b0 kind:function(arm,size=0x34) addr:0x021e31b0
-func_ov023_021e31e4 kind:function(arm,size=0x74) addr:0x021e31e4
-func_ov023_021e3258 kind:function(arm,size=0x74) addr:0x021e3258
-func_ov023_021e32cc kind:function(arm,size=0x38) addr:0x021e32cc
-func_ov023_021e3304 kind:function(arm,size=0x88) addr:0x021e3304
-func_ov023_021e338c kind:function(arm,size=0x14) addr:0x021e338c
-func_ov023_021e33a0 kind:function(arm,size=0x14) addr:0x021e33a0
-func_ov023_021e33b4 kind:function(arm,size=0x988) addr:0x021e33b4
-func_ov023_021e3d3c kind:function(arm,size=0x74) addr:0x021e3d3c
-func_ov023_021e3db0 kind:function(arm,size=0xe8) addr:0x021e3db0
-func_ov023_021e3e98 kind:function(arm,size=0x9c) addr:0x021e3e98
-func_ov023_021e3f34 kind:function(arm,size=0x8c) addr:0x021e3f34
-func_ov023_021e3fc0 kind:function(arm,size=0x290) addr:0x021e3fc0
-func_ov023_021e4250 kind:function(arm,size=0x14) addr:0x021e4250
-func_ov023_021e4264 kind:function(arm,size=0xf4) addr:0x021e4264
-func_ov023_021e4358 kind:function(arm,size=0x98) addr:0x021e4358
-func_ov023_021e43f0 kind:function(arm,size=0x8c) addr:0x021e43f0
-func_ov023_021e447c kind:function(arm,size=0xf0) addr:0x021e447c
-func_ov023_021e456c kind:function(arm,size=0xd0) addr:0x021e456c
-func_ov023_021e463c kind:function(arm,size=0x368) addr:0x021e463c
-func_ov023_021e49a4 kind:function(arm,size=0x274) addr:0x021e49a4
-func_ov023_021e4c18 kind:function(arm,size=0x204) addr:0x021e4c18
-func_ov023_021e4e1c kind:function(arm,size=0x4) addr:0x021e4e1c
-func_ov023_021e4e20 kind:function(arm,size=0x1c) addr:0x021e4e20
-func_ov023_021e4e3c kind:function(arm,size=0x50) addr:0x021e4e3c
+_ZN12MemberScreen16LoadVocationIconEiP14SpriteRenderer kind:function(arm,size=0xf0) addr:0x021e2ce8
+_ZN12MemberScreen10InitializeEv kind:function(arm,size=0x160) addr:0x021e2dd8
+_ZN12MemberScreen6FinishEv kind:function(arm,size=0xf8) addr:0x021e2f38
+_ZN12MemberScreen6UpdateEv kind:function(arm,size=0x54) addr:0x021e3030
+_ZN12MemberScreen6Draw3DEv kind:function(arm,size=0xb0) addr:0x021e3084
+_ZN12MemberScreen6Draw2DEv kind:function(arm,size=0x50) addr:0x021e3134
+_ZN12MemberScreen7DrawSubEv kind:function(arm,size=0x2c) addr:0x021e3184
+_ZN12MemberScreen10SetMembersEPKhi kind:function(arm,size=0x34) addr:0x021e31b0
+_ZN12MemberScreen11DrawArrows1Eiiis kind:function(arm,size=0x74) addr:0x021e31e4
+_ZN12MemberScreen11DrawArrows2Eiiis kind:function(arm,size=0x74) addr:0x021e3258
+_ZN12MemberScreen10DrawArrow3Eii kind:function(arm,size=0x38) addr:0x021e32cc
+_ZN12MemberScreen10DrawCursorEss kind:function(arm,size=0x88) addr:0x021e3304
+_ZN12MemberScreen5CloseEv kind:function(arm,size=0x14) addr:0x021e338c
+_ZN12MemberScreen8SetStateEa kind:function(arm,size=0x14) addr:0x021e33a0
+_ZN12MemberScreen10State_LoadEv kind:function(arm,size=0x988) addr:0x021e33b4
+_ZN12MemberScreen11HideElementEP6Layoutsi kind:function(arm,size=0x74) addr:0x021e3d3c
+_ZN12MemberScreen10State_MainEv kind:function(arm,size=0xe8) addr:0x021e3db0
+_ZN12MemberScreen10UpdateBackEv kind:function(arm,size=0x9c) addr:0x021e3e98
+_ZN12MemberScreen10State_ExitEv kind:function(arm,size=0x8c) addr:0x021e3f34
+_ZN12MemberScreen9DrawTextsEv kind:function(arm,size=0x290) addr:0x021e3fc0
+_ZN12MemberScreen8GetStarsEP11PartyMember kind:function(arm,size=0x14) addr:0x021e4250
+_ZN12MemberScreen13DrawLeftRightEv kind:function(arm,size=0xf4) addr:0x021e4264
+_ZN12MemberScreen8DrawNextEv kind:function(arm,size=0x98) addr:0x021e4358
+_ZN12MemberScreen8DrawBackEv kind:function(arm,size=0x8c) addr:0x021e43f0
+_ZN12MemberScreen12UpdateModelsEv kind:function(arm,size=0xf0) addr:0x021e447c
+_ZN12MemberScreen15UpdateModelLoadEv kind:function(arm,size=0xd0) addr:0x021e456c
+_ZN12MemberScreen10UpdateTurnEj kind:function(arm,size=0x368) addr:0x021e463c
+_ZN12MemberScreen9LoadTextsEv kind:function(arm,size=0x274) addr:0x021e49a4
+_ZN12MemberScreen12UpdateMemberEv kind:function(arm,size=0x204) addr:0x021e4c18
+_ZN12MemberScreen9DoNothingEv kind:function(arm,size=0x4) addr:0x021e4e1c
+_ZN12MemberScreen7GetBodyEv kind:function(arm,size=0x1c) addr:0x021e4e20
+_ZN12MemberScreen11UpdateCloseEv kind:function(arm,size=0x50) addr:0x021e4e3c
 _ZN14CharacterModel10InitializeEv kind:function(arm,size=0x8c) addr:0x021e4e8c
 _ZN14CharacterModel6FinishEv kind:function(arm,size=0x4c) addr:0x021e4f18
 _ZN14CharacterModel16CreateAllocatorsEP13SafeAllocator kind:function(arm,size=0x74) addr:0x021e4f64
@@ -847,7 +847,7 @@ data_ov023_021fd61e kind:data(any) addr:0x021fd61e
 data_ov023_021fd626 kind:data(any) addr:0x021fd626
 data_ov023_021fd634 kind:data(any) addr:0x021fd634
 data_ov023_021fd64c kind:data(any) addr:0x021fd64c
-data_ov023_021fd66c kind:data(any) addr:0x021fd66c
+sCategories kind:data(any) addr:0x021fd66c local
 sExtension kind:data(any) addr:0x021fd678 local
 sFaceLetters kind:data(any) addr:0x021fd680 local
 sColoredParts kind:data(any) addr:0x021fd68a local
@@ -918,11 +918,8 @@ data_ov023_021fdc4c kind:data(any) addr:0x021fdc4c
 data_ov023_021fdc61 kind:data(any) addr:0x021fdc61
 sOpcodes kind:data(any) addr:0x021fdc78 local
 @stringBase0 kind:data(any) addr:0x021fdc90 local
-data_ov023_021fdc94 kind:data(any) addr:0x021fdc94
-data_ov023_021fdca4 kind:data(any) addr:0x021fdca4
-data_ov023_021fdcb6 kind:data(any) addr:0x021fdcb6
-data_ov023_021fdcc4 kind:data(any) addr:0x021fdcc4
-data_ov023_021fdcd8 kind:data(any) addr:0x021fdcd8
+sEdgeColors kind:data(any) addr:0x021fdc94 local
+sStrings kind:data(byte[0x3b]) addr:0x021fdca4 local
 sStrings kind:data(any) addr:0x021fdce0 local
 data_ov023_021fdd6c kind:data(any) addr:0x021fdd6c
 data_ov023_021fdd6e kind:data(any) addr:0x021fdd6e

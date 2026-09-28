@@ -20,6 +20,12 @@ src/Scene/Overlay_23/Layout.cpp:
     .text start:0x021e2030 end:0x021e2ce8
     .data start:0x021fdc90 end:0x021fdc94
 
+src/Scene/Overlay_23/MemberScreen.cpp:
+    complete
+    .text start:0x021e2ce8 end:0x021e4e8c
+    .rodata start:0x021fd66c end:0x021fd678
+    .data start:0x021fdc94 end:0x021fdce0
+
 src/Scene/Overlay_23/CharacterModel.cpp:
     complete
     .text start:0x021e4e8c end:0x021e61f4

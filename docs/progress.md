@@ -234,13 +234,13 @@ Last recorded on 2026-09-28.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 346,584 | 2,959,024 | 11.71 % |
-| Functions | 2,350 | 14,779 | 15.90 % |
+| Code (bytes) | 358,388 | 2,959,024 | 12.11 % |
+| Functions | 2,422 | 14,779 | 16.39 % |
 | Modules | 4 complete, 15 in progress, 13 not started | 32 with code |  |
 
-Source files: 207 complete, 1 in progress.
+Source files: 210 complete, 1 in progress.
 
-Not counted as decompiled: 55 functions (56,564 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 59 functions (60,368 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -252,7 +252,7 @@ Not counted as decompiled: 55 functions (56,564 bytes) in assembly, since their 
 | 2026-09-25 | 2,029 (13.73 %) | 284,916 (9.63 %) | 200 |
 | 2026-09-26 | 2,212 (14.97 %) | 302,008 (10.21 %) | 202 |
 | 2026-09-27 | 2,276 (15.40 %) | 324,504 (10.97 %) | 203 |
-| 2026-09-28 | 2,350 (15.90 %) | 346,584 (11.71 %) | 207 |
+| 2026-09-28 | 2,422 (16.39 %) | 358,388 (12.11 %) | 210 |
 
 ## Modules
 
@@ -284,7 +284,7 @@ Not counted as decompiled: 55 functions (56,564 bytes) in assembly, since their 
 | ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
 | ov021 | A mode of `main()` with its own main loop that runs overlay 9 (the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
-| ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts of overlay 14's bestiary, the objects of overlay 11's menus, list menus... (`src/Scene/Overlay_23`). 3 files decompiled, with 12 functions in assembly for now | 146.7 | 827 | 38 | 789 | 4.94 % | In progress |
+| ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts (`.lia`) of the menus and of overlay 14's bestiary, the screen of the party members (`MemberScreen`), the sorted lists of items, the objects of overlay 11's menus, list menus... (`src/Scene/Overlay_23`). 6 files decompiled, with 16 functions in assembly for now | 146.7 | 827 | 110 | 717 | 12.80 % | In progress |
 | ov024 | Unclear, no strings | 151.1 | 573 | 0 | 573 | 0.00 % | In progress |
 | ov025 | *Likely* battle spell and skill animations | 89.5 | 304 | 0 | 304 | 0.00 % | Not started |
 | ov026 | *Likely* spell and skill effects | 23.1 | 24 | 0 | 24 | 0.00 % | Not started |
@@ -347,6 +347,10 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov021 | `CharacterCreationScene::Run` | `0x0218b5fc` | 0x4fc |
 | ov023 | `CharacterCreation::UpdateBackgrounds` | `0x021da274` | 0x4fc |
 | ov023 | `CharacterCreation::SetCursorSprites` | `0x021dab5c` | 0xe4 |
+| ov023 | `MemberScreen::State_Load` | `0x021e33b4` | 0x988 |
+| ov023 | `MemberScreen::DrawTexts` | `0x021e3fc0` | 0x290 |
+| ov023 | `MemberScreen::LoadTexts` | `0x021e49a4` | 0x274 |
+| ov023 | `MemberScreen::UpdateClose` | `0x021e4e3c` | 0x50 |
 | ov023 | `CharacterModel::UpdateColors` | `0x021e540c` | 0x21c |
 | ov023 | `CharacterModel::Draw` | `0x021e5628` | 0x34c |
 | ov023 | `CharacterModel::Load` | `0x021e5974` | 0x4f4 |
@@ -400,12 +404,12 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
 | ov020 | 0 | 0 | 0 | 1 | 4.2 |
 | ov021 | 0 | 0 | 1 | 0 | 1.2 |
-| ov023 | 389 | 339 | 53 | 8 | 139.4 |
+| ov023 | 373 | 287 | 49 | 8 | 127.9 |
 | ov024 | 142 | 387 | 36 | 8 | 151.1 |
 | ov025 | 126 | 137 | 33 | 8 | 89.5 |
 | ov026 | 5 | 9 | 8 | 2 | 23.1 |
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5076** | **6231** | **992** | **130** | **2551.2** |
+| **Total** | **5060** | **6179** | **988** | **130** | **2539.7** |
 <!-- END GENERATED -->
