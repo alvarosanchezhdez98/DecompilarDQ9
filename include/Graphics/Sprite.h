@@ -2,9 +2,23 @@
 
 #include "System/Matrix.h"
 
+// A sprite's cell: its tiles start at the character name unk_4 & 0x3ff
+struct SpriteCell
+{
+    char unk_0[4];
+    unsigned short unk_4;
+};
+
+// The start of a Sprite, which overlay 23 copies
+struct SpriteImage
+{
+    int unk_0;
+    SpriteCell* cell_;
+};
+
 struct Sprite
 {
-    char unk_0[8];
+    SpriteImage image_;
     // The OAM attributes
     void* unk_8;
     char unk_c[8];

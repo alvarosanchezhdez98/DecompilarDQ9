@@ -130,6 +130,10 @@ def asm_block(source: Path, module: str, symbol: str, signature: str, text: str)
             "and run this again. The strings it uses:\n"
             + "\n".join(f"  @stringBase0+{offset:#x}: {string!r}" for offset, string in pool_strings(source, pooled)))
     body[0] = signature
+    # The runtime's division functions that the compiler calls aren't declared in the C
+    for name in sorted(set(re.findall(r"\bbl\s+(_[su]32_div_f|_ll_\w+)\b", "\n".join(body)))):
+        if not re.search(rf"\b{name}\s*\(", text) and not any(f" {name}(" in extern for extern in externs):
+            externs.append(f"    void {name}();")
     block = ""
     if externs:
         block += ('extern "C"\n{\n    // The assembler doesn\'t take qualified names, so these are the member functions\' '

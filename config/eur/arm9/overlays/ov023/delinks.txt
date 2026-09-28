@@ -4,3 +4,19 @@
     .data       start:0x021fda60 end:0x021ff9e0 kind:data align:32
     .bss        start:0x021ff9e0 end:0x021fff40 kind:bss align:32
 
+src/Scene/Overlay_23/CharacterCreationDisplay.cpp:
+    complete
+    .text start:0x021d99a4 end:0x021dad78
+    .rodata start:0x021fd530 end:0x021fd540
+
+src/Scene/Overlay_23/CharacterModel.cpp:
+    complete
+    .text start:0x021e4e8c end:0x021e61f4
+    .rodata start:0x021fd678 end:0x021fd724
+    .data start:0x021fdce0 end:0x021fdd6c
+
+src/Scene/Overlay_23/ProfileEditorDisplay.cpp:
+    complete
+    .text start:0x021e61f4 end:0x021e709c
+    .rodata start:0x021fd724 end:0x021fd75c
+

@@ -24,6 +24,8 @@ extern "C"
     void func_0203b4d8(GameResources* resources, int);
     void func_0207df90(VRAMManagerState* state);
     void func_0207dfac(VRAMManagerState* state);
+    // CharacterModel::Initialize(), for the assembly
+    void _ZN14CharacterModel10InitializeEv();
 
     // The menu that runs a script
     MenuScript* func_ov017_021b2164();
@@ -1895,7 +1897,7 @@ static asm int Command_4a(ScriptValue* params, int count)
     mov r0, r4
     bl _ZN13SafeAllocator21ResetAllocatorPointerEv
     mov r0, r7
-    bl func_ov023_021e4e8c
+    bl _ZN14CharacterModel10InitializeEv
     add r0, sp, #0x1800
     add r7, r7, #0xc20
     add r0, r0, #0x6c

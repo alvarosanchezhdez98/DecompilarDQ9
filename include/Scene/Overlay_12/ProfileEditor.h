@@ -245,4 +245,21 @@ struct ProfileEditor
     void Text_0c(char* text, int hidden);
     void Text_0d(char* text, int hidden);
     void Text_0e(char* text, int hidden);
+
+    // In overlay 23 (ProfileEditorDisplay.cpp)
+    void UpdateDateArrows();
+    void ShowDateItems(unsigned char state, unsigned char year, unsigned char month, unsigned char day);
+    int GetTouchedDateArrow();
+    int UpdateTouchedPage();
+    void RefreshAccoladeTexts();
+    void ResetAccoladeTexts();
+    void DrawCursorAnimation();
+    void DrawDateArrows();
+    void DrawDateMarker();
+    void DrawMarker();
+    void DrawKey();
+    void DrawKeyText();
+    int IsConfirmed();
+    int IsCancelled();
+    void SetItemGrid();
 };
