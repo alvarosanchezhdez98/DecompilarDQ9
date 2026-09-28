@@ -9,6 +9,8 @@ names. Download the references first with tools/fetch_references.py.
   python tools/find_signatures.py main 0x020bc000 0x020c3a5c   Only those in a range
   python tools/find_signatures.py main --runs                  Groups consecutive matches by reference file
   python tools/find_signatures.py ov031 --exact --rename       Names the functions with one exact match in symbols.txt
+  python tools/find_signatures.py ov009 --ours                 Compares with our decompiled functions, to reuse their C
+  python tools/find_signatures.py --duplicates main            The groups of functions left with the same instructions
 
 An exact match has the same instructions, ignoring addresses and symbols. The others show the most similar reference
 function, when it's at least 80 % alike (same instructions in the same order, ignoring registers). The disassembly in
@@ -151,6 +153,38 @@ def load_ours(module: str) -> dict[int, AsmFunction]:
     return functions
 
 
+@functools.cache
+def load_decompiled() -> list[AsmFunction]:
+    '''Our decompiled functions, as references: a function with the same instructions can reuse their C'''
+    functions = []
+    for module in progress.load_modules():
+        ours = load_ours(module.name) if module.functions else {}
+        for function in module.functions:
+            if function.decompiled and function.address in ours:
+                name = f"{progress.qualified_name(function.name)} ({module.name}, {function.address:#010x})"
+                file = progress.file_of(module, function.address) or module.name
+                functions.append(AsmFunction(name, file, ours[function.address].instructions))
+    return functions
+
+
+def duplicates(minimum: int = 4) -> list[list[tuple[str, progress.Function]]]:
+    '''The groups of functions left to decompile that have the same instructions, the most bytes first: decompiling
+    one gives the C of the others'''
+    groups: dict[tuple[str, ...], list[tuple[str, progress.Function]]] = {}
+    for module in progress.load_modules():
+        ours = load_ours(module.name) if module.functions else {}
+        for function in module.functions:
+            asm = ours.get(function.address)
+            if asm is not None and len(asm.instructions) >= minimum:
+                groups.setdefault(asm.instructions, []).append((module.name, function))
+    result = [members for members in groups.values()
+              if sum(not function.decompiled for _, function in members) >= 2
+              or (any(function.decompiled for _, function in members)
+                  and any(not function.decompiled for _, function in members))]
+    return sorted(result, key=lambda members: -sum(function.size for _, function in members
+                                                     if not function.decompiled))
+
+
 @dataclass
 class Match:
     function: progress.Function
@@ -162,13 +196,15 @@ class Match:
 
 
 def find_matches(module_name: str, start: int = 0, end: int = 0xffffffff, include_done: bool = False,
-                 fuzzy: bool = True) -> list[Match]:
-    '''The reference functions that are like each function of a module in a range'''
+                 fuzzy: bool = True, references: list[AsmFunction] | None = None) -> list[Match]:
+    '''The reference functions that are like each function of a module in a range: by default the public
+    decompilations' (see load_references), or e.g. our decompiled functions (load_decompiled)'''
     module = next((module for module in progress.load_modules() if module.name == module_name), None)
     if module is None:
         sys.exit(f"Unknown module {module_name}")
     ours = load_ours(module_name)
-    references = load_references()
+    if references is None:
+        references = load_references()
     by_instructions: dict[tuple[str, ...], list[AsmFunction]] = {}
     for reference in references:
         by_instructions.setdefault(reference.instructions, []).append(reference)
@@ -267,9 +303,34 @@ def main():
     parser.add_argument("--rename", action="store_true",
                         help="Give the official names in symbols.txt to the func_ functions with one exact match, "
                              "when no source uses their current names")
+    parser.add_argument("--ours", action="store_true",
+                        help="Compare with our decompiled functions instead, whose C can be reused")
+    parser.add_argument("--duplicates", action="store_true",
+                        help="List the groups of functions left that have the same instructions, in the whole game "
+                             "(the module is ignored)")
     args = parser.parse_args()
 
-    results = find_matches(args.module, args.start, args.end, args.all, not args.exact)
+    if args.duplicates:
+        groups = duplicates()
+        for members in groups[:100]:
+            left = [(module, function) for module, function in members if not function.decompiled]
+            done = [(module, function) for module, function in members if function.decompiled]
+            print(f"{len(left)} x {left[0][1].size:#x} bytes: "
+                  + ", ".join(f"{module}:{function.name}" for module, function in left[:6])
+                  + (f" and {len(left) - 6} more" if len(left) > 6 else "")
+                  + (f" (the same as decompiled {done[0][0]}:{progress.qualified_name(done[0][1].name)})" if done
+                     else ""))
+        left = sum(sum(not function.decompiled for _, function in members) for members in groups)
+        reusable = sum(sum(not function.decompiled for _, function in members) for members in groups
+                       if any(function.decompiled for _, function in members))
+        print(f"\n{len(groups)} groups with {left} functions left, {reusable} of them the same as a decompiled one "
+              f"(functions of at least 4 instructions; the first 100 groups are listed)")
+        return
+
+    references = load_decompiled() if args.ours else None
+    if args.ours and args.rename:
+        sys.exit("--rename gives official names, from the public decompilations: don't combine it with --ours")
+    results = find_matches(args.module, args.start, args.end, args.all, not args.exact, references)
     if args.rename:
         for change in rename(args.module, results):
             print(change)

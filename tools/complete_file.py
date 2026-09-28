@@ -6,7 +6,7 @@ symbols.txt.
 
   python tools/complete_file.py src/System/Foo.cpp              Marks it complete, with the sections it finds
   python tools/complete_file.py src/System/Foo.cpp --dry-run    Only prints what it would change
-  python tools/complete_file.py src/System/Foo.cpp --build      Also runs configure.py and `ninja min`
+  python tools/complete_file.py src/System/Foo.cpp --build      Also runs configure.py and `ninja check`
 
 It compiles the file and finds its functions and variables in the ROM (see tools/rom_mapping.py): the functions by
 their names in symbols.txt, or else by their place after the previous one, and the variables by the code and data
@@ -392,7 +392,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("source", type=Path)
     parser.add_argument("--dry-run", action="store_true", help="Only print the changes")
-    parser.add_argument("--build", action="store_true", help="Run configure.py and `ninja min` afterwards")
+    parser.add_argument("--build", action="store_true", help="Run configure.py and `ninja check` afterwards")
     parser.add_argument("--text-start", type=lambda text: int(text, 16),
                         help="Where the file's code starts, when none of its functions is named like symbols.txt")
     args = parser.parse_args()
@@ -436,9 +436,9 @@ def main():
     module.relocations_path.write_text(completion.relocation_text, newline="\n")
     if args.build:
         subprocess.run([sys.executable, "tools/configure.py", "eur"], cwd=root_path, check=True)
-        subprocess.run([str(root_path / "ninja"), "min"], cwd=root_path, check=True)
+        subprocess.run([str(root_path / "ninja"), "check"], cwd=root_path, check=True)
     else:
-        print("Next: python tools/configure.py eur, then ninja min")
+        print("Next: python tools/configure.py eur, then ninja check")
 
 
 if __name__ == "__main__":

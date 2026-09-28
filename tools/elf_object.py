@@ -41,6 +41,12 @@ class Symbol:
     kind: int
     local: bool
     section: Section | None
+    binding: int = 1 # 0 local, 1 global, 2 weak; MWCC's vtables and out-of-line inline functions are 13 ("multidef")
+
+    @property
+    def weak(self) -> bool:
+        '''A symbol that the linker keeps one copy of for the whole ROM, like an out-of-line inline function'''
+        return self.binding in (2, 13)
 
     @property
     def offset(self) -> int:
@@ -109,7 +115,7 @@ class ElfObject:
                 section = self.sections[section_index] if 0 < section_index < count else None
                 symbol_kind = info & 0xf
                 name = string(link, name) if name else (section.name if section and symbol_kind == STT_SECTION else "")
-                self.symbols.append(Symbol(name, value, size_, symbol_kind, info >> 4 == 0, section))
+                self.symbols.append(Symbol(name, value, size_, symbol_kind, info >> 4 == 0, section, info >> 4))
 
         for index, (_, kind, _, _, offset, size, _, info, _, _) in enumerate(headers):
             if kind != SHT_RELA:

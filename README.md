@@ -47,7 +47,7 @@ Once everything is set up:
    ```bash
    ninja
    ```
-This builds the ROM, verifies every module against the original, generates a decomp.me context for each object (requires GCC), creates an objdiff configuration and progress report, and verifies the SHA-1 of the whole built ROM (needs the ARM7 BIOS dump). If you're only interested in building the ROM, you can instead use `ninja min`. This will still verify the modules but not the final SHA-1 and as such does not require GCC or the ARM7 BIOS dump.
+This builds the ROM, verifies every module against the original, generates a decomp.me context for each object (requires GCC), creates an objdiff configuration and progress report, and verifies the SHA-1 of the whole built ROM (needs the ARM7 BIOS dump). If you're only interested in building the ROM, you can instead use `ninja min`. This will still verify the modules but not the final SHA-1 and as such does not require GCC or the ARM7 BIOS dump. While decompiling, `ninja check` is faster: it verifies the modules and symbols without building the ROM.
 
 ---
 
