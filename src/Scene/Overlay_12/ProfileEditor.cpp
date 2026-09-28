@@ -19,6 +19,11 @@ extern "C"
 {
     void __clear(void* buffer, unsigned long size);
     int memcmp(const void* a, const void* b, unsigned long size);
+    // Methods of overlay 23, for the assembly
+    void _ZN13ProfileEditor18ResetAccoladeTextsEv();
+    void _ZN13ProfileEditor11IsConfirmedEv();
+    void _ZN13ProfileEditor11IsCancelledEv();
+    void _ZN13ProfileEditor11SetItemGridEv();
 
     // The file of the forbidden words
     extern const char* data_020f285c;
@@ -148,14 +153,6 @@ extern "C"
     void func_ov003_0215ec68(int size, short* width, short* height);
     int func_ov003_0215f000(void* keyboard, int input);
     void func_ov003_0215f41c(void* keyboard, const char*);
-    void func_ov023_021e61f4(ProfileEditor* editor);
-    void func_ov023_021e6378(ProfileEditor* editor, int item, int, int, int);
-    int func_ov023_021e63bc(ProfileEditor* editor);
-    int func_ov023_021e6448(ProfileEditor* editor);
-    void func_ov023_021e6594(ProfileEditor* editor);
-    int func_ov023_021e6de4(ProfileEditor* editor);
-    int func_ov023_021e6e20(ProfileEditor* editor);
-    void func_ov023_021e6e60(ProfileEditor* editor);
     void func_ov023_021e71b4(Unknown_021e7220* windows, SafeAllocator* allocator);
     void func_ov023_021e7340(Unknown_021e7220* windows);
     int func_ov023_021e76c4(Unknown_021e7220* windows);
@@ -163,13 +160,6 @@ extern "C"
     void func_ov023_021e7bc4(Unknown_021e7220* windows, int, int);
     void func_ov023_021e7c58(Unknown_021e7220* windows, int, int);
     void func_ov023_021e8270(Unknown_021e7220* windows);
-    void func_ov023_021e66ac(ProfileEditor* editor);
-    void func_ov023_021e67f4(ProfileEditor* editor);
-    void func_ov023_021e68cc(ProfileEditor* editor);
-    void func_ov023_021e6a14(ProfileEditor* editor);
-    void func_ov023_021e6a90(ProfileEditor* editor);
-    void func_ov023_021e6b04(ProfileEditor* editor);
-    void func_ov023_021e6b8c(ProfileEditor* editor);
     void func_ov023_021e7220(Unknown_021e7220* windows, int);
     void func_ov023_021e7404(Unknown_021e7220* windows, int input);
     void func_ov023_021e761c(Unknown_021e7220* windows);
@@ -436,7 +426,7 @@ void ProfileEditor::LoadProfile()
     else
         text = func_02072a68(&strings_, accolade + 20000);
     memcpy(accoladeText_, text, strlen(text));
-    func_ov023_021e66ac(this);
+    ResetAccoladeTexts();
 }
 #else
 extern "C"
@@ -586,7 +576,7 @@ asm void ProfileEditor::LoadProfile()
     add r0, r7, #0x1400
     bl memcpy
     mov r0, r7
-    bl func_ov023_021e66ac
+    bl _ZN13ProfileEditor18ResetAccoladeTextsEv
     ldmia sp!, {r3, r4, r5, r6, r7, pc}
 }
 #endif
@@ -2021,11 +2011,11 @@ void ProfileEditor::Draw1()
     func_0205da88(&window_, 1, 3, 1);
     func_0205da88(&window_, 2, 3, 0);
     func_0205d274(&window_);
-    func_ov023_021e67f4(this);
-    func_ov023_021e68cc(this);
-    func_ov023_021e6a14(this);
-    func_ov023_021e6a90(this);
-    func_ov023_021e6b04(this);
+    DrawCursorAnimation();
+    DrawDateArrows();
+    DrawDateMarker();
+    DrawMarker();
+    DrawKey();
 }
 
 void ProfileEditor::Draw2()
@@ -2033,7 +2023,7 @@ void ProfileEditor::Draw2()
     func_ov023_021e76a8(&windows_);
     if (state_ != 0)
         func_0205d2bc(&window_);
-    func_ov023_021e6b8c(this);
+    DrawKeyText();
 }
 
 void ProfileEditor::Finish()
@@ -2494,7 +2484,7 @@ void ProfileEditor::State_Menu()
         unk_13a0 = 0;
         selection_ = 0;
         func_0205de24(&window_, 0, 2);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMenu();
         step_++;
         return;
@@ -2504,7 +2494,7 @@ void ProfileEditor::State_Menu()
         unk_13a0 = 1;
         selection_ = func_0205d794(&window_);
         int close = 0;
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             window_.unk_b8 = state_;
             unk_13a0 = 0;
@@ -2536,7 +2526,7 @@ void ProfileEditor::State_Menu()
                     break;
             }
         }
-        else if (func_ov023_021e6e20(this))
+        else if (IsCancelled())
         {
             close = 1;
         }
@@ -2574,7 +2564,7 @@ void ProfileEditor::State_TitleCategory()
             category = 0;
         selections_[0] = category;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenTitleCategories();
         step_++;
     }
@@ -2582,7 +2572,7 @@ void ProfileEditor::State_TitleCategory()
     {
         unk_13a0 = 1;
         selections_[0] = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             int sound = 1;
             switch (selections_[0])
@@ -2622,7 +2612,7 @@ void ProfileEditor::State_TitleCategory()
             if (sound)
                 func_0205eaa0(data_02108760, 1, 0);
         }
-        else if (func_ov023_021e6e20(this))
+        else if (IsCancelled())
         {
             SelectItem(1);
         }
@@ -2675,7 +2665,7 @@ asm void ProfileEditor::State_TitleCategory()
     str r4, [r3, #0x3d8]
     bl func_0205de24
     mov r0, r6
-    bl func_ov023_021e6e60
+    bl _ZN13ProfileEditor11SetItemGridEv
     mov r0, r6
     bl _ZN13ProfileEditor19OpenTitleCategoriesEv
     add r0, r6, #0x1000
@@ -2693,7 +2683,7 @@ asm void ProfileEditor::State_TitleCategory()
     add r1, r6, #0x1000
     str r0, [r1, #0x3d8]
     mov r0, r6
-    bl func_ov023_021e6de4
+    bl _ZN13ProfileEditor11IsConfirmedEv
     cmp r0, #0x0
     beq @L02186e0c
     add r1, r6, #0x1000
@@ -2773,7 +2763,7 @@ asm void ProfileEditor::State_TitleCategory()
     ldmia sp!, {r4, r5, r6, pc}
 @L02186e0c:
     mov r0, r6
-    bl func_ov023_021e6e20
+    bl _ZN13ProfileEditor11IsCancelledEv
     cmp r0, #0x0
     ldmeqia sp!, {r4, r5, r6, pc}
     mov r0, r6
@@ -2792,7 +2782,7 @@ void ProfileEditor::State_Title0()
         if (selections_[1] < 0)
             selections_[1] = 0;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenTitles0();
         step_++;
         return;
@@ -2801,9 +2791,9 @@ void ProfileEditor::State_Title0()
     {
         unk_13a0 = 1;
         selections_[1] = func_0205d794(&window_);
-        if (func_ov023_021e6448(this))
+        if (UpdateTouchedPage())
             selections_[1] = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             func_0205eaa0(data_02108760, 1, 0);
             GameState* gameState = GameState::GetInstance();
@@ -2816,7 +2806,7 @@ void ProfileEditor::State_Title0()
             SelectItem(0);
             return;
         }
-        if (func_ov023_021e6e20(this))
+        if (IsCancelled())
             SelectItem(1);
         return;
     }
@@ -2831,7 +2821,7 @@ void ProfileEditor::State_Title1()
         if (selections_[2] < 0)
             selections_[2] = 0;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenTitles1();
         step_++;
         return;
@@ -2840,7 +2830,7 @@ void ProfileEditor::State_Title1()
     {
         unk_13a0 = 1;
         selections_[2] = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             func_0205eaa0(data_02108760, 1, 0);
             GameState* gameState = GameState::GetInstance();
@@ -2853,7 +2843,7 @@ void ProfileEditor::State_Title1()
             SelectItem(0);
             return;
         }
-        if (func_ov023_021e6e20(this))
+        if (IsCancelled())
             SelectItem(1);
         return;
     }
@@ -2875,7 +2865,7 @@ void ProfileEditor::State_Title2()
             }
         }
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenTitles2();
         step_++;
         return;
@@ -2884,9 +2874,9 @@ void ProfileEditor::State_Title2()
     {
         unk_13a0 = 1;
         selections_[3] = func_0205d794(&window_);
-        if (func_ov023_021e6448(this))
+        if (UpdateTouchedPage())
             selections_[3] = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             func_0205eaa0(data_02108760, 1, 0);
             int index;
@@ -2901,7 +2891,7 @@ void ProfileEditor::State_Title2()
             SelectItem(0);
             return;
         }
-        if (func_ov023_021e6e20(this))
+        if (IsCancelled())
             SelectItem(1);
         return;
     }
@@ -2933,7 +2923,7 @@ void ProfileEditor::State_06()
         unk_13a0 = 0;
         unk_13f8 = 0;
         func_0205de24(&window_, 0, 2);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenQuestion();
         func_0205eaa0(data_02108760, 5, 0);
         step_++;
@@ -2944,7 +2934,7 @@ void ProfileEditor::State_06()
         unk_13a0 = 1;
         unk_13f8 = func_0205d794(&window_);
         int done = 0;
-        if (func_ov023_021e6de4(this) || func_ov023_021e6e20(this))
+        if (IsConfirmed() || IsCancelled())
         {
             DrawItemText(state_, 1);
             func_0205eaa0(data_02108760, 1, 0);
@@ -2958,7 +2948,7 @@ void ProfileEditor::State_06()
                     profile->showBirthday_ = 0;
                     break;
             }
-            if (func_ov023_021e6e20(this))
+            if (IsCancelled())
                 profile->showBirthday_ = 1;
             RefreshCard(0, -1, 0);
             done = 1;
@@ -2986,7 +2976,7 @@ void ProfileEditor::State_06()
     else if (step_ == 6)
     {
         state_ = 1;
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMenu();
         unk_13a0 = 1;
         unk_13a8 = -1;
@@ -3014,7 +3004,7 @@ void ProfileEditor::State_07()
     {
         int changed = 0;
         int canCancel = 1;
-        int scroll = func_ov023_021e63bc(this);
+        int scroll = GetTouchedDateArrow();
         if (func_0201248c(data_02114e30, 0x80) || scroll < 0)
         {
             if (unk_13aa != 0)
@@ -3033,7 +3023,7 @@ void ProfileEditor::State_07()
         {
             unk_13a9 = 0;
         }
-        func_ov023_021e61f4(this);
+        UpdateDateArrows();
         if (func_02012444(data_02114e30, 0x80) || unk_13a9 <= -3)
         {
             if (unk_13ab & 2)
@@ -3076,14 +3066,14 @@ void ProfileEditor::State_07()
         }
         else if (func_02012444(data_02114e30, 0x20) || func_0205df38(&window_, 8))
         {
-            func_ov023_021e6378(this, 8, 1, 0, 1);
+            ShowDateItems(8, 1, 0, 1);
             changed = 1;
             canCancel = 0;
             DrawItemText(7, 1);
         }
         else if (func_0205df38(&window_, 9))
         {
-            func_ov023_021e6378(this, 9, 1, 1, 0);
+            ShowDateItems(9, 1, 1, 0);
             changed = 1;
             canCancel = 0;
             DrawItemText(7, 1);
@@ -3099,7 +3089,7 @@ void ProfileEditor::State_07()
         }
 
         int close = 0;
-        if (func_ov023_021e6de4(this) || func_0205df38(&window_, 0x10))
+        if (IsConfirmed() || func_0205df38(&window_, 0x10))
         {
             GameState* gameState = GameState::GetInstance();
             ProfileData* profile = GetProfile(gameState);
@@ -3114,7 +3104,7 @@ void ProfileEditor::State_07()
             state_ = 6;
             step_ = 0;
         }
-        else if (func_ov023_021e6e20(this) && canCancel)
+        else if (IsCancelled() && canCancel)
         {
             close = 1;
         }
@@ -3137,7 +3127,7 @@ void ProfileEditor::State_07()
     else if (step_ == 7)
     {
         state_ = 1;
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMenu();
         unk_13a0 = 1;
         unk_13a8 = -1;
@@ -3155,7 +3145,7 @@ void ProfileEditor::State_08()
     {
         int changed = 0;
         int canCancel = 1;
-        int scroll = func_ov023_021e63bc(this);
+        int scroll = GetTouchedDateArrow();
         if (func_0201248c(data_02114e30, 0x80) || scroll < 0)
         {
             if (unk_13aa != 0)
@@ -3174,7 +3164,7 @@ void ProfileEditor::State_08()
         {
             unk_13a9 = 0;
         }
-        func_ov023_021e61f4(this);
+        UpdateDateArrows();
         // The days of each month
         unsigned char days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
         if (year_ % 4 == 0)
@@ -3223,7 +3213,7 @@ void ProfileEditor::State_08()
         }
         else if (func_02012444(data_02114e30, 0x20) || func_0205df38(&window_, 9))
         {
-            func_ov023_021e6378(this, 9, 1, 1, 0);
+            ShowDateItems(9, 1, 1, 0);
             changed = 1;
             canCancel = 0;
             DrawItemText(8, 1);
@@ -3231,7 +3221,7 @@ void ProfileEditor::State_08()
         else if (func_02012444(data_02114e30, 0x10) || func_0205df38(&window_, 7))
         {
             GameState::GetInstance();
-            func_ov023_021e6378(this, 7, 0, 1, 1);
+            ShowDateItems(7, 0, 1, 1);
             changed = 1;
             canCancel = 0;
             DrawItemText(8, 1);
@@ -3247,7 +3237,7 @@ void ProfileEditor::State_08()
         }
 
         int close = 0;
-        if (func_ov023_021e6de4(this) || func_0205df38(&window_, 0x10))
+        if (IsConfirmed() || func_0205df38(&window_, 0x10))
         {
             GameState* gameState = GameState::GetInstance();
             ProfileData* profile = GetProfile(gameState);
@@ -3262,7 +3252,7 @@ void ProfileEditor::State_08()
             state_ = 6;
             step_ = 0;
         }
-        else if (func_ov023_021e6e20(this) && canCancel)
+        else if (IsCancelled() && canCancel)
         {
             close = 1;
         }
@@ -3287,7 +3277,7 @@ void ProfileEditor::State_08()
     else if (step_ == 7)
     {
         state_ = 1;
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMenu();
         unk_13a0 = 1;
         unk_13a8 = -1;
@@ -3322,7 +3312,7 @@ void ProfileEditor::State_09()
         month_ = GetProfile(gameState)->month_;
         day_ = GetProfile(gameState)->day_;
         func_0205de24(&window_, 0, 2);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenBirthday();
         unk_13a0 = 0;
         step_++;
@@ -3332,7 +3322,7 @@ void ProfileEditor::State_09()
     {
         int changed = 0;
         int canCancel = 1;
-        int scroll = func_ov023_021e63bc(this);
+        int scroll = GetTouchedDateArrow();
         if (func_0201248c(data_02114e30, 0x80) || scroll < 0)
         {
             if (unk_13aa != 0)
@@ -3351,7 +3341,7 @@ void ProfileEditor::State_09()
         {
             unk_13a9 = 0;
         }
-        func_ov023_021e61f4(this);
+        UpdateDateArrows();
         if (func_02012444(data_02114e30, 0x80) || unk_13a9 <= -3)
         {
             if (!(unk_13ab & 0x20))
@@ -3384,7 +3374,7 @@ void ProfileEditor::State_09()
         }
         else if (func_02012444(data_02114e30, 0x10) || func_0205df38(&window_, 8))
         {
-            func_ov023_021e6378(this, 8, 1, 0, 1);
+            ShowDateItems(8, 1, 0, 1);
             changed = 1;
             canCancel = 0;
             DrawItemText(9, 1);
@@ -3392,7 +3382,7 @@ void ProfileEditor::State_09()
         else if (func_0205df38(&window_, 7))
         {
             GameState::GetInstance();
-            func_ov023_021e6378(this, 7, 0, 1, 1);
+            ShowDateItems(7, 0, 1, 1);
             changed = 1;
             canCancel = 0;
             DrawItemText(9, 1);
@@ -3408,7 +3398,7 @@ void ProfileEditor::State_09()
         }
 
         int close = 0;
-        if (func_ov023_021e6de4(this) || func_0205df38(&window_, 0x10))
+        if (IsConfirmed() || func_0205df38(&window_, 0x10))
         {
             GameState* gameState = GameState::GetInstance();
             ProfileData* profile = GetProfile(gameState);
@@ -3423,7 +3413,7 @@ void ProfileEditor::State_09()
             state_ = 6;
             step_ = 0;
         }
-        else if (func_ov023_021e6e20(this) && canCancel)
+        else if (IsCancelled() && canCancel)
         {
             close = 1;
         }
@@ -3446,7 +3436,7 @@ void ProfileEditor::State_09()
     else if (step_ == 7)
     {
         state_ = 1;
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMenu();
         unk_13a0 = 1;
         unk_13a8 = -1;
@@ -3466,7 +3456,7 @@ void ProfileEditor::State_0a()
         if (FindAccolade(unk_13c8, unk_13c4_5) < 0)
             selections_[4] = 0;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenAccoladeKinds();
         step_++;
     }
@@ -3474,7 +3464,7 @@ void ProfileEditor::State_0a()
     {
         unk_13a0 = 1;
         selections_[4] = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             int sound = 1;
             switch (selections_[4])
@@ -3498,7 +3488,7 @@ void ProfileEditor::State_0a()
             if (sound)
                 func_0205eaa0(data_02108760, 1, 0);
         }
-        else if (func_ov023_021e6e20(this))
+        else if (IsCancelled())
         {
             SelectItem(1);
         }
@@ -3531,7 +3521,7 @@ void ProfileEditor::State_0b()
     found:
         selections_[5] = index;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenAccolades0();
         step_++;
         return;
@@ -3540,9 +3530,9 @@ void ProfileEditor::State_0b()
     {
         unk_13a0 = 1;
         selections_[5] = func_0205d794(&window_);
-        if (func_ov023_021e6448(this))
+        if (UpdateTouchedPage())
             selections_[5] = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             func_0205eaa0(data_02108760, 1, 0);
             ProfileData* profile = GetProfile(GameState::GetInstance());
@@ -3577,7 +3567,7 @@ void ProfileEditor::State_0b()
             SelectItem(0);
             return;
         }
-        if (func_ov023_021e6e20(this))
+        if (IsCancelled())
             SelectItem(1);
         return;
     }
@@ -3593,7 +3583,7 @@ void ProfileEditor::State_0c()
         if (unk_13f0 < 0)
             unk_13f0 = 0;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenAccolades1();
         step_++;
         return;
@@ -3602,9 +3592,9 @@ void ProfileEditor::State_0c()
     {
         unk_13a0 = 1;
         unk_13f0 = func_0205d794(&window_);
-        if (func_ov023_021e6448(this))
+        if (UpdateTouchedPage())
             unk_13f0 = func_0205d794(&window_);
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             const char* text = func_020e0434(&texts_, unk_13c8[unk_13f0]);
             if (text == 0)
@@ -3621,7 +3611,7 @@ void ProfileEditor::State_0c()
             SelectItem(0);
             return;
         }
-        if (func_ov023_021e6e20(this))
+        if (IsCancelled())
             SelectItem(1);
         return;
     }
@@ -3650,7 +3640,7 @@ void ProfileEditor::State_0d()
         unk_13a0 = 0;
         design_ = (profile->unk_0_21 - profile->female_) >> 1;
         func_0205de24(&window_, 0, 3);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenDesigns();
         step_++;
         return;
@@ -3665,7 +3655,7 @@ void ProfileEditor::State_0d()
             RefreshCard(0, profile->female_ + design_ * 2, 0);
         }
         int done = 0;
-        if (func_ov023_021e6de4(this))
+        if (IsConfirmed())
         {
             func_0205eaa0(data_02108760, 1, 0);
             ProfileData* profile2 = GetProfile(GameState::GetInstance());
@@ -3673,7 +3663,7 @@ void ProfileEditor::State_0d()
             profile2->designChosen_ = 1;
             done = 1;
         }
-        else if (func_ov023_021e6e20(this))
+        else if (IsCancelled())
         {
             design_ = (profile->unk_0_21 - profile->female_) >> 1;
             done = 1;
@@ -3737,7 +3727,7 @@ asm void ProfileEditor::State_0d()
     str r4, [r3, #0x3f4]
     bl func_0205de24
     mov r0, r5
-    bl func_ov023_021e6e60
+    bl _ZN13ProfileEditor11SetItemGridEv
     mov r0, r5
     bl _ZN13ProfileEditor11OpenDesignsEv
     add r0, r5, #0x1000
@@ -3769,7 +3759,7 @@ asm void ProfileEditor::State_0d()
 @L02188bdc:
     mov r0, r5
     mov r6, #0x0
-    bl func_ov023_021e6de4
+    bl _ZN13ProfileEditor11IsConfirmedEv
     cmp r0, #0x0
     beq @L02188c3c
     ldr r0, =data_02108760
@@ -3793,7 +3783,7 @@ asm void ProfileEditor::State_0d()
     b @L02188c84
 @L02188c3c:
     mov r0, r5
-    bl func_ov023_021e6e20
+    bl _ZN13ProfileEditor11IsCancelledEv
     cmp r0, #0x0
     beq @L02188c84
     ldr r2, [r4, #0x0]
@@ -3886,7 +3876,7 @@ void ProfileEditor::State_0e()
     {
         unk_13a0 = 0;
         func_0205de24(&window_, 0, 2);
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMessage();
         memcpy(unk_13ac, GetProfile(GameState::GetInstance())->unk_8, 0x72);
         Keyboard* keyboard = (Keyboard*)unk_0;
@@ -3978,7 +3968,7 @@ void ProfileEditor::State_0e()
     else if (step_ == 7)
     {
         state_ = 1;
-        func_ov023_021e6e60(this);
+        SetItemGrid();
         OpenMenu();
         unk_13a0 = 1;
         step_ = 1;
@@ -4020,7 +4010,7 @@ void ProfileEditor::State_Finish()
         windows_.strings_ = 0;
         windows_.unk_5fc = 0;
         func_ov023_021e7340(&windows_);
-        func_ov023_021e6594(this);
+        RefreshAccoladeTexts();
         func_020466f4(func_020d6c00(), 0xf);
         func_0203b4b0(resources, 0x10);
         result_ = 1;
@@ -4051,7 +4041,7 @@ void ProfileEditor::SelectItem(int cancel)
     if (selected == 0)
         return;
     state_ = selected->unk_c4;
-    func_ov023_021e6e60(this);
+    SetItemGrid();
     DrawItemText(state_, 0);
 }
 
@@ -4896,7 +4886,7 @@ asm void ProfileEditor::Text_0e(char* text, int hidden)
 void ProfileEditor::RefreshCard(int animate, int design, int keepPage)
 {
     GameState* gameState = GameState::GetInstance();
-    func_ov023_021e6594(this);
+    RefreshAccoladeTexts();
     ProfileData* profile;
     ProfileData copy;
     if (design == -1)
@@ -4921,7 +4911,7 @@ void ProfileEditor::RefreshCard(int animate, int design, int keepPage)
         else
             func_ov023_021e7c58(&windows_, 2, 0);
     }
-    func_ov023_021e66ac(this);
+    ResetAccoladeTexts();
 }
 
 // Writes the text of the card, and returns whether it has two pages

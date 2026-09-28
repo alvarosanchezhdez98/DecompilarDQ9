@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Graphics/Sprite.h"
+#include "Graphics/VRAMManagerState.h"
 #include "Memory/SafeAllocator.h"
+#include "Scene/Overlay_23/CharacterModel.h"
 #include "System/Matrix.h"
 #include "Text/TextTable.h"
 
@@ -161,7 +163,6 @@ extern "C"
     void func_020de824(void*);
     void func_020df80c(void*);
     void func_020dfc2c(TextTable* table);
-    void func_ov023_021e4e8c(void*);
 
     void func_0205a444(SpriteRenderer* renderer);
     void func_0205a494(SpriteRenderer* renderer);
@@ -436,25 +437,11 @@ struct MenuObject_021fc408 : MenuObject
     MenuObject_021fc408() : MenuObject(&data_ov023_021ff4b0) {}
 };
 
-// A part of MenuObject_021fc518, which func_ov023_021e4e8c initializes
-struct MenuObjectPart_021fc518
-{
-    char unk_0[0x6b8];
-    SafeAllocator allocators_[10];
-    SafeAllocator allocator_;
-    char unk_794[0x48c];
-
-    MenuObjectPart_021fc518()
-    {
-        func_ov023_021e4e8c(this);
-    }
-};
-
 // What func_ov023_021fc518 initializes (sizeof == 0x1870)
 struct MenuObject_021fc518 : MenuObject
 {
     char unk_10[0x10];
-    MenuObjectPart_021fc518 unk_20[2];
+    CharacterModel unk_20[2];
     char unk_1860[0x10];
 
     MenuObject_021fc518() : MenuObject(&data_ov023_021ff5b4) {}
@@ -519,13 +506,6 @@ struct MenuHeap
     MenuHeap* Find(int id);
     void AddNext(MenuHeap* heap);
     void AddChild(MenuHeap* heap);
-};
-
-// A saved state of the VRAM's managers, which func_0207df50 saves and func_0207dfc8 copies (*likely* NitroSystem's
-// texture and palette VRAM managers, which it calls)
-struct VRAMManagerState
-{
-    char unk_0[0x70];
 };
 
 // A state of the VRAM's managers that a script saves with an ID

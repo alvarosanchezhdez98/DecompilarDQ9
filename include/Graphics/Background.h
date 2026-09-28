@@ -27,7 +27,8 @@ struct Canvas
     char unk_b0[4];
     short unk_b4;
     short unk_b6;
-    char unk_b8[4];
+    short unk_b8;
+    short unk_ba;
     short unk_bc;
     short unk_be;
     char unk_c0[4];

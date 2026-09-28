@@ -67,16 +67,6 @@ extern "C"
 
     void func_ov003_0215e6d8(KeyboardLayout* layout);
     void func_ov003_0215efb8(Keyboard* keyboard);
-    void func_ov023_021d9a6c(CharacterCreation* creation);
-    void func_ov023_021d9d34(CharacterCreation* creation);
-    void func_ov023_021d9e60(CharacterCreation* creation);
-    void func_ov023_021da1dc(CharacterCreation* creation);
-    void func_ov023_021da274(CharacterCreation* creation);
-    void func_ov023_021da770(CharacterCreation* creation);
-    void func_ov023_021da9b4(CharacterCreation* creation);
-    void func_ov023_021e4f18(void* character);
-    void func_ov023_021e5020(void* character);
-    void func_ov023_021e5628(void* character);
     int func_0200fb08(GameState* gameState);
     // The count of the files of an archive, and a file of it
     int func_02046900(void* archive);
@@ -118,17 +108,6 @@ extern "C"
     void func_ov003_0215e6f8(KeyboardLayout* layout, SafeAllocator* allocator, void* file, unsigned int size);
     void func_ov003_0215f41c(Keyboard* keyboard, const char* text);
     KeyboardKey* func_ov003_0215f4fc(Keyboard* keyboard, const char* text);
-    void func_ov023_021d99a4(CharacterCreation* creation);
-    void func_ov023_021d9c7c(CharacterCreation* creation);
-    void func_ov023_021d9da4(CharacterCreation* creation);
-    void func_ov023_021e4e8c(void* character);
-    void func_ov023_021e4f64(void* character, SafeAllocator* allocator);
-    void func_ov023_021e4fd8(void* character);
-    void func_ov023_021e5974(void* character, PartyMemberData* member, int, int, int);
-    void func_ov023_021e5e68(void* character, int width, int height);
-    void func_ov023_021e60e0(void* character, int angle);
-    void func_ov023_021e6150(void* character, int);
-    void func_ov023_021e6198(void* character, PartNameTable* names);
     // "%s"
     extern const char data_020ef078[];
     // The file of the forbidden words, and the file of the texts of the checker
@@ -177,16 +156,24 @@ extern "C"
     int func_ov003_0215f000(Keyboard* keyboard, int ticks);
     KeyboardKey* func_ov003_0215f4a4(Keyboard* keyboard, int);
     void func_ov003_0215f4e4(Keyboard* keyboard, int);
-    void func_ov023_021d9f88(CharacterCreation* creation);
-    void func_ov023_021dac40(CharacterCreation* creation, unsigned int ticks);
-    void func_ov023_021e540c(void* character);
-    void func_ov023_021e6088(void* character, const Vector3fix& rotation);
-    Vector3fix func_ov023_021e613c(void* character);
-    void func_ov023_021e6158(void* character, int part);
-    Object3D* func_ov023_021e6194(void* character);
     // The touch screen
     extern TouchState data_02114e54;
     int func_020e0424(TextTable* texts);
+    // Methods of overlay 23, for the assembly
+    void _ZN17CharacterCreation15OpenStateWindowEv();
+    void _ZN17CharacterCreation16OpenChoiceWindowEv();
+    void _ZN17CharacterCreation14OpenNameWindowEv();
+    void _ZN17CharacterCreation17OpenConfirmWindowEv();
+    void _ZN17CharacterCreation17UpdateBackgroundsEv();
+    // CharacterModel's methods, for the assembly
+    void _ZN14CharacterModel10InitializeEv();
+    void _ZN14CharacterModel16CreateAllocatorsEP13SafeAllocator();
+    void _ZN14CharacterModel20InitializeVRAMStatesEv();
+    void _ZN14CharacterModel4LoadEP15PartyMemberDataiii();
+    void _ZN14CharacterModel8SetScaleEii();
+    void _ZN14CharacterModel8SetAngleEi();
+    void _ZN14CharacterModel10SetUnk_c11Eh();
+    void _ZN14CharacterModel8SetNamesEP13PartNameTable();
 }
 
 // The symbols of the patterns of the forbidden words
@@ -374,8 +361,8 @@ void CharacterCreation::Finish()
 {
     if (mode_ == 1)
         func_020466f4(func_020d6c00(), 0xf);
-    func_ov023_021e4f18(characters_[0]);
-    func_ov023_021e4f18(characters_[1]);
+    characters_[0]->Finish();
+    characters_[1]->Finish();
     MessageSystem* messages = func_020421a0();
     func_02045cac();
     func_02043204(messages);
@@ -441,9 +428,9 @@ int CharacterCreation::Update()
         object2_.AdvanceEffects();
     }
     if (character_ != NULL)
-        func_ov023_021e5020(character_);
+        character_->Update();
     if (nextCharacter_ != NULL)
-        func_ov023_021e5020(nextCharacter_);
+        nextCharacter_->Update();
     Turn(ticks);
     SwapCharacters();
     UpdateCharacter();
@@ -556,9 +543,9 @@ void CharacterCreation::Draw2D()
     signed char state = state_;
     if (state != 0 && state != 12)
     {
-        func_ov023_021da274(this);
-        func_ov023_021da770(this);
-        func_ov023_021da9b4(this);
+        UpdateBackgrounds();
+        UpdateSprites();
+        UpdateAnimations();
         if (state_ != 10)
         {
             func_0205d1e0(&windows_[0]);
@@ -577,7 +564,7 @@ void CharacterCreation::Draw3D()
     if (state != 0 && state != 12)
     {
         GXFIFO_MATRIX_PUSH = 0;
-        func_ov023_021e5628(character_);
+        character_->Draw(NULL);
         if (flags_ & 0x200)
         {
             object_.Draw(true);
@@ -609,10 +596,10 @@ void CharacterCreation::UpdateGraphics()
             func_0204b088(&backgrounds_[3], 0);
         flags_ &= ~0x2000;
     }
-    func_ov023_021d9a6c(this);
-    func_ov023_021d9d34(this);
-    func_ov023_021d9e60(this);
-    func_ov023_021da1dc(this);
+    UpdateStateWindow();
+    ClearChoiceWindow();
+    UpdateNameWindow();
+    UpdateConfirmWindow();
 }
 
 void CharacterCreation::QueueBackgrounds()
@@ -826,15 +813,15 @@ void CharacterCreation::LoadBackgrounds()
     func_0204bc74(&backgrounds_[4], 0, 0, 0, 0x20, 0x19, 0);
     flags_ |= 0x2000;
     if (backgrounds_[4].unk_1d != 0)
-        func_ov023_021da274(this);
+        UpdateBackgrounds();
     flags_ &= ~0x2000;
     func_0204b0e8(&backgrounds_[3], 0);
     func_0204b0e8(&backgrounds_[4], 0);
     flags_ |= 0x4000;
-    func_ov023_021d9d34(this);
+    ClearChoiceWindow();
     flags_ &= ~0x4000;
     flags_ |= 0x8000;
-    func_ov023_021d9e60(this);
+    UpdateNameWindow();
     flags_ &= ~0x8000;
     flags_ &= ~0x80;
     loadStep_ = 0;
@@ -881,18 +868,18 @@ void CharacterCreation::State_Load()
             func_020de9a4(&partNames_, &allocators_[4], names, namesSize, sPartNameIDs, 0x29);
         BackgroundLoader::RemoveLockGlobal();
 
-        void* character = allocators_[3].Allocate(0xc20);
+        CharacterModel* character = (CharacterModel*)allocators_[3].Allocate(sizeof(CharacterModel));
         characters_[0] = character;
-        func_ov023_021e4e8c(character);
-        func_ov023_021e4f64(character, &allocators_[3]);
-        func_ov023_021e4fd8(character);
-        func_ov023_021e6198(character, &partNames_);
-        void* character2 = allocators_[3].Allocate(0xc20);
+        character->Initialize();
+        character->CreateAllocators(&allocators_[3]);
+        character->InitializeVRAMStates();
+        character->SetNames(&partNames_);
+        CharacterModel* character2 = (CharacterModel*)allocators_[3].Allocate(sizeof(CharacterModel));
         characters_[1] = character2;
-        func_ov023_021e4e8c(character2);
-        func_ov023_021e4f64(character2, &allocators_[3]);
-        func_ov023_021e4fd8(character2);
-        func_ov023_021e6198(character2, &partNames_);
+        character2->Initialize();
+        character2->CreateAllocators(&allocators_[3]);
+        character2->InitializeVRAMStates();
+        character2->SetNames(&partNames_);
 
         if (mode_ == 0)
         {
@@ -966,12 +953,12 @@ void CharacterCreation::State_Load()
         short models[10] = {-1, -1, hairStyle, face, -1, -1, -1, -1, -1, -1};
         memcpy(appearance->models_, models, sizeof(models));
         appearance->unk_16 = -1;
-        func_ov023_021e5e68(character, appearance->width_, appearance->height_);
-        func_ov023_021e5e68(character2, appearance->width_, appearance->height_);
+        character->SetScale(appearance->width_, appearance->height_);
+        character2->SetScale(appearance->width_, appearance->height_);
         if (vocation_ != 0)
         {
-            func_ov023_021e6150(character, 1);
-            func_ov023_021e6150(character2, 1);
+            character->SetUnk_c11(1);
+            character2->SetUnk_c11(1);
             switch (vocation_)
             {
             case 1:
@@ -1082,7 +1069,7 @@ void CharacterCreation::State_Load()
         func_0204bc74(&backgrounds_[5], 0, 0, 0, 0x20, 0x19, 0);
         func_0204b0e8(&backgrounds_[5], 0);
         flags_ |= 0x1000;
-        func_ov023_021da274(this);
+        UpdateBackgrounds();
         func_0204b0e8(&backgrounds_[1], 0);
         flags_ &= ~0x1000;
 
@@ -1184,15 +1171,15 @@ void CharacterCreation::State_Load()
     }
     else
     {
-        func_ov023_021e60e0(characters_[0], 0x1eb);
-        func_ov023_021e60e0(characters_[1], 0x1eb);
-        func_ov023_021e5974(characters_[0], member_, member_->details_.unk_4e0, 0, 0);
-        func_ov023_021e5974(characters_[1], member_, member_->details_.unk_4e0, 0, 0);
+        characters_[0]->SetAngle(0x1eb);
+        characters_[1]->SetAngle(0x1eb);
+        characters_[0]->Load(member_, member_->details_.unk_4e0, 0, 0);
+        characters_[1]->Load(member_, member_->details_.unk_4e0, 0, 0);
         character_ = characters_[0];
         nextCharacter_ = characters_[1];
-        func_ov023_021d99a4(this);
-        func_ov023_021d9c7c(this);
-        func_ov023_021d9da4(this);
+        OpenStateWindow();
+        OpenChoiceWindow();
+        OpenNameWindow();
         func_0205deb4(&windows_[1], 2, 0);
         func_0205deb4(&windows_[1], 3, 0);
         SetState(1);
@@ -1279,29 +1266,29 @@ asm void CharacterCreation::State_Load()
     bl _ZN13SafeAllocator8AllocateEj
     mov r6, r0
     str r0, [r9, #0x7f0]
-    bl func_ov023_021e4e8c
+    bl _ZN14CharacterModel10InitializeEv
     mov r0, r6
     add r1, r9, #0x3c
-    bl func_ov023_021e4f64
+    bl _ZN14CharacterModel16CreateAllocatorsEP13SafeAllocator
     mov r0, r6
-    bl func_ov023_021e4fd8
+    bl _ZN14CharacterModel20InitializeVRAMStatesEv
     mov r0, r6
     add r1, r9, #0xc8
-    bl func_ov023_021e6198
+    bl _ZN14CharacterModel8SetNamesEP13PartNameTable
     add r0, r9, #0x3c
     mov r1, #0xc20
     bl _ZN13SafeAllocator8AllocateEj
     mov r7, r0
     str r0, [r9, #0x7f4]
-    bl func_ov023_021e4e8c
+    bl _ZN14CharacterModel10InitializeEv
     mov r0, r7
     add r1, r9, #0x3c
-    bl func_ov023_021e4f64
+    bl _ZN14CharacterModel16CreateAllocatorsEP13SafeAllocator
     mov r0, r7
-    bl func_ov023_021e4fd8
+    bl _ZN14CharacterModel20InitializeVRAMStatesEv
     mov r0, r7
     add r1, r9, #0xc8
-    bl func_ov023_021e6198
+    bl _ZN14CharacterModel8SetNamesEP13PartNameTable
     ldrb r0, [r9, #0xd95]
     cmp r0, #0x0
     bne @L02185888
@@ -1520,20 +1507,20 @@ asm void CharacterCreation::State_Load()
     ldrsh r1, [r4, #0x18]
     ldrsh r2, [r4, #0x1a]
     mov r0, r6
-    bl func_ov023_021e5e68
+    bl _ZN14CharacterModel8SetScaleEii
     ldrsh r1, [r4, #0x18]
     ldrsh r2, [r4, #0x1a]
     mov r0, r7
-    bl func_ov023_021e5e68
+    bl _ZN14CharacterModel8SetScaleEii
     ldrb r0, [r9, #0xda2]
     cmp r0, #0x0
     beq @L02185ba4
     mov r0, r6
     mov r1, #0x1
-    bl func_ov023_021e6150
+    bl _ZN14CharacterModel10SetUnk_c11Eh
     mov r0, r7
     mov r1, #0x1
-    bl func_ov023_021e6150
+    bl _ZN14CharacterModel10SetUnk_c11Eh
     ldrb r0, [r9, #0xda2]
     cmp r0, #0xc
     addls pc, pc, r0, lsl #0x2
@@ -1811,7 +1798,7 @@ asm void CharacterCreation::State_Load()
     mov r0, r9
     orr r1, r1, #0x1000
     str r1, [r9, #0xd9c]
-    bl func_ov023_021da274
+    bl _ZN17CharacterCreation17UpdateBackgroundsEv
     add r0, r9, #0x158
     mov r1, #0x0
     bl func_0204b0e8
@@ -2065,34 +2052,34 @@ asm void CharacterCreation::State_Load()
 @L02186298:
     ldr r0, [r9, #0x7f0]
     ldr r1, =0x1eb
-    bl func_ov023_021e60e0
+    bl _ZN14CharacterModel8SetAngleEi
     ldr r0, [r9, #0x7f4]
     ldr r1, =0x1eb
-    bl func_ov023_021e60e0
+    bl _ZN14CharacterModel8SetAngleEi
     mov r3, #0x0
     str r3, [sp, #0x0]
     ldr r1, [r9, #0xd88]
     ldr r0, [r9, #0x7f0]
     add r2, r1, #0x500
     ldrsh r2, [r2, #0x68]
-    bl func_ov023_021e5974
+    bl _ZN14CharacterModel4LoadEP15PartyMemberDataiii
     mov r3, #0x0
     str r3, [sp, #0x0]
     ldr r0, [r9, #0x7f4]
     ldr r1, [r9, #0xd88]
     add r2, r1, #0x500
     ldrsh r2, [r2, #0x68]
-    bl func_ov023_021e5974
+    bl _ZN14CharacterModel4LoadEP15PartyMemberDataiii
     ldr r1, [r9, #0x7f0]
     mov r0, r9
     str r1, [r9, #0x7f8]
     ldr r1, [r9, #0x7f4]
     str r1, [r9, #0x7fc]
-    bl func_ov023_021d99a4
+    bl _ZN17CharacterCreation15OpenStateWindowEv
     mov r0, r9
-    bl func_ov023_021d9c7c
+    bl _ZN17CharacterCreation16OpenChoiceWindowEv
     mov r0, r9
-    bl func_ov023_021d9da4
+    bl _ZN17CharacterCreation14OpenNameWindowEv
     add r0, r9, #0x2b4
     mov r1, #0x2
     mov r2, #0x0
@@ -2146,13 +2133,13 @@ void CharacterCreation::State_Sex()
         int result = UpdateChoice();
         if (result != state_)
         {
-            PreviewCharacter* next = (PreviewCharacter*)nextCharacter_;
-            if (next->unk_c12 == 0)
+            CharacterModel* next = nextCharacter_;
+            if (next->loading_ == 0)
             {
-                func_ov023_021e6158(next, 0);
-                func_ov023_021e6158(next, 2);
-                func_ov023_021e6158(next, 3);
-                func_ov023_021e6158(next, 4);
+                next->Hide(0);
+                next->Hide(2);
+                next->Hide(3);
+                next->Hide(4);
             }
         }
         if (result == -2)
@@ -2529,7 +2516,7 @@ void CharacterCreation::State_Name()
         case 3:
             func_0205eaa0(data_02108760, 1, 0);
             flags_ |= 0x8100;
-            func_ov023_021d9e60(this);
+            UpdateNameWindow();
             if (func_02012444(data_02114e30, 1))
             {
                 KeyboardKey* key = func_ov003_0215f4a4(keyboard_, 6);
@@ -2641,7 +2628,7 @@ void CharacterCreation::State_Confirm()
     func_020d6c00();
     if (step_ == 0)
     {
-        func_ov023_021d9f88(this);
+        OpenConfirmWindow();
         func_0205deb4(&windows_[1], 3, 2);
         func_0205eaa0(data_02108760, 5, 0);
         step_++;
@@ -2810,7 +2797,7 @@ asm void CharacterCreation::State_Confirm()
     cmp r0, #0x0
     bne @L0218748c
     mov r0, r10
-    bl func_ov023_021d9f88
+    bl _ZN17CharacterCreation17OpenConfirmWindowEv
     add r0, r10, #0x2b4
     mov r1, #0x3
     mov r2, #0x2
@@ -3274,7 +3261,7 @@ void CharacterCreation::State_Finish()
 {
     GameState* gameState = GameState::GetInstance();
     GameResources* resources = func_0200fb8c(gameState);
-    Object3D* preview = func_ov023_021e6194(character_);
+    Object3D* preview = character_->GetBody();
     void* unknown = func_020d6c00();
     BackgroundLoader* loader = BackgroundLoader::GetInstance();
     if (loader == NULL)
@@ -3282,7 +3269,7 @@ void CharacterCreation::State_Finish()
     unsigned int ticks = gameState->GetTickCount();
     if (ticks == 0)
         ticks = 1;
-    func_ov023_021dac40(this, ticks);
+    UpdateFade(ticks);
     if (UpdateTimer(ticks) > 0)
         return;
 
@@ -3315,7 +3302,7 @@ void CharacterCreation::State_Finish()
         if (func_0202eeb4(camera_) != 0)
             break;
         flags_ |= 0x800000;
-        if (func_ov023_021e6194(character_)->normalizedAnimationTime_ >= 0xccc)
+        if (character_->GetBody()->normalizedAnimationTime_ >= 0xccc)
         {
             func_0205ebc0(data_02108760, 0x6f, 0x6f);
             step_ = 2;
@@ -3505,17 +3492,17 @@ void CharacterCreation::SwapCharacters()
 {
     if (!(flags_ & 4))
         return;
-    PreviewCharacter* next = (PreviewCharacter*)nextCharacter_;
-    if (next != NULL && next->unk_c12 != 0)
+    CharacterModel* next = nextCharacter_;
+    if (next != NULL && next->loading_ != 0)
         return;
     if (flags_ & 0x40000)
     {
-        func_ov023_021e60e0(character_, 0x1eb);
+        character_->SetAngle(0x1eb);
         flags_ &= ~0x40000;
     }
-    func_ov023_021e6088(nextCharacter_, func_ov023_021e613c(character_));
-    Object3D* current = func_ov023_021e6194(character_);
-    Object3D* object = func_ov023_021e6194(nextCharacter_);
+    nextCharacter_->SetRotation(character_->GetRotation());
+    Object3D* current = character_->GetBody();
+    Object3D* object = nextCharacter_->GetBody();
     int length = 0;
     int currentLength = 0;
     const char* animation = (const char*)current->activeAnimationRecord_;
@@ -3528,15 +3515,15 @@ void CharacterCreation::SwapCharacters()
         object->MaybeSetRegularAnimation(animation, 0);
         object->SetCurrentAnimationTime(current->animationTime_);
     }
-    void* swap = character_;
+    CharacterModel* swap = character_;
     character_ = nextCharacter_;
     nextCharacter_ = swap;
     if (flags_ & 0x20000)
     {
         PartyMemberAppearance* appearance = &member_->details_.appearance_;
         GetBodyScale(bodyType_[sex_], &appearance->width_, &appearance->height_);
-        func_ov023_021e5e68(character_, appearance->width_, appearance->height_);
-        func_ov023_021e5e68(nextCharacter_, appearance->width_, appearance->height_);
+        character_->SetScale(appearance->width_, appearance->height_);
+        nextCharacter_->SetScale(appearance->width_, appearance->height_);
         flags_ &= ~0x20000;
     }
     flags_ &= ~4;
@@ -3546,7 +3533,7 @@ void CharacterCreation::UpdateCharacter()
 {
     if (flags_ & 2)
     {
-        func_ov023_021e5974(nextCharacter_, member_, member_->details_.unk_4e0, 0, 0);
+        nextCharacter_->Load(member_, member_->details_.unk_4e0, 0, 0);
         flags_ = (flags_ | 4) & ~2;
     }
 }
@@ -3556,7 +3543,7 @@ void CharacterCreation::Turn(unsigned int ticks)
     if (flags_ & 8)
     {
         int done = 0;
-        Vector3fix rotation = func_ov023_021e613c(character_);
+        Vector3fix rotation = character_->GetRotation();
         int angle;
         int y = rotation.y;
         int difference = fix32ReduceAngle0To2Pi(targetAngle_ - y);
@@ -3572,7 +3559,7 @@ void CharacterCreation::Turn(unsigned int ticks)
             for (unsigned int i = 0; i < ticks - 1; i++)
                 angle -= (0x6488 - fix32ReduceAngle0To2Pi(targetAngle_ - angle)) / 12;
         }
-        func_ov023_021e60e0(character_, fix32ReduceAngle0To2Pi(angle));
+        character_->SetAngle(fix32ReduceAngle0To2Pi(angle));
         int remaining = fix32ReduceAngle0To2Pi(targetAngle_ - angle);
         if ((remaining < 0 ? -remaining : remaining) < 40)
             done = 1;
@@ -3580,7 +3567,7 @@ void CharacterCreation::Turn(unsigned int ticks)
             done = 1;
         if (done)
         {
-            func_ov023_021e60e0(character_, fix32ReduceAngle0To2Pi(targetAngle_));
+            character_->SetAngle(fix32ReduceAngle0To2Pi(targetAngle_));
             targetAngle_ = 0;
             flags_ &= ~8;
         }
@@ -3619,13 +3606,13 @@ void CharacterCreation::Turn(unsigned int ticks)
         }
         else if (left != 0 || right != 0)
         {
-            Vector3fix rotation = func_ov023_021e613c(character_);
+            Vector3fix rotation = character_->GetRotation();
             if (left != 0)
                 rotation.y += (int)(4096.0f * (0.08f * ticks));
             if (right != 0)
                 rotation.y -= (int)(4096.0f * (0.08f * ticks));
             rotation.y = fix32ReduceAngle0To2Pi(rotation.y);
-            func_ov023_021e6088(character_, rotation);
+            character_->SetRotation(rotation);
         }
     }
 }
@@ -3634,51 +3621,51 @@ void CharacterCreation::SetChoice(int choice)
 {
     PartyMemberAppearance* appearance = &member_->details_.appearance_;
     int state = state_;
-    void* next = nextCharacter_;
-    void* current = character_;
+    CharacterModel* next = nextCharacter_;
+    CharacterModel* current = character_;
     if (state == 1)
     {
         appearance->female_ = choice;
-        func_ov023_021e6158(next, 0);
-        func_ov023_021e6158(next, 2);
-        func_ov023_021e6158(next, 3);
-        func_ov023_021e6158(next, 4);
+        next->Hide(0);
+        next->Hide(2);
+        next->Hide(3);
+        next->Hide(4);
         flags_ |= 2;
     }
     else if (state == 2)
     {
         GetBodyScale(choice, &appearance->width_, &appearance->height_);
-        func_ov023_021e5e68(current, appearance->width_, appearance->height_);
-        func_ov023_021e5e68(next, appearance->width_, appearance->height_);
+        current->SetScale(appearance->width_, appearance->height_);
+        next->SetScale(appearance->width_, appearance->height_);
     }
     else if (state == 5)
     {
         appearance->models_[2] = GetModel(5, choice) + 0x233c;
-        func_ov023_021e6158(next, 2);
+        next->Hide(2);
         flags_ |= 2;
     }
     else if (state == 3)
     {
         appearance->models_[3] = GetModel(3, choice) + 0x2328;
-        func_ov023_021e6158(next, 3);
-        func_ov023_021e6158(next, 4);
+        next->Hide(3);
+        next->Hide(4);
         flags_ |= 2;
     }
     else if (state == 4)
     {
         appearance->hairColor_ = choice;
-        func_ov023_021e6158(next, 4);
+        next->Hide(4);
         flags_ |= 2;
     }
     else if (state == 6)
     {
         appearance->eyeColor_ = choice;
-        func_ov023_021e540c(current);
+        current->UpdateColors();
     }
     else if (state == 7)
     {
         appearance->skinColor_ = choice;
-        func_ov023_021e540c(current);
+        current->UpdateColors();
     }
 }
 

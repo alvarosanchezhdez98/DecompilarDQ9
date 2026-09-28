@@ -6,22 +6,11 @@
 #include "Graphics/TextWindow.h"
 #include "Memory/SafeAllocator.h"
 #include "Scene/Overlay_12/ProfileEditor.h"
+#include "Scene/Overlay_23/CharacterModel.h"
+#include "System/TouchScreen.h"
 #include "Text/ForbiddenWordChecker.h"
 #include "Text/TextTable.h"
 #include "World/Object3D.h"
-
-// The touch screen (data_02114e54)
-struct TouchState
-{
-    char unk_0[0x24];
-    unsigned short unk_24;
-    char unk_26[0x54 - 0x26];
-    unsigned char unk_54;
-    // The screen is touched
-    unsigned char touching_;
-    char unk_56[0x5f - 0x56];
-    unsigned char unk_5f;
-};
 
 // A loaded data/prm/level<vocation>.bin (func_0208247c initializes it, func_02082490 loads it)
 struct LevelTable
@@ -39,15 +28,6 @@ struct LevelStatistics
 struct Unknown_0209a804
 {
     char unk_0[4];
-};
-
-// A character of overlay 23 that shows the choices (0xc20 bytes)
-struct PreviewCharacter
-{
-    char unk_0[0xc12];
-    // It's still loading?
-    unsigned char unk_c12;
-    char unk_c13[0xc20 - 0xc13];
 };
 
 // The statistics of a new party member, which func_02086404 initializes
@@ -147,9 +127,9 @@ struct CharacterCreation
     Sprite* sprites2_;
     void* unk_7ec;
     // The two characters of overlay 23 that show the choices: the current one and the next one
-    void* characters_[2];
-    void* character_;
-    void* nextCharacter_;
+    CharacterModel* characters_[2];
+    CharacterModel* character_;
+    CharacterModel* nextCharacter_;
     int unk_800;
     // The angle that the character turns to
     int targetAngle_;
@@ -246,4 +226,21 @@ struct CharacterCreation
     void CheckName();
     void SetRandomName();
     int UpdateTimer(int ticks);
+
+    // In overlay 23 (CharacterCreationDisplay.cpp)
+    void OpenStateWindow();
+    void UpdateStateWindow();
+    void OpenChoiceWindow();
+    void ClearChoiceWindow();
+    void OpenNameWindow();
+    void UpdateNameWindow();
+    void OpenConfirmWindow();
+    void WriteConfirmText(char* text, int highlighted);
+    void UpdateConfirmWindow();
+    void UpdateBackgrounds();
+    void UpdateSprites();
+    void UpdateAnimations();
+    void SetCursorSprites(int x, int y, int width, int height);
+    void UpdateFade(unsigned int ticks);
+    void DrawFade(int color, int alpha);
 };
