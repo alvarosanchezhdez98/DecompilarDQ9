@@ -10,6 +10,10 @@
 
 extern "C"
 {
+    // Methods of overlay 23, for the assembly
+    void _ZN6Layout7SetTextEsPKchh();
+    void _ZN6Layout9SetNumberEsihhhhhh();
+    void _ZN6Layout4DrawEv();
     // Sets the camera
     void func_020100c4(GameState* gameState, void* camera);
     // Returns the camera
@@ -74,15 +78,9 @@ extern "C"
     const char** func_020e5294(void* reader, short id);
 
     // Returns the layout element's position
-    void func_ov023_021e2bdc(Layout* layout, short id, short* x, short* y);
     // Sets the text of a layout element
-    void func_ov023_021e23d0(Layout* layout, short id, const char* text, int, int);
     // Sets the number shown by a layout element
-    void func_ov023_021e24b0(Layout* layout, short id, int value, int, int, int, int, int, int);
     // Draws a layout to its canvas
-    void func_ov023_021e257c(Layout* layout);
-    void func_ov023_021e20c0(Layout* layout);
-    void func_ov023_021e20f0(Layout* layout, SafeAllocator* allocator, void* file, unsigned int size);
 
 
     extern char data_02114e30[];
@@ -463,7 +461,7 @@ void MonsterInfoScreen::Draw()
             short y = 0;
             if (i == 2 ? showPageButton : showArrows)
             {
-                func_ov023_021e2bdc(layout_, s_buttonIDs[i], &x, &y);
+                layout_->GetPosition(s_buttonIDs[i], &x, &y);
                 if (buttonPressed_[i])
                 {
                     x += s_pressedOffsets[i].x;
@@ -892,7 +890,7 @@ void MonsterInfoScreen::Setup()
 
     if (initStep_ == 1)
     {
-        func_ov023_021e20c0(layout_);
+        layout_->Initialize();
         taskID_ = loader->QueueLoadFile("data/ani/lay_sml.lia", NULL);
         initStep_++;
     }
@@ -906,7 +904,7 @@ void MonsterInfoScreen::Setup()
         {
             SafeAllocator* allocators = allocators_;
             allocators[3].Reset();
-            func_ov023_021e20f0(layout_, &allocators[3], file, size);
+            layout_->Load(&allocators[3], file, size);
             HIDE_ELEMENT(layout_, 1);
         }
         loader->RemoveTask(taskID_);
@@ -935,20 +933,20 @@ void MonsterInfoScreen::Setup()
         short y = 0;
         Sprite* sprite;
         HIDE_ELEMENT(layout_, 0x1a);
-        func_ov023_021e2bdc(layout_, 0x1a, &x, &y);
+        layout_->GetPosition(0x1a, &x, &y);
         sprite = &sprites_[0];
         sprite->x_ = x << 12;
         sprite->y_ = y << 12;
         sprite->unk_22 = 0x21;
         sprite->unk_26 = 0;
         HIDE_ELEMENT(layout_, 0x1b);
-        func_ov023_021e2bdc(layout_, 0x1b, &x, &y);
+        layout_->GetPosition(0x1b, &x, &y);
         sprite = &sprites_[1];
         sprite->x_ = x << 12;
         sprite->y_ = y << 12;
         sprite->unk_22 = 0x22;
         sprite->unk_26 = 0;
-        func_ov023_021e2bdc(layout_, 0x14, &x, &y);
+        layout_->GetPosition(0x14, &x, &y);
         sprite = &sprites_[2];
         sprite->x_ = x << 12;
         sprite->y_ = y << 12;
@@ -1054,19 +1052,19 @@ void MonsterInfoScreen::UpdateText()
                 monster = monster_;
                 if (layout != NULL && monster != NULL && texts != NULL && record != NULL && record->defeatCount_ != 0)
                 {
-                    func_ov023_021e24b0(layout, 2, monster->number_, 8, 0xf, 1, 3, 0, 1);
-                    func_ov023_021e23d0(layout, 3, monster->name_, 10, 0xf);
-                    func_ov023_021e23d0(layout, 4, func_020e0434(texts, monster->familyTextID_), 10, 0xf);
+                    layout->SetNumber(2, monster->number_, 8, 0xf, 1, 3, 0, 1);
+                    layout->SetText(3, monster->name_, 10, 0xf);
+                    layout->SetText(4, func_020e0434(texts, monster->familyTextID_), 10, 0xf);
                     LayoutElement* element = FindLayoutElement(layout, 4);
                     if (element != NULL)
                         element->flags_ |= LAYOUT_ELEMENT_FLAG_4;
 
                     if (&best_ != NULL && best_.monsterID_ > 0)
                     {
-                        func_ov023_021e24b0(layout, 5, best_.value_, 8, 0xf, 1, 6, 0, 0);
-                        func_ov023_021e24b0(layout, 6, best_.count_, 8, 0xf, 1, 6, 0, 0);
+                        layout->SetNumber(5, best_.value_, 8, 0xf, 1, 6, 0, 0);
+                        layout->SetNumber(6, best_.count_, 8, 0xf, 1, 6, 0, 0);
                     }
-                    func_ov023_021e24b0(layout, 7, record->defeatCount_, 8, 0xf, 1, 6, 0, 0);
+                    layout->SetNumber(7, record->defeatCount_, 8, 0xf, 1, 6, 0, 0);
 
                     HIDE_ELEMENT(layout, 8);
                     HIDE_ELEMENT(layout, 0xa);
@@ -1100,9 +1098,9 @@ void MonsterInfoScreen::UpdateText()
                             SHOW_ELEMENT(layout, 8);
                             SHOW_ELEMENT(layout, 0xa);
                             SHOW_ELEMENT(layout, 0xc);
-                            func_ov023_021e23d0(layout, 8, dropText0, 10, 0xf);
-                            func_ov023_021e24b0(layout, 0xa, record->dropCount0_, 8, 0xf, 1, 3, 0, 0);
-                            func_ov023_021e23d0(layout, 0xc, func_020e0434(texts, 0xf), 10, 0xf);
+                            layout->SetText(8, dropText0, 10, 0xf);
+                            layout->SetNumber(0xa, record->dropCount0_, 8, 0xf, 1, 3, 0, 0);
+                            layout->SetText(0xc, func_020e0434(texts, 0xf), 10, 0xf);
                             dropNameID = 9;
                             dropCountID = 0xb;
                             dropTextID = 0xd;
@@ -1116,27 +1114,27 @@ void MonsterInfoScreen::UpdateText()
                             SHOW_ELEMENT(layout, dropNameID);
                             SHOW_ELEMENT(layout, dropCountID);
                             SHOW_ELEMENT(layout, dropTextID);
-                            func_ov023_021e23d0(layout, dropNameID, dropText1, 10, 0xf);
-                            func_ov023_021e24b0(layout, dropCountID, record->dropCount1_, 8, 0xf, 1, 3, 0, 0);
-                            func_ov023_021e23d0(layout, dropTextID, func_020e0434(texts, 0xf), 10, 0xf);
+                            layout->SetText(dropNameID, dropText1, 10, 0xf);
+                            layout->SetNumber(dropCountID, record->dropCount1_, 8, 0xf, 1, 3, 0, 0);
+                            layout->SetText(dropTextID, func_020e0434(texts, 0xf), 10, 0xf);
                         }
                     }
                     if (!shownDrops)
                     {
                         SHOW_ELEMENT(layout, 0x16);
-                        func_ov023_021e23d0(layout, 0x16, func_020e0434(texts, 0xe), 10, 0xf);
+                        layout->SetText(0x16, func_020e0434(texts, 0xe), 10, 0xf);
                     }
 
-                    func_ov023_021e23d0(layout, 0x13, description, 10, 0xf);
+                    layout->SetText(0x13, description, 10, 0xf);
                     if (record->complete_)
                     {
                         HIDE_ELEMENT(layout, 0x14);
                         SHOW_ELEMENT(layout, 0x17);
-                        func_ov023_021e23d0(layout, 0x17, func_020e0434(texts, 0x1c), 8, 0xf);
+                        layout->SetText(0x17, func_020e0434(texts, 0x1c), 8, 0xf);
                         SHOW_ELEMENT(layout, 0x18);
-                        func_ov023_021e24b0(layout, 0x18, page + 1, 8, 0xf, 0, 1, 0, 0);
+                        layout->SetNumber(0x18, page + 1, 8, 0xf, 0, 1, 0, 0);
                         SHOW_ELEMENT(layout, 0x19);
-                        func_ov023_021e24b0(layout, 0x19, 2, 8, 0xf, 0, 1, 0, 0);
+                        layout->SetNumber(0x19, 2, 8, 0xf, 0, 1, 0, 0);
                     }
 
                     HIDE_ELEMENT(layout, 0xe);
@@ -1156,22 +1154,22 @@ void MonsterInfoScreen::UpdateText()
                                 NatGroup* area = habitats_.GetGroup(i, habitat);
                                 char** areaName = habitats_.GetGroupPointer(i, habitat);
                                 if (area->flag_)
-                                    func_ov023_021e23d0(layout, areaID, *areaName, 10, 0xf);
+                                    layout->SetText(areaID, *areaName, 10, 0xf);
                                 else
-                                    func_ov023_021e23d0(layout, areaID, func_020e0434(texts, 0x15), 10, 0xf);
+                                    layout->SetText(areaID, func_020e0434(texts, 0x15), 10, 0xf);
                                 areaID++;
                             }
                         }
                         if (habitat->numGroups_ >= 3 && habitats_.GetGroup(2, habitat)->flag_)
                         {
                             SHOW_ELEMENT(layout, 0x10);
-                            func_ov023_021e23d0(layout, 0x10, func_020e0434(texts, 0x10), 10, 0xf);
+                            layout->SetText(0x10, func_020e0434(texts, 0x10), 10, 0xf);
                         }
                     }
                 }
 
                 layout_->SetCanvas(&canvas);
-                func_ov023_021e257c(layout_);
+                layout_->Draw();
                 BackgroundGraphics graphics;
                 func_0204af64(&graphics);
                 func_0204b11c(&graphics, 0);
@@ -1376,14 +1374,14 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0x2
     mov r3, #0x8
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
     mov r0, #0xf
     str r0, [sp, #0x0]
     ldr r2, [r8, #0x8]
     mov r0, r5
     mov r1, #0x3
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     ldrsb r1, [r8, #0x12]
     mov r0, r6
     bl func_020e0434
@@ -1393,7 +1391,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0x4
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     mov r0, r5
     mov r1, #0x4
     bl FindLayoutElement
@@ -1419,7 +1417,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0x5
     mov r3, #0x8
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
     mov r0, #0xf
     str r0, [sp, #0x0]
     mov r0, #0x1
@@ -1432,7 +1430,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     ldrh r2, [r10, #0xa2]
     mov r3, #0x8
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
 @L02185f80:
     mov r0, #0xf
     str r0, [sp, #0x0]
@@ -1449,7 +1447,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r2, r1, lsr #0x16
     mov r1, #0x7
     mov r3, #0x8
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
     mov r0, r5
     mov r1, #0x8
     bl FindLayoutElement
@@ -1593,7 +1591,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0x8
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     mov r0, #0xf
     str r0, [sp, #0x0]
     mov r0, #0x1
@@ -1609,7 +1607,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r1, #0xa
     mov r3, #0x8
     mov r2, r2, lsr #0x19
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
     mov r0, r6
     mov r1, #0xf
     bl func_020e0434
@@ -1619,7 +1617,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0xc
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     mov r0, #0xd
     mov r8, #0x9
     mov r11, #0xb
@@ -1665,7 +1663,7 @@ asm void MonsterInfoScreen::UpdateText()
     str r0, [sp, #0x0]
     mov r0, r5
     mov r1, r8
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     mov r0, #0xf
     str r0, [sp, #0x0]
     mov r0, #0x1
@@ -1681,7 +1679,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r3, #0x8
     mov r2, r2, lsr #0x19
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
     mov r0, r6
     mov r1, #0xf
     bl func_020e0434
@@ -1691,7 +1689,7 @@ asm void MonsterInfoScreen::UpdateText()
     str r0, [sp, #0x0]
     mov r0, r5
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
 @L0218637c:
     cmp r9, #0x0
     bne @L021863c8
@@ -1711,7 +1709,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0x16
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
 @L021863c8:
     mov r1, #0xf
     str r1, [sp, #0x0]
@@ -1719,7 +1717,7 @@ asm void MonsterInfoScreen::UpdateText()
     add r2, sp, #0x110
     mov r1, #0x13
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     ldr r0, [r7, #0x0]
     mov r0, r0, lsl #0x15
     movs r0, r0, lsr #0x1f
@@ -1747,7 +1745,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, #0x17
     mov r3, #0x8
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     mov r0, r5
     mov r1, #0x18
     bl FindLayoutElement
@@ -1768,7 +1766,7 @@ asm void MonsterInfoScreen::UpdateText()
     add r2, r1, #0x1
     mov r1, #0x18
     str r7, [sp, #0x10]
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
     mov r0, r5
     mov r1, #0x19
     bl FindLayoutElement
@@ -1788,7 +1786,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r1, #0x19
     mov r3, #0x8
     str r7, [sp, #0x10]
-    bl func_ov023_021e24b0
+    bl _ZN6Layout9SetNumberEsihhhhhh
 @L021864f8:
     mov r0, r5
     mov r1, #0xe
@@ -1850,7 +1848,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, r8
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
     b @L02186614
 @L021865ec:
     mov r0, r6
@@ -1862,7 +1860,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r0, r5
     mov r1, r8
     mov r3, #0xa
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
 @L02186614:
     add r0, r8, #0x1
     mov r0, r0, lsl #0x10
@@ -1901,7 +1899,7 @@ asm void MonsterInfoScreen::UpdateText()
     mov r1, #0x10
     mov r3, #0xa
     str r6, [sp, #0x0]
-    bl func_ov023_021e23d0
+    bl _ZN6Layout7SetTextEsPKchh
 @L021866a4:
     ldr r2, [r10, #0x58]
     add r1, sp, #0x3a0
@@ -1909,7 +1907,7 @@ asm void MonsterInfoScreen::UpdateText()
     str r1, [r2, #0x4]
     strh r0, [r2, #0x12]
     ldr r0, [r10, #0x58]
-    bl func_ov023_021e257c
+    bl _ZN6Layout4DrawEv
     add r0, sp, #0x60
     bl func_0204af64
     add r0, sp, #0x60

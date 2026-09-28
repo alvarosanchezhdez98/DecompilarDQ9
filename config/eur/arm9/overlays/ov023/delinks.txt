@@ -9,6 +9,23 @@ src/Scene/Overlay_23/CharacterCreationDisplay.cpp:
     .text start:0x021d99a4 end:0x021dad78
     .rodata start:0x021fd530 end:0x021fd540
 
+src/Scene/Overlay_23/ItemSortList.cpp:
+    complete
+    .text start:0x021e1194 end:0x021e2030
+    .data start:0x021fdc78 end:0x021fdc90
+    .bss start:0x021ffa34 end:0x021ffa44
+
+src/Scene/Overlay_23/Layout.cpp:
+    complete
+    .text start:0x021e2030 end:0x021e2ce8
+    .data start:0x021fdc90 end:0x021fdc94
+
+src/Scene/Overlay_23/MemberScreen.cpp:
+    complete
+    .text start:0x021e2ce8 end:0x021e4e8c
+    .rodata start:0x021fd66c end:0x021fd678
+    .data start:0x021fdc94 end:0x021fdce0
+
 src/Scene/Overlay_23/CharacterModel.cpp:
     complete
     .text start:0x021e4e8c end:0x021e61f4

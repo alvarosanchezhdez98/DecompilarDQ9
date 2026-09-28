@@ -9,7 +9,7 @@ struct MessageSystem
     void* unk_5c;
     char unk_60[0x2d8 - 0x60];
     int unk_2d8;
-    char unk_2dc[4];
+    int unk_2dc;
     void* unk_2e0;
     char unk_2e4[3];
     // TitleScreen waits for 2 after func_02043368
