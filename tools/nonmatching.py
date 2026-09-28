@@ -113,7 +113,7 @@ def asm_block(source: Path, module: str, symbol: str, signature: str, text: str)
         index += 2
         while lines[index].strip() != "}":
             declaration = lines[index].strip()
-            # Declared once per file
+            # Declared once per file, before the function (text is the file up to it)
             if declaration.startswith(("void ", "int ")) and declaration.split("(")[0].split()[-1] not in text:
                 externs.append("    " + declaration)
             index += 1
@@ -162,7 +162,7 @@ def main():
     note = f"NONMATCHING: the C matches {percent} %, so the build uses the original's instructions after #else (see " \
            "Decompiling.md)." + (f" {args.reason.strip()}" if args.reason.strip() else "")
     block = (comment(note) + "#ifdef NONMATCHING\n" + text[start:end] + "#else\n"
-             + asm_block(source, module, symbol, signature, text) + "#endif\n")
+             + asm_block(source, module, symbol, signature, text[:start]) + "#endif\n")
     if args.dry_run:
         print(block)
         return

@@ -6,7 +6,8 @@ struct BackgroundGraphics
     char unk_0[0x1c];
     unsigned char unk_1c_0_ : 4;
     unsigned char unk_1c_4_ : 4;
-    char unk_1d[3];
+    unsigned char unk_1d;
+    char unk_1e[2];
 };
 
 // A surface that text is drawn to (func_0204c684 initializes it)

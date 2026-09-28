@@ -49,7 +49,7 @@ extern "C"
     int func_020100a8(GameState* gameState);
     void* func_020100bc(GameState* gameState);
     void func_02010124(GameState* gameState);
-    CreatedCharacter* func_02010954(GameState* gameState);
+    PartyMemberData* func_02010954(GameState* gameState);
     void* func_02012d88(AllocatorUnion* allocator, unsigned int size);
     void func_02012da4(AllocatorUnion* allocator, void* data);
     void func_02012efc();
@@ -112,14 +112,6 @@ extern "C"
     void func_020ca458(int value, void* dst, unsigned int len);
     void func_020d86d0(int, int);
 
-    void func_ov009_021842a0(CharacterCreation* creation, SafeAllocator* allocator);
-    void func_ov009_0218454c(CharacterCreation* creation, int, int);
-    void func_ov009_02184848(CharacterCreation* creation);
-    // Whether the character creation is done
-    bool func_ov009_02184a18(CharacterCreation* creation);
-    void func_ov009_02184bbc(CharacterCreation* creation);
-    void func_ov009_02184c30(CharacterCreation* creation);
-    void func_ov009_02184ca4(CharacterCreation* creation);
 }
 
 void CharacterCreationScene::Initialize()
@@ -221,11 +213,11 @@ void CharacterCreationScene::Run()
     allocator_.CreateTypeA(buffer, 0x4b238);
     allocator_.Reset();
     creation_ = (CharacterCreation*)allocator_.Allocate(sizeof(CharacterCreation));
-    func_ov009_0218454c(creation_, 0, 0);
+    creation_->Initialize(0, 0);
     character_ = func_02010954(gameState);
-    character_->unk_568 = func_020100a8(gameState);
-    creation_->character_ = character_;
-    func_ov009_021842a0(creation_, &allocator_);
+    character_->details_.unk_4e0 = func_020100a8(gameState);
+    creation_->member_ = character_;
+    creation_->Load(&allocator_);
     func_0209c3b4(data_02109bf4, 2);
     func_020c9820();
     func_020c38d4();
@@ -244,14 +236,14 @@ void CharacterCreationScene::Run()
         allowBrightnessApply = true;
         func_020c9820();
         func_020bbcb4();
-        func_ov009_02184ca4(creation_);
+        creation_->UpdateGraphics();
         func_0203bdb0(func_0203bd08());
         UpdateAndApplyBrightness((GameResources*)this);
         data_02114e50++;
         gameState->CalculateDeltaTime(16667);
     }
 
-    func_ov009_02184848(creation_);
+    creation_->Finish();
     func_0209c678(data_02109bf4, 0);
     func_0203ad88(data_02109bf4, 0, 0);
     func_0203aa08(data_02109bf4);
@@ -276,6 +268,10 @@ extern "C"
     void _ZN9GameState18CalculateDeltaTimeEy(); // GameState::CalculateDeltaTime
     void _ZN22CharacterCreationScene6UpdateEv(); // CharacterCreationScene::Update
     void _ZN22CharacterCreationScene4DrawEv(); // CharacterCreationScene::Draw
+    void _ZN17CharacterCreation4LoadEP13SafeAllocator(); // CharacterCreation::Load
+    void _ZN17CharacterCreation10InitializeEii(); // CharacterCreation::Initialize
+    void _ZN17CharacterCreation6FinishEv(); // CharacterCreation::Finish
+    void _ZN17CharacterCreation14UpdateGraphicsEv(); // CharacterCreation::UpdateGraphics
 }
 
 asm void CharacterCreationScene::Run()
@@ -497,7 +493,7 @@ asm void CharacterCreationScene::Run()
     mov r1, #0x0
     mov r2, r1
     str r0, [r7, #0x40]
-    bl func_ov009_0218454c
+    bl _ZN17CharacterCreation10InitializeEii
     mov r0, r5
     bl func_02010954
     str r0, [r7, #0xb4]
@@ -511,7 +507,7 @@ asm void CharacterCreationScene::Run()
     ldr r0, [r7, #0x40]
     str r2, [r0, #0xd88]
     ldr r0, [r7, #0x40]
-    bl func_ov009_021842a0
+    bl _ZN17CharacterCreation4LoadEP13SafeAllocator
     ldr r0, =data_02109bf4
     mov r1, #0x2
     bl func_0209c3b4
@@ -544,7 +540,7 @@ asm void CharacterCreationScene::Run()
     bl func_020c9820
     bl func_020bbcb4
     ldr r0, [r7, #0x40]
-    bl func_ov009_02184ca4
+    bl _ZN17CharacterCreation14UpdateGraphicsEv
     bl func_0203bd08
     bl func_0203bdb0
     mov r0, r7
@@ -559,7 +555,7 @@ asm void CharacterCreationScene::Run()
     b @L0218b9d4
 @L0218ba48:
     ldr r0, [r7, #0x40]
-    bl func_ov009_02184848
+    bl _ZN17CharacterCreation6FinishEv
     ldr r0, =data_02109bf4
     mov r1, #0x0
     bl func_0209c678
@@ -588,7 +584,7 @@ asm void CharacterCreationScene::Run()
 void CharacterCreationScene::Update()
 {
     BackgroundLoader::GetInstance()->RemoveAllLocks();
-    if (func_ov009_02184a18(creation_))
+    if (creation_->Update())
     {
         done_ = 1;
     }
@@ -610,8 +606,8 @@ void CharacterCreationScene::Draw()
     }
     RenderConfig::SubmitToFifo();
     SendQueuedDataToGeometryFifo();
-    func_ov009_02184c30(creation_);
-    func_ov009_02184bbc(creation_);
+    creation_->Draw3D();
+    creation_->Draw2D();
     func_0203bd88(func_0203bd08());
     func_020d86d0(1, 0);
 }

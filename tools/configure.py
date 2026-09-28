@@ -84,6 +84,12 @@ FORCE_ACTIVE = { # Overlay functions that -dead would strip because nothing refe
 LOCAL_SYMBOLS = { # Weak symbols that a file has its own copy of, see tools/localize_symbols.py
     # Overlays 33 and 34 are at the same address, and both have a copy of BackgroundLoader's vtable
     "src/Filesystem/Overlay_34/Ov34BackgroundLoader.cpp": ["_ZTV16BackgroundLoader"],
+    # Overlays 9 and 12 each have a copy of the checker of the forbidden words
+    "src/Scene/Overlay_9/CharacterCreation.cpp": [
+        "_ZN20ForbiddenWordChecker10InitializeEv", "_ZN20ForbiddenWordChecker7ToUpperEPKcPc",
+        "_ZN20ForbiddenWordChecker8FindTextEPKcS1_ii", "_ZN20ForbiddenWordChecker5MatchEPKcS1_ii",
+        "_ZN20ForbiddenWordChecker8ContainsEPKhih",
+    ],
 }
 LD_FLAGS = " ".join([
     "-proc arm946e",        # Target processor

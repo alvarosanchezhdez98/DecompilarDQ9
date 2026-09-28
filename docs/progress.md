@@ -230,17 +230,17 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-09-27.
+Last recorded on 2026-09-28.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 324,504 | 2,959,024 | 10.97 % |
-| Functions | 2,276 | 14,779 | 15.40 % |
-| Modules | 4 complete, 13 in progress, 15 not started | 32 with code |  |
+| Code (bytes) | 339,156 | 2,959,024 | 11.46 % |
+| Functions | 2,312 | 14,779 | 15.64 % |
+| Modules | 4 complete, 14 in progress, 14 not started | 32 with code |  |
 
-Source files: 203 complete, 1 in progress.
+Source files: 204 complete, 1 in progress.
 
-Not counted as decompiled: 36 functions (38,548 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 43 functions (50,196 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -252,6 +252,7 @@ Not counted as decompiled: 36 functions (38,548 bytes) in assembly, since their 
 | 2026-09-25 | 2,029 (13.73 %) | 284,916 (9.63 %) | 200 |
 | 2026-09-26 | 2,212 (14.97 %) | 302,008 (10.21 %) | 202 |
 | 2026-09-27 | 2,276 (15.40 %) | 324,504 (10.97 %) | 203 |
+| 2026-09-28 | 2,312 (15.64 %) | 339,156 (11.46 %) | 204 |
 
 ## Modules
 
@@ -269,7 +270,7 @@ Not counted as decompiled: 36 functions (38,548 bytes) in assembly, since their 
 | ov006 | Alchemy pot ("renkin" in Japanese) | 50.1 | 132 | 0 | 132 | 0.00 % | Not started |
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov008 | *Likely* battle records and profile | 28.1 | 63 | 0 | 63 | 0.00 % | Not started |
-| ov009 | *Likely* character creation / name entry | 25.7 | 43 | 0 | 43 | 0.00 % | Not started |
+| ov009 | The creation of a character: the protagonist's (overlay 21) or a party member's at the Quester's Rest (overlay 3), with its sex, looks and name (`src/Scene/Overlay_9`). Decompiled, with 6 functions and the copy of `ForbiddenWordChecker::Match` in assembly for now | 25.7 | 43 | 36 | 7 | 55.71 % | In progress |
 | ov010 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | 1.9 | 3 | 3 | 0 | 100.00 % | Complete |
 | ov011 | The system of the menus that run a script (`data/menu/*.stb`: the title, the treasure maps, the accolades...), and its 114 script commands (`src/Scene/Overlay_11`). Overlay 17 loads the script and overlay 23 has the objects that the commands create. Decompiled, with 3 commands in assembly for now. Needs `FORCE_ACTIVE` | 17.6 | 186 | 183 | 3 | 94.85 % | In progress |
 | ov012 | The editor of the profile that tag mode's card shows: its title, accolade, birthday, design and message, with overlay 3's keyboard and a check of forbidden words (`src/Scene/Overlay_12`). Overlay 23 draws the card. Decompiled, with 7 functions in assembly for now | 27.2 | 71 | 64 | 7 | 80.75 % | In progress |
@@ -281,7 +282,7 @@ Not counted as decompiled: 36 functions (38,548 bytes) in assembly, since their 
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov019 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | 3.2 | 5 | 4 | 1 | 8.70 % | In progress |
 | ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
-| ov021 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
+| ov021 | A mode of `main()` with its own main loop that runs overlay 9 (the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov023 | Unclear: list menus | 146.7 | 827 | 0 | 827 | 0.00 % | Not started |
 | ov024 | Unclear, no strings | 151.1 | 573 | 0 | 573 | 0.00 % | In progress |
@@ -320,6 +321,13 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | main | `func_020c04e8` | `0x020c04f8` | 0x3b4 |
 | main | `func_020d2f88` | `0x020d2f98` | 0x68 |
 | main | `func_020d3160` | `0x020d3170` | 0x87c |
+| ov009 | `CharacterCreation::State_Load` | `0x02185634` | 0xd9c |
+| ov009 | `CharacterCreation::State_Confirm` | `0x0218742c` | 0x708 |
+| ov009 | `CharacterCreation::GetBodyScale` | `0x02188bf8` | 0x34 |
+| ov009 | `CharacterCreation::UpdateChoice` | `0x02188ee8` | 0x96c |
+| ov009 | `CharacterCreation::GetTouchedChoice` | `0x02189854` | 0x1f8 |
+| ov009 | `CharacterCreation::CheckName` | `0x02189a4c` | 0x9d4 |
+| ov009 | `ForbiddenWordChecker::Match` | `0x0218a518` | 0x370 |
 | ov011 | `Command_CreateChildHeap` | `0x02184ed0` | 0xe0 |
 | ov011 | `Command_2a` | `0x021869b8` | 0x18c |
 | ov011 | `Command_4a` | `0x02187720` | 0x134 |
@@ -369,7 +377,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov005 | 12 | 55 | 19 | 3 | 37.2 |
 | ov006 | 24 | 82 | 22 | 4 | 50.1 |
 | ov008 | 11 | 38 | 12 | 2 | 28.1 |
-| ov009 | 4 | 26 | 9 | 4 | 25.7 |
+| ov009 | 1 | 1 | 2 | 3 | 11.4 |
 | ov011 | 0 | 3 | 0 | 0 | 0.9 |
 | ov012 | 0 | 2 | 4 | 1 | 5.2 |
 | ov013 | 0 | 2 | 1 | 0 | 1.3 |
@@ -387,5 +395,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **5088** | **6282** | **1002** | **131** | **2572.8** |
+| **Total** | **5085** | **6257** | **995** | **130** | **2558.5** |
 <!-- END GENERATED -->

@@ -22,6 +22,7 @@ doesn't define, or variables in other places (see tools/data_order.py).
 '''
 
 import argparse
+import ast
 from pathlib import Path
 import re
 import subprocess
@@ -35,6 +36,15 @@ from module_files import DelinkFile, Module, SymbolLine
 root_path = Path(__file__).parent.parent
 output_path = root_path / "build" / "complete_file"
 SECTION_ORDER = [".text", ".init", ".rodata", ".ctor", ".data", ".bss"]
+
+
+def local_symbols(source: Path) -> set[str]:
+    '''The symbols that configure.py's LOCAL_SYMBOLS makes local in the source's object (the compiler's are global)'''
+    tree = ast.parse((module_files.root_path / "tools" / "configure.py").read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(getattr(target, "id", None) == "LOCAL_SYMBOLS" for target in node.targets):
+            return set(ast.literal_eval(node.value).get(source.as_posix(), []))
+    return set()
 
 
 class Failure(Exception):
@@ -80,6 +90,7 @@ def code_matches(obj: ElfObject, function: Symbol, rom: bytes) -> bool:
 class Completion:
     def __init__(self, source: Path, module: Module, file: DelinkFile | None, obj: ElfObject):
         self.source = source
+        self.local_symbols = local_symbols(source)
         self.module = module
         self.file = file
         self.obj = obj
@@ -257,8 +268,9 @@ class Completion:
                 self.variable_addresses[variable] = base + variable.offset
 
     def set_local(self, line: SymbolLine, symbol: Symbol):
-        if symbol.local != line.local:
-            rest = re.sub(r"\s+local\b", "", line.rest) + (" local" if symbol.local else "")
+        local = symbol.local or symbol.name in self.local_symbols
+        if local != line.local:
+            rest = re.sub(r"\s+local\b", "", line.rest) + (" local" if local else "")
             self.renames.append((line, None))
             line.rest = rest
 

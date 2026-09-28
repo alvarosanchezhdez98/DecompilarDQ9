@@ -64,7 +64,10 @@ public:
     // The save data error that overlay 19 shows (see SaveErrorScreen). func_020a94f8 sets 2 or 3 when a save fails
     // its checks
     unsigned char saveError_;
-    char unk_5cc9[0x63e0 - 0x5cc9];
+    char unk_5cc9[0x63d4 - 0x5cc9];
+    // Set by overlay 9 when the protagonist is created
+    unsigned char unk_63d4;
+    char unk_63d5[0x63e0 - 0x63d5];
 
     unsigned char* treasureMapLanguageData_;
     GrottoStruct grottoInfo_;
