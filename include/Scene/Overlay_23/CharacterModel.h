@@ -3,39 +3,9 @@
 #include "GameState/PartyMemberData.h"
 #include "Graphics/VRAMManagerState.h"
 #include "Memory/SafeAllocator.h"
+#include "Resource/PartNameTable.h"
 #include "System/Matrix.h"
 #include "World/Object3D.h"
-
-struct PartNameTable;
-
-// The information of a model that a PartEntry points to
-struct PartModelInfo
-{
-    int unk_0;
-    unsigned int unk_4_0 : 12;
-    // The number of the model's animation files (md<number><number><m/w>.nsbca and .bcfg)
-    unsigned int animations_ : 8;
-    unsigned int unk_4_20 : 12;
-};
-
-// An entry of a PartNameTable, for an item or a part of a character's look (func_020dedd0 returns it)
-struct PartEntry
-{
-    PartModelInfo* model_;
-    int unk_4;
-    unsigned int unk_8_0 : 4;
-    // 6 for the items that the character holds with the arms (arm2R and arm2L)
-    unsigned int type_ : 5;
-    unsigned int unk_8_9 : 23;
-    int unk_c;
-    unsigned int unk_10_0 : 20;
-    // The letter of its model files (d_<letter><number>...)
-    unsigned int letter_ : 8;
-    unsigned int unk_10_28 : 4;
-    int unk_14;
-    // 1000 when the model file's number depends on unk_4e2 of the party member's data
-    short unk_18;
-};
 
 // The objects that CharacterModel::Draw() draws at the bones of the body: at the chest, and at the head
 struct CharacterModelExtras

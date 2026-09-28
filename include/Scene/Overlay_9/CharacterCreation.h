@@ -90,13 +90,6 @@ struct BackgroundPart
     void* unk_c;
 };
 
-// A table of the names of the parts of the characters' models (func_020de848 initializes it, func_020de9a4 loads it
-// and func_020dedd0 returns a name)
-struct PartNameTable
-{
-    char unk_0[0x18];
-};
-
 // Overlay 9, the creation of a character: of the protagonist at the start of the game (overlay 21 runs it, mode 0),
 // or of a party member at the Quester's Rest (overlay 3, mode 1). Overlay 23 has more of its code, which takes it too.
 // Its states choose the sex, then each part of the character's look, then the name, then the confirmation

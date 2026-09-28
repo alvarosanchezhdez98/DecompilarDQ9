@@ -4,6 +4,7 @@
 #include "Graphics/Background.h"
 #include "Graphics/Sprite.h"
 #include "Memory/SafeAllocator.h"
+#include "Scene/Overlay_23/Layout.h"
 #include "World/Object3D.h"
 
 // A monster of the bestiary list, from mon_list_<LG>.nat
@@ -62,36 +63,6 @@ struct MonsterRecordCount
 struct MonsterInfoTable
 {
     char unk_0[0x10];
-};
-
-// A layout (.lia file) of the menus in overlay 23
-struct LayoutElement
-{
-    short id_;
-    char unk_2[0x14];
-    // LAYOUT_ELEMENT_FLAG_*
-    unsigned char flags_;
-    char unk_17;
-};
-
-#define LAYOUT_ELEMENT_FLAG_VISIBLE 1
-#define LAYOUT_ELEMENT_FLAG_4 0x10
-
-struct Layout
-{
-    char unk_0[4];
-    Canvas* canvas_;
-    LayoutElement* elements_;
-    char unk_c[6];
-    short unk_12;
-    unsigned short numElements_;
-    char unk_16[0x36];
-
-    void SetCanvas(Canvas* canvas)
-    {
-        canvas_ = canvas;
-        unk_12 = 1;
-    }
 };
 
 // The monster that's shown with the best record
