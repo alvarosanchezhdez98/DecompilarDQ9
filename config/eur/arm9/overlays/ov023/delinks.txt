@@ -37,3 +37,9 @@ src/Scene/Overlay_23/ProfileEditorDisplay.cpp:
     .text start:0x021e61f4 end:0x021e709c
     .rodata start:0x021fd724 end:0x021fd75c
 
+src/Scene/Overlay_23/StateCommands.cpp:
+    complete
+    .text start:0x021e8f28 end:0x021eb080
+    .data start:0x021fddb8 end:0x021fe0f0
+    .bss start:0x021ffa4c end:0x021ffefc
+
