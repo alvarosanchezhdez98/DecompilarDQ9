@@ -416,11 +416,11 @@ void ProfileEditor::LoadProfile()
         profile->month_ = 1;
         profile->day_ = 1;
         profile->showBirthday_ = 1;
-        profile->female_ = data->details_.female_;
-        profile->unk_0_21 = data->details_.female_;
+        profile->female_ = data->details_.appearance_.female_;
+        profile->unk_0_21 = data->details_.appearance_.female_;
         profile->title_ = 300;
         int accolade = 0x50dc;
-        if (protagonist->partyData_->details_.female_ == 1)
+        if (protagonist->partyData_->details_.appearance_.female_ == 1)
             accolade += 0x32;
         profile->accolade_ = accolade + protagonist->partyData_->vocation_ - 0x4e20;
         memset(profile->unk_8, 0, sizeof(profile->unk_8));
@@ -2326,7 +2326,7 @@ void ProfileEditor::State_Load()
             unsigned int female = 0;
             GameObject* protagonist = gameState->GetProtagonist();
             if (protagonist != 0)
-                female = protagonist->partyData_->details_.female_;
+                female = protagonist->partyData_->details_.appearance_.female_;
             char archive[0x40];
             char file[0x20];
             sprintf(archive, "data/bin/ttlname%d.gp2", female);
@@ -3553,7 +3553,7 @@ void ProfileEditor::State_0b()
             {
                 PartyMemberData* data = protagonist->partyData_;
                 int accolade = 0x50dc;
-                if (data->details_.female_ == 1)
+                if (data->details_.appearance_.female_ == 1)
                     accolade = 0x510e;
                 int vocation = data->vocation_;
                 profile->vocationAccolade_ = 1;
@@ -3564,7 +3564,7 @@ void ProfileEditor::State_0b()
             else
             {
                 int accolade = 0x5140;
-                if (protagonist->partyData_->details_.female_ == 1)
+                if (protagonist->partyData_->details_.appearance_.female_ == 1)
                     accolade = 0x51a4;
                 profile->accolade_ = accolade + selections_[5] - 0x4e21;
                 profile->vocationAccolade_ = 0;
@@ -3867,7 +3867,7 @@ void ProfileEditor::State_0e()
                 func_ov003_0215e6f8(unk_4, &allocators_[4], file, size);
                 func_ov003_0215efb8(unk_0);
                 ((Keyboard*)unk_0)->layout_ = (KeyboardLayout*)unk_4;
-                ((Keyboard*)unk_0)->unk_0 = 0;
+                ((Keyboard*)unk_0)->key_ = 0;
             }
             loader->RemoveTask(tasks_[0]);
             tasks_[0] = -1;
@@ -4483,7 +4483,7 @@ void ProfileEditor::Text_0b(char* text, int hidden)
         if (i == 0)
         {
             int id = base;
-            if (protagonist->partyData_->details_.female_ == 1)
+            if (protagonist->partyData_->details_.appearance_.female_ == 1)
                 id = 0x510e;
             const char* name = func_02072a68(&strings_, id);
             func_02041b70(text, i % 10, name);
@@ -4491,7 +4491,7 @@ void ProfileEditor::Text_0b(char* text, int hidden)
         else
         {
             int id = 0x5140;
-            if (protagonist->partyData_->details_.female_ == 1)
+            if (protagonist->partyData_->details_.appearance_.female_ == 1)
                 id = 0x51a4;
             const char* name = func_02072a68(&strings_, id + i - 1);
             char converted[0x80];

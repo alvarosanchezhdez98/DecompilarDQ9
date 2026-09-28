@@ -23,6 +23,7 @@ import difflib
 import functools
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
@@ -126,6 +127,11 @@ def load_references() -> list[AsmFunction]:
 
 def module_asm_files(module: str) -> list[Path]:
     '''The module's disassembly: dsd writes the files of its delinks.txt at their own paths, and the rest in parts'''
+    # Generated again when a symbols.txt or delinks.txt changed since, so that it has the current names
+    if asm_path.exists():
+        changed = max(path.stat().st_mtime for path in progress.config_path.rglob("*.txt"))
+        if changed > asm_path.stat().st_mtime:
+            shutil.rmtree(asm_path)
     if not asm_path.exists():
         subprocess.run([str(root_path / "dsd"), "dis", "--config-path", str(root_path / "config/eur/arm9/config.yaml"),
                         "--asm-path", str(asm_path)], check=True, stdout=subprocess.DEVNULL)

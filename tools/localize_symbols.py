@@ -78,7 +78,9 @@ def main():
     args = parser.parse_args()
 
     data = bytearray(args.input.read_bytes())
-    missing = set(args.symbols) - localize(data, set(args.symbols))
+    # A function's debug information has a global symbol of its own, `.dwarf.<name>`, which goes local with it
+    names = set(args.symbols) | {".dwarf." + name for name in args.symbols}
+    missing = set(args.symbols) - localize(data, names)
     if missing:
         sys.exit(f"{args.input}: no global symbol named {', '.join(sorted(missing))}")
     args.output.write_bytes(data)

@@ -4,6 +4,7 @@
 #include "Graphics/Sprite.h"
 #include "Graphics/TextWindow.h"
 #include "Memory/SafeAllocator.h"
+#include "Text/ForbiddenWordChecker.h"
 #include "Text/TextTable.h"
 
 // The profile of the player in the save data (GameState + 0x569c), which the profile editor edits
@@ -43,70 +44,6 @@ struct BinTextTable
     char unk_0[8];
 };
 
-// A pattern of forbidden words (0x20 bytes): up to 5 words, and how each matches
-struct ForbiddenWordPattern
-{
-    // The file has offsets in its texts, which ResolvePattern() replaces
-    const char* words_[5];
-    signed char lengths_[5];
-    // 0 to 3: the word is the whole word, somewhere in it, at its end or at its start; 4 to 7: the same with a
-    // pattern (see ForbiddenWordChecker::Match)
-    unsigned char types_[5];
-    unsigned char count_;
-    char unk_1f;
-};
-
-// The loaded file of the forbidden words
-struct ForbiddenWordFile
-{
-    // The count of the patterns (12 bits), and the patterns were prepared (bit 31)
-    unsigned int header_;
-    // The patterns (0x20 bytes each) and their texts
-    ForbiddenWordPattern* patterns_;
-    char* texts_;
-};
-
-// A word of the checked text, in its codes
-struct ForbiddenWordRange
-{
-    short start_;
-    short length_;
-    // The word ends its line, or a separator follows it
-    unsigned char lineEnd_;
-    unsigned char active_;
-};
-
-// What func_020425b4 returns for a character's code
-struct CharacterInfo
-{
-    const char* text_;
-    char unk_4;
-    signed char length_ : 6;
-    signed char unk_5_6 : 1;
-    signed char uppercase_ : 1;
-};
-
-// The checker of the forbidden words of the profile's message (data_020f285c is its file). func_ov012_021845f8
-// initializes it and func_ov012_02184d80 checks a text
-struct ForbiddenWordChecker
-{
-    char unk_0[0x18];
-    ForbiddenWordFile file_;
-    void* unk_24;
-    short unk_28;
-    // The codes of the symbols that the patterns use (sSymbols)
-    unsigned char symbols_[15];
-    char unk_39[3];
-
-    void Initialize();
-    void LoadFile(void* data, int extra, int (*prepare)(ForbiddenWordFile* file, ForbiddenWordPattern* pattern));
-    int Check(const char* text);
-    void ToUpper(const char* text, char* output);
-    int FindText(const char* word, const char* text, int length, int positions);
-    int Match(const char* pattern, const char* text, int length, int positions);
-    int Contains(const unsigned char* text, int length, unsigned char character);
-};
-
 // What func_ov023_021e7220 initializes: the windows of the profile editor, which overlay 23 runs
 struct Unknown_021e7220
 {
@@ -134,7 +71,8 @@ struct KeyboardKey
     unsigned char flags_;
     unsigned char unk_d;
     unsigned char size_;
-    char unk_f[5];
+    unsigned char unk_f;
+    char unk_10[4];
 };
 
 // A keyboard's layout (keyboard_pr.bin), which overlay 3 has: func_ov003_0215e6d8 initializes it
@@ -149,11 +87,12 @@ struct KeyboardLayout
 // The keyboard of overlay 3: func_ov003_0215efb8 initializes it and func_ov003_0215f000 updates it
 struct Keyboard
 {
-    int unk_0;
+    // The selected key
+    KeyboardKey* key_;
     KeyboardLayout* layout_;
     // The text that it edits
     char* text_;
-    char unk_c[4];
+    int unk_c;
     int size_;
     int unk_14;
     int unk_18;
@@ -166,6 +105,12 @@ struct Keyboard
     unsigned char unk_23;
     unsigned char unk_24;
     char unk_25[3];
+
+    void SetText(char* text, int size)
+    {
+        text_ = text;
+        size_ = size;
+    }
 };
 
 // Overlay 12, the editor of the player's profile (for tag mode): its message, title and accolade, which overlay 17

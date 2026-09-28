@@ -61,7 +61,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 6 | `0x021536e0` | 51.2 | 132 | Alchemy pot ("renkin" in Japanese) | `ren_in`, `ren_out`, `obj_rri`, `bm_rri` |
 | 7 | `0x021842a0` | 0.0 | 0 | Empty | |
 | 8 | `0x021842a0` | 28.8 | 63 | *Likely* battle records and profile | `title_clr.stb`, `profstr`, `tlkpcstr` |
-| 9 | `0x021842a0` | 26.7 | 43 | *Likely* character creation / name entry | `keyboard_cm.bin`, `keyboard_cs.bin`, `str_cm` |
+| 9 | `0x021842a0` | 26.7 | 43 | The creation of a character: the protagonist's (overlay 21) or a party member's at the Quester's Rest (overlay 3), with its sex, looks and name (`src/Scene/Overlay_9`). Decompiled, with 6 functions and the copy of `ForbiddenWordChecker::Match` in assembly for now | `keyboard_cm.bin`, `keyboard_cs.bin`, `str_cm`; uses overlay 23's characters |
 | 10 | `0x021842a0` | 2.0 | 3 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | `str_pit`, `ana.chr` ("ana" is a hole in Japanese) |
 | 11 | `0x021842a0` | 18.2 | 186 | The system of the menus that run a script (`data/menu/*.stb`: the title, the treasure maps, the accolades...), and its 114 script commands (`src/Scene/Overlay_11`). Overlay 17 loads the script and overlay 23 has the objects that the commands create. Decompiled, with 3 commands in assembly for now. Needs `FORCE_ACTIVE` | `data/%s` only |
 | 12 | `0x021842a0` | 28.1 | 71 | The editor of the profile that tag mode's card shows: its title, accolade, birthday, design and message, with overlay 3's keyboard and a check of forbidden words (`src/Scene/Overlay_12`). Overlay 23 draws the card. Decompiled, with 7 functions in assembly for now | `profstr`, `profsen`, `keyboard_pr.bin`, `ttlname` |
@@ -73,7 +73,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 18 | `0x0218b5a0` | 0.0 | 0 | Empty | |
 | 19 | `0x0218b5a0` | 3.4 | 5 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | `str_err`, `icon.nsarc`, `pen.pac` |
 | 20 | `0x0218b5a0` | 9.9 | 18 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | `bg_title.pac`, `Chara Viewer`, library versions, `LEVEL5 INC.` |
-| 21 | `0x0218b5a0` | 1.6 | 5 | A mode of `main()` with its own main loop that runs overlay 9 (*likely* the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | Loads overlays 9 and 23 |
+| 21 | `0x0218b5a0` | 1.6 | 5 | A mode of `main()` with its own main loop that runs overlay 9 (the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | Loads overlays 9 and 23 |
 | 22 | `0x021d8a40` | 0.0 | 0 | Empty | |
 | 23 | `0x021d8a40` | 155.9 | 827 | Unclear: list menus | `str_ii`, `bg_iilist`, `al_qu.spr` |
 | 24 | `0x021d8a40` | 157.8 | 573 | Unclear, no strings | |

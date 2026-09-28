@@ -33,6 +33,13 @@ union WindowCursor
     {
         char unk_0[4];
         int unk_4;
+        char unk_8[4];
+        int unk_c;
+        char unk_10[0xc];
+        int unk_1c;
+        char unk_20[0x1c];
+        unsigned char unk_3c;
+        unsigned char unk_3d;
     };
 };
 

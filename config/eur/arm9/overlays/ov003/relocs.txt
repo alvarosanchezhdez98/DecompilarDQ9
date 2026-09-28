@@ -6306,7 +6306,7 @@ from:0x0217e8bc kind:arm_call to:0x02032554 module:main
 from:0x0217e8c8 kind:arm_call to:0x020a1950 module:main
 from:0x0217e8d0 kind:arm_call to:0x020a1f00 module:main
 from:0x0217e8e0 kind:arm_call to:0x0218454c module:overlay(9)
-from:0x0217e8ec kind:arm_call to:0x021842a0 module:overlays(8,9,10,11,12,13,14)
+from:0x0217e8ec kind:arm_call to:0x021842a0 module:overlay(9)
 from:0x0217e8f8 kind:arm_call to:0x02032554 module:main
 from:0x0217e904 kind:arm_call to:0x02082838 module:main
 from:0x0217e914 kind:arm_call to:0x020100cc module:main
