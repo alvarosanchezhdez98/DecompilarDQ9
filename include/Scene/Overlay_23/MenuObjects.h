@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Background.h"
+#include "Graphics/Sprite.h"
 #include "Graphics/Vector.h"
 #include "Text/TextTable.h"
 
@@ -578,6 +579,30 @@ public:
     // Moves the object to the target, accelerating and then slowing down
     void Move(MenuScript* script, unsigned short id, Vector3fix* target, int maxSpeed, int acceleration);
     void Step(MenuScript* script, MenuMove* move);
+};
+
+// The objects of type 0xa, sprites whose cells, graphics, palette and animations (.NCER, .NCGR, .NCLR and .NANR) are
+// in a NARC under data/, alone or in a GP2 archive. The texts show them too (0x88 bytes)
+class MenuObjectClassA : public MenuObjectClass
+{
+public:
+    // The GP2 archive of the file under data/, or NULL
+    const char* archive_;
+    SpriteRenderer renderer_;
+    // The VRAM of the sprites' graphics
+    MenuObjectRange range_;
+
+    int Initialize(MenuScript* script, int id, int heap, const char* archive, const char* file, int screen);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void Draw1();
+    virtual void Draw2();
+    void Load(MenuScript* script);
+    void LoadFiles(MenuScript* script, void* archive, unsigned int size);
+    SpriteRenderer* GetRenderer();
 };
 
 // The objects of type 0xf, a number on a MenuObjectClass6

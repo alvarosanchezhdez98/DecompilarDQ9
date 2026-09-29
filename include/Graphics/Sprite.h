@@ -52,9 +52,11 @@ struct SpriteRenderer
     char unk_0[0x3c];
     SpriteAnimationList* animations_;
     Sprite* sprites_;
-    char unk_44[8];
+    char unk_44[4];
+    unsigned int unk_48;
     short numSprites_;
     unsigned short capacity_;
+    // The screen: 0 for the main one, 1 for the sub one
     unsigned char unk_50;
     char unk_51[3];
 
@@ -62,5 +64,13 @@ struct SpriteRenderer
     {
         sprites_ = sprites;
         numSprites_ = numSprites;
+    }
+    // The game's compiler didn't inline it: overlay 23's menus call its copy after MenuObjectClassA::Finish()
+    Sprite* GetSprite(unsigned short index)
+    {
+        Sprite* sprite = 0;
+        if (sprites_ != 0 && index < capacity_)
+            sprite = &sprites_[index];
+        return sprite;
     }
 };
