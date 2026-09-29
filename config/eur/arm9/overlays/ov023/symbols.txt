@@ -1,20 +1,20 @@
-func_ov023_021d8a40 kind:function(arm,size=0xb8) addr:0x021d8a40
-func_ov023_021d8af8 kind:function(arm,size=0x74) addr:0x021d8af8
-func_ov023_021d8b6c kind:function(arm,size=0x48) addr:0x021d8b6c
-func_ov023_021d8bb4 kind:function(arm,size=0xac) addr:0x021d8bb4
-func_ov023_021d8c60 kind:function(arm,size=0x34) addr:0x021d8c60
-func_ov023_021d8c94 kind:function(arm,size=0x20) addr:0x021d8c94
-func_ov023_021d8cb4 kind:function(arm,size=0x128) addr:0x021d8cb4
-func_ov023_021d8ddc kind:function(arm,size=0x70) addr:0x021d8ddc
-func_ov023_021d8e4c kind:function(arm,size=0x54) addr:0x021d8e4c
-func_ov023_021d8ea0 kind:function(arm,size=0x8c) addr:0x021d8ea0
-func_ov023_021d8f2c kind:function(arm,size=0x1a4) addr:0x021d8f2c
-func_ov023_021d90d0 kind:function(arm,size=0x14c) addr:0x021d90d0
-func_ov023_021d921c kind:function(arm,size=0x74) addr:0x021d921c
-func_ov023_021d9290 kind:function(arm,size=0x254) addr:0x021d9290
-func_ov023_021d94e4 kind:function(arm,size=0x468) addr:0x021d94e4
-func_ov023_021d994c kind:function(arm,size=0x3c) addr:0x021d994c
-func_ov023_021d9988 kind:function(arm,size=0x1c) addr:0x021d9988
+_ZN18BattleResultWindow10InitializeEv kind:function(arm,size=0xb8) addr:0x021d8a40
+_ZN18BattleResultWindow6FinishEv kind:function(arm,size=0x74) addr:0x021d8af8
+_ZN18BattleResultWindow5CloseEv kind:function(arm,size=0x48) addr:0x021d8b6c
+_ZN18BattleResultWindow6UpdateEv kind:function(arm,size=0xac) addr:0x021d8bb4
+_ZN18BattleResultWindow5Draw1Ev kind:function(arm,size=0x34) addr:0x021d8c60
+_ZN18BattleResultWindow5Draw2Ev kind:function(arm,size=0x20) addr:0x021d8c94
+_ZN18BattleResultWindow9SetSourceEP24BattleResultWindowSource kind:function(arm,size=0x128) addr:0x021d8cb4
+_ZN18BattleResultWindow14ShowExperienceEPKi kind:function(arm,size=0x70) addr:0x021d8ddc
+_ZN18BattleResultWindow11ShowLevelUpEiPK17BattleResultStatsS2_ kind:function(arm,size=0x54) addr:0x021d8e4c
+_ZN18BattleResultWindow10State_LoadEv kind:function(arm,size=0x8c) addr:0x021d8ea0
+_ZN18BattleResultWindow16State_ExperienceEv kind:function(arm,size=0x1a4) addr:0x021d8f2c
+_ZN18BattleResultWindow13State_LevelUpEv kind:function(arm,size=0x14c) addr:0x021d90d0
+_ZN18BattleResultWindow10OpenWindowEPcss kind:function(arm,size=0x74) addr:0x021d921c
+_ZN18BattleResultWindow15WriteExperienceEPch kind:function(arm,size=0x254) addr:0x021d9290
+_ZN18BattleResultWindow12WriteLevelUpEPch kind:function(arm,size=0x468) addr:0x021d94e4
+_ZN18BattleResultWindow10FindMemberEi kind:function(arm,size=0x3c) addr:0x021d994c
+_ZN18BattleResultWindow10SetMembersEPKhh kind:function(arm,size=0x1c) addr:0x021d9988
 _ZN17CharacterCreation15OpenStateWindowEv kind:function(arm,size=0xc8) addr:0x021d99a4
 _ZN17CharacterCreation17UpdateStateWindowEv kind:function(arm,size=0x210) addr:0x021d9a6c
 _ZN17CharacterCreation16OpenChoiceWindowEv kind:function(arm,size=0xb8) addr:0x021d9c7c
@@ -825,7 +825,7 @@ func_ov023_021fd464 kind:function(arm,size=0x8) addr:0x021fd464
 func_ov023_021fd46c kind:function(arm,size=0x8c) addr:0x021fd46c
 func_ov023_021fd4f8 kind:function(arm,size=0x14) addr:0x021fd4f8
 func_ov023_021fd50c kind:function(arm,size=0x4) addr:0x021fd50c
-data_ov023_021fd510 kind:data(any) addr:0x021fd510
+@1026 kind:data(any) addr:0x021fd510 local
 sKeyboardBackgrounds kind:data(byte[0xf]) addr:0x021fd530 local
 data_ov023_021fd563 kind:data(any) addr:0x021fd563
 data_ov023_021fd565 kind:data(any) addr:0x021fd565
