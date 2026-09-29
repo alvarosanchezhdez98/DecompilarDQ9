@@ -234,13 +234,13 @@ Last recorded on 2026-09-29.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 401,136 | 2,959,024 | 13.56 % |
-| Functions | 2,801 | 14,779 | 18.95 % |
+| Code (bytes) | 401,948 | 2,959,024 | 13.58 % |
+| Functions | 2,833 | 14,779 | 19.17 % |
 | Modules | 4 complete, 15 in progress, 13 not started | 32 with code |  |
 
-Source files: 219 complete, 1 in progress.
+Source files: 220 complete, 1 in progress.
 
-Not counted as decompiled: 67 functions (62,168 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 71 functions (65,900 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -253,7 +253,7 @@ Not counted as decompiled: 67 functions (62,168 bytes) in assembly, since their 
 | 2026-09-26 | 2,212 (14.97 %) | 302,008 (10.21 %) | 202 |
 | 2026-09-27 | 2,276 (15.40 %) | 324,504 (10.97 %) | 203 |
 | 2026-09-28 | 2,422 (16.39 %) | 358,388 (12.11 %) | 210 |
-| 2026-09-29 | 2,801 (18.95 %) | 401,136 (13.56 %) | 219 |
+| 2026-09-29 | 2,833 (19.17 %) | 401,948 (13.58 %) | 220 |
 
 ## Modules
 
@@ -285,7 +285,7 @@ Not counted as decompiled: 67 functions (62,168 bytes) in assembly, since their 
 | ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
 | ov021 | A mode of `main()` with its own main loop that runs overlay 9 (the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
-| ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts (`.lia`) of the menus and of overlay 14's bestiary, the screen of the party members (`MemberScreen`), the sorted lists of items, the commands of the scripts that read the state of the game (`StateCommands`), the profile card of tag mode (`ProfileCard`), the window of the guides with their pages and titles (`GuideWindow`), the window of a battle's results with the experience and the level ups (`BattleResultWindow`), the downloaded files ("info", "mes", "auction", "quest": checksum, RC4 and script commands, `DownloadContent`), the objects of overlay 11's menus (their list, base class and the objects of type 0 in `MenuObjects`, the backgrounds of type 2 in `MenuBackground`, the canvases of type 6 where the texts, numbers and boxes are drawn in `MenuCanvas`, the texts of type 8 in `MenuText`; each other class is in its own file), list menus... (`src/Scene/Overlay_23`). 15 files decompiled, with 24 functions in assembly for now | 146.7 | 827 | 489 | 338 | 41.26 % | In progress |
+| ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts (`.lia`) of the menus and of overlay 14's bestiary, the screen of the party members (`MemberScreen`), the sorted lists of items, the commands of the scripts that read the state of the game (`StateCommands`), the profile card of tag mode (`ProfileCard`), the window of the guides with their pages and titles (`GuideWindow`), the window of a battle's results with the experience and the level ups (`BattleResultWindow`), the downloaded files ("info", "mes", "auction", "quest": checksum, RC4 and script commands, `DownloadContent`), the objects of overlay 11's menus (their list, base class and the objects of type 0 in `MenuObjects`, the backgrounds of type 2 in `MenuBackground`, the canvases of type 6 where the texts, numbers and boxes are drawn in `MenuCanvas`, the texts of type 8 in `MenuText`, the grids of type 7 with a cursor in `MenuGrid`; each other class is in its own file), list menus... (`src/Scene/Overlay_23`). 16 files decompiled, with 28 functions in assembly for now | 146.7 | 827 | 521 | 306 | 41.80 % | In progress |
 | ov024 | Unclear, no strings | 151.1 | 573 | 0 | 573 | 0.00 % | In progress |
 | ov025 | *Likely* battle spell and skill animations | 89.5 | 304 | 0 | 304 | 0.00 % | Not started |
 | ov026 | *Likely* spell and skill effects | 23.1 | 24 | 0 | 24 | 0.00 % | Not started |
@@ -370,6 +370,10 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov023 | `MenuObjectClass6::Setup` | `0x021f7eb8` | 0x1e4 |
 | ov023 | `MenuObjectClass6::Refresh` | `0x021f809c` | 0x84 |
 | ov023 | `MenuObjectClass6::ContainsTouch` | `0x021f8970` | 0x84 |
+| ov023 | `MenuObjectClass7::Update` | `0x021f8e1c` | 0xac4 |
+| ov023 | `MenuObjectClass7::MoveCursor` | `0x021f98e0` | 0x238 |
+| ov023 | `MenuObjectClass7::MoveToItem` | `0x021f9d14` | 0x8c |
+| ov023 | `MenuObjectClass7::GetTouchedArrow` | `0x021f9da8` | 0x10c |
 | ov027 | `MBi_CommParentCallback` | `0x021d8c94` | 0x4a0 |
 | ov027 | `MBi_CommParentRecvDataPerChild` | `0x021d9134` | 0x4e4 |
 | ov027 | `MBi_CommParentSendBlock` | `0x021d9940` | 0x29c |
@@ -413,12 +417,12 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
 | ov020 | 0 | 0 | 0 | 1 | 4.2 |
 | ov021 | 0 | 0 | 1 | 0 | 1.2 |
-| ov023 | 138 | 152 | 41 | 7 | 86.2 |
+| ov023 | 108 | 150 | 41 | 7 | 85.4 |
 | ov024 | 142 | 387 | 36 | 8 | 151.1 |
 | ov025 | 126 | 137 | 33 | 8 | 89.5 |
 | ov026 | 5 | 9 | 8 | 2 | 23.1 |
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4825** | **6044** | **980** | **129** | **2497.9** |
+| **Total** | **4795** | **6042** | **980** | **129** | **2497.1** |
 <!-- END GENERATED -->

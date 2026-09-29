@@ -261,7 +261,7 @@ from:0x02185800 kind:arm_call to:0x02001a40 module:main
 from:0x02185818 kind:arm_call to:0x021f8cf4 module:overlay(23)
 from:0x0218582c kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x02185834 kind:arm_call to:0x021f67ac module:overlay(23)
-from:0x02185844 kind:load to:0x021fe80c module:overlays(23,24)
+from:0x02185844 kind:load to:0x021fe804 add:0x8 module:overlay(23)
 from:0x02185850 kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x0218585c kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x02185868 kind:arm_call to:0x02184c30 module:overlay(11)

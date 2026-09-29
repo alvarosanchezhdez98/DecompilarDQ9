@@ -4437,7 +4437,7 @@ from:0x021f9828 kind:arm_call to:0x02012454 module:main
 from:0x021f9864 kind:arm_call to:0x021f6880 module:overlay(23)
 from:0x021f9890 kind:arm_call to:0x02184a40 module:overlay(11)
 from:0x021f98b4 kind:arm_call to:0x0205eab0 module:main
-from:0x021f98c8 kind:load to:0x021fd922 module:overlay(23)
+from:0x021f98c8 kind:load to:0x021fd920 add:0x2 module:overlay(23)
 from:0x021f98cc kind:load to:0x02114e30 module:main
 from:0x021f98d0 kind:load to:0x021fff24 module:overlay(23)
 from:0x021f98d4 kind:load to:0x02114e54 module:main

@@ -102,7 +102,7 @@ void MenuObjectClass8::V3c(short value)
     unk_46 = value;
 }
 
-unsigned short MenuObjectClass8::V40()
+int MenuObjectClass8::V40()
 {
     return unk_46;
 }
@@ -112,7 +112,7 @@ void MenuObjectClass8::V44(short value)
     unk_48 = value;
 }
 
-unsigned short MenuObjectClass8::V48()
+int MenuObjectClass8::V48()
 {
     return unk_48;
 }

@@ -595,7 +595,7 @@ void MenuObjectClass6::DrawFrame(MenuScript* script)
         func_0204bc74(background, 0xc02, x + width - 1, y + height - 1, 1, 1, 0);
 }
 
-void MenuObjectClass6::Select(MenuScript* script, int id)
+void MenuObjectClass6::Select(MenuScript* script, unsigned short id)
 {
     for (MenuObjectClass* object = script->GetObjects()->GetAt(0); object != NULL; object = object->GetNext())
     {
