@@ -531,6 +531,40 @@ public:
     }
 };
 
+// A movement of an object towards a position (0x28 bytes)
+struct MenuMove
+{
+    unsigned short id_;
+    // 0: none, 1: towards target_ (see MenuObjectClass9::Step())
+    unsigned char kind_;
+    // 0: accelerating, 1: slowing down
+    unsigned char phase_;
+    // Fixed-point, per frame
+    int speed_;
+    int acceleration_;
+    int maxSpeed_;
+    Vector3fix position_;
+    Vector3fix target_;
+
+    void Clear();
+};
+
+// The objects of type 9, which move other objects, such as the menus' cursor (0x28 bytes)
+class MenuObjectClass9 : public MenuObjectClass
+{
+public:
+    unsigned short count_;
+    MenuMove* moves_;
+
+    int Initialize(MenuScript* script, int id, int heap, int count);
+    virtual void Update(MenuScript* script);
+    virtual void Finish(MenuObjectList* list);
+    MenuMove* FindFreeMove();
+    // Moves the object to the target, accelerating and then slowing down
+    void Move(MenuScript* script, unsigned short id, Vector3fix* target, int maxSpeed, int acceleration);
+    void Step(MenuScript* script, MenuMove* move);
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {

@@ -136,7 +136,7 @@ extern "C"
     extern const char _ZTV16MenuObjectClass6[];
     extern const char _ZTV16MenuObjectClass7[];
     extern const char _ZTV16MenuObjectClass8[];
-    extern const MenuObjectVTable data_ov023_021fe910;
+    extern const char _ZTV16MenuObjectClass9[];
     extern const MenuObjectVTable data_ov023_021fea34;
     extern const MenuObjectVTable data_ov023_021feb40;
     extern const MenuObjectVTable data_ov023_021fec60;
@@ -303,12 +303,13 @@ struct MenuObject_021f8cf4 : MenuObject
     MenuObject_021f8cf4() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClass7 + 8)) {}
 };
 
-// What func_ov023_021f9ec8 initializes (sizeof == 0x28), *likely* the cursor
+// MenuObjectClass9 of overlay 23 (sizeof == 0x28), which MenuObjectClass9::Initialize() initializes: the object that
+// moves the others, such as the cursor
 struct MenuObject_021f9ec8 : MenuObject
 {
     char unk_10[0x18];
 
-    MenuObject_021f9ec8() : MenuObject(&data_ov023_021fe910) {}
+    MenuObject_021f9ec8() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClass9 + 8)) {}
 };
 
 // What func_ov023_021fa298 initializes (sizeof == 0x30)

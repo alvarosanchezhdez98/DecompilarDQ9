@@ -37,8 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021f9ec8(MenuObject_021f9ec8* object, MenuScript* script, int id, int heap, int);
-    void func_ov023_021fa078(MenuObject* object, MenuScript* script, unsigned short, Vector3fix*, int, int);
     int func_ov023_021fa298(MenuObject_021fa298* object, MenuScript* script, int id, int heap, const char* archive,
                             const char* file, int);
     int func_ov023_021fa760(MenuObject_021fa760* object, MenuScript* script, int id, int heap, const char* archive,
@@ -715,7 +713,7 @@ static int Command_CreateCursor(ScriptValue* params, int count)
 
     MenuObject_021f9ec8 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f9ec8));
-    if (!func_ov023_021f9ec8(object, script, CURSOR_ID, heapId, unk))
+    if (!((MenuObjectClass9*)object)->Initialize(script, CURSOR_ID, heapId, unk))
         return 0;
 
     objects->Add((MenuObjectClass*)object);
@@ -862,7 +860,7 @@ static int Command_1e(ScriptValue* params, int count)
     if (cursor == 0)
         return 0;
 
-    func_ov023_021fa078(cursor, script, id, &position, unk4, unk5);
+    ((MenuObjectClass9*)cursor)->Move(script, id, &position, unk4, unk5);
     return 1;
 }
 
