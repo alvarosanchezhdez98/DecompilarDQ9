@@ -104,3 +104,9 @@ src/Scene/Overlay_23/MenuMover.cpp:
     .text start:0x021f9eb4 end:0x021fa298
     .rodata start:0x021fd92c end:0x021fd944
     .data start:0x021fe908 end:0x021fea0c
+
+src/Scene/Overlay_23/MenuTexts.cpp:
+    complete
+    .text start:0x021fa298 end:0x021fa760
+    .data start:0x021fea0c end:0x021feb38
+    .bss start:0x021fff28 end:0x021fff2c

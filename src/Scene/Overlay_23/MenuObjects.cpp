@@ -19,7 +19,7 @@ extern "C"
     void func_02047554(void* model, int, int);
     void func_02047b30(void* model, void* file, unsigned int size, SafeAllocator* allocator);
     void* func_020467c0(void* archive, const char* name, unsigned int* size);
-    const char* func_02072a68(TextTable* texts, short id);
+    const char* func_02072a68(TextList* texts, short id);
     void func_0207df90(VRAMManagerState* state);
     void func_0207dfac(VRAMManagerState* state);
 }

@@ -37,8 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021fa298(MenuObject_021fa298* object, MenuScript* script, int id, int heap, const char* archive,
-                            const char* file, int);
     int func_ov023_021fa760(MenuObject_021fa760* object, MenuScript* script, int id, int heap, const char* archive,
                             const char* file, int);
     int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
@@ -565,7 +563,7 @@ static int Command_10(ScriptValue* params, int count)
 
     MenuObject_021fa298 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fa298));
-    if (!func_ov023_021fa298(object, script, id, heapId, 0, file, unk))
+    if (!((MenuObjectClass4*)object)->Initialize(script, id, heapId, 0, file, unk))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -2409,7 +2407,7 @@ static int Command_6e(ScriptValue* params, int count)
 
     MenuObject_021fa298 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fa298));
-    if (!func_ov023_021fa298(object, script, id, heapId, archive, file, unk))
+    if (!((MenuObjectClass4*)object)->Initialize(script, id, heapId, archive, file, unk))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
