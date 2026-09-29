@@ -126,8 +126,15 @@ class Completion:
         addresses = {}
         previous_end = text_start
         named = set(mapping.addresses.values())
+        # The file's code when delinks.txt has it already: a function named like one outside of it is an inline
+        # function that another file defines too, whose copy the linker kept there
+        known = self.file.ranges(".text") if self.file is not None else []
         for function in functions:
             address = mapping.addresses.get(function)
+            if address is not None and known and not any(start <= address < end for start, end in known):
+                self.notes.append(f"{function.name} is at {address:#010x}, another file's: the linker keeps one copy "
+                                  "of an inline function that several files define")
+                continue
             if address is None and previous_end is not None:
                 # The ROM's next function, when it's as big: otherwise the linker stripped this one
                 candidates = [symbol for symbol in self.functions_at(previous_end, previous_end + 4)

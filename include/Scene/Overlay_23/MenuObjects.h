@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Graphics/Background.h"
 #include "Graphics/Vector.h"
 #include "Text/TextTable.h"
 
@@ -37,65 +38,139 @@ public:
     virtual void Finish(MenuObjectList* list) = 0;
     virtual void SetPosition(Vector3fix* position) = 0;
     virtual Vector3fix GetPosition() = 0;
-    virtual void V24(int) = 0;
-    virtual int V28() = 0;
-    virtual void V2c(int) = 0;
-    virtual int V30() = 0;
-    virtual void V34(int) = 0;
-    virtual int V38() = 0;
-    virtual void V3c(short) = 0;
-    virtual unsigned short V40() = 0;
-    virtual void V44(short) = 0;
-    virtual unsigned short V48() = 0;
-    virtual void V4c(int) = 0;
-    virtual int V50() = 0;
-    virtual void V54(int) = 0;
-    virtual int V58() = 0;
-    virtual void V5c(int) = 0;
-    virtual int V60() = 0;
-    virtual void V64(int) = 0;
-    virtual int V68() = 0;
-    virtual void V6c(int) = 0;
-    virtual int V70() = 0;
-    virtual void V74(int) = 0;
-    virtual int V78() = 0;
-    virtual void V7c(int) = 0;
-    virtual int V80() = 0;
-    virtual void V84(int) = 0;
-    virtual int V88() = 0;
-    virtual void V8c(int) = 0;
-    virtual int V90() = 0;
-    virtual void V94(int) = 0;
-    virtual int V98() = 0;
-    virtual void V9c(int) = 0;
-    virtual int Va0() = 0;
-    virtual void Va4(int) = 0;
+    virtual void V24(int) {}
+    virtual int V28()
+    {
+        return 0;
+    }
+    virtual void V2c(int) {}
+    virtual int V30()
+    {
+        return 0;
+    }
+    virtual void V34(int) {}
+    virtual int V38()
+    {
+        return 0;
+    }
+    virtual void V3c(short) {}
+    virtual unsigned short V40()
+    {
+        return 0;
+    }
+    virtual void V44(short) {}
+    virtual unsigned short V48()
+    {
+        return 0;
+    }
+    virtual void V4c(int) {}
+    virtual int V50()
+    {
+        return 0;
+    }
+    virtual void V54(int) {}
+    virtual int V58()
+    {
+        return 0;
+    }
+    virtual void V5c(int) {}
+    virtual int V60()
+    {
+        return 0;
+    }
+    virtual void V64(int) {}
+    virtual int V68()
+    {
+        return 0;
+    }
+    virtual void V6c(int) {}
+    virtual int V70()
+    {
+        return 0;
+    }
+    virtual void V74(int) {}
+    virtual int V78()
+    {
+        return 0;
+    }
+    virtual void V7c(int) {}
+    virtual int V80()
+    {
+        return 0;
+    }
+    virtual void V84(int) {}
+    virtual int V88()
+    {
+        return 0;
+    }
+    virtual void V8c(int) {}
+    virtual int V90()
+    {
+        return 0;
+    }
+    virtual void V94(int) {}
+    virtual int V98()
+    {
+        return 0;
+    }
+    virtual void V9c(int) {}
+    virtual int Va0()
+    {
+        return 0;
+    }
+    virtual void Va4(int) {}
     // The callback that touching the object runs
     virtual int GetTouchCallback()
     {
         return 0;
     }
-    virtual void Vac(int, int, int) = 0;
-    virtual void Vb0(int) = 0;
-    virtual int Vb4() = 0;
+    virtual void Vac(int, int, int) {}
+    virtual void Vb0(int) {}
+    virtual int Vb4()
+    {
+        return 0;
+    }
     // Whether the touched point is on the object
     virtual int IsTouched()
     {
         return 0;
     }
-    virtual int Vbc() = 0;
-    virtual int Vc0() = 0;
-    virtual void Vc4(int, int, int) = 0;
-    virtual void Vc8(int) = 0;
-    virtual Vector3fix Vcc() = 0;
-    virtual void Vd0() = 0;
-    virtual void Vd4() = 0;
-    virtual void Vd8(unsigned char) = 0;
-    virtual int Vdc() = 0;
-    virtual void Ve0(int) = 0;
-    virtual int Ve4() = 0;
-    virtual int Ve8() = 0;
-    virtual int Vec() = 0;
+    virtual int Vbc()
+    {
+        return 0;
+    }
+    virtual int Vc0()
+    {
+        return 0;
+    }
+    // Sets the object's color
+    virtual void SetColor(unsigned char red, unsigned char green, unsigned char blue) {}
+    virtual void Vc8(int) {}
+    virtual Vector3fix Vcc()
+    {
+        Vector3fix zero = {0};
+        return zero;
+    }
+    virtual void Vd0() {}
+    virtual void Vd4() {}
+    virtual void Vd8(unsigned char) {}
+    virtual int Vdc()
+    {
+        return 15;
+    }
+    virtual void Ve0(int) {}
+    virtual int Ve4()
+    {
+        return 0;
+    }
+    virtual int Ve8()
+    {
+        return 0;
+    }
+    virtual int Vec()
+    {
+        return 0;
+    }
     virtual void Vf0(int) {}
     virtual void Vf4(int) {}
     // Whether a group of objects (see MenuObjectGroup) still waits for this one
@@ -204,119 +279,6 @@ public:
     void LoadFile(MenuScript* script, void* file, unsigned int size);
     void* GetModel();
     void SetLoaded();
-
-    virtual void V24(int) {}
-    virtual int V28()
-    {
-        return 0;
-    }
-    virtual void V2c(int) {}
-    virtual int V30()
-    {
-        return 0;
-    }
-    virtual void V34(int) {}
-    virtual int V38()
-    {
-        return 0;
-    }
-    virtual void V4c(int) {}
-    virtual int V50()
-    {
-        return 0;
-    }
-    virtual void V54(int) {}
-    virtual int V58()
-    {
-        return 0;
-    }
-    virtual void V5c(int) {}
-    virtual int V60()
-    {
-        return 0;
-    }
-    virtual void V64(int) {}
-    virtual int V68()
-    {
-        return 0;
-    }
-    virtual void V6c(int) {}
-    virtual int V70()
-    {
-        return 0;
-    }
-    virtual void V74(int) {}
-    virtual int V78()
-    {
-        return 0;
-    }
-    virtual void V7c(int) {}
-    virtual int V80()
-    {
-        return 0;
-    }
-    virtual void V84(int) {}
-    virtual int V88()
-    {
-        return 0;
-    }
-    virtual void V8c(int) {}
-    virtual int V90()
-    {
-        return 0;
-    }
-    virtual void V94(int) {}
-    virtual int V98()
-    {
-        return 0;
-    }
-    virtual void V9c(int) {}
-    virtual int Va0()
-    {
-        return 0;
-    }
-    virtual void Va4(int) {}
-    virtual void Vac(int, int, int) {}
-    virtual void Vb0(int) {}
-    virtual int Vb4()
-    {
-        return 0;
-    }
-    virtual int Vbc()
-    {
-        return 0;
-    }
-    virtual int Vc0()
-    {
-        return 0;
-    }
-    virtual void Vc4(int, int, int) {}
-    virtual void Vc8(int) {}
-    virtual Vector3fix Vcc()
-    {
-        Vector3fix zero = {0};
-        return zero;
-    }
-    virtual void Vd0() {}
-    virtual void Vd4() {}
-    virtual void Vd8(unsigned char) {}
-    virtual int Vdc()
-    {
-        return 15;
-    }
-    virtual void Ve0(int) {}
-    virtual int Ve4()
-    {
-        return 0;
-    }
-    virtual int Ve8()
-    {
-        return 0;
-    }
-    virtual int Vec()
-    {
-        return 0;
-    }
 };
 
 // The objects of type 4, which show a text of a table
@@ -326,11 +288,51 @@ public:
     TextTable* GetTexts();
 };
 
-// The objects of type 6
+// The objects of type 2, a background whose cells (.bnsc) are in an archive under data/ (0x54 bytes)
+class MenuObjectClass2 : public MenuObjectClass
+{
+public:
+    MenuScript* script_;
+    // The GP2 archive of the file under data/, or NULL
+    const char* archive_;
+    BackgroundGraphics background_;
+    // SetColor() was called
+    int colored_;
+    unsigned char red_;
+    unsigned char green_;
+    unsigned char blue_;
+    // In tiles
+    short x_;
+    short y_;
+
+    int Initialize(MenuScript* script, int id, int heap, const char* archive, const char* file, int screen, int layer,
+                   int priority);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void V0c(MenuScript* script);
+    virtual void V10(MenuScript* script);
+    virtual void Draw3();
+    virtual void Finish(MenuObjectList* list);
+    BackgroundGraphics* GetBackground();
+    void SetFile(const char* file);
+    void Load(MenuScript* script);
+    void LoadFiles(MenuScript* script, void* archive, unsigned int size);
+    void LoadCells(MenuScript* script, int add, void* archive, unsigned int size);
+    virtual void SetColor(unsigned char red, unsigned char green, unsigned char blue);
+    void LoadData(MenuScript* script);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+};
+
+// The objects of type 6, a text on a canvas
 class MenuObjectClass6 : public MenuObjectClass
 {
 public:
-    char unk_20[0x104 - 0x20];
+    // Its background can be a MenuObjectClass2's
+    Canvas canvas_;
+    char unk_100[4];
     short unk_104;
     short unk_106;
 

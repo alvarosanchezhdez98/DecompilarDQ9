@@ -4232,7 +4232,7 @@ from:0x021f7b14 kind:arm_call to:0x0200423c module:main
 from:0x021f7b40 kind:arm_call to:0x0204af48 module:main
 from:0x021f7b64 kind:arm_call to:0x02046800 module:main
 from:0x021f7b7c kind:arm_call to:0x0204b184 module:main
-from:0x021f7b94 kind:load to:0x021fe5f4 module:overlay(23)
+from:0x021f7b94 kind:load to:0x021fe5ec add:0x8 module:overlay(23)
 from:0x021f7bbc kind:arm_call to:0x02046910 module:main
 from:0x021f7be4 kind:arm_call to:0x02046800 module:main
 from:0x021f7bf4 kind:arm_call to:0x0204af74 module:main
