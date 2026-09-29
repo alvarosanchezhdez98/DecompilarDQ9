@@ -27,7 +27,9 @@ struct MessageSystem
     unsigned char unk_19b2;
     char unk_19b3[0x19be - 0x19b3];
     unsigned char unk_19be;
-    char unk_19bf[0x19ca - 0x19bf];
+    char unk_19bf[0x19c8 - 0x19bf];
+    unsigned char unk_19c8;
+    char unk_19c9;
     unsigned char unk_19ca;
     char unk_19cb[0x19d2 - 0x19cb];
     unsigned char unk_19d2;

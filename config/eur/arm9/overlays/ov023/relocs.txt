@@ -2558,8 +2558,8 @@ from:0x021ec2d0 kind:arm_call to:0x020301d8 module:main
 from:0x021ec30c kind:arm_call to:0x0203b120 module:main
 from:0x021ec314 kind:arm_call to:0x0203b1ac module:main
 from:0x021ec350 kind:load to:0x021fe108 module:overlay(23)
-from:0x021ec354 kind:load to:0x021fe121 module:overlay(23)
-from:0x021ec358 kind:load to:0x021fe131 module:overlay(23)
+from:0x021ec354 kind:load to:0x021fe108 add:0x19 module:overlay(23)
+from:0x021ec358 kind:load to:0x021fe108 add:0x29 module:overlay(23)
 from:0x021ec35c kind:load to:0x021fd844 module:overlay(23)
 from:0x021ec48c kind:arm_call to:0x0218b5b0 module:overlay(17)
 from:0x021ec494 kind:arm_call to:0x020421b0 module:main
