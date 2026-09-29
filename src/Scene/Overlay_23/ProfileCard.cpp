@@ -132,7 +132,7 @@ extern "C"
     void func_0205d6a0(TextWindow* window, int);
     Canvas* func_0205d81c(TextWindow* window, int item);
     void func_0205deb4(TextWindow* window, unsigned char item, int);
-    const char* func_02072a68(BinTextTable* table, short id);
+    const char* func_02072a68(TextList* texts, short id);
     void func_02074b64(void*);
     void func_02074bf4(void*);
     int func_020d2ff0(const char* text);

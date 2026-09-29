@@ -57,9 +57,9 @@ extern "C"
     void func_0205a444(SpriteRenderer* renderer);
     void func_0205a528(SpriteRenderer* renderer, void* data, unsigned int size, SafeAllocator* allocator);
     void func_0205ac40(SpriteRenderer* renderer, Sprite* sprite);
-    void func_020727d8(SkillNameTable* names);
-    void func_020728ac(SkillNameTable* names, SafeAllocator* allocator, void* file, unsigned int size, int, int, int);
-    const char* func_02072a68(SkillNameTable* names, int skill);
+    void func_020727d8(TextList* texts);
+    void func_020728ac(TextList* texts, SafeAllocator* allocator, void* file, unsigned int size, int, int, int);
+    const char* func_02072a68(TextList* texts, short id);
     // Sorts the abilities by their skill points
     void func_020749ac(SortedAbility* abilities, int first, int last, int);
     void func_02074af4(void*);
@@ -500,7 +500,7 @@ void SkillAbilityList::Draw(Canvas* canvas)
     PartyMemberData* data = func_02053c6c(member);
     if (data == NULL)
         return;
-    int skill = func_020dd11c(data->vocation_, skill_);
+    short skill = func_020dd11c(data->vocation_, skill_);
     unsigned char points = data->details_.skillPoints_[skill];
     int y = 0x1e;
     const char* name = func_02072a68(&names_, skill);

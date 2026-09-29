@@ -7,12 +7,6 @@
 #include "Memory/SafeAllocator.h"
 #include "Text/TextTable.h"
 
-// A loaded .bin file of texts: func_020727d8 initializes it, func_020728ac loads it and func_02072a68 returns a text
-struct BinTextTable
-{
-    char unk_0[8];
-};
-
 // The card of the player's profile that tag mode shows on the sub screen (str_sli.gp2, bg_slime3.pac), with three
 // pages: the records, the profile and the message (0x614 bytes). Overlay 12's profile editor and overlay 2 show it
 struct ProfileCard
@@ -48,7 +42,7 @@ struct ProfileCard
     int scrollY_;
     // The card's design (0 to 3)
     int design_;
-    BinTextTable* strings_;
+    TextList* strings_;
     TextTable* texts_;
     // A text that the message page shows
     const char* unk_5fc;

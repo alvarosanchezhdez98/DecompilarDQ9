@@ -75,10 +75,10 @@ extern "C"
     void func_0205a444(SpriteRenderer* renderer);
     void func_0205a528(SpriteRenderer* renderer, void* file, unsigned int size, SafeAllocator* allocator);
     void func_0205cf78(TextWindow* window, Canvas* canvases, int count);
-    void func_020728ac(BinTextTable* table, SafeAllocator* allocator, void* file, unsigned int size, int, int, int);
+    void func_020728ac(TextList* texts, SafeAllocator* allocator, void* file, unsigned int size, int, int, int);
     void func_020dfec0(TextTable* texts, SafeAllocator* allocator, void* file, unsigned int size);
-    void func_020727d8(BinTextTable* table);
-    const char* func_02072a68(BinTextTable* table, short id);
+    void func_020727d8(TextList* texts);
+    const char* func_02072a68(TextList* texts, short id);
     void func_02094ab0();
     int func_02098f20(int year, int month, int day);
     void func_020dfc40(TextTable* texts);
