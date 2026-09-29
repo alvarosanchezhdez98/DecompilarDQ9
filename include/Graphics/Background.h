@@ -36,5 +36,8 @@ struct Canvas
     unsigned char unk_c4;
     // 0x2: hidden?, 0x20: ?, 0x40: ?
     unsigned char flags_;
-    char unk_c6[0x1a];
+    char unk_c6[0xd8 - 0xc6];
+    // 0x4: ?
+    unsigned char unk_d8;
+    char unk_d9[0xe0 - 0xd9];
 };

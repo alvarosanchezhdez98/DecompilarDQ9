@@ -4,7 +4,9 @@
 struct MessageSystem
 {
     void* arguments_;
-    char unk_4[0x58];
+    char unk_4[0xc];
+    void* unk_10;
+    char unk_14[0x5c - 0x14];
     // 0x960 bytes, which TitleScreen clears before writing the library versions to it
     void* unk_5c;
     char unk_60[0x2d8 - 0x60];

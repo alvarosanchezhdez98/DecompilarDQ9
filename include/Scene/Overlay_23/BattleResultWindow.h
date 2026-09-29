@@ -1,0 +1,97 @@
+#pragma once
+
+#include "Graphics/TextWindow.h"
+#include "Text/TextTable.h"
+
+// Three words of 10-bit values: the 9 stats of a party member
+struct BattleResultStatWord
+{
+    unsigned int first_ : 10;
+    unsigned int second_ : 10;
+    unsigned int third_ : 10;
+    unsigned int unk_30 : 2;
+};
+
+// The stats of a party member before or after a level up (0x14 bytes)
+struct BattleResultStats
+{
+    int unk_0;
+    int unk_4;
+    BattleResultStatWord stats_[3];
+};
+
+// A party member as the battle's results know them (0x99c bytes)
+struct BattleResultMember
+{
+    unsigned char id_;
+    unsigned char vocation_;
+    char unk_2[6];
+    char name_[0x30];
+    // What func_02085fb4 and the next functions read the base stats from
+    char data_[0x888 - 0x38];
+    // The bonus of each vocation to the stats
+    BattleResultStatWord bonuses_[13][3];
+    char unk_924[0x99c - 0x924];
+};
+
+// What BattleResultWindow copies its window and texts from
+struct BattleResultWindowSource
+{
+    char unk_0[0xb8];
+    TextTable texts_;
+    char unk_d0[0x188 - 0xd0];
+    TextWindow window_;
+};
+
+// The window of the results of a battle on the bottom screen (0x12c bytes): the experience that each party member
+// earns, then the stats of a member that levels up
+struct BattleResultWindow
+{
+    TextTable* texts_;
+    // 0x960 bytes, the message system's
+    char* text_;
+    char unk_8[0x10];
+    unsigned char unk_18;
+    unsigned char unk_19;
+    // The planes that the bottom screen showed before
+    int planes_;
+    TextWindow window_;
+    // The experience of each member of ids_
+    int values_[4];
+    // The member that levels up
+    int member_;
+    BattleResultStats before_;
+    BattleResultStats after_;
+    // The lines of the text shown so far
+    unsigned char lines_;
+    // The members with experience
+    unsigned char count_;
+    // 0: loading, 1: experience, 2: level up
+    unsigned char state_;
+    // 0xff when loaded
+    unsigned char loadStep_;
+    unsigned char step_;
+    signed char timer_;
+    unsigned char memberCount_;
+    BattleResultMember* members_;
+    unsigned char ids_[4];
+    unsigned char idCount_;
+
+    void Initialize();
+    void Finish();
+    void Close();
+    int Update();
+    void Draw1();
+    void Draw2();
+    void SetSource(BattleResultWindowSource* source);
+    void ShowExperience(const int* values);
+    void ShowLevelUp(int member, const BattleResultStats* before, const BattleResultStats* after);
+    void State_Load();
+    void State_Experience();
+    void State_LevelUp();
+    void OpenWindow(char* text, short width, short height);
+    void WriteExperience(char* text, unsigned char lines);
+    void WriteLevelUp(char* text, unsigned char lines);
+    BattleResultMember* FindMember(int id);
+    void SetMembers(const unsigned char* ids, unsigned char count);
+};
