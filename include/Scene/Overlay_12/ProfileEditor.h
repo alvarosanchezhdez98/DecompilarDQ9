@@ -5,31 +5,9 @@
 #include "Graphics/Sprite.h"
 #include "Graphics/TextWindow.h"
 #include "Memory/SafeAllocator.h"
+#include "Scene/Overlay_23/ProfileCard.h"
 #include "Text/ForbiddenWordChecker.h"
 #include "Text/TextTable.h"
-
-// A loaded .bin file of texts: func_020727d8 initializes it, func_020728ac loads it and func_02072a68 returns a text
-struct BinTextTable
-{
-    char unk_0[8];
-};
-
-// What func_ov023_021e7220 initializes: the windows of the profile editor, which overlay 23 runs
-struct Unknown_021e7220
-{
-    char unk_0[0x5f4];
-    BinTextTable* strings_;
-    TextTable* texts_;
-    void* unk_5fc;
-    // The message being edited
-    char* message_;
-    SpriteRenderer* renderer_;
-    Sprite* sprites_;
-    // The page of the card, and the card has two
-    unsigned char unk_60c;
-    unsigned char unk_60d;
-    char unk_60e[0x614 - 0x60e];
-};
 
 // A key of a keyboard's layout (0x14 bytes)
 struct KeyboardKey
@@ -100,7 +78,7 @@ struct ProfileEditor
     TextWindow window_;
     BackgroundGraphics backgrounds_[3];
     Canvas canvases_[13];
-    Unknown_021e7220 windows_;
+    ProfileCard card_;
     BinTextTable strings_;
     TextTable texts_;
     SpriteRenderer* renderer_;
@@ -129,7 +107,7 @@ struct ProfileEditor
     char* name_;
     void* unk_13b4;
     unsigned int unk_13b8;
-    void* unk_13bc;
+    char* unk_13bc;
     signed char* unk_13c0;
     unsigned short unk_13c4_0 : 5;
     unsigned short unk_13c4_5 : 11;

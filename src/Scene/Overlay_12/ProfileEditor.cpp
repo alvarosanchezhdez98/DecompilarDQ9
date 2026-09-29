@@ -81,7 +81,6 @@ extern "C"
     const char* func_02072a68(BinTextTable* table, short id);
     void func_02094ab0();
     int func_02098f20(int year, int month, int day);
-    void func_020ac460(void*);
     void func_020dfc40(TextTable* texts);
     const char* func_020e0434(TextTable* texts, short id);
 
@@ -153,17 +152,6 @@ extern "C"
     void func_ov003_0215ec68(int size, short* width, short* height);
     int func_ov003_0215f000(void* keyboard, int input);
     void func_ov003_0215f41c(void* keyboard, const char*);
-    void func_ov023_021e71b4(Unknown_021e7220* windows, SafeAllocator* allocator);
-    void func_ov023_021e7340(Unknown_021e7220* windows);
-    int func_ov023_021e76c4(Unknown_021e7220* windows);
-    void func_ov023_021e7b34(Unknown_021e7220* windows, int);
-    void func_ov023_021e7bc4(Unknown_021e7220* windows, int, int);
-    void func_ov023_021e7c58(Unknown_021e7220* windows, int, int);
-    void func_ov023_021e8270(Unknown_021e7220* windows);
-    void func_ov023_021e7220(Unknown_021e7220* windows, int);
-    void func_ov023_021e7404(Unknown_021e7220* windows, int input);
-    void func_ov023_021e761c(Unknown_021e7220* windows);
-    void func_ov023_021e76a8(Unknown_021e7220* windows);
 }
 
 
@@ -310,7 +298,7 @@ void ProfileEditor::Initialize()
     allocators_[3].ResetAllocatorPointer();
     allocators_[5].ResetAllocatorPointer();
     allocators_[6].ResetAllocatorPointer();
-    func_ov023_021e7220(&windows_, 2);
+    card_.Initialize(2);
     func_020727d8(&strings_);
     func_020dfc40(&texts_);
     renderer_ = 0;
@@ -600,7 +588,7 @@ void ProfileEditor::Load(SafeAllocator* allocator)
     renderer2_ = (SpriteRenderer*)allocator->Allocate(0x54);
     unk_13ac = allocator->Allocate(0x72);
     unk_13b4 = allocator->Allocate(0x3c00);
-    unk_13bc = allocator->Allocate(0xf2);
+    unk_13bc = (char*)allocator->Allocate(0xf2);
     memset(unk_13bc, 0, 0xf2);
     unk_13c0 = (signed char*)allocator->Allocate(0x12);
     memset(unk_13c0, 0, 0x12);
@@ -608,14 +596,14 @@ void ProfileEditor::Load(SafeAllocator* allocator)
     memset(unk_13c8, 0, 0x38c);
     unk_13cc = (unsigned int*)allocator->Allocate(0x3c);
     memset(unk_13cc, 0, 0x3c);
-    func_020ac460(unk_13cc);
+    func_020ac460((GameFlags*)unk_13cc);
     message_ = (char*)allocator->Allocate(0x400);
     memset(message_, 0, 0x400);
 }
 int ProfileEditor::Update(int input)
 {
     unk_13a4 = input;
-    func_ov023_021e7404(&windows_, input);
+    card_.Update(input);
     unk_1398 = func_0205d0e0(&window_, input);
     void (ProfileEditor::*states[])() = {
         &ProfileEditor::State_Load,     &ProfileEditor::State_Menu,      &ProfileEditor::State_TitleCategory,
@@ -636,7 +624,7 @@ int ProfileEditor::Update(int input)
         if (messages->busy_ == 0 && func_02012444(data_02114e30, 0x800))
         {
             unk_14bd = ++unk_14bd & 1;
-            windows_.unk_60c = unk_14bd;
+            card_.unk_60c = unk_14bd;
             if (state_ == 13 && step_ == 3)
                 RefreshCard(0, GetProfile(gameState)->female_ + design_ * 2, 1);
             else
@@ -1998,7 +1986,7 @@ int ForbiddenWordChecker::Contains(const unsigned char* text, int length, unsign
 
 void ProfileEditor::Draw1()
 {
-    func_ov023_021e761c(&windows_);
+    card_.Draw1();
     func_0205d1e0(&window_);
     func_0205d228(&window_);
     func_0205da88(&window_, 1, 2, 1);
@@ -2014,7 +2002,7 @@ void ProfileEditor::Draw1()
 
 void ProfileEditor::Draw2()
 {
-    func_ov023_021e76a8(&windows_);
+    card_.Draw2();
     if (state_ != 0)
         func_0205d2bc(&window_);
     DrawKeyText();
@@ -2388,22 +2376,22 @@ void ProfileEditor::State_Load()
         {
             func_020dc2bc();
             allocators_[2].Reset();
-            func_ov023_021e7220(&windows_, 2);
-            func_ov023_021e71b4(&windows_, &allocators_[2]);
-            windows_.strings_ = &strings_;
-            windows_.texts_ = &texts_;
-            windows_.unk_5fc = unk_13bc;
-            windows_.renderer_ = renderer2_;
-            windows_.sprites_ = sprites2_;
+            card_.Initialize(2);
+            card_.CreateAllocators(&allocators_[2]);
+            card_.strings_ = &strings_;
+            card_.texts_ = &texts_;
+            card_.unk_5fc = unk_13bc;
+            card_.renderer_ = renderer2_;
+            card_.sprites_ = sprites2_;
             step_++;
             return;
         }
     }
     else if (step_ == 4)
     {
-        if (func_ov023_021e76c4(&windows_))
+        if (card_.Load())
         {
-            func_ov023_021e7b34(&windows_, func_020100a8(gameState));
+            card_.SetDesign(func_020100a8(gameState));
             RefreshCard(1, -1, 0);
             SetSubBrightness(resources, 0, 15);
             void* unk = func_0205ec34();
@@ -3825,7 +3813,7 @@ void ProfileEditor::State_0e()
         func_0205d6a0(&window_, 1);
         ProfileData* profile = GetProfile(GameState::GetInstance());
         memset(message_, 0, 0x400);
-        windows_.message_ = message_;
+        card_.message_ = message_;
         func_02042764(profile->unk_8, message_, 1);
         tasks_[0] = BackgroundLoader::GetInstance()->QueueLoadFile("data/bin/keyboard_pr.bin", 0);
         step_++;
@@ -3908,7 +3896,7 @@ void ProfileEditor::State_0e()
                 func_0205eaa0(data_02108760, 1, 0);
                 if (page != ((Keyboard*)unk_0)->unk_20)
                     Text_0e(0, 0);
-                func_ov023_021e8270(&windows_);
+                card_.RedrawMessage();
                 return;
 
             case 4:
@@ -3949,7 +3937,7 @@ void ProfileEditor::State_0e()
     else if (step_ == 5)
     {
         func_020426bc(message_, (char*)GetProfile(GameState::GetInstance())->unk_8, 1);
-        windows_.message_ = 0;
+        card_.message_ = 0;
         memset(message_, 0, 0x400);
         step_++;
         return;
@@ -4001,9 +3989,9 @@ void ProfileEditor::State_Finish()
     {
         if (IsSubBrightnessTransitionActive(resources))
             return;
-        windows_.strings_ = 0;
-        windows_.unk_5fc = 0;
-        func_ov023_021e7340(&windows_);
+        card_.strings_ = 0;
+        card_.unk_5fc = 0;
+        card_.Finish();
         RefreshAccoladeTexts();
         func_020466f4(func_020d6c00(), 0xf);
         func_0203b4b0(resources, 0x10);
@@ -4896,14 +4884,14 @@ void ProfileEditor::RefreshCard(int animate, int design, int keepPage)
     if (!keepPage)
     {
         unk_14bd = 0;
-        windows_.unk_60c = 0;
+        card_.unk_60c = 0;
     }
     if (FormatCard(profile) || !keepPage)
     {
         if (animate)
-            func_ov023_021e7bc4(&windows_, 2, 0);
+            card_.OpenPage(2, 0);
         else
-            func_ov023_021e7c58(&windows_, 2, 0);
+            card_.RefreshPage(2, 0);
     }
     ResetAccoladeTexts();
 }
@@ -4912,7 +4900,7 @@ void ProfileEditor::RefreshCard(int animate, int design, int keepPage)
 int ProfileEditor::FormatCard(ProfileData* profile)
 {
     int twoPages = 1;
-    windows_.unk_60d = 1;
+    card_.unk_60d = 1;
     memset(text_, 0, 0x960);
     func_02099304(profile, name_, unk_13b4, unk_13b8, text_, 0x960, 0, titleText_, accoladeText_);
     char* shown = text_;
@@ -4921,8 +4909,8 @@ int ProfileEditor::FormatCard(ProfileData* profile)
     {
         twoPages = 0;
         unk_14bd = 0;
-        windows_.unk_60c = 0;
-        windows_.unk_60d = 0;
+        card_.unk_60c = 0;
+        card_.unk_60d = 0;
     }
     else if (unk_14bd == 0)
     {
