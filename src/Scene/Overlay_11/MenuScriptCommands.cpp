@@ -37,8 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021f745c(MenuObject_021f745c* object, MenuScript* script, int id, int heap, const char* archive,
-                            const char* file, int, int, int);
     int func_ov023_021f7da0(MenuObject_021f7da0* object, MenuScript* script, int id, int heap, int, int, int, int,
                             int);
     void func_ov023_021f7eb8(MenuObject* object, MenuScript* script, int, short, short, short, short, unsigned char,
@@ -57,7 +55,6 @@ extern "C"
     int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
-    void func_ov023_021f79ec(MenuObject* object, const char* text);
     void func_ov023_021f8944(MenuObject* object, MenuScript* script, unsigned char, int);
     void func_ov023_021f9c0c(MenuObject* object);
     void func_ov023_021f9c58(MenuObject* object, unsigned short);
@@ -455,7 +452,7 @@ static int Command_09(ScriptValue* params, int count)
 
     MenuObject_021f745c prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f745c));
-    if (!func_ov023_021f745c(object, script, id, heapId, 0, file, unk3, unk4, unk5))
+    if (!((MenuObjectClass2*)object)->Initialize(script, id, heapId, 0, file, unk3, unk4, unk5))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -1514,7 +1511,7 @@ static int Command_36(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 2)
         return 0;
 
-    func_ov023_021f79ec(object, text);
+    ((MenuObjectClass2*)object)->SetFile(text);
     return 1;
 }
 
@@ -1975,7 +1972,7 @@ static int Command_4e(ScriptValue* params, int count)
 
     MenuObject_021f745c prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f745c));
-    if (!func_ov023_021f745c(object, script, id, heapId, 0, 0, unk2, unk3, unk4))
+    if (!((MenuObjectClass2*)object)->Initialize(script, id, heapId, 0, 0, unk2, unk3, unk4))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -2462,7 +2459,7 @@ static int Command_6f(ScriptValue* params, int count)
 
     MenuObject_021f745c prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f745c));
-    if (!func_ov023_021f745c(object, script, id, heapId, archive, file, unk4, unk5, unk6))
+    if (!((MenuObjectClass2*)object)->Initialize(script, id, heapId, archive, file, unk4, unk5, unk6))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
