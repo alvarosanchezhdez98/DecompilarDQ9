@@ -86,3 +86,8 @@ src/Scene/Overlay_23/MenuCanvas.cpp:
     .text start:0x021f7da0 end:0x021f89f4
     .rodata start:0x021fd91c end:0x021fd920
     .data start:0x021fe5fc end:0x021fe700
+
+src/Scene/Overlay_23/MenuText.cpp:
+    complete
+    .text start:0x021f89f4 end:0x021f8cf4
+    .data start:0x021fe700 end:0x021fe804

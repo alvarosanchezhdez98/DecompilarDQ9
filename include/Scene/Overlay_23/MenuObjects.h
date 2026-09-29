@@ -36,8 +36,10 @@ public:
     virtual void V10(MenuScript* script) {}
     virtual void Draw3() {}
     virtual void Finish(MenuObjectList* list) = 0;
+    // Its default, which does nothing (0x021f9b18), is in the file of the class at 0x021f8cf4, not decompiled yet
     virtual void SetPosition(Vector3fix* position) = 0;
-    virtual Vector3fix GetPosition() = 0;
+    // Not inline: its default, a zero position, is in MenuText.cpp
+    virtual Vector3fix GetPosition();
     virtual void V24(int) {}
     virtual int V28()
     {
@@ -145,7 +147,7 @@ public:
     }
     // Sets the object's color
     virtual void SetColor(unsigned char red, unsigned char green, unsigned char blue) {}
-    virtual void Vc8(int) {}
+    virtual void Vc8(Vector3fix*) {}
     virtual Vector3fix Vcc()
     {
         Vector3fix zero = {0};
@@ -381,18 +383,26 @@ public:
     int GetUnk9bc0();
 };
 
-// The objects of type 8, a text on a MenuObjectClass6
+// The objects of type 8, a text on a MenuObjectClass6 (0x50 bytes)
 class MenuObjectClass8 : public MenuObjectClass
 {
 public:
     // The text, or NULL for the text textId_ of the MenuObjectClass4 texts_
     const char* text_;
-    char unk_24[0x34 - 0x24];
+    Vector3fix unk_24;
+    short unk_30;
+    short unk_32;
     // The ID of the MenuObjectClass6
     unsigned short canvas_;
     unsigned short texts_;
     short textId_;
-    char unk_3a[0x44 - 0x3a];
+    // On the canvas, in pixels
+    unsigned short x_;
+    unsigned short y_;
+    // Of the text that the canvas drew last
+    unsigned short width_;
+    unsigned short height_;
+    short unk_42;
     unsigned char font_ : 4;
     unsigned char color_ : 4;
     unsigned char selected_ : 1;
@@ -400,7 +410,44 @@ public:
     unsigned char alignment_ : 6;
     // The text has codes that the message system formats
     unsigned char formatted_ : 1;
+    unsigned short unk_46;
+    unsigned short unk_48;
+    unsigned short unk_4a;
+    unsigned short unk_4c;
 
+    int Initialize(MenuScript* script, int id, int heap, int canvas, int texts, int textId, int x, int y, int font,
+                   int color);
+    virtual void Finish(MenuObjectList* list);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    // The position on the screen: the canvas's plus the text's
+    Vector3fix GetScreenPosition(MenuScript* script);
+    void SetWidth(unsigned short width);
+    unsigned short GetWidth();
+    void SetHeight(unsigned short height);
+    unsigned short GetHeight();
+    virtual void V3c(short value);
+    virtual unsigned short V40();
+    virtual void V44(short value);
+    virtual unsigned short V48();
+    virtual void V4c(int value);
+    virtual int V50();
+    virtual void V7c(int value);
+    virtual int V80();
+    // Whether the text is selected
+    virtual int ContainsTouch();
+
+    virtual void Update(MenuScript* script) {}
+    virtual void Vc8(Vector3fix* value)
+    {
+        unk_24.x = value->x;
+        unk_24.y = value->y;
+        unk_24.z = value->z;
+    }
+    virtual Vector3fix Vcc()
+    {
+        return unk_24;
+    }
     virtual void Vd8(unsigned char value)
     {
         color_ = value;
@@ -409,8 +456,6 @@ public:
     {
         return selected_ ? 5 : color_;
     }
-    void SetWidth(unsigned short width);
-    void SetHeight(unsigned short height);
 };
 
 // The objects of type 0xf, a number on a MenuObjectClass6
