@@ -1,14 +1,7 @@
 #pragma once
 
 #include "Memory/SafeAllocator.h"
-
-// A list of texts loaded from a .bin file of a .gp2 archive, found by their IDs. sizeof == 8
-struct TextList
-{
-    void* entries_;
-    short count_;
-    short unk_6;
-};
+#include "Text/TextTable.h"
 
 // The only code of overlay 10, named after its files: str_pit.gp2 (its texts) and ana.chr ("ana" is a hole in
 // Japanese). It shows a message about a party member chosen from a menu and, if the zone allows it, creates a hole

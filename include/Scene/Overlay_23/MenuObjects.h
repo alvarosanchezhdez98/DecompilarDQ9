@@ -285,11 +285,26 @@ public:
     void SetLoaded();
 };
 
-// The objects of type 4, which show a text of a table
+// The objects of type 4, a list of texts that the other objects show, loaded from a .bin or .mes file under data/,
+// alone or in a GP2 archive (0x30 bytes)
 class MenuObjectClass4 : public MenuObjectClass
 {
 public:
-    TextTable* GetTexts();
+    TextList texts_;
+    // The GP2 archive of the file under data/, or NULL
+    const char* archive_;
+    // Where the names of the archive and of the file have a %d: 1 for the hero's gender, 3 for 1, else 0
+    unsigned char variant_;
+
+    int Initialize(MenuScript* script, int id, int heap, const char* archive, const char* file, int variant);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void Finish(MenuObjectList* list);
+    TextList* GetTexts();
+    void Load(MenuScript* script);
+    void LoadFile(MenuScript* script, void* file, unsigned int size);
 };
 
 // The objects of type 2, a background whose cells (.bnsc) are in an archive under data/ (0x54 bytes)

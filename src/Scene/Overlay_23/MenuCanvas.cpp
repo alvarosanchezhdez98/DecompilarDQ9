@@ -46,7 +46,7 @@ extern "C"
     void func_0204fae8(Canvas* canvas);
     void func_0204fbf8(Canvas* canvas);
     int func_0204fd00(Canvas* canvas, int corner);
-    const char* func_02072a68(TextTable* texts, short id);
+    const char* func_02072a68(TextList* texts, short id);
     void func_0206819c(const char* text, char* output, int font);
 }
 
