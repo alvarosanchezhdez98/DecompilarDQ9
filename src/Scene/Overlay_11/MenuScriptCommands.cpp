@@ -37,8 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021f8cf4(MenuObject_021f8cf4* object, MenuScript* script, int id, int heap, int, int);
-    int func_ov023_021f9b30(MenuObject* object, unsigned short, unsigned short, unsigned short);
     int func_ov023_021f9ec8(MenuObject_021f9ec8* object, MenuScript* script, int id, int heap, int);
     void func_ov023_021fa078(MenuObject* object, MenuScript* script, unsigned short, Vector3fix*, int, int);
     int func_ov023_021fa298(MenuObject_021fa298* object, MenuScript* script, int id, int heap, const char* archive,
@@ -48,10 +46,6 @@ extern "C"
     int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
-    void func_ov023_021f9c0c(MenuObject* object);
-    void func_ov023_021f9c58(MenuObject* object, unsigned short);
-    void func_ov023_021f9c60(MenuObject* object, unsigned short);
-    void func_ov023_021f9da0(MenuObject* object, bool);
     // Returns the names that the object shows
     void func_ov023_021fb25c(MenuObject* object, int, int, int, int);
     void func_ov023_021fb274(MenuObject* object, signed char);
@@ -610,7 +604,7 @@ static int Command_12(ScriptValue* params, int count)
 
     MenuObject_021f8cf4 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f8cf4));
-    if (!func_ov023_021f8cf4(object, script, id, heapId, unk3, unk2))
+    if (!((MenuObjectClass7*)object)->Initialize(script, id, heapId, unk3, unk2))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -631,7 +625,7 @@ static int Command_13(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
-    return func_ov023_021f9b30(object, id2, unk3, unk2) ? 1 : 0;
+    return ((MenuObjectClass7*)object)->SetItem(id2, unk3, unk2) ? 1 : 0;
 }
 
 static int Command_14(ScriptValue* params, int count)
@@ -1390,7 +1384,7 @@ static int Command_2d(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
-    func_ov023_021f9c0c(object);
+    ((MenuObjectClass7*)object)->ClearItems();
     return 1;
 }
 
@@ -1404,7 +1398,7 @@ static int Command_2e(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
-    func_ov023_021f9c58(object, value);
+    ((MenuObjectClass7*)object)->SetBEntry(value);
     return 1;
 }
 
@@ -1418,7 +1412,7 @@ static int Command_2f(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
-    func_ov023_021f9c60(object, value);
+    ((MenuObjectClass7*)object)->SetBCallback(value);
     return 1;
 }
 
@@ -1471,7 +1465,7 @@ static int Command_34(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
-    func_ov023_021f9c60(object, value);
+    ((MenuObjectClass7*)object)->SetBCallback(value);
     return 0;
 }
 
@@ -2083,7 +2077,7 @@ static int Command_54(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
-    func_ov023_021f9da0(object, value != 0);
+    ((MenuObjectClass7*)object)->SetWrap(value != 0);
     return 1;
 }
 

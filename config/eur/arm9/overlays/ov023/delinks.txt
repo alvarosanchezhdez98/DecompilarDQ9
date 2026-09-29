@@ -91,3 +91,10 @@ src/Scene/Overlay_23/MenuText.cpp:
     complete
     .text start:0x021f89f4 end:0x021f8cf4
     .data start:0x021fe700 end:0x021fe804
+
+src/Scene/Overlay_23/MenuGrid.cpp:
+    complete
+    .text start:0x021f8cf4 end:0x021f9eb4
+    .rodata start:0x021fd920 end:0x021fd92c
+    .data start:0x021fe804 end:0x021fe908
+    .bss start:0x021fff24 end:0x021fff28

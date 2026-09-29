@@ -94,8 +94,8 @@ int GetMenuObject7Selection(MenuScript* script, unsigned short id)
     MenuObjectClass7* object = GetMenuObject7(script, id);
     if (object == NULL)
         return -1;
-    int unk = object->GetUnk9bc0();
-    return object->GetSelection(object->GetUnk9bb0(), unk);
+    unsigned short column = object->GetColumn();
+    return object->GetItem(object->GetRow(), column);
 }
 
 MenuObjectClass* GetMenuObject7Selected(MenuScript* script, unsigned short id)
@@ -104,13 +104,13 @@ MenuObjectClass* GetMenuObject7Selected(MenuScript* script, unsigned short id)
     return script->GetObjects()->Find(selection);
 }
 
-void SetMenuObject7Unk5c(MenuScript* script, unsigned short id, short a, short b)
+void SetMenuObject7Pages(MenuScript* script, unsigned short id, short page, short pages)
 {
     MenuObjectClass7* object = GetMenuObject7(script, id);
     if (object != NULL)
     {
-        object->unk_5c = a;
-        object->unk_5e = b;
+        object->page_ = page;
+        object->pages_ = pages;
     }
 }
 
@@ -511,7 +511,7 @@ void MenuObjectClass::Initialize()
     state_ = 0;
 }
 
-unsigned short MenuObjectClass::GetId()
+int MenuObjectClass::GetId()
 {
     return id_;
 }
@@ -619,7 +619,7 @@ void MenuObjectClass0::V3c(short value)
     unk_a8 = value;
 }
 
-unsigned short MenuObjectClass0::V40()
+int MenuObjectClass0::V40()
 {
     return unk_a8;
 }
@@ -629,7 +629,7 @@ void MenuObjectClass0::V44(short value)
     unk_aa = value;
 }
 
-unsigned short MenuObjectClass0::V48()
+int MenuObjectClass0::V48()
 {
     return unk_aa;
 }

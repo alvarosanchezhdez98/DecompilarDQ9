@@ -36,8 +36,8 @@ public:
     virtual void V10(MenuScript* script) {}
     virtual void Draw3() {}
     virtual void Finish(MenuObjectList* list) = 0;
-    // Its default, which does nothing (0x021f9b18), is in the file of the class at 0x021f8cf4, not decompiled yet
-    virtual void SetPosition(Vector3fix* position) = 0;
+    // Not inline: its default, which does nothing, is in MenuGrid.cpp
+    virtual void SetPosition(Vector3fix* position);
     // Not inline: its default, a zero position, is in MenuText.cpp
     virtual Vector3fix GetPosition();
     virtual void V24(int) {}
@@ -56,12 +56,13 @@ public:
         return 0;
     }
     virtual void V3c(short) {}
-    virtual unsigned short V40()
+    // The entry of the script that confirming the object starts, and the callback that it runs
+    virtual int V40()
     {
         return 0;
     }
     virtual void V44(short) {}
-    virtual unsigned short V48()
+    virtual int V48()
     {
         return 0;
     }
@@ -183,7 +184,7 @@ public:
     }
 
     void Initialize();
-    unsigned short GetId();
+    int GetId();
     unsigned short GetType();
     MenuObjectClass* GetNext();
 };
@@ -275,9 +276,9 @@ public:
     virtual void SetPosition(Vector3fix* position);
     virtual Vector3fix GetPosition();
     virtual void V3c(short value);
-    virtual unsigned short V40();
+    virtual int V40();
     virtual void V44(short value);
-    virtual unsigned short V48();
+    virtual int V48();
     void Load(MenuScript* script);
     void LoadFile(MenuScript* script, void* file, unsigned int size);
     void* GetModel();
@@ -364,23 +365,95 @@ public:
     virtual Vector3fix GetPosition();
     void DrawObjects(MenuScript* script);
     void DrawFrame(MenuScript* script);
-    void Select(MenuScript* script, int id);
+    void Select(MenuScript* script, unsigned short id);
     void SetUnkC2(MenuScript* script, unsigned char value, int refresh);
     void SetUnk10c(short a, short b);
     virtual int ContainsTouch();
 };
 
-// The objects of type 7, a list with a selection
+// The objects of type 7, a grid of objects with a cursor that the pad and the touch screen move (0x64 bytes). The
+// entries of the script that the keys start and the callbacks that they run are 0 when there are none
 class MenuObjectClass7 : public MenuObjectClass
 {
 public:
-    char unk_20[0x5c - 0x20];
-    short unk_5c;
-    short unk_5e;
+    // The IDs of the objects in the cells, row by row (0: none)
+    unsigned short* items_;
+    unsigned short rows_;
+    unsigned short columns_;
+    // The cell of the cursor
+    unsigned short row_;
+    unsigned short column_;
+    // Added to the position of the object in the cell for the cursor's
+    Vector3fix offset_;
+    // The cursor has to be moved (see MoveCursor())
+    int moved_;
+    unsigned short xEntry_;
+    unsigned short yEntry_;
+    unsigned short aCallback_;
+    unsigned short aEntry_;
+    unsigned short bEntry_;
+    unsigned short bCallback_;
+    // When the page changes
+    unsigned short pageCallback_;
+    unsigned short selectCallback_;
+    // Instead of moving the cursor
+    unsigned short upCallback_;
+    unsigned short downCallback_;
+    unsigned short yCallback_;
+    unsigned short xCallback_;
+    unsigned short rightCallback_;
+    unsigned short leftCallback_;
+    unsigned short lCallback_;
+    unsigned short rCallback_;
+    // Moving the cursor past the first or last column changes the page
+    short page_;
+    short pages_;
+    // The cursor goes from the first cell to the last and back
+    unsigned char wrap_;
+    // Confirming plays a sound
+    unsigned char sound_;
+    // X confirms, like A
+    unsigned char xConfirms_;
 
-    int GetSelection(int, int);
-    int GetUnk9bb0();
-    int GetUnk9bc0();
+    int Initialize(MenuScript* script, int id, int heap, int rows, int columns);
+    virtual void Update(MenuScript* script);
+    // Moves the cursor (the script's object GetUnk1b2()) to the object in the cell
+    void MoveCursor(MenuScript* script);
+    virtual void Finish(MenuObjectList* list);
+    int SetItem(unsigned short id, unsigned short row, unsigned short column);
+    unsigned short GetItem(unsigned short row, unsigned short column);
+    unsigned short GetRows();
+    void SetRow(unsigned short row);
+    unsigned short GetRow();
+    void SetColumn(unsigned short column);
+    unsigned short GetColumn();
+    int GetIndex();
+    void SetIndex(unsigned short index);
+    void ClearItems();
+    virtual void V24(int value);
+    virtual void V2c(int value);
+    virtual void V34(int value);
+    virtual void V44(short value);
+    virtual void V3c(short value);
+    void SetBEntry(unsigned short entry);
+    void SetBCallback(unsigned short callback);
+    virtual void V54(int value);
+    virtual void V5c(int value);
+    virtual void V64(int value);
+    virtual void V6c(int value);
+    virtual void V74(int value);
+    virtual void V7c(int value);
+    virtual void V84(int value);
+    virtual void V8c(int value);
+    virtual void V94(int value);
+    virtual void V9c(int value);
+    // The canvas that the object, a text, is drawn on
+    MenuObjectClass6* GetCanvas(MenuScript* script, MenuObjectClass* object);
+    // Moves the cursor back to the last cell with an object
+    void MoveToItem(MenuScript* script);
+    void SetWrap(bool wrap);
+    // -1 or 1 when the point is on the left or right arrow of the canvas of a text of the grid
+    int GetTouchedArrow(MenuScript* script, int x, int y);
 };
 
 // The objects of type 8, a text on a MenuObjectClass6 (0x50 bytes)
@@ -427,9 +500,9 @@ public:
     void SetHeight(unsigned short height);
     unsigned short GetHeight();
     virtual void V3c(short value);
-    virtual unsigned short V40();
+    virtual int V40();
     virtual void V44(short value);
-    virtual unsigned short V48();
+    virtual int V48();
     virtual void V4c(int value);
     virtual int V50();
     virtual void V7c(int value);

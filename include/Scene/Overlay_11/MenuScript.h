@@ -134,8 +134,8 @@ extern "C"
     // The vtables of overlay 23's classes (MenuObjects.h), which the objects point to after their 8-byte header
     extern const char _ZTV16MenuObjectClass2[];
     extern const char _ZTV16MenuObjectClass6[];
+    extern const char _ZTV16MenuObjectClass7[];
     extern const char _ZTV16MenuObjectClass8[];
-    extern const MenuObjectVTable data_ov023_021fe80c;
     extern const MenuObjectVTable data_ov023_021fe910;
     extern const MenuObjectVTable data_ov023_021fea34;
     extern const MenuObjectVTable data_ov023_021feb40;
@@ -295,12 +295,12 @@ struct MenuObject_021f89f4 : MenuObject
     MenuObject_021f89f4() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClass8 + 8)) {}
 };
 
-// What func_ov023_021f8cf4 initializes (sizeof == 0x64)
+// MenuObjectClass7 of overlay 23 (sizeof == 0x64), which MenuObjectClass7::Initialize() initializes
 struct MenuObject_021f8cf4 : MenuObject
 {
     char unk_10[0x54];
 
-    MenuObject_021f8cf4() : MenuObject(&data_ov023_021fe80c) {}
+    MenuObject_021f8cf4() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClass7 + 8)) {}
 };
 
 // What func_ov023_021f9ec8 initializes (sizeof == 0x28), *likely* the cursor
