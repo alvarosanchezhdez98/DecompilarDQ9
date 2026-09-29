@@ -431,25 +431,25 @@ func_ov023_021f5448 kind:function(arm,size=0xdc) addr:0x021f5448
 func_ov023_021f5524 kind:function(arm,size=0x10) addr:0x021f5524
 func_ov023_021f5534 kind:function(arm,size=0x44) addr:0x021f5534
 func_ov023_021f5578 kind:function(arm,size=0x20) addr:0x021f5578
-func_ov023_021f5598 kind:function(arm,size=0x10) addr:0x021f5598
-func_ov023_021f55a8 kind:function(arm,size=0x8) addr:0x021f55a8
-func_ov023_021f55b0 kind:function(arm,size=0x8) addr:0x021f55b0
-func_ov023_021f55b8 kind:function(arm,size=0x30) addr:0x021f55b8
-func_ov023_021f55e8 kind:function(arm,size=0x98) addr:0x021f55e8
-func_ov023_021f5680 kind:function(arm,size=0x108) addr:0x021f5680
-func_ov023_021f5788 kind:function(arm,size=0x3c) addr:0x021f5788
-func_ov023_021f57c4 kind:function(arm,size=0x84) addr:0x021f57c4
-func_ov023_021f5848 kind:function(arm,size=0x1d4) addr:0x021f5848
-func_ov023_021f5a1c kind:function(arm,size=0xbc) addr:0x021f5a1c
-func_ov023_021f5ad8 kind:function(arm,size=0xbc) addr:0x021f5ad8
-func_ov023_021f5b94 kind:function(arm,size=0x8) addr:0x021f5b94
-func_ov023_021f5b9c kind:function(arm,size=0x13c) addr:0x021f5b9c
-func_ov023_021f5cd8 kind:function(arm,size=0x80) addr:0x021f5cd8
-func_ov023_021f5d58 kind:function(arm,size=0x118) addr:0x021f5d58
-func_ov023_021f5e70 kind:function(arm,size=0x1e8) addr:0x021f5e70
-func_ov023_021f6058 kind:function(arm,size=0x100) addr:0x021f6058
-func_ov023_021f6158 kind:function(arm,size=0x1cc) addr:0x021f6158
-func_ov023_021f6324 kind:function(arm,size=0x54) addr:0x021f6324
+_Z16SetDownloadItemsP13PartNameTable kind:function(arm,size=0x10) addr:0x021f5598
+_Z10Command_64PN6Script9ParameterEi kind:function(arm,size=0x8) addr:0x021f55a8 local
+_Z10Command_65PN6Script9ParameterEi kind:function(arm,size=0x8) addr:0x021f55b0 local
+_Z10Command_66PN6Script9ParameterEi kind:function(arm,size=0x30) addr:0x021f55b8 local
+_Z10Command_67PN6Script9ParameterEi kind:function(arm,size=0x98) addr:0x021f55e8 local
+_Z10Command_68PN6Script9ParameterEi kind:function(arm,size=0x108) addr:0x021f5680 local
+_Z10Command_69PN6Script9ParameterEi kind:function(arm,size=0x3c) addr:0x021f5788 local
+_Z10Command_6aPN6Script9ParameterEi kind:function(arm,size=0x84) addr:0x021f57c4 local
+_Z10Command_6bPN6Script9ParameterEi kind:function(arm,size=0x1d4) addr:0x021f5848 local
+_Z10Command_6cPN6Script9ParameterEi kind:function(arm,size=0xbc) addr:0x021f5a1c local
+_Z10Command_6dPN6Script9ParameterEi kind:function(arm,size=0xbc) addr:0x021f5ad8 local
+_Z10Command_6ePN6Script9ParameterEi kind:function(arm,size=0x8) addr:0x021f5b94 local
+_Z19ReadDownloadedFilesPhP13DownloadEntryiP13SafeAllocator kind:function(arm,size=0x13c) addr:0x021f5b9c
+_Z8ReadInfoPhiPv kind:function(arm,size=0x80) addr:0x021f5cd8 local
+_Z11ReadMessagePhiPv kind:function(arm,size=0x118) addr:0x021f5d58 local
+_Z11ReadAuctionPhiPv kind:function(arm,size=0x1e8) addr:0x021f5e70 local
+_Z9ReadQuestPhiPv kind:function(arm,size=0x100) addr:0x021f6058 local
+_Z19AdvanceDownloadDateP12DownloadDate kind:function(arm,size=0x1cc) addr:0x021f6158
+_Z11GetChecksumiPKh kind:function(arm,size=0x54) addr:0x021f6324 local
 func_ov023_021f6378 kind:function(arm,size=0x34) addr:0x021f6378
 func_ov023_021f63ac kind:function(arm,size=0x4c) addr:0x021f63ac
 func_ov023_021f63f8 kind:function(arm,size=0x4c) addr:0x021f63f8
@@ -889,7 +889,7 @@ data_ov023_021fd860 kind:data(any) addr:0x021fd860
 data_ov023_021fd862 kind:data(any) addr:0x021fd862
 data_ov023_021fd870 kind:data(any) addr:0x021fd870
 data_ov023_021fd888 kind:data(any) addr:0x021fd888
-data_ov023_021fd8a8 kind:data(any) addr:0x021fd8a8
+@1496 kind:data(any) addr:0x021fd8a8 local
 data_ov023_021fd8d8 kind:data(any) addr:0x021fd8d8
 data_ov023_021fd8fc kind:data(any) addr:0x021fd8fc
 data_ov023_021fd91c kind:data(any) addr:0x021fd91c
@@ -965,13 +965,9 @@ data_ov023_021fe2f7 kind:data(any) addr:0x021fe2f7
 data_ov023_021fe316 kind:data(any) addr:0x021fe316
 data_ov023_021fe334 kind:data(any) addr:0x021fe334
 data_ov023_021fe338 kind:data(any) addr:0x021fe338
-data_ov023_021fe34c kind:data(any) addr:0x021fe34c
-data_ov023_021fe3ac kind:data(any) addr:0x021fe3ac
-data_ov023_021fe3b1 kind:data(any) addr:0x021fe3b1
-data_ov023_021fe3b5 kind:data(any) addr:0x021fe3b5
-data_ov023_021fe3ba kind:data(any) addr:0x021fe3ba
-data_ov023_021fe3c2 kind:data(any) addr:0x021fe3c2
-data_ov023_021fe3c8 kind:data(any) addr:0x021fe3c8
+sCommands kind:data(any) addr:0x021fe34c local
+sStrings kind:data(any) addr:0x021fe3ac local
+data_ov023_021fe3dc kind:data(any) addr:0x021fe3dc
 data_ov023_021fe3e4 kind:data(any) addr:0x021fe3e4
 data_ov023_021fe4e0 kind:data(any) addr:0x021fe4e0
 data_ov023_021fe4f0 kind:data(any) addr:0x021fe4f0
@@ -1014,7 +1010,7 @@ _ZGVcopy$1767 kind:bss addr:0x021ffa44 local
 copy$1767 kind:bss addr:0x021ffa48 local
 sCommands kind:bss addr:0x021ffa4c local
 data_ov023_021ffefc kind:bss addr:0x021ffefc
-data_ov023_021fff08 kind:bss addr:0x021fff08
-data_ov023_021fff1c kind:bss addr:0x021fff1c
+sState kind:bss addr:0x021fff08 local
+sChosen kind:bss addr:0x021fff1c local
 data_ov023_021fff24 kind:bss addr:0x021fff24
 data_ov023_021fff28 kind:bss addr:0x021fff28

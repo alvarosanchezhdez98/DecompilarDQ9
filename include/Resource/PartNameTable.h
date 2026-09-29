@@ -48,5 +48,7 @@ struct PartEntry
     int unk_14;
     // 1000 when the model file's number depends on unk_4e2 of the party member's data
     short unk_18;
-    char unk_1a[0x20 - 0x1a];
+    // The price, *likely*: overlay 23 multiplies it by a random factor for the downloaded files' sales
+    unsigned short price_;
+    char unk_1c[0x20 - 0x1c];
 };
