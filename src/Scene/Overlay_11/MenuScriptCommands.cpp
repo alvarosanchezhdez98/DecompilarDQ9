@@ -37,11 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021f7da0(MenuObject_021f7da0* object, MenuScript* script, int id, int heap, int, int, int, int,
-                            int);
-    void func_ov023_021f7eb8(MenuObject* object, MenuScript* script, int, short, short, short, short, unsigned char,
-                             unsigned char, bool);
-    void func_ov023_021f8120(MenuObject* object);
     int func_ov023_021f89f4(MenuObject_021f89f4* object, MenuScript* script, int id, int heap, int, int, int, int,
                             int, int, int);
     int func_ov023_021f8cf4(MenuObject_021f8cf4* object, MenuScript* script, int id, int heap, int, int);
@@ -55,7 +50,6 @@ extern "C"
     int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
-    void func_ov023_021f8944(MenuObject* object, MenuScript* script, unsigned char, int);
     void func_ov023_021f9c0c(MenuObject* object);
     void func_ov023_021f9c58(MenuObject* object, unsigned short);
     void func_ov023_021f9c60(MenuObject* object, unsigned short);
@@ -480,7 +474,7 @@ static int Command_0a(ScriptValue* params, int count)
 
     MenuObject_021f7da0 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f7da0));
-    if (!func_ov023_021f7da0(object, script, id, heapId, unk2, unk3, unk4, unk5, unk6))
+    if (!((MenuObjectClass6*)object)->Initialize(script, id, heapId, unk2, unk3, unk4, unk5, unk6))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -506,7 +500,7 @@ static int Command_0b(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 6)
         return 0;
 
-    func_ov023_021f7eb8(object, script, unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8);
+    ((MenuObjectClass6*)object)->Setup(script, unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8);
     script->SetUnk1c8();
     return 1;
 }
@@ -520,7 +514,7 @@ static int Command_0c(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 6)
         return 0;
 
-    func_ov023_021f8120(object);
+    ((MenuObjectClass6*)object)->Clear();
     return 1;
 }
 
@@ -1663,7 +1657,7 @@ static int Command_3f(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 6)
         return 0;
 
-    func_ov023_021f8944(object, script, value, 1);
+    ((MenuObjectClass6*)object)->SetUnkC2(script, value, 1);
     return 1;
 }
 

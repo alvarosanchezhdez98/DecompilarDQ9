@@ -26,14 +26,14 @@ extern "C"
 
 int GetFileInNarc(const void* archive, const char* name, const void** file, unsigned int* size, unsigned int);
 
-unsigned short GetMenuObject8Unk38(MenuScript* script, unsigned short id)
+unsigned short GetMenuObject8TextId(MenuScript* script, unsigned short id)
 {
     MenuObjectClass8* object = (MenuObjectClass8*)script->GetObjects()->Find(id);
     if (object == NULL)
         return 0;
     if (object->GetType() != 8)
         return 0;
-    return object->unk_38;
+    return object->textId_;
 }
 
 const char* GetMenuObject4Text(MenuScript* script, unsigned short id, int text)
@@ -46,37 +46,37 @@ const char* GetMenuObject4Text(MenuScript* script, unsigned short id, int text)
     return func_02072a68(object->GetTexts(), text);
 }
 
-void SetMenuObject8Unk20(MenuScript* script, unsigned short id, int value, unsigned char unk)
+void SetMenuObject8Text(MenuScript* script, unsigned short id, const char* text, unsigned char color)
 {
     MenuObjectClass8* object = (MenuObjectClass8*)script->GetObjects()->Find(id);
     if (object == NULL)
         return;
     if (object->GetType() != 8)
         return;
-    object->unk_20 = value;
-    object->Vd8(unk);
+    object->text_ = text;
+    object->Vd8(color);
 }
 
-void SetMenuObject8Unk38(MenuScript* script, unsigned short id, unsigned short value, unsigned char unk)
+void SetMenuObject8TextId(MenuScript* script, unsigned short id, unsigned short text, unsigned char color)
 {
     MenuObjectClass8* object = (MenuObjectClass8*)script->GetObjects()->Find(id);
     if (object == NULL)
         return;
     if (object->GetType() != 8)
         return;
-    object->unk_38 = value;
-    object->Vd8(unk);
+    object->textId_ = text;
+    object->Vd8(color);
 }
 
-void SetMenuObjectFUnk2c(MenuScript* script, unsigned short id, int value, unsigned char unk)
+void SetMenuObjectFValue(MenuScript* script, unsigned short id, int value, unsigned char color)
 {
     MenuObjectClassF* object = (MenuObjectClassF*)script->GetObjects()->Find(id);
     if (object == NULL)
         return;
     if (object->GetType() != 15)
         return;
-    object->Ve0(value);
-    object->Vd8(unk);
+    object->SetValue(value);
+    object->Vd8(color);
 }
 
 MenuObjectClass7* GetMenuObject7(MenuScript* script, unsigned short id)
@@ -128,15 +128,15 @@ void ClearMenuObjectFlags(MenuScript* script, unsigned short id, unsigned char f
         object->flags_ &= ~flags;
 }
 
-void SetMenuObject6Unk104(MenuScript* script, unsigned short id, short a, short b)
+void SetMenuObject6Pages(MenuScript* script, unsigned short id, short page, short pages)
 {
     MenuObjectClass6* object = (MenuObjectClass6*)script->GetObjects()->Find(id);
     if (object == NULL)
         return;
     if (object->GetType() != 6)
         return;
-    object->unk_104 = a;
-    object->unk_106 = b;
+    object->page_ = page;
+    object->pages_ = pages;
     object->Refresh(script);
 }
 
@@ -313,7 +313,7 @@ int MenuObjectList::CheckGroups(MenuScript* script)
             for (int j = 0; j < group->count_ && !busy; j++)
             {
                 MenuObjectClass* object = Find(group->ids_[j]);
-                if (object != NULL && object->IsBusy())
+                if (object != NULL && object->ContainsTouch())
                     busy = 1;
             }
             if (busy)

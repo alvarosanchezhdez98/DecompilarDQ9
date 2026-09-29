@@ -154,12 +154,13 @@ public:
     virtual void Vd0() {}
     virtual void Vd4() {}
     virtual void Vd8(unsigned char) {}
-    virtual int Vdc()
+    // The color of the object's text
+    virtual unsigned char GetColor()
     {
         return 15;
     }
-    virtual void Ve0(int) {}
-    virtual int Ve4()
+    virtual void SetValue(int) {}
+    virtual int GetValue()
     {
         return 0;
     }
@@ -173,8 +174,8 @@ public:
     }
     virtual void Vf0(int) {}
     virtual void Vf4(int) {}
-    // Whether a group of objects (see MenuObjectGroup) still waits for this one
-    virtual int IsBusy()
+    // Whether the touched point is on the object, for the groups (see MenuObjectGroup)
+    virtual int ContainsTouch()
     {
         return 0;
     }
@@ -326,17 +327,45 @@ public:
     virtual Vector3fix GetPosition();
 };
 
-// The objects of type 6, a text on a canvas
+// The objects of type 6, a canvas on a MenuObjectClass2's background that the objects of types 8, 15 and 19 draw
+// their texts, numbers and boxes on (0x110 bytes)
 class MenuObjectClass6 : public MenuObjectClass
 {
 public:
-    // Its background can be a MenuObjectClass2's
+    // Its background is a MenuObjectClass2's
     Canvas canvas_;
-    char unk_100[4];
-    short unk_104;
-    short unk_106;
+    // In pixels
+    unsigned short x_;
+    unsigned short y_;
+    // The page and the pages, drawn as "<page + 1>/<pages>" when flags_ has 4
+    short page_;
+    short pages_;
+    // The MenuObjectClass2 whose background has the frame
+    unsigned char frame_;
+    char unk_109;
+    unsigned char color_;
+    char unk_10b;
+    unsigned short unk_10c;
+    unsigned short unk_10e;
 
+    int Initialize(MenuScript* script, int id, int heap, int background, int width, int height, int frame,
+                   int parent);
+    void Setup(MenuScript* script, int, short x, short y, short width, int height, unsigned char,
+               unsigned char, bool);
     void Refresh(MenuScript* script);
+    void Clear();
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    virtual void Draw1();
+    virtual void Draw2();
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    void DrawObjects(MenuScript* script);
+    void DrawFrame(MenuScript* script);
+    void Select(MenuScript* script, int id);
+    void SetUnkC2(MenuScript* script, unsigned char value, int refresh);
+    void SetUnk10c(short a, short b);
+    virtual int ContainsTouch();
 };
 
 // The objects of type 7, a list with a selection
@@ -352,39 +381,87 @@ public:
     int GetUnk9bc0();
 };
 
-// The objects of type 8
+// The objects of type 8, a text on a MenuObjectClass6
 class MenuObjectClass8 : public MenuObjectClass
 {
 public:
-    int unk_20;
-    char unk_24[0x38 - 0x24];
-    unsigned short unk_38;
+    // The text, or NULL for the text textId_ of the MenuObjectClass4 texts_
+    const char* text_;
+    char unk_24[0x34 - 0x24];
+    // The ID of the MenuObjectClass6
+    unsigned short canvas_;
+    unsigned short texts_;
+    short textId_;
     char unk_3a[0x44 - 0x3a];
-    unsigned char unk_44_0 : 4;
-    unsigned char unk_44_4 : 4;
+    unsigned char font_ : 4;
+    unsigned char color_ : 4;
+    unsigned char selected_ : 1;
+    // 1: left, 2: right, 3: centered
+    unsigned char alignment_ : 6;
+    // The text has codes that the message system formats
+    unsigned char formatted_ : 1;
 
     virtual void Vd8(unsigned char value)
     {
-        unk_44_4 = value;
+        color_ = value;
     }
+    virtual unsigned char GetColor()
+    {
+        return selected_ ? 5 : color_;
+    }
+    void SetWidth(unsigned short width);
+    void SetHeight(unsigned short height);
 };
 
-// The objects of type 0xf
+// The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {
 public:
     char unk_20[0x2c - 0x20];
-    int unk_2c;
-    char unk_30[0x3a - 0x30];
-    unsigned char unk_3a_0 : 4;
-    unsigned char unk_3a_4 : 4;
+    int value_;
+    // The ID of the MenuObjectClass6
+    unsigned short canvas_;
+    char unk_32[0x3a - 0x32];
+    unsigned char font_ : 4;
+    unsigned char color_ : 4;
+    unsigned char unk_3b;
+    unsigned char unk_3c;
+    unsigned char unk_3d;
 
     virtual void Vd8(unsigned char value)
     {
-        unk_3a_4 = value;
+        color_ = value;
     }
-    virtual void Ve0(int value)
+    virtual void SetValue(int value)
     {
-        unk_2c = value;
+        value_ = value;
     }
+    virtual int GetValue()
+    {
+        return value_;
+    }
+    virtual unsigned char GetColor()
+    {
+        return color_;
+    }
+    void SetWidth(unsigned short width);
+    void SetHeight(unsigned short height);
+};
+
+// The objects of type 0x13, a box on a MenuObjectClass6
+class MenuObjectClass13 : public MenuObjectClass
+{
+public:
+    char unk_20[4];
+    // The ID of the MenuObjectClass6
+    unsigned short canvas_;
+    char unk_26[0x2e - 0x26];
+    unsigned char color_;
+
+    virtual unsigned char GetColor()
+    {
+        return color_;
+    }
+    unsigned short GetWidth();
+    unsigned short GetHeight();
 };
