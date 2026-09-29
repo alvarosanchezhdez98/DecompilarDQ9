@@ -214,34 +214,34 @@ _ZN13ProfileEditor11DrawKeyTextEv kind:function(arm,size=0x258) addr:0x021e6b8c
 _ZN13ProfileEditor11IsConfirmedEv kind:function(arm,size=0x3c) addr:0x021e6de4
 _ZN13ProfileEditor11IsCancelledEv kind:function(arm,size=0x40) addr:0x021e6e20
 _ZN13ProfileEditor11SetItemGridEv kind:function(arm,size=0x23c) addr:0x021e6e60
-func_ov023_021e709c kind:function(arm,size=0x104) addr:0x021e709c
-func_ov023_021e71a0 kind:function(arm,size=0x14) addr:0x021e71a0
-func_ov023_021e71b4 kind:function(arm,size=0x6c) addr:0x021e71b4
-func_ov023_021e7220 kind:function(arm,size=0x120) addr:0x021e7220
-func_ov023_021e7340 kind:function(arm,size=0xc4) addr:0x021e7340
-func_ov023_021e7404 kind:function(arm,size=0x218) addr:0x021e7404
-func_ov023_021e761c kind:function(arm,size=0x8c) addr:0x021e761c
-func_ov023_021e76a8 kind:function(arm,size=0x1c) addr:0x021e76a8
-func_ov023_021e76c4 kind:function(arm,size=0x470) addr:0x021e76c4
-func_ov023_021e7b34 kind:function(arm,size=0x90) addr:0x021e7b34
-func_ov023_021e7bc4 kind:function(arm,size=0x94) addr:0x021e7bc4
-func_ov023_021e7c58 kind:function(arm,size=0x94) addr:0x021e7c58
-func_ov023_021e7cec kind:function(arm,size=0xa0) addr:0x021e7cec
-func_ov023_021e7d8c kind:function(arm,size=0x124) addr:0x021e7d8c
-func_ov023_021e7eb0 kind:function(arm,size=0xb8) addr:0x021e7eb0
-func_ov023_021e7f68 kind:function(arm,size=0x7c) addr:0x021e7f68
-func_ov023_021e7fe4 kind:function(arm,size=0x48) addr:0x021e7fe4
-func_ov023_021e802c kind:function(arm,size=0x1c8) addr:0x021e802c
-func_ov023_021e81f4 kind:function(arm,size=0x7c) addr:0x021e81f4
-func_ov023_021e8270 kind:function(arm,size=0x158) addr:0x021e8270
-func_ov023_021e83c8 kind:function(arm,size=0x174) addr:0x021e83c8
-func_ov023_021e853c kind:function(arm,size=0xc8) addr:0x021e853c
-func_ov023_021e8604 kind:function(arm,size=0x88) addr:0x021e8604
-func_ov023_021e868c kind:function(arm,size=0x634) addr:0x021e868c
-func_ov023_021e8cc0 kind:function(arm,size=0x1c) addr:0x021e8cc0
-func_ov023_021e8cdc kind:function(arm,size=0x158) addr:0x021e8cdc
-func_ov023_021e8e34 kind:function(arm,size=0xc4) addr:0x021e8e34
-func_ov023_021e8ef8 kind:function(arm,size=0x30) addr:0x021e8ef8
+_Z13DrawCharacterP6CanvasPKhi kind:function(arm,size=0x104) addr:0x021e709c local
+_Z9ClearTimeP8PlayTime kind:function(arm,size=0x14) addr:0x021e71a0 local
+_ZN11ProfileCard16CreateAllocatorsEP13SafeAllocator kind:function(arm,size=0x6c) addr:0x021e71b4
+_ZN11ProfileCard10InitializeEi kind:function(arm,size=0x120) addr:0x021e7220
+_ZN11ProfileCard6FinishEv kind:function(arm,size=0xc4) addr:0x021e7340
+_ZN11ProfileCard6UpdateEi kind:function(arm,size=0x218) addr:0x021e7404
+_ZN11ProfileCard5Draw1Ev kind:function(arm,size=0x8c) addr:0x021e761c
+_ZN11ProfileCard5Draw2Ev kind:function(arm,size=0x1c) addr:0x021e76a8
+_ZN11ProfileCard4LoadEv kind:function(arm,size=0x470) addr:0x021e76c4
+_ZN11ProfileCard9SetDesignEi kind:function(arm,size=0x90) addr:0x021e7b34
+_ZN11ProfileCard8OpenPageEii kind:function(arm,size=0x94) addr:0x021e7bc4
+_ZN11ProfileCard11RefreshPageEii kind:function(arm,size=0x94) addr:0x021e7c58
+_ZN11ProfileCard9SetWindowEiss kind:function(arm,size=0xa0) addr:0x021e7cec
+_ZN11ProfileCard11OpenRecordsEv kind:function(arm,size=0x124) addr:0x021e7d8c
+_ZN11ProfileCard14RefreshRecordsEv kind:function(arm,size=0xb8) addr:0x021e7eb0
+_ZN11ProfileCard11OpenProfileEv kind:function(arm,size=0x7c) addr:0x021e7f68
+_ZN11ProfileCard14RefreshProfileEv kind:function(arm,size=0x48) addr:0x021e7fe4
+_ZN11ProfileCard11OpenMessageEv kind:function(arm,size=0x1c8) addr:0x021e802c
+_ZN11ProfileCard14RefreshMessageEv kind:function(arm,size=0x7c) addr:0x021e81f4
+_ZN11ProfileCard13RedrawMessageEv kind:function(arm,size=0x158) addr:0x021e8270
+_ZN11ProfileCard12DrawPlayTimeEv kind:function(arm,size=0x174) addr:0x021e83c8
+_ZN11ProfileCard11DrawRecordsEv kind:function(arm,size=0xc8) addr:0x021e853c
+_ZN11ProfileCard10DrawUnkF74Ev kind:function(arm,size=0x88) addr:0x021e8604
+_ZN11ProfileCard11DrawProfileEv kind:function(arm,size=0x634) addr:0x021e868c
+_ZN11ProfileCard10DrawUnk5fcEv kind:function(arm,size=0x1c) addr:0x021e8cc0
+_ZN11ProfileCard11DrawMessageEv kind:function(arm,size=0x158) addr:0x021e8cdc
+_ZN11ProfileCard8DrawNameEv kind:function(arm,size=0xc4) addr:0x021e8e34
+_ZN11ProfileCard9DrawLabelEv kind:function(arm,size=0x30) addr:0x021e8ef8
 _Z9GetMemberi kind:function(arm,size=0xc0) addr:0x021e8f28 local
 _Z7AddTime8PlayTimei kind:function(arm,size=0x174) addr:0x021e8fe8 local
 _Z15StateCommand_00P11ScriptValuei kind:function(arm,size=0x34) addr:0x021e915c local
@@ -857,13 +857,27 @@ sAllocatorSizes kind:data(any) addr:0x021fd6d4 local
 sPaletteSizes kind:data(byte[0x28]) addr:0x021fd6fc local
 data_ov023_021fd724 kind:data(any) addr:0x021fd724
 @1156 kind:data(any) addr:0x021fd72c local
-data_ov023_021fd75c kind:data(any) addr:0x021fd75c
-data_ov023_021fd760 kind:data(any) addr:0x021fd760
-data_ov023_021fd79c kind:data(any) addr:0x021fd79c
-data_ov023_021fd7b4 kind:data(any) addr:0x021fd7b4
-data_ov023_021fd7cc kind:data(any) addr:0x021fd7cc
-data_ov023_021fd7e4 kind:data(any) addr:0x021fd7e4
-data_ov023_021fd7fc kind:data(any) addr:0x021fd7fc
+@1557 kind:data(any) addr:0x021fd75c local
+@1561 kind:data(any) addr:0x021fd75d local
+@1549 kind:data(any) addr:0x021fd75e local
+sTextColor kind:data(any) addr:0x021fd760 local
+@1555 kind:data(any) addr:0x021fd764 local
+@1551 kind:data(any) addr:0x021fd768 local
+@1559 kind:data(any) addr:0x021fd76c local
+@1771 kind:data(any) addr:0x021fd770 local
+@1563 kind:data(any) addr:0x021fd774 local
+@1775 kind:data(any) addr:0x021fd778 local
+@1567 kind:data(any) addr:0x021fd77c local
+@1565 kind:data(any) addr:0x021fd780 local
+@1773 kind:data(any) addr:0x021fd784 local
+@1553 kind:data(any) addr:0x021fd788 local
+@1647 kind:data(any) addr:0x021fd78e local
+@1800 kind:data(any) addr:0x021fd794 local
+@1569 kind:data(any) addr:0x021fd79c local
+@1601 kind:data(any) addr:0x021fd7b4 local
+@1645 kind:data(any) addr:0x021fd7cc local
+@1681 kind:data(any) addr:0x021fd7e4 local
+sWindowLayouts kind:data(any) addr:0x021fd7fc local
 data_ov023_021fd844 kind:data(any) addr:0x021fd844
 data_ov023_021fd850 kind:data(any) addr:0x021fd850
 data_ov023_021fd862 kind:data(any) addr:0x021fd862
@@ -921,12 +935,7 @@ sOpcodes kind:data(any) addr:0x021fdc78 local
 sEdgeColors kind:data(any) addr:0x021fdc94 local
 sStrings kind:data(byte[0x3b]) addr:0x021fdca4 local
 sStrings kind:data(any) addr:0x021fdce0 local
-data_ov023_021fdd6c kind:data(any) addr:0x021fdd6c
-data_ov023_021fdd6e kind:data(any) addr:0x021fdd6e
-data_ov023_021fdd88 kind:data(any) addr:0x021fdd88
-data_ov023_021fdd99 kind:data(any) addr:0x021fdd99
-data_ov023_021fddb0 kind:data(any) addr:0x021fddb0
-data_ov023_021fddb4 kind:data(any) addr:0x021fddb4
+@stringBase0 kind:data(any) addr:0x021fdd6c local
 sCommandTable kind:data(any) addr:0x021fddb8 local
 data_ov023_021fe0f0 kind:data(any) addr:0x021fe0f0
 data_ov023_021fe108 kind:data(any) addr:0x021fe108
@@ -997,7 +1006,8 @@ data_ov023_021ff8c8 kind:data(any) addr:0x021ff8c8 ambiguous
 data_ov023_021ff9e0 kind:bss addr:0x021ff9e0
 data_ov023_021ffa0c kind:bss addr:0x021ffa0c
 sLoading kind:bss addr:0x021ffa34 local
-data_ov023_021ffa44 kind:bss addr:0x021ffa44
+_ZGVcopy$1767 kind:bss addr:0x021ffa44 local
+copy$1767 kind:bss addr:0x021ffa48 local
 sCommands kind:bss addr:0x021ffa4c local
 data_ov023_021ffefc kind:bss addr:0x021ffefc
 data_ov023_021fff08 kind:bss addr:0x021fff08
