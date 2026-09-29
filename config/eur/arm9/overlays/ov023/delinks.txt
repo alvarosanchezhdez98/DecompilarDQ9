@@ -61,3 +61,10 @@ src/Scene/Overlay_23/GuideWindow.cpp:
     .rodata start:0x021fd844 end:0x021fd860
     .data start:0x021fe0f0 end:0x021fe144
 
+
+src/Scene/Overlay_23/DownloadContent.cpp:
+    complete
+    .text start:0x021f5598 end:0x021f6378
+    .rodata start:0x021fd8a8 end:0x021fd8d8
+    .data start:0x021fe34c end:0x021fe3dc
+    .bss start:0x021fff08 end:0x021fff24

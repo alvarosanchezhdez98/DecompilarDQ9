@@ -234,13 +234,13 @@ Last recorded on 2026-09-29.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 388,456 | 2,959,024 | 13.13 % |
-| Functions | 2,602 | 14,779 | 17.61 % |
+| Code (bytes) | 391,752 | 2,959,024 | 13.24 % |
+| Functions | 2,620 | 14,779 | 17.73 % |
 | Modules | 4 complete, 15 in progress, 13 not started | 32 with code |  |
 
-Source files: 214 complete, 1 in progress.
+Source files: 215 complete, 1 in progress.
 
-Not counted as decompiled: 61 functions (60,676 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 62 functions (60,932 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -253,7 +253,7 @@ Not counted as decompiled: 61 functions (60,676 bytes) in assembly, since their 
 | 2026-09-26 | 2,212 (14.97 %) | 302,008 (10.21 %) | 202 |
 | 2026-09-27 | 2,276 (15.40 %) | 324,504 (10.97 %) | 203 |
 | 2026-09-28 | 2,422 (16.39 %) | 358,388 (12.11 %) | 210 |
-| 2026-09-29 | 2,602 (17.61 %) | 388,456 (13.13 %) | 214 |
+| 2026-09-29 | 2,620 (17.73 %) | 391,752 (13.24 %) | 215 |
 
 ## Modules
 
@@ -285,7 +285,7 @@ Not counted as decompiled: 61 functions (60,676 bytes) in assembly, since their 
 | ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
 | ov021 | A mode of `main()` with its own main loop that runs overlay 9 (the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
-| ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts (`.lia`) of the menus and of overlay 14's bestiary, the screen of the party members (`MemberScreen`), the sorted lists of items, the commands of the scripts that read the state of the game (`StateCommands`), the profile card of tag mode (`ProfileCard`), the window of the guides with their pages and titles (`GuideWindow`), the window of a battle's results with the experience and the level ups (`BattleResultWindow`), the objects of overlay 11's menus, list menus... (`src/Scene/Overlay_23`). 10 files decompiled, with 18 functions in assembly for now | 146.7 | 827 | 290 | 537 | 32.82 % | In progress |
+| ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts (`.lia`) of the menus and of overlay 14's bestiary, the screen of the party members (`MemberScreen`), the sorted lists of items, the commands of the scripts that read the state of the game (`StateCommands`), the profile card of tag mode (`ProfileCard`), the window of the guides with their pages and titles (`GuideWindow`), the window of a battle's results with the experience and the level ups (`BattleResultWindow`), the downloaded files ("info", "mes", "auction", "quest": checksum, RC4 and script commands, `DownloadContent`), the objects of overlay 11's menus, list menus... (`src/Scene/Overlay_23`). 11 files decompiled, with 19 functions in assembly for now | 146.7 | 827 | 308 | 519 | 35.01 % | In progress |
 | ov024 | Unclear, no strings | 151.1 | 573 | 0 | 573 | 0.00 % | In progress |
 | ov025 | *Likely* battle spell and skill animations | 89.5 | 304 | 0 | 304 | 0.00 % | Not started |
 | ov026 | *Likely* spell and skill effects | 23.1 | 24 | 0 | 24 | 0.00 % | Not started |
@@ -364,6 +364,7 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov023 | `ProfileEditor::SetItemGrid` | `0x021e6e60` | 0x23c |
 | ov023 | `ProfileCard::Draw1` | `0x021e761c` | 0x8c |
 | ov023 | `StateCommand_67` | `0x021e9424` | 0xa8 |
+| ov023 | `ReadQuest` | `0x021f6058` | 0x100 |
 | ov027 | `MBi_CommParentCallback` | `0x021d8c94` | 0x4a0 |
 | ov027 | `MBi_CommParentRecvDataPerChild` | `0x021d9134` | 0x4e4 |
 | ov027 | `MBi_CommParentSendBlock` | `0x021d9940` | 0x29c |
@@ -407,12 +408,12 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
 | ov020 | 0 | 0 | 0 | 1 | 4.2 |
 | ov021 | 0 | 0 | 1 | 0 | 1.2 |
-| ov023 | 283 | 205 | 42 | 7 | 98.6 |
+| ov023 | 277 | 193 | 42 | 7 | 95.3 |
 | ov024 | 142 | 387 | 36 | 8 | 151.1 |
 | ov025 | 126 | 137 | 33 | 8 | 89.5 |
 | ov026 | 5 | 9 | 8 | 2 | 23.1 |
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4970** | **6097** | **981** | **129** | **2510.3** |
+| **Total** | **4964** | **6085** | **981** | **129** | **2507.1** |
 <!-- END GENERATED -->

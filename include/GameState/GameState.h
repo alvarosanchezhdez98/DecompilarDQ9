@@ -4,6 +4,7 @@
 #include "Resource/GameResources.h"
 #include "World/Object3D.h"
 #include "Filesystem/NitroVM.h"
+#include "GameState/DownloadedData.h"
 #include "GameState/TimeOfDay.h"
 #include "Grotto/Main/GrottoStruct.h"
 
@@ -64,7 +65,14 @@ public:
     // The save data error that overlay 19 shows (see SaveErrorScreen). func_020a94f8 sets 2 or 3 when a save fails
     // its checks
     unsigned char saveError_;
-    char unk_5cc9[0x63d4 - 0x5cc9];
+    char unk_5cc9[0x5e6c - 0x5cc9];
+    // What the scripts of the downloaded files set (see DownloadContent.cpp)
+    DownloadedData downloadedData_;
+    // The message that a downloaded "mes" file sets
+    char downloadedMessage_[0x200];
+    char unk_6180[0x6380 - 0x6180];
+    // What the scripts of the downloaded "quest" files read
+    char unk_6380[0x63d4 - 0x6380];
     // Set by overlay 9 when the protagonist is created
     unsigned char unk_63d4;
     char unk_63d5[0x63e0 - 0x63d5];
