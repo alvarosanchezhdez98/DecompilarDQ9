@@ -1378,7 +1378,7 @@ from:0x0215c440 kind:load to:0x021703ff module:overlay(4)
 from:0x0215c444 kind:load to:0x0211e33c module:main
 from:0x0215c45c kind:arm_call to:0x02048090 module:main
 from:0x0215c464 kind:arm_call to:0x020471ac module:main
-from:0x0215c470 kind:load to:0x021fe3e4 module:overlay(23)
+from:0x0215c470 kind:load to:0x021fe3dc add:0x8 module:overlay(23)
 from:0x0215c480 kind:arm_call to:0x02047240 module:main
 from:0x0215c488 kind:arm_call to:0x02048090 module:main
 from:0x0215c4a0 kind:arm_call to:0x02156e2c module:overlay(4)
