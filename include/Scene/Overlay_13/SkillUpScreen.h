@@ -30,13 +30,6 @@ struct SkillAbilityTable
     char unk_0[8];
 };
 
-// The names of the skills (str_sklc_<LG>.bin): func_020727d8 initializes it, func_020728ac loads it and func_02072a68
-// returns a name
-struct SkillNameTable
-{
-    char unk_0[8];
-};
-
 // The second class of overlay 13, *likely* the panel of the skill up screen that lists the abilities of the selected
 // skill and the points that they need. The caller (overlays 2 and 23) runs Setup(), Initialize(), Load() until it
 // returns true, Select() when the skill changes, Update() each frame and Finish()
@@ -44,7 +37,8 @@ struct SkillAbilityList
 {
     // What each file is loaded to: the background's screen, its characters, the abilities, the names and the sprites
     SafeAllocator* allocators_;
-    SkillNameTable names_;
+    // The names of the skills (str_sklc_<LG>.bin)
+    TextList names_;
     SkillAbilityTable abilities_;
     // func_02074af4 (main screen) and func_02074b64 (sub screen) initialize it
     char unk_14[0x10];

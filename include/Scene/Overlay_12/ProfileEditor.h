@@ -79,7 +79,7 @@ struct ProfileEditor
     BackgroundGraphics backgrounds_[3];
     Canvas canvases_[13];
     ProfileCard card_;
-    BinTextTable strings_;
+    TextList strings_;
     TextTable texts_;
     SpriteRenderer* renderer_;
     void* unk_1360;

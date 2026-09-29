@@ -38,7 +38,7 @@ extern "C"
     void func_0202ae18();
     int func_020420e8(const char* text, int large);
     int func_0204c7e0(Canvas* canvas);
-    const char* func_02072a68(BinTextTable* table, short id);
+    const char* func_02072a68(TextList* texts, short id);
     void func_0205a330(SpriteAnimationList* list, int ticks);
     void func_0205a370(SpriteAnimationList* list, int);
     SpriteAnimation* func_0205a3d0(SpriteAnimationList* list, int index);

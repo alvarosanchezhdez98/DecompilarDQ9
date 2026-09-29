@@ -82,7 +82,7 @@ extern "C"
     int func_020457e0(MessageSystem* messages);
     void func_02048004(void*, void*);
     void func_0205eaa0(void* sound, int effect, int);
-    const char* func_02072a68(void* names, int index);
+    const char* func_02072a68(TextList* texts, short id);
     int func_0209ca2c(void*);
 }
 
@@ -1660,7 +1660,7 @@ static int Command_ShowName(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 4)
         return 1;
 
-    void* names = ((MenuObjectClass4*)object)->GetTexts();
+    TextList* names = ((MenuObjectClass4*)object)->GetTexts();
     if (names == 0)
         return 1;
 
