@@ -13,7 +13,8 @@ struct BackgroundGraphics
 // A surface that text is drawn to (func_0204c684 initializes it)
 struct Canvas
 {
-    char unk_0[4];
+    // The canvas that this one is drawn over? (overlay 23's MenuObjectClass6)
+    Canvas* unk_0;
     BackgroundGraphics* background_;
     void* pixels_;
     char unk_c[0x94];
@@ -31,7 +32,8 @@ struct Canvas
     short unk_ba;
     short unk_bc;
     short unk_be;
-    char unk_c0[4];
+    short unk_c0;
+    unsigned short unk_c2;
     // *Likely* the canvas' item (overlay 12)
     unsigned char unk_c4;
     // 0x2: hidden?, 0x20: ?, 0x40: ?
