@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Resource/PartNameTable.h"
+
 // How a party member looks (0x1c bytes), which overlay 9 sets when a character is created
 struct PartyMemberAppearance
 {
@@ -28,9 +30,9 @@ struct PartyMemberDetails
     // For each vocation
     unsigned char unk_fe[0xd];
     char unk_10b;
-    // Texts of 0x20 bytes, which overlay 9 copies from its table of the parts' names
-    char unk_10c[10][0x20];
-    char unk_24c[0x3dc - 0x24c];
+    // The equipment: copies of the entries of the parts' names (overlay 9 copies them from its table)
+    PartEntry equipment_[11];
+    char unk_26c[0x3dc - 0x26c];
     // The points spent on each skill
     unsigned char skillPoints_[0x24];
     PartyMemberAppearance appearance_;

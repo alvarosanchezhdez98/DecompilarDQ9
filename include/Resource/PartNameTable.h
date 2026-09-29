@@ -15,6 +15,16 @@ struct PartModelInfo
     // The number of the model's animation files (md<number><number><m/w>.nsbca and .bcfg)
     unsigned int animations_ : 8;
     unsigned int unk_4_20 : 12;
+    int unk_8[4];
+    // The item's bonuses (overlay 23's commands add them up)
+    int unk_18_0 : 10;
+    int unk_18_10 : 10;
+    int unk_18_20 : 10;
+    int unk_18_30 : 2;
+    int unk_1c_0 : 10;
+    int unk_1c_10 : 10;
+    int unk_1c_20 : 10;
+    int unk_1c_30 : 2;
 };
 
 // An entry of a PartNameTable, for an item or a part of a character's look (func_020dedd0 returns it)
@@ -38,4 +48,5 @@ struct PartEntry
     int unk_14;
     // 1000 when the model file's number depends on unk_4e2 of the party member's data
     short unk_18;
+    char unk_1a[0x20 - 0x1a];
 };

@@ -2723,7 +2723,7 @@ void CharacterCreation::State_Confirm()
             {
                 const void* name = func_020dedd0(&partNames_, models[sPartNames[i].model_]);
                 if (name != NULL)
-                    memcpy(member->details_.unk_10c[sPartNames[i].name_], name, 0x20);
+                    memcpy(&member->details_.equipment_[sPartNames[i].name_], name, 0x20);
             }
             func_02083e28(member, 0);
             func_020863c4(member);

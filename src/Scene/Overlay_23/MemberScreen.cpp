@@ -1443,7 +1443,7 @@ void MemberScreen::DrawTexts()
     if (hp <= 0)
         color = 0x1f;
     func_02045f3c(messages, names_[member_], nameX_[member_], 0xa1, color, 0xa, 0, 0, 0, 0x11);
-    if (member->unk_130[2] <= 0)
+    if ((int)member->unk_130[2] <= 0)
     {
         short x = ((0x3b - func_020420e8(downTexts_[member->data_->details_.appearance_.female_], 0)) >> 1) + 0x40;
         func_02045f3c(messages, vocations_[member_], x, 0xa1, color, 0xa, 0, 0, 0, 0x11);
@@ -1906,7 +1906,7 @@ void MemberScreen::LoadTexts()
         func_ov017_0218b5b0();
         if (func_ov017_021bdbcc())
             vocation = 0x1f4;
-        if (member->unk_130[2] <= 0)
+        if ((int)member->unk_130[2] <= 0)
             func_02045d14(messages, downTexts_[member->data_->details_.appearance_.female_], vocations_[i], 0);
         else
             func_02045d14(messages, func_020e0434(texts + 0xc00, vocation), vocations_[i], 0);

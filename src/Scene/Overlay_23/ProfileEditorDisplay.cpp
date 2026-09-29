@@ -69,12 +69,6 @@ extern "C"
 // Unused: nothing reads it (external, so the compiler keeps it), *maybe* the size of the date arrows' sprites
 extern const int data_ov023_021fd724[2] = {0x10, 8};
 
-// The profile's data
-static inline ProfileData* GetProfile(GameState* gameState)
-{
-    return (ProfileData*)((char*)gameState + 0x569c);
-}
-
 void ProfileEditor::UpdateDateArrows()
 {
     int days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};

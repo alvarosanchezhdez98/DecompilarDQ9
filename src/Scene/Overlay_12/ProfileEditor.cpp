@@ -230,12 +230,6 @@ static const ItemWindowTable sItemWindows = {{
 // The ranges of the titles of each category
 static const TitleRange sTitleRanges[] = {{0x136, 0x200}, {0xc8, 0x12c}, {0, 0x64}, {0x12c, 0x12d}};
 
-// The profile's data
-static inline ProfileData* GetProfile(GameState* gameState)
-{
-    return (ProfileData*)((char*)gameState + 0x569c);
-}
-
 // The cursor of a window's items (like GetProfile(), the original computes its address apart from its fields')
 static inline WindowCursor* GetCursor(TextWindow* window)
 {
