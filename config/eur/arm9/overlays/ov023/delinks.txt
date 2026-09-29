@@ -98,3 +98,9 @@ src/Scene/Overlay_23/MenuGrid.cpp:
     .rodata start:0x021fd920 end:0x021fd92c
     .data start:0x021fe804 end:0x021fe908
     .bss start:0x021fff24 end:0x021fff28
+
+src/Scene/Overlay_23/MenuMover.cpp:
+    complete
+    .text start:0x021f9eb4 end:0x021fa298
+    .rodata start:0x021fd92c end:0x021fd944
+    .data start:0x021fe908 end:0x021fea0c
