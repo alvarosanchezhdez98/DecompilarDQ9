@@ -347,38 +347,38 @@ _Z15StateCommand_fbP11ScriptValuei kind:function(arm,size=0x68) addr:0x021eae38 
 _Z15StateCommand_fcP11ScriptValuei kind:function(arm,size=0xb0) addr:0x021eaea0 local
 _Z15StateCommand_fdP11ScriptValuei kind:function(arm,size=0xb0) addr:0x021eaf50 local
 _Z16SetStateCommandsP12ScriptEngine kind:function(arm,size=0x80) addr:0x021eb000
-func_ov023_021eb080 kind:function(arm,size=0xb8) addr:0x021eb080
-func_ov023_021eb138 kind:function(arm,size=0x134) addr:0x021eb138
-func_ov023_021eb26c kind:function(arm,size=0x1a8) addr:0x021eb26c
-func_ov023_021eb414 kind:function(arm,size=0x28) addr:0x021eb414
-func_ov023_021eb43c kind:function(arm,size=0x7c) addr:0x021eb43c
-func_ov023_021eb4b8 kind:function(arm,size=0x3c) addr:0x021eb4b8
-func_ov023_021eb4f4 kind:function(arm,size=0x70) addr:0x021eb4f4
-func_ov023_021eb564 kind:function(arm,size=0x14) addr:0x021eb564
-func_ov023_021eb578 kind:function(arm,size=0xdf0) addr:0x021eb578
-func_ov023_021ec368 kind:function(arm,size=0x34) addr:0x021ec368
-func_ov023_021ec39c kind:function(arm,size=0x2c) addr:0x021ec39c
-func_ov023_021ec3c8 kind:function(arm,size=0x2c) addr:0x021ec3c8
-func_ov023_021ec3f4 kind:function(arm,size=0x2c) addr:0x021ec3f4
-func_ov023_021ec420 kind:function(arm,size=0x34) addr:0x021ec420
-func_ov023_021ec454 kind:function(arm,size=0x2c) addr:0x021ec454
-func_ov023_021ec480 kind:function(arm,size=0x624) addr:0x021ec480
-func_ov023_021ecaa4 kind:function(arm,size=0x118) addr:0x021ecaa4
-func_ov023_021ecbbc kind:function(arm,size=0x2c) addr:0x021ecbbc
-func_ov023_021ecbe8 kind:function(arm,size=0x214) addr:0x021ecbe8
-func_ov023_021ecdfc kind:function(arm,size=0xa0) addr:0x021ecdfc
-func_ov023_021ece9c kind:function(arm,size=0xdc) addr:0x021ece9c
-func_ov023_021ecf78 kind:function(arm,size=0x9c) addr:0x021ecf78
-func_ov023_021ed014 kind:function(arm,size=0x50) addr:0x021ed014
-func_ov023_021ed064 kind:function(arm,size=0x130) addr:0x021ed064
-func_ov023_021ed194 kind:function(arm,size=0xc0) addr:0x021ed194
-func_ov023_021ed254 kind:function(arm,size=0x100) addr:0x021ed254
-func_ov023_021ed354 kind:function(arm,size=0xf8) addr:0x021ed354
-func_ov023_021ed44c kind:function(arm,size=0x6c) addr:0x021ed44c
-func_ov023_021ed4b8 kind:function(arm,size=0x148) addr:0x021ed4b8
-func_ov023_021ed600 kind:function(arm,size=0xcc) addr:0x021ed600
-func_ov023_021ed6cc kind:function(arm,size=0x58) addr:0x021ed6cc
-func_ov023_021ed724 kind:function(arm,size=0xbc) addr:0x021ed724
+_ZN11GuideWindow16CreateAllocatorsEP13SafeAllocator kind:function(arm,size=0xb8) addr:0x021eb080
+_ZN11GuideWindow10InitializeEh kind:function(arm,size=0x134) addr:0x021eb138
+_ZN11GuideWindow6FinishEv kind:function(arm,size=0x1a8) addr:0x021eb26c
+_ZN11GuideWindow5CloseEv kind:function(arm,size=0x28) addr:0x021eb414
+_ZN11GuideWindow6UpdateEv kind:function(arm,size=0x7c) addr:0x021eb43c
+_ZN11GuideWindow5Draw1Ev kind:function(arm,size=0x3c) addr:0x021eb4b8
+_ZN11GuideWindow5Draw2Ev kind:function(arm,size=0x70) addr:0x021eb4f4
+_ZN11GuideWindow8SetPagesEP9GuidePagei kind:function(arm,size=0x14) addr:0x021eb564
+_ZN11GuideWindow10State_LoadEv kind:function(arm,size=0xdf0) addr:0x021eb578
+_Z17G2S_SetBG1Controliiiii kind:function(arm,size=0x34) addr:0x021ec368 local
+_Z21G2S_SetBG2ControlTextiiii kind:function(arm,size=0x2c) addr:0x021ec39c local
+_Z21G2S_SetBG3ControlTextiiii kind:function(arm,size=0x2c) addr:0x021ec3c8 local
+_Z20G2_SetBG3ControlTextiiii kind:function(arm,size=0x2c) addr:0x021ec3f4 local
+_Z16G2_SetBG1Controliiiii kind:function(arm,size=0x34) addr:0x021ec420 local
+_Z20G2_SetBG2ControlTextiiii kind:function(arm,size=0x2c) addr:0x021ec454 local
+_ZN11GuideWindow10State_MainEv kind:function(arm,size=0x624) addr:0x021ec480
+_ZN11GuideWindow11State_CloseEv kind:function(arm,size=0x118) addr:0x021ecaa4
+_ZN11GuideWindow10StartTitleEv kind:function(arm,size=0x2c) addr:0x021ecbbc
+_ZN11GuideWindow11UpdateTitleEv kind:function(arm,size=0x214) addr:0x021ecbe8
+_ZN11GuideWindow19DrawTitleBackgroundEv kind:function(arm,size=0xa0) addr:0x021ecdfc
+_ZN11GuideWindow11UpdateArrowEv kind:function(arm,size=0xdc) addr:0x021ece9c
+_ZN11GuideWindow9DrawArrowEv kind:function(arm,size=0x9c) addr:0x021ecf78
+_ZN11GuideWindow16WasButtonPressedEv kind:function(arm,size=0x50) addr:0x021ed014
+_ZN11GuideWindow4SkipEv kind:function(arm,size=0x130) addr:0x021ed064
+_ZN11GuideWindow9OpenTitleEv kind:function(arm,size=0xc0) addr:0x021ed194
+_ZN11GuideWindow10WriteTitleEPc kind:function(arm,size=0x100) addr:0x021ed254
+_ZN11GuideWindow8OpenTextEv kind:function(arm,size=0xf8) addr:0x021ed354
+_ZN11GuideWindow12RefreshTitleEv kind:function(arm,size=0x6c) addr:0x021ed44c
+_ZN11GuideWindow8OpenNameEv kind:function(arm,size=0x148) addr:0x021ed4b8
+_ZN11GuideWindow7OpenEndEv kind:function(arm,size=0xcc) addr:0x021ed600
+_ZN11GuideWindow9IsFlagSetEi kind:function(arm,size=0x58) addr:0x021ed6cc
+_ZN11GuideWindow8SetShownEPKsi kind:function(arm,size=0xbc) addr:0x021ed724
 func_ov023_021ed7e0 kind:function(arm,size=0x24) addr:0x021ed7e0
 func_ov023_021ed804 kind:function(arm,size=0x128) addr:0x021ed804
 func_ov023_021ed92c kind:function(arm,size=0x5c) addr:0x021ed92c
@@ -878,8 +878,14 @@ sTextColor kind:data(any) addr:0x021fd760 local
 @1645 kind:data(any) addr:0x021fd7cc local
 @1681 kind:data(any) addr:0x021fd7e4 local
 sWindowLayouts kind:data(any) addr:0x021fd7fc local
-data_ov023_021fd844 kind:data(any) addr:0x021fd844
-data_ov023_021fd850 kind:data(any) addr:0x021fd850
+@1571 kind:data(any) addr:0x021fd844 local
+@1984 kind:data(any) addr:0x021fd846 local
+@1776 kind:data(any) addr:0x021fd848 local
+@1569 kind:data(any) addr:0x021fd84a local
+@1567 kind:data(any) addr:0x021fd84c local
+@1725 kind:data(any) addr:0x021fd84e local
+@1321 kind:data(any) addr:0x021fd850 local
+data_ov023_021fd860 kind:data(any) addr:0x021fd860
 data_ov023_021fd862 kind:data(any) addr:0x021fd862
 data_ov023_021fd870 kind:data(any) addr:0x021fd870
 data_ov023_021fd888 kind:data(any) addr:0x021fd888
@@ -937,10 +943,8 @@ sStrings kind:data(byte[0x3b]) addr:0x021fdca4 local
 sStrings kind:data(any) addr:0x021fdce0 local
 @stringBase0 kind:data(any) addr:0x021fdd6c local
 sCommandTable kind:data(any) addr:0x021fddb8 local
-data_ov023_021fe0f0 kind:data(any) addr:0x021fe0f0
-data_ov023_021fe108 kind:data(any) addr:0x021fe108
-data_ov023_021fe121 kind:data(any) addr:0x021fe121
-data_ov023_021fe131 kind:data(any) addr:0x021fe131
+sStates kind:data(any) addr:0x021fe0f0 local
+@stringBase0 kind:data(byte[0x3c]) addr:0x021fe108 local
 data_ov023_021fe144 kind:data(any) addr:0x021fe144
 data_ov023_021fe148 kind:data(any) addr:0x021fe148
 data_ov023_021fe1d8 kind:data(any) addr:0x021fe1d8
