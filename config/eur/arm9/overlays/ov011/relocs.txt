@@ -150,7 +150,7 @@ from:0x021850f8 kind:arm_call to:0x021f67ac module:overlay(23)
 from:0x02185100 kind:arm_call to:0x0218513c module:overlay(11)
 from:0x02185124 kind:arm_call to:0x02048090 module:main
 from:0x0218512c kind:arm_call to:0x020471ac module:main
-from:0x02185138 kind:load to:0x021fe3e4 module:overlay(23)
+from:0x02185138 kind:load to:0x021fe3dc add:0x8 module:overlay(23)
 from:0x02185148 kind:arm_call to:0x02047240 module:main
 from:0x02185150 kind:arm_call to:0x02048090 module:main
 from:0x02185168 kind:arm_call to:0x02184c30 module:overlay(11)

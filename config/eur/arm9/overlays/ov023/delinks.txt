@@ -68,3 +68,9 @@ src/Scene/Overlay_23/DownloadContent.cpp:
     .rodata start:0x021fd8a8 end:0x021fd8d8
     .data start:0x021fe34c end:0x021fe3dc
     .bss start:0x021fff08 end:0x021fff24
+
+src/Scene/Overlay_23/MenuObjects.cpp:
+    complete
+    .text start:0x021f6378 end:0x021f745c
+    .rodata start:0x021fd8d8 end:0x021fd8f8
+    .data start:0x021fe3dc end:0x021fe4e8

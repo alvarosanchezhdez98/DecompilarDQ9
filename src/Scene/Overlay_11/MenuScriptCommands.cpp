@@ -37,11 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    void func_ov023_021f67ac(MenuObjectList* objects, void* object);
-    MenuObject* func_ov023_021f6880(MenuObjectList* objects, int id);
-    int func_ov023_021f6bc0(MenuObjectList* objects);
-    int func_ov023_021f6f10(MenuObject* object);
-    int func_ov023_021f6f20(MenuObject_021f6f20* object, MenuScript* script, int id, int heap, int, const char* file);
     int func_ov023_021f745c(MenuObject_021f745c* object, MenuScript* script, int id, int heap, const char* archive,
                             const char* file, int, int, int);
     int func_ov023_021f7da0(MenuObject_021f7da0* object, MenuScript* script, int id, int heap, int, int, int, int,
@@ -62,11 +57,6 @@ extern "C"
     int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
-    void func_ov023_021f6844(MenuObjectList* objects, int heap);
-    void func_ov023_021f6e90(MenuObjectList* objects, int id, void* values);
-    void func_ov023_021f6eb8(MenuObjectList* objects, int id);
-    void* func_ov023_021f7318(MenuObject* object);
-    void func_ov023_021f7320(MenuObject* object);
     void func_ov023_021f79ec(MenuObject* object, const char* text);
     void func_ov023_021f8944(MenuObject* object, MenuScript* script, unsigned char, int);
     void func_ov023_021f9c0c(MenuObject* object);
@@ -74,7 +64,6 @@ extern "C"
     void func_ov023_021f9c60(MenuObject* object, unsigned short);
     void func_ov023_021f9da0(MenuObject* object, bool);
     // Returns the names that the object shows
-    void* func_ov023_021fa598(MenuObject* object);
     void func_ov023_021fb25c(MenuObject* object, int, int, int, int);
     void func_ov023_021fb274(MenuObject* object, signed char);
     void func_ov023_021fb284(MenuObject* object, signed char);
@@ -398,16 +387,20 @@ static int Command_06(ScriptValue* params, int count)
 
     MenuObject_021f6f20 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f6f20));
-    if (!func_ov023_021f6f20(object, script, id, heapId, unk, file))
+    if (!((MenuObjectClass0*)object)->Initialize(script, id, heapId, unk, file))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
 #pragma dont_inline reset
 
-MenuObject_021f6f20::MenuObject_021f6f20() : MenuObject(&data_ov023_021fe3e4)
+// The vtable of MenuObjectClass0 (MenuObjects.cpp), which the objects point to after its 8-byte header
+extern "C" const char _ZTV16MenuObjectClass0[];
+
+MenuObject_021f6f20::MenuObject_021f6f20()
+    : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClass0 + 8))
 {
     func_0204719c(unk_20);
 }
@@ -425,7 +418,7 @@ static int Command_SetPosition(ScriptValue* params, int count)
     position.x = params[1].ToFloat() * 4096.0f;
     position.y = params[2].ToFloat() * 4096.0f;
     position.z = 0;
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -435,7 +428,7 @@ static int Command_SetPosition(ScriptValue* params, int count)
 
 static int Command_08(ScriptValue* params, int count)
 {
-    params[0].Set(func_ov023_021f6bc0(func_ov017_021b2164()->GetObjects()));
+    params[0].Set(func_ov017_021b2164()->GetObjects()->IsLoading());
     return 1;
 }
 
@@ -465,7 +458,7 @@ static int Command_09(ScriptValue* params, int count)
     if (!func_ov023_021f745c(object, script, id, heapId, 0, file, unk3, unk4, unk5))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -493,7 +486,7 @@ static int Command_0a(ScriptValue* params, int count)
     if (!func_ov023_021f7da0(object, script, id, heapId, unk2, unk3, unk4, unk5, unk6))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -510,10 +503,10 @@ static int Command_0b(ScriptValue* params, int count)
     unsigned char unk7 = params[7].ToInt();
     bool unk8 = params[8].ToInt() != 0;
     MenuScript* script = func_ov017_021b2164();
-    MenuObject* object = func_ov023_021f6880(script->GetObjects(), id);
+    MenuObject* object = (MenuObject*)script->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 6)
+    if (((MenuObjectClass*)object)->GetType() != 6)
         return 0;
 
     func_ov023_021f7eb8(object, script, unk1, unk2, unk3, unk4, unk5, unk6, unk7, unk8);
@@ -524,10 +517,10 @@ static int Command_0b(ScriptValue* params, int count)
 static int Command_0c(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 6)
+    if (((MenuObjectClass*)object)->GetType() != 6)
         return 0;
 
     func_ov023_021f8120(object);
@@ -594,7 +587,7 @@ static int Command_10(ScriptValue* params, int count)
     if (!func_ov023_021fa298(object, script, id, heapId, 0, file, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -631,7 +624,7 @@ static int Command_12(ScriptValue* params, int count)
     if (!func_ov023_021f8cf4(object, script, id, heapId, unk3, unk2))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -642,11 +635,11 @@ static int Command_13(ScriptValue* params, int count)
     int unk2 = params[2].ToInt();
     int unk3 = params[3].ToInt();
     MenuObjectList* objects = func_ov017_021b2164()->GetObjects();
-    MenuObject* object = func_ov023_021f6880(objects, id);
-    MenuObject* object2 = func_ov023_021f6880(objects, id2);
+    MenuObject* object = (MenuObject*)objects->Find(id);
+    MenuObject* object2 = (MenuObject*)objects->Find(id2);
     if (object == 0 || object2 == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     return func_ov023_021f9b30(object, id2, unk3, unk2) ? 1 : 0;
@@ -656,10 +649,10 @@ static int Command_14(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     MenuScript* script = func_ov017_021b2164();
-    MenuObject* object = func_ov023_021f6880(script->GetObjects(), id);
+    MenuObject* object = (MenuObject*)script->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     script->SetUnk1b0(id);
@@ -670,7 +663,7 @@ static int Command_15(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     MenuScript* script = func_ov017_021b2164();
-    if (func_ov023_021f6880(script->GetObjects(), id) == 0)
+    if ((MenuObject*)script->GetObjects()->Find(id) == 0)
         return 0;
 
     script->SetUnk1b2(id);
@@ -703,7 +696,7 @@ static int Command_16(ScriptValue* params, int count)
     if (!func_ov023_021f89f4(object, script, id, heapId, unk2, unk3, unk4, unk5, unk6, unk7, unk8))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -711,7 +704,7 @@ static int Command_17(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -723,7 +716,7 @@ static int Command_CreateCursor(ScriptValue* params, int count)
 {
     MenuScript* script = func_ov017_021b2164();
     MenuObjectList* objects = script->GetObjects();
-    if (func_ov023_021f6880(objects, CURSOR_ID) != 0)
+    if ((MenuObject*)objects->Find(CURSOR_ID) != 0)
         return 0;
 
     int heapId = params[0].ToInt();
@@ -742,7 +735,7 @@ static int Command_CreateCursor(ScriptValue* params, int count)
     if (!func_ov023_021f9ec8(object, script, CURSOR_ID, heapId, unk))
         return 0;
 
-    func_ov023_021f67ac(objects, object);
+    objects->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -770,7 +763,7 @@ static int Command_CreateSprites(ScriptValue* params, int count)
     if (!func_ov023_021fa760(object, script, id, heapId, 0, file, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -797,7 +790,7 @@ static int Command_1a(ScriptValue* params, int count)
     if (!func_ov023_021fad84(object, script, id, heapId, unk2, unk3))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -822,7 +815,7 @@ static int Command_1b(ScriptValue* params, int count)
     if (!func_ov023_021fb2b0(object, script, id, heapId, unk2, unk3))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -850,7 +843,7 @@ static int Command_1c(ScriptValue* params, int count)
     if (!func_ov023_021fb534(object, script, id, heapId, file, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -860,7 +853,7 @@ static int Command_1d(ScriptValue* params, int count)
     int unk1 = params[1].ToInt();
     int unk2 = params[2].ToInt();
     int unk3 = params[3].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -879,10 +872,10 @@ static int Command_1e(ScriptValue* params, int count)
     int unk5 = params[5].ToFloat() * 4096.0f;
     MenuScript* script = func_ov017_021b2164();
     MenuObjectList* objects = script->GetObjects();
-    if (func_ov023_021f6880(objects, id) == 0)
+    if ((MenuObject*)objects->Find(id) == 0)
         return 0;
 
-    MenuObject* cursor = func_ov023_021f6880(objects, CURSOR_ID);
+    MenuObject* cursor = (MenuObject*)objects->Find(CURSOR_ID);
     if (cursor == 0)
         return 0;
 
@@ -1071,7 +1064,7 @@ static int Command_22(ScriptValue* params, int count)
     if (!func_ov023_021fd1e0(object, script, id, heapId, &values, &flags))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -1082,7 +1075,7 @@ static int Command_23(ScriptValue* params, int count)
     position.x = params[1].ToFloat() * 4096.0f;
     position.y = params[2].ToFloat() * 4096.0f;
     position.z = 0;
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1109,14 +1102,14 @@ static int Command_24(ScriptValue* params, int count)
     if (!func_ov023_021fba80(object, script, id, heapId))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
 static int Command_25(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1127,7 +1120,7 @@ static int Command_25(ScriptValue* params, int count)
 static int Command_26(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1150,7 +1143,7 @@ static int Command_28(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1184,7 +1177,7 @@ static int Command_29(ScriptValue* params, int count)
     if (!func_ov023_021fbb64(object, script, id, heapId, unk2, unk3, unk4, unk5, unk6, unk7, unk8))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -1219,7 +1212,7 @@ static int Command_2a(ScriptValue* params, int count)
 
     unk = 0;
     objects = script->GetObjects();
-    MenuObject* other = func_ov023_021f6880(objects, otherId);
+    MenuObject* other = (MenuObject*)objects->Find(otherId);
     if (other != 0)
         unk = other->Functions()->UnkE8();
 
@@ -1228,7 +1221,7 @@ static int Command_2a(ScriptValue* params, int count)
     if (!func_ov023_021fbd00(object, script, id, heapId, unk2, unk, unk4))
         return 0;
 
-    func_ov023_021f67ac(objects, object);
+    objects->Add((MenuObjectClass*)object);
     return 1;
 }
 #else
@@ -1238,6 +1231,8 @@ extern "C"
     void _ZN10MenuScript10GetObjectsEv(); // MenuScript::GetObjects
     void _ZN10MenuScript7GetHeapEv(); // MenuScript::GetHeap
     void _ZN10MenuScript8FindHeapEi(); // MenuScript::FindHeap
+    void _ZN14MenuObjectList3AddEP15MenuObjectClass(); // MenuObjectList::Add
+    void _ZN14MenuObjectList4FindEi(); // MenuObjectList::Find
     void _ZN13SafeAllocator11CreateTypeBEPvji(); // SafeAllocator::CreateTypeB
     void _ZN13SafeAllocator21ResetAllocatorPointerEv(); // SafeAllocator::ResetAllocatorPointer
     void _ZN13SafeAllocator8AllocateEj(); // SafeAllocator::Allocate
@@ -1294,7 +1289,7 @@ static asm int Command_2a(ScriptValue* params, int count)
     bl _ZN10MenuScript10GetObjectsEv
     mov r1, r8
     mov r11, r0
-    bl func_ov023_021f6880
+    bl _ZN14MenuObjectList4FindEi
     cmp r0, #0x0
     beq @L02186a7c
     ldr r1, [r0, #0x0]
@@ -1344,7 +1339,7 @@ static asm int Command_2a(ScriptValue* params, int count)
 @L02186b18:
     mov r0, r11
     mov r1, r6
-    bl func_ov023_021f67ac
+    bl _ZN14MenuObjectList3AddEP15MenuObjectClass
     add r0, sp, #0x15c
     bl func_0205a494
     mov r0, #0x1
@@ -1379,7 +1374,7 @@ static int Command_2b(ScriptValue* params, int count)
     if (!func_ov023_021fbe08(object, script, id, heapId, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -1392,7 +1387,7 @@ static int Command_ClearHeap(ScriptValue* params, int count)
     if (heap == 0)
         return 0;
 
-    func_ov023_021f6844(script->GetObjects(), heapId);
+    script->GetObjects()->RemoveHeap(heapId);
     heap->allocator_.Reset();
     return 1;
 }
@@ -1400,10 +1395,10 @@ static int Command_ClearHeap(ScriptValue* params, int count)
 static int Command_2d(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     func_ov023_021f9c0c(object);
@@ -1414,10 +1409,10 @@ static int Command_2e(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     func_ov023_021f9c58(object, value);
@@ -1428,10 +1423,10 @@ static int Command_2f(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     func_ov023_021f9c60(object, value);
@@ -1449,7 +1444,7 @@ static int Command_31(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1461,7 +1456,7 @@ static int Command_32(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1481,10 +1476,10 @@ static int Command_34(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     func_ov023_021f9c60(object, value);
@@ -1495,7 +1490,7 @@ static int Command_35(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int set = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1513,10 +1508,10 @@ static int Command_36(ScriptValue* params, int count)
     if (text == 0)
         return 0;
 
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 2)
+    if (((MenuObjectClass*)object)->GetType() != 2)
         return 0;
 
     func_ov023_021f79ec(object, text);
@@ -1527,7 +1522,7 @@ static int Command_37(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int set = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1557,10 +1552,10 @@ static int Command_39(ScriptValue* params, int count)
     int id = params[0].ToInt();
     int unk1 = params[1].ToInt();
     int unk2 = params[2].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 8)
+    if (((MenuObjectClass*)object)->GetType() != 8)
         return 0;
 
     ((MenuObjectType8*)object)->unk_45_1 = unk1;
@@ -1587,7 +1582,7 @@ static int Command_3a(ScriptValue* params, int count)
     if (!func_ov023_021fc1f4(object, script, id, heapId))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -1595,10 +1590,10 @@ static int Command_3b(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     object->Functions()->Unk5c(value);
@@ -1630,7 +1625,7 @@ static int Command_3c(ScriptValue* params, int count)
     if (!func_ov023_021fc408(object, script, id, heapId, unk2, unk3, unk4, unk5, unk6, unk7))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -1639,7 +1634,7 @@ static int Command_SetObjectFlags(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     unsigned char flags = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1652,7 +1647,7 @@ static int Command_ClearObjectFlags(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     unsigned char flags = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -1665,10 +1660,10 @@ static int Command_3f(ScriptValue* params, int count)
     int id = params[0].ToInt();
     unsigned char value = params[1].ToInt();
     MenuScript* script = func_ov017_021b2164();
-    MenuObject* object = func_ov023_021f6880(script->GetObjects(), id);
+    MenuObject* object = (MenuObject*)script->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 6)
+    if (((MenuObjectClass*)object)->GetType() != 6)
         return 0;
 
     func_ov023_021f8944(object, script, value, 1);
@@ -1680,13 +1675,13 @@ static int Command_ShowName(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int index = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 1;
-    if (func_ov023_021f6f10(object) != 4)
+    if (((MenuObjectClass*)object)->GetType() != 4)
         return 1;
 
-    void* names = func_ov023_021fa598(object);
+    void* names = ((MenuObjectClass4*)object)->GetTexts();
     if (names == 0)
         return 1;
 
@@ -1727,7 +1722,7 @@ static int Command_44(ScriptValue* params, int count)
     int id = params[0].ToInt();
     int unk1 = params[1].ToInt();
     int unk2 = params[2].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object != 0)
     {
         object->Functions()->Unk64(unk1);
@@ -1752,10 +1747,10 @@ static int Command_46(ScriptValue* params, int count)
     int unk2 = params[2].ToInt();
     int unk3 = params[3].ToInt();
     int unk4 = params[4].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 1;
-    if (func_ov023_021f6f10(object) != 1)
+    if (((MenuObjectClass*)object)->GetType() != 1)
         return 1;
 
     func_ov023_021fb25c(object, unk1, unk2, unk3, unk4);
@@ -1766,7 +1761,7 @@ static int Command_47(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object != 0)
         object->Functions()->UnkA4(value);
     return 1;
@@ -1776,10 +1771,10 @@ static int Command_48(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     object->Functions()->Unk74(value);
@@ -1791,7 +1786,7 @@ static int Command_49(ScriptValue* params, int count)
     int id = params[0].ToInt();
     int unk1 = params[1].ToInt();
     int unk2 = params[2].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object != 0)
     {
         object->Functions()->Unk84(unk1);
@@ -1825,7 +1820,7 @@ static int Command_4a(ScriptValue* params, int count)
     if (!func_ov023_021fc518(object, script, id, heapId, unk2, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 #else
@@ -1835,6 +1830,7 @@ extern "C"
     void _ZN10MenuScript10GetObjectsEv(); // MenuScript::GetObjects
     void _ZN10MenuScript7GetHeapEv(); // MenuScript::GetHeap
     void _ZN10MenuScript8FindHeapEi(); // MenuScript::FindHeap
+    void _ZN14MenuObjectList3AddEP15MenuObjectClass(); // MenuObjectList::Add
     void _ZN13SafeAllocator11CreateTypeBEPvji(); // SafeAllocator::CreateTypeB
     void _ZN13SafeAllocator21ResetAllocatorPointerEv(); // SafeAllocator::ResetAllocatorPointer
     void _ZN13SafeAllocator8AllocateEj(); // SafeAllocator::Allocate
@@ -1920,7 +1916,7 @@ static asm int Command_4a(ScriptValue* params, int count)
     mov r0, r11
     bl _ZN10MenuScript10GetObjectsEv
     mov r1, r5
-    bl func_ov023_021f67ac
+    bl _ZN14MenuObjectList3AddEP15MenuObjectClass
     mov r0, #0x1
 @L02187840:
     add sp, sp, #0x7c
@@ -1982,7 +1978,7 @@ static int Command_4e(ScriptValue* params, int count)
     if (!func_ov023_021f745c(object, script, id, heapId, 0, 0, unk2, unk3, unk4))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -1996,8 +1992,8 @@ static int Command_4f(ScriptValue* params, int count)
     int otherId = params[2].ToInt();
     MenuScript* script = func_ov017_021b2164();
     MenuObjectList* objects = script->GetObjects();
-    MenuObject* other = func_ov023_021f6880(objects, otherId);
-    func_ov023_021f6f10(other);
+    MenuObject* other = (MenuObject*)objects->Find(otherId);
+    ((MenuObjectClass*)other)->GetType();
     MenuHeap* heap = script->FindHeap(heapId);
     if (heap == 0)
         return 0;
@@ -2009,13 +2005,13 @@ static int Command_4f(ScriptValue* params, int count)
 
     MenuObject_021f6f20 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021f6f20));
-    if (!func_ov023_021f6f20(object, script, id, heapId, 0, 0))
+    if (!((MenuObjectClass0*)object)->Initialize(script, id, heapId, 0, 0))
         return 0;
 
-    void* source = func_ov023_021f7318(other);
-    func_02048004(source, func_ov023_021f7318(object));
-    func_ov023_021f7320(object);
-    func_ov023_021f67ac(objects, object);
+    void* source = ((MenuObjectClass0*)other)->GetModel();
+    func_02048004(source, ((MenuObjectClass0*)object)->GetModel());
+    ((MenuObjectClass0*)object)->SetLoaded();
+    objects->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2044,7 +2040,7 @@ static int Command_50(ScriptValue* params, int count)
     if (!func_ov023_021fcdd4(object, script, id, heapId, unk2, text))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2052,10 +2048,10 @@ static int Command_51(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     signed char value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 1)
+    if (((MenuObjectClass*)object)->GetType() != 1)
         return 0;
 
     func_ov023_021fb274(object, value);
@@ -2067,7 +2063,7 @@ static int Command_52(ScriptValue* params, int count)
     int id = params[0].ToInt();
     int unk1 = params[1].ToInt();
     int unk2 = params[2].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object != 0)
     {
         object->Functions()->Unk94(unk1);
@@ -2082,7 +2078,7 @@ static int Command_53(ScriptValue* params, int count)
     int unk1 = params[1].ToInt();
     int unk2 = params[2].ToInt();
     int unk3 = params[3].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object != 0)
         object->Functions()->UnkAc(unk1, unk2, unk3);
     return 1;
@@ -2092,10 +2088,10 @@ static int Command_54(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 7)
+    if (((MenuObjectClass*)object)->GetType() != 7)
         return 0;
 
     func_ov023_021f9da0(object, value != 0);
@@ -2106,10 +2102,10 @@ static int Command_55(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 1)
+    if (((MenuObjectClass*)object)->GetType() != 1)
         return 0;
 
     func_ov023_021fb284(object, value);
@@ -2142,7 +2138,7 @@ static int Command_57(ScriptValue* params, int count)
     if (!func_ov004_02167820(object, script, id, heapId))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2247,7 +2243,7 @@ static int Command_61(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -2286,7 +2282,7 @@ static int Command_63(ScriptValue* params, int count)
     if (!func_ov023_021fd320(object, script, id, heapId, unk2, unk3, unk4, unk5, unk6))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2294,7 +2290,7 @@ static int Command_64(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -2302,7 +2298,7 @@ static int Command_64(ScriptValue* params, int count)
     return 1;
 }
 
-// What Command_65 passes to func_ov023_021f6e90
+// What Command_65 passes to MenuObjectList::SetGroup (see MenuObjectGroup)
 struct MenuObjectValues
 {
     unsigned char count_;
@@ -2327,21 +2323,21 @@ static int Command_65(ScriptValue* params, int count)
         if (i < 8)
             values.values_[i] = value;
     }
-    func_ov023_021f6e90(func_ov017_021b2164()->GetObjects(), id, &values);
+    func_ov017_021b2164()->GetObjects()->SetGroup(id, (const MenuObjectGroup*)(&values));
     return 1;
 }
 
 static int Command_66(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
-    func_ov023_021f6eb8(func_ov017_021b2164()->GetObjects(), id);
+    func_ov017_021b2164()->GetObjects()->ClearGroup(id);
     return 1;
 }
 
 static int Command_67(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -2353,7 +2349,7 @@ static int Command_68(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
 
@@ -2371,7 +2367,7 @@ static int Command_6a(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object != 0)
         object->Functions()->UnkB0(value);
     return 1;
@@ -2435,7 +2431,7 @@ static int Command_6e(ScriptValue* params, int count)
     if (!func_ov023_021fa298(object, script, id, heapId, archive, file, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2469,7 +2465,7 @@ static int Command_6f(ScriptValue* params, int count)
     if (!func_ov023_021f745c(object, script, id, heapId, archive, file, unk4, unk5, unk6))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2501,7 +2497,7 @@ static int Command_70(ScriptValue* params, int count)
     if (!func_ov023_021fa760(object, script, id, heapId, archive, file, unk))
         return 0;
 
-    func_ov023_021f67ac(script->GetObjects(), object);
+    script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
@@ -2509,10 +2505,10 @@ static int Command_71(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int value = params[1].ToInt();
-    MenuObject* object = func_ov023_021f6880(func_ov017_021b2164()->GetObjects(), id);
+    MenuObject* object = (MenuObject*)func_ov017_021b2164()->GetObjects()->Find(id);
     if (object == 0)
         return 0;
-    if (func_ov023_021f6f10(object) != 8)
+    if (((MenuObjectClass*)object)->GetType() != 8)
         return 0;
 
     ((MenuObjectType8*)object)->unk_45_7 = value;

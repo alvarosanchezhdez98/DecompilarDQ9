@@ -4,6 +4,7 @@
 #include "Graphics/VRAMManagerState.h"
 #include "Memory/SafeAllocator.h"
 #include "Scene/Overlay_23/CharacterModel.h"
+#include "Scene/Overlay_23/MenuObjects.h"
 #include "System/Matrix.h"
 #include "Text/TextTable.h"
 
@@ -53,12 +54,6 @@ struct ScriptEngine
     char unk_40[0x14];
 };
 
-// The part of the objects that overlay 23 shows on the menus: func_ov023_021f672c initializes it, func_ov023_021f67ac
-// adds an object, func_ov023_021f6880 returns an object by its ID and func_ov023_021f6844 removes a heap's objects
-struct MenuObjectList
-{
-    char unk_0[0x74];
-};
 
 // A vtable of overlay 23's objects
 struct MenuObjectVTable;
@@ -136,7 +131,6 @@ extern "C"
     void func_02048080(void*);
 
     // The vtables of the objects' classes
-    extern const MenuObjectVTable data_ov023_021fe3e4;
     extern const MenuObjectVTable data_ov023_021fe4f0;
     extern const MenuObjectVTable data_ov023_021fe604;
     extern const MenuObjectVTable data_ov023_021fe708;
@@ -261,7 +255,7 @@ struct MenuObjectPart_020de824
     }
 };
 
-// What func_ov023_021f6f20 initializes (sizeof == 0xac)
+// MenuObjectClass0 of overlay 23 (sizeof == 0xac), which MenuObjectClass0::Initialize() initializes
 struct MenuObject_021f6f20 : MenuObject
 {
     char unk_10[0x10];

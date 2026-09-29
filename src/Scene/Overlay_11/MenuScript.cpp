@@ -37,15 +37,6 @@ extern "C"
     void func_ov017_021d4ccc(ScriptEngine* engine);
     void func_ov017_021d4ce4(ScriptEngine* engine, int entry);
     int func_ov017_021d4df8(ScriptEngine* engine, int entry);
-
-    void func_ov023_021f672c(MenuObjectList* objects);
-    void func_ov023_021f6844(MenuObjectList* objects, int heap);
-    void func_ov023_021f68dc(MenuObjectList* objects, MenuScript* script);
-    void func_ov023_021f698c(MenuObjectList* objects);
-    void func_ov023_021f69bc(MenuObjectList* objects);
-    void func_ov023_021f69ec(MenuObjectList* objects);
-    // The BackgroundLoader's task of the objects
-    int func_ov023_021f6bb8(MenuObjectList* objects);
 }
 
 void MenuHeap::Initialize()
@@ -117,7 +108,7 @@ void MenuScript::Initialize()
     entry_ = -1;
     nextEntry_ = 0;
     flags_ = 0;
-    func_ov023_021f672c(&objects_);
+    objects_.Initialize();
     loadTask_ = -1;
     func_0203b4d8(func_ov017_0218b5b0(), 0xc0);
     screensSwapped_ = (POWCNT & 0x8000) >> 15;
@@ -232,7 +223,7 @@ void MenuScript::DestroyHeap(MenuHeap* heap)
 
     DestroyHeap(heap->next_);
     DestroyHeap(heap->child_);
-    func_ov023_021f6844(&objects_, heap->id_);
+    objects_.RemoveHeap(heap->id_);
     heap->allocator_.Destroy();
 }
 
@@ -269,7 +260,7 @@ bool MenuScript::Update()
         RunScript();
         UpdateCallbacks();
         UpdateQuestion();
-        func_ov023_021f68dc(&objects_, this);
+        objects_.Update(this);
     }
     else if (resources != 0 && !IsBrightnessTransitionActive(resources))
     {
@@ -281,17 +272,17 @@ bool MenuScript::Update()
 
 void MenuScript::Draw1()
 {
-    func_ov023_021f698c(&objects_);
+    objects_.Draw1();
 }
 
 void MenuScript::Draw2()
 {
-    func_ov023_021f69bc(&objects_);
+    objects_.Draw2();
 }
 
 void MenuScript::Draw3()
 {
-    func_ov023_021f69ec(&objects_);
+    objects_.Draw3();
 }
 
 void MenuScript::Finish()
@@ -316,7 +307,7 @@ void MenuScript::Finish()
     LoadToMainBG1ScreenData(buffer, 0, 0x600);
     DISPCNT = (mainLayers_ << 8) | (DISPCNT & ~0x1f00);
     DISPCNTSUB = (subLayers_ << 8) | (DISPCNTSUB & ~0x1f00);
-    BackgroundLoader::GetInstance()->RemoveTask(func_ov023_021f6bb8(&objects_));
+    BackgroundLoader::GetInstance()->RemoveTask(objects_.GetTask());
     BackgroundLoader::RemoveLockGlobal();
     func_0203b4e8(func_ov017_0218b5b0(), 0xc0);
 }
