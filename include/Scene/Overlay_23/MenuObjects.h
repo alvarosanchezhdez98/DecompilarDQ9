@@ -920,6 +920,33 @@ public:
     int State_Loaded(MenuScript* script);
 };
 
+// An area of the touch screen that runs a callback of the script when it's touched. Its type is 0x13 too, like the
+// boxes' (MenuObjectClass13)
+class MenuTouchArea : public MenuObjectClass
+{
+public:
+    unsigned short unk_20;
+    // In pixels
+    unsigned short x_;
+    unsigned short y_;
+    unsigned short width_;
+    unsigned short height_;
+    unsigned short callback_;
+    unsigned char unk_2c;
+
+    int Initialize(MenuScript* script, int id, int heap, int x, int y, int width, int height, int unk2c);
+    virtual void Finish(MenuObjectList* list);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    void GetRect(unsigned short* left, unsigned short* top, unsigned short* right, unsigned short* bottom);
+    virtual void Va4(int callback);
+    virtual int GetTouchCallback();
+    virtual int IsTouched();
+    virtual int ContainsTouch();
+
+    virtual void Update(MenuScript* script) {}
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {
