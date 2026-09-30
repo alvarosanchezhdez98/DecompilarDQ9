@@ -7,14 +7,37 @@ struct PartNameTable
     char unk_0[0x18];
 };
 
+// The start of the file of a PartNameTable, and where its parts are (0x14 bytes)
+struct PartNameHeader
+{
+    unsigned short count_;
+    unsigned short count2_ : 15;
+    unsigned short unk_2_15 : 1;
+    int unk_4;
+    unsigned int unk_8_0 : 31;
+    // The entries' pointers were fixed (func_020de574)
+    unsigned int fixed_ : 1;
+    // After the header
+    struct PartEntry* entries_;
+    void* unk_10;
+};
+
 // The information of a model that a PartEntry points to
 struct PartModelInfo
 {
-    int unk_0;
+    unsigned int unk_0_0 : 7;
+    unsigned int unk_0_7 : 4;
+    unsigned int unk_0_11 : 18;
+    unsigned int unk_0_29 : 1;
+    unsigned int unk_0_30 : 2;
     unsigned int unk_4_0 : 12;
     // The number of the model's animation files (md<number><number><m/w>.nsbca and .bcfg)
     unsigned int animations_ : 8;
-    unsigned int unk_4_20 : 12;
+    unsigned int unk_4_20 : 7;
+    unsigned int unk_4_27 : 1;
+    unsigned int unk_4_28 : 1;
+    unsigned int unk_4_29 : 1;
+    unsigned int unk_4_30 : 2;
     int unk_8[4];
     // The item's bonuses (overlay 23's commands add them up)
     int unk_18_0 : 10;
