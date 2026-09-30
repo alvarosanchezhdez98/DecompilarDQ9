@@ -1445,7 +1445,7 @@ void MemberScreen::DrawTexts()
     func_02045f3c(messages, names_[member_], nameX_[member_], 0xa1, color, 0xa, 0, 0, 0, 0x11);
     if ((int)member->unk_130[2] <= 0)
     {
-        short x = ((0x3b - func_020420e8(downTexts_[member->data_->details_.appearance_.female_], 0)) >> 1) + 0x40;
+        short x = ((0x3b - func_020420e8(downTexts_[member->data_->appearance_.female_], 0)) >> 1) + 0x40;
         func_02045f3c(messages, vocations_[member_], x, 0xa1, color, 0xa, 0, 0, 0, 0x11);
     }
     else
@@ -1468,7 +1468,7 @@ void MemberScreen::DrawTexts()
         if (func_0200fb08(gameState) == 1)
             x += 2;
         PartyMemberData* data = member->data_;
-        func_ov005_02155258(equipment_, (short)data->details_.levels_[data->vocation_], x, 0xa1, color);
+        func_ov005_02155258(equipment_, (short)data->levels_[data->vocation_], x, 0xa1, color);
     }
     GXFIFO_END_VTXS = 0;
     GXFIFO_MATRIX_POP = 1;
@@ -1649,7 +1649,7 @@ asm void MemberScreen::DrawTexts()
 unsigned int MemberScreen::GetStars(PartyMember* member)
 {
     PartyMemberData* data = member->data_;
-    return data->details_.unk_fe[data->vocation_];
+    return data->unk_186[data->vocation_];
 }
 
 void MemberScreen::DrawLeftRight()
@@ -1907,7 +1907,7 @@ void MemberScreen::LoadTexts()
         if (func_ov017_021bdbcc())
             vocation = 0x1f4;
         if ((int)member->unk_130[2] <= 0)
-            func_02045d14(messages, downTexts_[member->data_->details_.appearance_.female_], vocations_[i], 0);
+            func_02045d14(messages, downTexts_[member->data_->appearance_.female_], vocations_[i], 0);
         else
             func_02045d14(messages, func_020e0434(texts + 0xc00, vocation), vocations_[i], 0);
         unsigned char stars = GetStars(member);

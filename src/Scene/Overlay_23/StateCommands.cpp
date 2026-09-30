@@ -266,8 +266,8 @@ static int StateCommand_65(ScriptValue* params, int count)
     if (member == NULL)
         return 0;
     func_ov017_021d6134(&params[1], member->data_->vocation_);
-    func_ov017_021d6134(&params[2], member->data_->details_.levels_[member->data_->vocation_]);
-    func_ov017_021d6134(&params[3], member->data_->details_.unk_b0[member->data_->vocation_]);
+    func_ov017_021d6134(&params[2], member->data_->levels_[member->data_->vocation_]);
+    func_ov017_021d6134(&params[3], member->data_->unk_138[member->data_->vocation_]);
     return 1;
 }
 
@@ -278,7 +278,7 @@ static int StateCommand_66(ScriptValue* params, int count)
     PartyMember* member = GetMember(func_ov017_021d60f4(&params[0]));
     if (member == NULL)
         return 0;
-    func_ov017_021d6134(&params[1], member->data_->details_.appearance_.female_);
+    func_ov017_021d6134(&params[1], member->data_->appearance_.female_);
     return 1;
 }
 
@@ -427,7 +427,7 @@ static int StateCommand_69(ScriptValue* params, int count)
     int bonuses[6] = {};
     for (int i = 0; i < 11; i++)
     {
-        PartEntry* entry = &member->data_->details_.equipment_[(unsigned char)i];
+        PartEntry* entry = &member->data_->equipment_[(unsigned char)i];
         PartModelInfo* info;
         if (entry != NULL && (info = entry->model_) != NULL)
         {
@@ -471,7 +471,7 @@ static int StateCommand_6a(ScriptValue* params, int count)
     if (member == NULL)
         return 0;
     int skill = func_ov017_021d60f4(&params[1]);
-    func_ov017_021d6134(&params[2], member->data_->details_.skillPoints_[(unsigned char)skill]);
+    func_ov017_021d6134(&params[2], member->data_->skillPoints_[(unsigned char)skill]);
     return 1;
 }
 
@@ -1021,7 +1021,7 @@ static int StateCommand_a3(ScriptValue* params, int count)
         return 0;
     int sum = 0;
     for (int i = 0; i < 13; i++)
-        sum += member->data_->details_.unk_fe[(unsigned char)i];
+        sum += member->data_->unk_186[(unsigned char)i];
     func_ov017_021d6134(&params[1], sum);
     return 1;
 }
@@ -1066,7 +1066,7 @@ static int StateCommand_a6(ScriptValue* params, int count)
     if (member != NULL)
     {
         PartyMemberData* data = func_02053c6c(member);
-        int* values = data->details_.unk_b0;
+        int* values = data->unk_138;
         for (int i = 0; i < 13; i++)
         {
             sum += values[i];

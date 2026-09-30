@@ -501,7 +501,7 @@ void SkillAbilityList::Draw(Canvas* canvas)
     if (data == NULL)
         return;
     short skill = func_020dd11c(data->vocation_, skill_);
-    unsigned char points = data->details_.skillPoints_[skill];
+    unsigned char points = data->skillPoints_[skill];
     int y = 0x1e;
     const char* name = func_02072a68(&names_, skill);
     short outX;

@@ -310,7 +310,7 @@ void ProfileEditor::RefreshAccoladeTexts()
             func_0202ae18();
             PartyMemberData* data = gameState->GetProtagonist()->partyData_;
             int accolade = 0x50dc;
-            if (data->details_.appearance_.female_ == 1)
+            if (data->appearance_.female_ == 1)
                 accolade = 0x510e;
             text = func_02072a68(&strings_, accolade + data->vocation_);
         }
@@ -341,7 +341,7 @@ void ProfileEditor::ResetAccoladeTexts()
         if (func_0201079c(gameState) == 1)
             vocation = 0xd;
         int accolade = 0x50dc;
-        if (protagonist->partyData_->details_.appearance_.female_ == 1)
+        if (protagonist->partyData_->appearance_.female_ == 1)
             accolade = 0x510e;
         const char* text = func_02072a68(&strings_, accolade + vocation);
         memset(accoladeText_, 0, sizeof(accoladeText_));
