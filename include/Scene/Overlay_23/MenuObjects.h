@@ -3,6 +3,8 @@
 #include "Graphics/Background.h"
 #include "Graphics/Sprite.h"
 #include "Graphics/Vector.h"
+#include "Memory/SafeAllocator.h"
+#include "Resource/PartNameTable.h"
 #include "Text/TextTable.h"
 
 class MenuScript;
@@ -168,7 +170,8 @@ public:
     {
         return 0;
     }
-    virtual int Ve8()
+    // The data that the object loaded, such as MenuObjectClass11's PartNameTable
+    virtual void* Ve8()
     {
         return 0;
     }
@@ -802,6 +805,25 @@ public:
     void Func021fbddc();
     Unknown_021dc134* GetUnk20();
     void SetUnk77a(signed char value);
+};
+
+// The objects of type 0x11, which load the names of the items and of the parts of the characters' models
+class MenuObjectClass11 : public MenuObjectClass
+{
+public:
+    // Where the names are loaded
+    SafeAllocator allocator_;
+    PartNameTable names_;
+    // The categories of the names to load (1: 0 to 7, 2: 8, 4: 9, 8: 11), or 0 for all of them
+    int categories_;
+
+    int Initialize(MenuScript* script, int id, int heap, int categories);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void* Ve8();
 };
 
 // The objects of type 0xf, a number on a MenuObjectClass6

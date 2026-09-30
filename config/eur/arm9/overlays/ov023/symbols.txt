@@ -768,13 +768,13 @@ _ZN17MenuObjectClass1012Func021fbdccEv kind:function(arm,size=0x10) addr:0x021fb
 _ZN17MenuObjectClass1012Func021fbddcEv kind:function(arm,size=0x10) addr:0x021fbddc
 _ZN17MenuObjectClass108GetUnk20Ev kind:function(arm,size=0x8) addr:0x021fbdec
 _ZN17MenuObjectClass109SetUnk77aEa kind:function(arm,size=0x14) addr:0x021fbdf4
-func_ov023_021fbe08 kind:function(arm,size=0x44) addr:0x021fbe08
-func_ov023_021fbe4c kind:function(arm,size=0x24) addr:0x021fbe4c
-func_ov023_021fbe70 kind:function(arm,size=0x80) addr:0x021fbe70
-func_ov023_021fbef0 kind:function(arm,size=0x5c) addr:0x021fbef0
-func_ov023_021fbf4c kind:function(arm,size=0x298) addr:0x021fbf4c
-func_ov023_021fc1e4 kind:function(arm,size=0x8) addr:0x021fc1e4
-func_ov023_021fc1ec kind:function(arm,size=0x8) addr:0x021fc1ec
+_ZN17MenuObjectClass1110InitializeEP10MenuScriptiii kind:function(arm,size=0x44) addr:0x021fbe08
+_ZN17MenuObjectClass116FinishEP14MenuObjectList kind:function(arm,size=0x24) addr:0x021fbe4c
+_ZN17MenuObjectClass116UpdateEP10MenuScript kind:function(arm,size=0x80) addr:0x021fbe70
+_ZN17MenuObjectClass1110State_LoadEP10MenuScript kind:function(arm,size=0x5c) addr:0x021fbef0
+_ZN17MenuObjectClass1110State_WaitEP10MenuScript kind:function(arm,size=0x298) addr:0x021fbf4c
+_ZN17MenuObjectClass1112State_LoadedEP10MenuScript kind:function(arm,size=0x8) addr:0x021fc1e4
+_ZN17MenuObjectClass113Ve8Ev kind:function(arm,size=0x8) addr:0x021fc1ec
 func_ov023_021fc1f4 kind:function(arm,size=0x34) addr:0x021fc1f4
 func_ov023_021fc228 kind:function(arm,size=0x10) addr:0x021fc228
 func_ov023_021fc238 kind:function(arm,size=0x80) addr:0x021fc238
@@ -899,7 +899,7 @@ sKeys kind:data(any) addr:0x021fd920 local
 @1747 kind:data(any) addr:0x021fd944 local
 @1798 kind:data(any) addr:0x021fd964 local
 @832 kind:data(any) addr:0x021fd984 local
-data_ov023_021fd9a4 kind:data(any) addr:0x021fd9a4
+@1823 kind:data(any) addr:0x021fd9a4 local
 data_ov023_021fd9c4 kind:data(any) addr:0x021fd9c4
 data_ov023_021fd9e4 kind:data(any) addr:0x021fd9e4
 data_ov023_021fd9f0 kind:data(any) addr:0x021fd9f0
@@ -988,8 +988,8 @@ _ZTV16MenuObjectClassC kind:data(any) addr:0x021fee60
 _ZTV16MenuObjectClassE kind:data(any) addr:0x021fef6c
 _ZTV16MenuObjectClassF kind:data(any) addr:0x021ff070
 _ZTV17MenuObjectClass10 kind:data(any) addr:0x021ff174
-data_ov023_021ff278 kind:data(any) addr:0x021ff278
-data_ov023_021ff280 kind:data(any) addr:0x021ff280 ambiguous
+_ZTV17MenuObjectClass11 kind:data(any) addr:0x021ff278
+data_ov023_021ff37c kind:data(any) addr:0x021ff37c
 data_ov023_021ff384 kind:data(any) addr:0x021ff384 ambiguous
 data_ov023_021ff480 kind:data(any) addr:0x021ff480
 data_ov023_021ff496 kind:data(any) addr:0x021ff496
