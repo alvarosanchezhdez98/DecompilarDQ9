@@ -460,7 +460,7 @@ from:0x0218674c kind:arm_call to:0x02001a40 module:main
 from:0x02186760 kind:arm_call to:0x021fba80 module:overlay(23)
 from:0x02186774 kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x0218677c kind:arm_call to:0x021f67ac module:overlay(23)
-from:0x0218678c kind:load to:0x021fef74 module:overlays(23,24)
+from:0x0218678c kind:load to:0x021fef6c add:0x8 module:overlay(23)
 from:0x02186794 kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x0218679c kind:arm_call to:0x021b2164 module:overlay(17)
 from:0x021867a0 kind:arm_call to:0x021849c8 module:overlay(11)

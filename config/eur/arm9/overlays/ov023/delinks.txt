@@ -132,3 +132,9 @@ src/Scene/Overlay_23/MenuGraphics.cpp:
     .text start:0x021fb534 end:0x021fba80
     .rodata start:0x021fd964 end:0x021fd984
     .data start:0x021fee60 end:0x021fef6c
+
+src/Scene/Overlay_23/MenuMusic.cpp:
+    complete
+    .text start:0x021fba80 end:0x021fbb64
+    .rodata start:0x021fd984 end:0x021fd9a4
+    .data start:0x021fef6c end:0x021ff070
