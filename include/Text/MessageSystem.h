@@ -9,7 +9,10 @@ struct MessageSystem
     char unk_14[0x5c - 0x14];
     // 0x960 bytes, which TitleScreen clears before writing the library versions to it
     void* unk_5c;
-    char unk_60[0x2d8 - 0x60];
+    char unk_60[0x14c - 0x60];
+    // 2 or more: the menus' buttons use their second cell (see MenuObjectClass1)
+    int unk_14c;
+    char unk_150[0x2d8 - 0x150];
     // The sprites that the texts can show (a SpriteRenderer, its sprites and its animations)
     void* unk_2d8;
     void* unk_2dc;

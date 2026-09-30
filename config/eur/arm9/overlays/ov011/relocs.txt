@@ -350,7 +350,7 @@ from:0x02185d88 kind:arm_call to:0x02001a40 module:main
 from:0x02185da4 kind:arm_call to:0x021fad84 module:overlay(23)
 from:0x02185db8 kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x02185dc0 kind:arm_call to:0x021f67ac module:overlay(23)
-from:0x02185dd0 kind:load to:0x021fec60 module:overlays(23,24)
+from:0x02185dd0 kind:load to:0x021fec58 add:0x8 module:overlay(23)
 from:0x02185de0 kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x02185dec kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x02185df8 kind:arm_call to:0x02184c30 module:overlay(11)

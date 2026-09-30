@@ -12,7 +12,9 @@ struct SpriteCell
 // The start of a Sprite, which overlay 23 copies
 struct SpriteImage
 {
-    int unk_0;
+    // Overlay 23's buttons reserve this many slots of VRAM and change it (see MenuObjectClass1)
+    unsigned short unk_0;
+    char unk_2[2];
     SpriteCell* cell_;
 };
 
