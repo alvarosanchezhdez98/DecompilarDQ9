@@ -192,3 +192,10 @@ src/Scene/Overlay_23/MenuTouchArea.cpp:
 src/Scene/Overlay_23/EquipmentModelTable.cpp:
     complete
     .text start:0x021dad78 end:0x021db0d4
+
+src/Scene/Overlay_23/ItemInfoWindow.cpp:
+    complete
+    .text start:0x021db0d4 end:0x021e1194
+    .rodata start:0x021fd540 end:0x021fd66c
+    .data start:0x021fda60 end:0x021fdc78
+    .bss start:0x021ff9e0 end:0x021ffa34

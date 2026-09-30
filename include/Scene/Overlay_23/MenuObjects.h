@@ -6,6 +6,7 @@
 #include "Memory/SafeAllocator.h"
 #include "Resource/PartNameTable.h"
 #include "Scene/Overlay_23/CharacterModel.h"
+#include "Scene/Overlay_23/ItemInfoWindow.h"
 #include "Scene/Overlay_23/ItemSortList.h"
 #include "Text/TextTable.h"
 
@@ -779,35 +780,20 @@ public:
     virtual void Vd4();
 };
 
-// What func_ov023_021dc134 initializes (0x79c bytes), in the file of overlay 23 that isn't decompiled yet
-struct Unknown_021dc134
-{
-    char unk_0[0x48];
-    int unk_48;
-    char unk_4c[0x774 - 0x4c];
-    // Flags: 0x4000 when a MenuObjectClass10 has it
-    unsigned short unk_774;
-    char unk_776[2];
-    unsigned char unk_778;
-    char unk_779;
-    signed char unk_77a;
-    char unk_77b[0x79c - 0x77b];
-};
-
-// The objects of type 0x10, which have an Unknown_021dc134 (overlay 4 uses them too)
+// The objects of type 0x10: the window of the information on an item (overlay 4 uses them too)
 class MenuObjectClass10 : public MenuObjectClass
 {
 public:
-    Unknown_021dc134 unk_20;
+    ItemInfoWindow window_;
 
-    int Initialize(MenuScript* script, int id, int heap, int flags, int unk48, unsigned char unk778);
+    int Initialize(MenuScript* script, int id, int heap, int flags, int names, unsigned char background);
     virtual void Update(MenuScript* script);
     virtual void Draw3();
     virtual void Finish(MenuObjectList* list);
-    void Func021fbdcc();
-    void Func021fbddc();
-    Unknown_021dc134* GetUnk20();
-    void SetUnk77a(signed char value);
+    void SetItem(short item);
+    void Close();
+    ItemInfoWindow* GetWindow();
+    void SetMember(signed char member);
 };
 
 // The objects of type 0x11, which load the names of the items and of the parts of the characters' models

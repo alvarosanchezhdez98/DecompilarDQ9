@@ -157,10 +157,14 @@ def qualified_name(symbol: str) -> str:
         rest = rest[len(match[0]) + length:]
         if not nested:
             break
+    operators = {"aS": "=", "eq": "==", "ne": "!=", "lt": "<", "gt": ">", "le": "<=", "ge": ">=", "pl": "+",
+                 "mi": "-", "ml": "*", "dv": "/", "ix": "[]", "cl": "()", "pL": "+=", "mI": "-="}
     if nested and names and rest[:2] in ["C1", "C2", "C3"]:
         names.append(names[-1])
     elif nested and names and rest[:2] in ["D0", "D1", "D2"]:
         names.append("~" + names[-1])
+    elif nested and names and rest[:2] in operators:
+        names.append("operator" + operators[rest[:2]])
     return "::".join(names)
 
 
