@@ -177,3 +177,9 @@ src/Scene/Overlay_23/MenuObject3D.cpp:
     .text start:0x021fcdd4 end:0x021fd1e0
     .rodata start:0x021fda14 end:0x021fda34
     .data start:0x021ff6b0 end:0x021ff7bc
+
+src/Scene/Overlay_23/MenuMusicPlayer.cpp:
+    complete
+    .text start:0x021fd1e0 end:0x021fd320
+    .rodata start:0x021fda34 end:0x021fda54
+    .data start:0x021ff7bc end:0x021ff8c0

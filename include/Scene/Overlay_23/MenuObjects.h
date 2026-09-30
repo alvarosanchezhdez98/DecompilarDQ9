@@ -892,6 +892,34 @@ public:
     void LoadFile(MenuScript* script, void* file, unsigned int size);
 };
 
+// The music that a MenuObjectClassD plays, and how (see func_02094b34)
+struct MenuMusicParams
+{
+    int music_;
+    int unk_4;
+};
+
+struct MenuMusicFlags
+{
+    bool unk_0;
+    bool unk_1;
+};
+
+// The objects of type 0xd, which play a music
+class MenuObjectClassD : public MenuObjectClass
+{
+public:
+    MenuMusicParams params_;
+    MenuMusicFlags flags2_;
+
+    int Initialize(MenuScript* script, int id, int heap, const MenuMusicParams* params, const MenuMusicFlags* flags);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {

@@ -809,12 +809,12 @@ _ZN17MenuObjectClass1411SetPositionEP8Vector3i kind:function(arm,size=0x1c) addr
 _ZN17MenuObjectClass1411GetPositionEv kind:function(arm,size=0x14) addr:0x021fd028
 _ZN17MenuObjectClass144LoadEP10MenuScript kind:function(arm,size=0xe4) addr:0x021fd03c
 _ZN17MenuObjectClass148LoadFileEP10MenuScriptPvj kind:function(arm,size=0xc0) addr:0x021fd120
-func_ov023_021fd1e0 kind:function(arm,size=0x54) addr:0x021fd1e0
-func_ov023_021fd234 kind:function(arm,size=0x4) addr:0x021fd234
-func_ov023_021fd238 kind:function(arm,size=0x80) addr:0x021fd238
-func_ov023_021fd2b8 kind:function(arm,size=0x40) addr:0x021fd2b8
-func_ov023_021fd2f8 kind:function(arm,size=0x20) addr:0x021fd2f8
-func_ov023_021fd318 kind:function(arm,size=0x8) addr:0x021fd318
+_ZN16MenuObjectClassD10InitializeEP10MenuScriptiiPK15MenuMusicParamsPK14MenuMusicFlags kind:function(arm,size=0x54) addr:0x021fd1e0
+_ZN16MenuObjectClassD6FinishEP14MenuObjectList kind:function(arm,size=0x4) addr:0x021fd234
+_ZN16MenuObjectClassD6UpdateEP10MenuScript kind:function(arm,size=0x80) addr:0x021fd238
+_ZN16MenuObjectClassD10State_LoadEP10MenuScript kind:function(arm,size=0x40) addr:0x021fd2b8
+_ZN16MenuObjectClassD10State_WaitEP10MenuScript kind:function(arm,size=0x20) addr:0x021fd2f8
+_ZN16MenuObjectClassD12State_LoadedEP10MenuScript kind:function(arm,size=0x8) addr:0x021fd318
 func_ov023_021fd320 kind:function(arm,size=0x70) addr:0x021fd320
 func_ov023_021fd390 kind:function(arm,size=0x4) addr:0x021fd390
 func_ov023_021fd394 kind:function(arm,size=0x44) addr:0x021fd394
@@ -906,7 +906,7 @@ sKeys kind:data(any) addr:0x021fd920 local
 @1986 kind:data(any) addr:0x021fd9fc local
 @1984 kind:data(any) addr:0x021fda08 local
 @1935 kind:data(any) addr:0x021fda14 local
-data_ov023_021fda34 kind:data(any) addr:0x021fda34
+@1575 kind:data(any) addr:0x021fda34 local
 data_ov023_021fda60 kind:data(any) addr:0x021fda60
 data_ov023_021fda65 kind:data(any) addr:0x021fda65
 data_ov023_021fda6b kind:data(any) addr:0x021fda6b
@@ -995,8 +995,8 @@ _ZTV17MenuObjectClass13 kind:data(any) addr:0x021ff4a8
 _ZTV16MenuObjectClass5 kind:data(any) addr:0x021ff5ac
 _ZTV17MenuObjectClass14 kind:data(any) addr:0x021ff6b0
 @stringBase0 kind:data(any) addr:0x021ff7b4 local
-data_ov023_021ff7bc kind:data(any) addr:0x021ff7bc
-data_ov023_021ff7c4 kind:data(any) addr:0x021ff7c4 ambiguous
+_ZTV16MenuObjectClassD kind:data(any) addr:0x021ff7bc
+data_ov023_021ff8c0 kind:data(any) addr:0x021ff8c0
 data_ov023_021ff8c8 kind:data(any) addr:0x021ff8c8 ambiguous
 data_ov023_021ff9e0 kind:bss addr:0x021ff9e0
 data_ov023_021ffa0c kind:bss addr:0x021ffa0c
