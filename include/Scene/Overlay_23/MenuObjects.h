@@ -675,6 +675,29 @@ public:
     }
 };
 
+// The objects of type 0xb: an animation of the sprites of a MenuObjectClassA
+class MenuObjectClassB : public MenuObjectClass
+{
+public:
+    // The ID of the MenuObjectClassA and the index of the animation
+    unsigned short sprites_;
+    unsigned short animation_;
+    // The slot of the VRAM of the animation's graphics (see MenuObjectList::FindSlots())
+    unsigned short slots_;
+    unsigned short unk_26;
+    // In pixels
+    unsigned short x_;
+    unsigned short y_;
+
+    int Initialize(MenuScript* script, int id, int heap, int sprites, int animation);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    virtual void V3c(short value);
+    virtual int V40();
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {
