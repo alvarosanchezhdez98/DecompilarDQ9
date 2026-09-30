@@ -151,7 +151,7 @@ extern "C"
     extern const char _ZTV16MenuObjectClass5[];
     extern const char _ZTV17MenuObjectClass14[];
     extern const char _ZTV16MenuObjectClassD[];
-    extern const MenuObjectVTable data_ov023_021ff8c8;
+    extern const char _ZTV13MenuTouchArea[];
     // Overlay 4's
     extern const MenuObjectVTable data_ov004_021705f8;
 
@@ -459,12 +459,12 @@ struct MenuObject_021fd1e0 : MenuObject
     MenuObject_021fd1e0() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClassD + 8)) {}
 };
 
-// What func_ov023_021fd320 initializes (sizeof == 0x30)
+// MenuTouchArea of overlay 23 (sizeof == 0x30), which MenuTouchArea::Initialize() initializes
 struct MenuObject_021fd320 : MenuObject
 {
     char unk_10[0x20];
 
-    MenuObject_021fd320() : MenuObject(&data_ov023_021ff8c8) {}
+    MenuObject_021fd320() : MenuObject((const MenuObjectVTable*)(_ZTV13MenuTouchArea + 8)) {}
 };
 
 // A part of MenuObject_02167820
