@@ -872,6 +872,26 @@ public:
     virtual void Draw1();
 };
 
+// The objects of type 0x14: a 3D object whose CHR archive is under data/, alone or in the NARC of the script
+class MenuObjectClass14 : public MenuObjectClass
+{
+public:
+    Object3D object_;
+
+    int Initialize(MenuScript* script, int id, int heap, int vramState, const char* file);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void Draw1();
+    virtual void Draw2();
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    void Load(MenuScript* script);
+    void LoadFile(MenuScript* script, void* file, unsigned int size);
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {

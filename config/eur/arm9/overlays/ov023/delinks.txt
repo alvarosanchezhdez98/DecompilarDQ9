@@ -171,3 +171,9 @@ src/Scene/Overlay_23/MenuCharacter.cpp:
     .text start:0x021fc518 end:0x021fcdd4
     .rodata start:0x021fd9e4 end:0x021fda14
     .data start:0x021ff5ac end:0x021ff6b0
+
+src/Scene/Overlay_23/MenuObject3D.cpp:
+    complete
+    .text start:0x021fcdd4 end:0x021fd1e0
+    .rodata start:0x021fda14 end:0x021fda34
+    .data start:0x021ff6b0 end:0x021ff7bc
