@@ -62,6 +62,18 @@ src/Scene/Overlay_23/GuideWindow.cpp:
     .data start:0x021fe0f0 end:0x021fe144
 
 
+src/Scene/Overlay_23/BattleEnd.cpp:
+    complete
+    .text start:0x021ed7e0 end:0x021f52a0
+    .rodata start:0x021fd860 end:0x021fd8a8
+    .data start:0x021fe144 end:0x021fe334
+    .bss start:0x021ffefc end:0x021fff08
+
+src/Scene/Overlay_23/ExperienceTable.cpp:
+    complete
+    .text start:0x021f52a0 end:0x021f5598
+    .data start:0x021fe334 end:0x021fe34c
+
 src/Scene/Overlay_23/DownloadContent.cpp:
     complete
     .text start:0x021f5598 end:0x021f6378

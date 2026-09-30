@@ -16,8 +16,21 @@ struct BattleResultStatWord
 struct BattleResultStats
 {
     int unk_0;
-    int unk_4;
+    unsigned short level_ : 7;
+    // The skill points earned
+    unsigned short skillPoints_ : 9;
+    short unk_6;
     BattleResultStatWord stats_[3];
+};
+
+// What func_02082490 computes when a party member levels up (0x54 bytes)
+struct BattleLevelUp
+{
+    BattleResultStats before_;
+    BattleResultStats after_;
+    BattleResultStats unk_28;
+    BattleResultStats unk_3c;
+    char unk_50[4];
 };
 
 // A party member as the battle's results know them (0x99c bytes)
@@ -25,7 +38,11 @@ struct BattleResultMember
 {
     unsigned char id_;
     unsigned char vocation_;
-    char unk_2[6];
+    unsigned char level_;
+    // The member is dead
+    unsigned char dead_;
+    // The experience after the battle
+    int experience_;
     char name_[0x30];
     // What func_02085fb4 and the next functions read the base stats from
     char data_[0x888 - 0x38];
