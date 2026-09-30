@@ -38,7 +38,6 @@ extern "C"
 
     // Adds an object to the list, returns an object by its ID and returns its type
     // Returns the names that the object shows
-    int func_ov023_021fd1e0(MenuObject_021fd1e0* object, MenuScript* script, int id, int heap, void*, void*);
     int func_ov023_021fd320(MenuObject_021fd320* object, MenuScript* script, int id, int heap, int, int, int, int,
                             int);
     int func_ov004_02167820(MenuObject_02167820* object, MenuScript* script, int id, int heap);
@@ -987,26 +986,14 @@ static int Command_SetAlphaBlend(ScriptValue* params, int count)
     return 1;
 }
 
-struct MenuObjectParams_021fd1e0
-{
-    int unk_0;
-    int unk_4;
-};
-
-struct MenuObjectFlags_021fd1e0
-{
-    bool unk_0;
-    bool unk_1;
-};
-
 static int Command_22(ScriptValue* params, int count)
 {
     int id = params[0].ToInt();
     int heapId = params[1].ToInt();
-    MenuObjectParams_021fd1e0 values;
-    values.unk_0 = params[2].ToInt();
+    MenuMusicParams values;
+    values.music_ = params[2].ToInt();
     values.unk_4 = params[3].ToInt();
-    MenuObjectFlags_021fd1e0 flags;
+    MenuMusicFlags flags;
     flags.unk_0 = params[4].ToInt() != 0;
     flags.unk_1 = params[5].ToInt() != 0;
     MenuScript* script = func_ov017_021b2164();
@@ -1021,7 +1008,7 @@ static int Command_22(ScriptValue* params, int count)
 
     MenuObject_021fd1e0 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fd1e0));
-    if (!func_ov023_021fd1e0(object, script, id, heapId, &values, &flags))
+    if (!((MenuObjectClassD*)object)->Initialize(script, id, heapId, &values, &flags))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
