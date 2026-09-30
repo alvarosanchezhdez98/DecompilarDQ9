@@ -4808,7 +4808,7 @@ from:0x021fc2dc kind:arm_call to:0x0202f7a8 module:main
 from:0x021fc2ec kind:arm_call to:0x0202fd3c module:main
 from:0x021fc2f8 kind:arm_call to:0x021f6bb0 module:overlay(23)
 from:0x021fc304 kind:load to:0x021ff480 module:overlay(23)
-from:0x021fc308 kind:load to:0x021ff496 module:overlay(23)
+from:0x021fc308 kind:load to:0x021ff480 add:0x16 module:overlay(23)
 from:0x021fc320 kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x021fc328 kind:arm_call to:0x0202f7a8 module:main
 from:0x021fc334 kind:arm_call to:0x021f6bb8 module:overlay(23)
