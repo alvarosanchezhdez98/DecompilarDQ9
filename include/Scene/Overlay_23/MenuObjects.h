@@ -605,6 +605,76 @@ public:
     SpriteRenderer* GetRenderer();
 };
 
+// The objects of type 1, a button: a sprite of a MenuObjectClassA, which runs callbacks of the script when it's
+// touched (0x4c bytes). flags_ has 0x20 while it's touched and 0x40 when touching it plays a sound
+class MenuObjectClass1 : public MenuObjectClass
+{
+public:
+    // The ID of the MenuObjectClassA and the index of the sprite
+    unsigned short sprites_;
+    unsigned short sprite_;
+    // The slots of the VRAM of the sprite's graphics (see MenuObjectList::FindSlots())
+    unsigned short slots_;
+    unsigned short unk_26;
+    // Fixed-point
+    int x_;
+    int y_;
+    // Where touching it counts, from its position
+    short touchX_;
+    short touchY_;
+    short touchWidth_;
+    short touchHeight_;
+    // Or -1 to keep the sprite's
+    signed char palette_;
+    signed char priority_;
+    unsigned char unk_3a;
+    unsigned short touchCallback_;
+    unsigned short holdCallback_;
+    unsigned short releaseCallback_;
+    // While it's held, after holdTime_
+    unsigned short repeatCallback_;
+    // The sprite's cells, or 0 to keep its own: the second one when the message system's unk_14c is 2 or more
+    unsigned short cell_;
+    unsigned short cell2_;
+    // In milliseconds, until repeatCallback_
+    short holdTime_;
+    // It's drawn one pixel lower, to the right or to the left, once
+    unsigned char pressedRight_;
+    unsigned char pressedLeft_;
+
+    int Initialize(MenuScript* script, int id, int heap, int sprites, int sprite);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    virtual void V3c(short value);
+    virtual int V40();
+    virtual void Va4(int callback);
+    virtual int GetTouchCallback();
+    virtual void Vac(int touch, int hold, int release);
+    virtual void Vb0(int callback);
+    virtual int Vb4();
+    void SetTouchArea(int x, int y, int width, int height);
+    void SetPalette(signed char palette);
+    void SetSprite(unsigned short sprite);
+    void SetPriority(signed char priority);
+
+    virtual void Vf0(int value)
+    {
+        pressedRight_ = value;
+    }
+    virtual void Vf4(int value)
+    {
+        pressedLeft_ = value;
+    }
+    virtual int ContainsTouch()
+    {
+        if (flags_ & 0x20)
+            return 1;
+        return 0;
+    }
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {

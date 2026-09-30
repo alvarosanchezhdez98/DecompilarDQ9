@@ -37,13 +37,9 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
     // Returns the names that the object shows
-    void func_ov023_021fb25c(MenuObject* object, int, int, int, int);
-    void func_ov023_021fb274(MenuObject* object, signed char);
-    void func_ov023_021fb284(MenuObject* object, signed char);
     int func_ov023_021fba80(MenuObject_021fba80* object, MenuScript* script, int id, int heap);
     int func_ov023_021fbb64(MenuObject_021fbb64* object, MenuScript* script, int id, int heap, int, int, int, int,
                             int, int, int);
@@ -764,7 +760,7 @@ static int Command_1a(ScriptValue* params, int count)
 
     MenuObject_021fad84 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fad84));
-    if (!func_ov023_021fad84(object, script, id, heapId, unk2, unk3))
+    if (!((MenuObjectClass1*)object)->Initialize(script, id, heapId, unk2, unk3))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -1730,7 +1726,7 @@ static int Command_46(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 1)
         return 1;
 
-    func_ov023_021fb25c(object, unk1, unk2, unk3, unk4);
+    ((MenuObjectClass1*)object)->SetTouchArea(unk1, unk2, unk3, unk4);
     return 1;
 }
 
@@ -2031,7 +2027,7 @@ static int Command_51(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 1)
         return 0;
 
-    func_ov023_021fb274(object, value);
+    ((MenuObjectClass1*)object)->SetPalette(value);
     return 1;
 }
 
@@ -2085,7 +2081,7 @@ static int Command_55(ScriptValue* params, int count)
     if (((MenuObjectClass*)object)->GetType() != 1)
         return 0;
 
-    func_ov023_021fb284(object, value);
+    ((MenuObjectClass1*)object)->SetPriority(value);
     return 1;
 }
 
