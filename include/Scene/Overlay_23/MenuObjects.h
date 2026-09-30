@@ -904,13 +904,27 @@ public:
     char unk_20[4];
     // The ID of the MenuObjectClass6
     unsigned short canvas_;
-    char unk_26[0x2e - 0x26];
+    // In pixels, on the canvas
+    unsigned short x_;
+    unsigned short y_;
+    unsigned short width_;
+    unsigned short height_;
     unsigned char color_;
 
+    int Initialize(MenuScript* script, int id, int heap, int canvas, int x, int y, int width, int height, int color);
+    virtual void Finish(MenuObjectList* list);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    unsigned short GetWidth();
+    unsigned short GetHeight();
+
+    virtual void Update(MenuScript* script) {}
+    virtual void Vd8(unsigned char value)
+    {
+        color_ = value;
+    }
     virtual unsigned char GetColor()
     {
         return color_;
     }
-    unsigned short GetWidth();
-    unsigned short GetHeight();
 };
