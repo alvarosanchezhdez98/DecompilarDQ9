@@ -379,58 +379,58 @@ _ZN11GuideWindow8OpenNameEv kind:function(arm,size=0x148) addr:0x021ed4b8
 _ZN11GuideWindow7OpenEndEv kind:function(arm,size=0xcc) addr:0x021ed600
 _ZN11GuideWindow9IsFlagSetEi kind:function(arm,size=0x58) addr:0x021ed6cc
 _ZN11GuideWindow8SetShownEPKsi kind:function(arm,size=0xbc) addr:0x021ed724
-func_ov023_021ed7e0 kind:function(arm,size=0x24) addr:0x021ed7e0
-func_ov023_021ed804 kind:function(arm,size=0x128) addr:0x021ed804
-func_ov023_021ed92c kind:function(arm,size=0x5c) addr:0x021ed92c
-func_ov023_021ed988 kind:function(arm,size=0x70) addr:0x021ed988
-func_ov023_021ed9f8 kind:function(arm,size=0x210) addr:0x021ed9f8
-func_ov023_021edc08 kind:function(arm,size=0x330) addr:0x021edc08
-func_ov023_021edf38 kind:function(arm,size=0x1c) addr:0x021edf38
-func_ov023_021edf54 kind:function(arm,size=0xb44) addr:0x021edf54
-func_ov023_021eea98 kind:function(arm,size=0x14) addr:0x021eea98
-func_ov023_021eeaac kind:function(arm,size=0x500) addr:0x021eeaac
-func_ov023_021eefac kind:function(arm,size=0x24) addr:0x021eefac
-func_ov023_021eefd0 kind:function(arm,size=0x724) addr:0x021eefd0
-func_ov023_021ef6f4 kind:function(arm,size=0xa00) addr:0x021ef6f4
-func_ov023_021f00f4 kind:function(arm,size=0x8) addr:0x021f00f4
-func_ov023_021f00fc kind:function(arm,size=0x264) addr:0x021f00fc
-func_ov023_021f0360 kind:function(arm,size=0x40) addr:0x021f0360
-func_ov023_021f03a0 kind:function(arm,size=0x6bc) addr:0x021f03a0
-func_ov023_021f0a5c kind:function(arm,size=0x7d8) addr:0x021f0a5c
-func_ov023_021f1234 kind:function(arm,size=0x5e4) addr:0x021f1234
-func_ov023_021f1818 kind:function(arm,size=0x50) addr:0x021f1818
-func_ov023_021f1868 kind:function(arm,size=0x98c) addr:0x021f1868
-func_ov023_021f21f4 kind:function(arm,size=0x38) addr:0x021f21f4
-func_ov023_021f222c kind:function(arm,size=0x70) addr:0x021f222c
-func_ov023_021f229c kind:function(arm,size=0x68) addr:0x021f229c
-func_ov023_021f2304 kind:function(arm,size=0x44) addr:0x021f2304
-func_ov023_021f2348 kind:function(arm,size=0x20) addr:0x021f2348
-func_ov023_021f2368 kind:function(arm,size=0x2d0) addr:0x021f2368
-func_ov023_021f2638 kind:function(arm,size=0x254) addr:0x021f2638
-func_ov023_021f288c kind:function(arm,size=0x1bc) addr:0x021f288c
-func_ov023_021f2a48 kind:function(arm,size=0x424) addr:0x021f2a48
-func_ov023_021f2e6c kind:function(arm,size=0xc20) addr:0x021f2e6c
-func_ov023_021f3a8c kind:function(arm,size=0x20) addr:0x021f3a8c
-func_ov023_021f3aac kind:function(arm,size=0x510) addr:0x021f3aac
-func_ov023_021f3fbc kind:function(arm,size=0xdc) addr:0x021f3fbc
-func_ov023_021f4098 kind:function(arm,size=0x3a0) addr:0x021f4098
-func_ov023_021f4438 kind:function(arm,size=0x98) addr:0x021f4438
-func_ov023_021f44d0 kind:function(arm,size=0x7c) addr:0x021f44d0
-func_ov023_021f454c kind:function(arm,size=0x6b8) addr:0x021f454c
-func_ov023_021f4c04 kind:function(arm,size=0x3c4) addr:0x021f4c04
-func_ov023_021f4fc8 kind:function(arm,size=0x134) addr:0x021f4fc8
-func_ov023_021f50fc kind:function(arm,size=0x54) addr:0x021f50fc
-func_ov023_021f5150 kind:function(arm,size=0xd8) addr:0x021f5150
-func_ov023_021f5228 kind:function(arm,size=0x78) addr:0x021f5228
-func_ov023_021f52a0 kind:function(arm,size=0x28) addr:0x021f52a0
-func_ov023_021f52c8 kind:function(arm,size=0x30) addr:0x021f52c8
-func_ov023_021f52f8 kind:function(arm,size=0x48) addr:0x021f52f8
-func_ov023_021f5340 kind:function(arm,size=0xd0) addr:0x021f5340
-func_ov023_021f5410 kind:function(arm,size=0x38) addr:0x021f5410
-func_ov023_021f5448 kind:function(arm,size=0xdc) addr:0x021f5448
-func_ov023_021f5524 kind:function(arm,size=0x10) addr:0x021f5524
-func_ov023_021f5534 kind:function(arm,size=0x44) addr:0x021f5534
-func_ov023_021f5578 kind:function(arm,size=0x20) addr:0x021f5578
+_Z11ClearRecordP13MonsterRecord kind:function(arm,size=0x24) addr:0x021ed7e0
+_Z14GetMonsterName11MessageNameP12MonsterEntry kind:function(arm,size=0x128) addr:0x021ed804
+_Z11IsPartyDeadv kind:function(arm,size=0x5c) addr:0x021ed92c
+_ZN11BattleScene10FadeBossesEi kind:function(arm,size=0x70) addr:0x021ed988
+_ZN11BattleScene13UpdateVictoryEv kind:function(arm,size=0x210) addr:0x021ed9f8
+_ZN11BattleScene9End_StartEv kind:function(arm,size=0x330) addr:0x021edc08
+_ZN11MessageNameaSERKS_ kind:function(arm,size=0x1c) addr:0x021edf38
+_ZN11BattleScene11End_ResultsEv kind:function(arm,size=0xb44) addr:0x021edf54
+_Z19GetMemberExperienceP11PartyMember kind:function(arm,size=0x14) addr:0x021eea98 local
+_ZN11BattleScene8End_LoadEv kind:function(arm,size=0x500) addr:0x021eeaac
+_ZN9BattleEnd5ResetEv kind:function(arm,size=0x24) addr:0x021eefac
+_ZN11BattleScene11End_VictoryEv kind:function(arm,size=0x724) addr:0x021eefd0
+_ZN11BattleScene14End_LegacyBossEv kind:function(arm,size=0xa00) addr:0x021ef6f4
+_Z9SetVectorP8Vector3iiii kind:function(arm,size=0x8) addr:0x021f00f4 local
+_ZN11BattleScene14End_ExperienceEv kind:function(arm,size=0x264) addr:0x021f00fc
+_ZN9BattleEnd10FindMemberEi kind:function(arm,size=0x40) addr:0x021f0360
+_ZN11BattleScene18End_ShowExperienceEv kind:function(arm,size=0x6bc) addr:0x021f03a0
+_ZN11BattleScene11End_LevelUpEv kind:function(arm,size=0x7d8) addr:0x021f0a5c
+_ZN11BattleScene15End_SkillPointsEv kind:function(arm,size=0x5e4) addr:0x021f1234
+_Z13SetMenuHiddenP10BattleMenui kind:function(arm,size=0x50) addr:0x021f1818 local
+_ZN11BattleScene13End_SkillArtsEv kind:function(arm,size=0x98c) addr:0x021f1868
+_Z17IsTitleScriptDoneP11TitleScript kind:function(arm,size=0x38) addr:0x021f21f4 local
+_Z9ClearPageP9GuidePage kind:function(arm,size=0x70) addr:0x021f222c local
+_Z7SetPageP9GuidePageP10GuideEntry kind:function(arm,size=0x68) addr:0x021f229c local
+_Z12SetPageTitleP9GuidePagePKc kind:function(arm,size=0x44) addr:0x021f2304 local
+_Z14SetGuideUnk400P11GuideWindowh kind:function(arm,size=0x20) addr:0x021f2348 local
+_ZN11BattleScene10End_SpellsEv kind:function(arm,size=0x2d0) addr:0x021f2368
+_ZN11BattleScene8End_GoldEv kind:function(arm,size=0x254) addr:0x021f2638
+_ZN11BattleScene18End_NewSkillPointsEv kind:function(arm,size=0x1bc) addr:0x021f288c
+_ZN11BattleScene9End_DropsEv kind:function(arm,size=0x424) addr:0x021f2a48
+_ZN11BattleScene9End_QuestEv kind:function(arm,size=0xc20) addr:0x021f2e6c
+_Z17IsQuestScriptDoneP11QuestScript kind:function(arm,size=0x20) addr:0x021f3a8c local
+_ZN11BattleScene10End_TitlesEv kind:function(arm,size=0x510) addr:0x021f3aac
+_ZN11BattleScene10End_FinishEv kind:function(arm,size=0xdc) addr:0x021f3fbc
+_ZN11BattleScene13GetExperienceEij kind:function(arm,size=0x3a0) addr:0x021f4098
+_ZN11BattleScene8HasDropsEv kind:function(arm,size=0x98) addr:0x021f4438
+_ZN11BattleScene7GetGoldEv kind:function(arm,size=0x7c) addr:0x021f44d0
+_ZN11BattleScene12ComputeDropsEv kind:function(arm,size=0x6b8) addr:0x021f454c
+_ZN11BattleScene12UpdateDefeatEv kind:function(arm,size=0x3c4) addr:0x021f4c04
+_Z13IsMessageDonev kind:function(arm,size=0x134) addr:0x021f4fc8 local
+_Z12ResetMembersv kind:function(arm,size=0x54) addr:0x021f50fc local
+_ZN11BattleScene13AddExperienceEP10BattleInfoPiS2_i kind:function(arm,size=0xd8) addr:0x021f5150
+_Z13CanLearnSkilli kind:function(arm,size=0x78) addr:0x021f5228 local
+_ZN15ExperienceTable10InitializeEv kind:function(arm,size=0x28) addr:0x021f52a0
+_ZN15ExperienceTable6FinishEv kind:function(arm,size=0x30) addr:0x021f52c8
+_ZN15ExperienceTable4LoadEP13SafeAllocator kind:function(arm,size=0x48) addr:0x021f52f8
+_ZN15ExperienceTable6UpdateEv kind:function(arm,size=0xd0) addr:0x021f5340
+_ZN15ExperienceTable10CancelTaskEv kind:function(arm,size=0x38) addr:0x021f5410
+_ZN15ExperienceTable5ParseEP13SafeAllocatorPvj kind:function(arm,size=0xdc) addr:0x021f5448
+_ZN15ExperienceTable14GetEntriesSizeEv kind:function(arm,size=0x10) addr:0x021f5524
+_ZN15ExperienceTable9FindEntryEi kind:function(arm,size=0x44) addr:0x021f5534
+_ZN15ExperienceTable13GetMultiplierEij kind:function(arm,size=0x20) addr:0x021f5578
 _Z16SetDownloadItemsP13PartNameTable kind:function(arm,size=0x10) addr:0x021f5598
 _Z10Command_64PN6Script9ParameterEi kind:function(arm,size=0x8) addr:0x021f55a8 local
 _Z10Command_65PN6Script9ParameterEi kind:function(arm,size=0x8) addr:0x021f55b0 local
@@ -885,10 +885,12 @@ sWindowLayouts kind:data(any) addr:0x021fd7fc local
 @1567 kind:data(any) addr:0x021fd84c local
 @1725 kind:data(any) addr:0x021fd84e local
 @1321 kind:data(any) addr:0x021fd850 local
-data_ov023_021fd860 kind:data(any) addr:0x021fd860
-data_ov023_021fd862 kind:data(any) addr:0x021fd862
-data_ov023_021fd870 kind:data(any) addr:0x021fd870
-data_ov023_021fd888 kind:data(any) addr:0x021fd888
+_ZN11BattleScene9sMaxLevelE kind:data(any) addr:0x021fd860
+sIconIds kind:data(any) addr:0x021fd862 local
+_ZN11BattleScene10sIconCountE kind:data(any) addr:0x021fd868
+_ZN11BattleScene14sQuestHeapSizeE kind:data(any) addr:0x021fd86c
+sSoundIds kind:data(any) addr:0x021fd870 local
+sDropRates kind:data(any) addr:0x021fd888 local
 @1496 kind:data(any) addr:0x021fd8a8 local
 @2112 kind:data(any) addr:0x021fd8d8 local
 @1691 kind:data(any) addr:0x021fd8f8 local
@@ -924,26 +926,11 @@ sStrings kind:data(any) addr:0x021fdce0 local
 sCommandTable kind:data(any) addr:0x021fddb8 local
 sStates kind:data(any) addr:0x021fe0f0 local
 @stringBase0 kind:data(byte[0x3c]) addr:0x021fe108 local
-data_ov023_021fe144 kind:data(any) addr:0x021fe144
-data_ov023_021fe148 kind:data(any) addr:0x021fe148
-data_ov023_021fe1d8 kind:data(any) addr:0x021fe1d8
-data_ov023_021fe1ee kind:data(any) addr:0x021fe1ee
-data_ov023_021fe200 kind:data(any) addr:0x021fe200
-data_ov023_021fe218 kind:data(any) addr:0x021fe218
-data_ov023_021fe230 kind:data(any) addr:0x021fe230
-data_ov023_021fe246 kind:data(any) addr:0x021fe246
-data_ov023_021fe258 kind:data(any) addr:0x021fe258
-data_ov023_021fe25e kind:data(any) addr:0x021fe25e
-data_ov023_021fe273 kind:data(any) addr:0x021fe273
-data_ov023_021fe284 kind:data(any) addr:0x021fe284
-data_ov023_021fe2a0 kind:data(any) addr:0x021fe2a0
-data_ov023_021fe2b7 kind:data(any) addr:0x021fe2b7
-data_ov023_021fe2ca kind:data(any) addr:0x021fe2ca
-data_ov023_021fe2e5 kind:data(any) addr:0x021fe2e5
-data_ov023_021fe2f7 kind:data(any) addr:0x021fe2f7
-data_ov023_021fe316 kind:data(any) addr:0x021fe316
-data_ov023_021fe334 kind:data(any) addr:0x021fe334
-data_ov023_021fe338 kind:data(any) addr:0x021fe338
+sFormat kind:data(any) addr:0x021fe144 local
+sEndStates kind:data(any) addr:0x021fe148
+sStrings kind:data(byte[0x15a]) addr:0x021fe1d8 local
+_ZN15ExperienceTable5sFileE kind:data(any) addr:0x021fe334
+@stringBase0 kind:data(any) addr:0x021fe338 local
 sCommands kind:data(any) addr:0x021fe34c local
 sStrings kind:data(any) addr:0x021fe3ac local
 _ZTV16MenuObjectClass0 kind:data(any) addr:0x021fe3dc
@@ -981,7 +968,9 @@ sLoading kind:bss addr:0x021ffa34 local
 _ZGVcopy$1767 kind:bss addr:0x021ffa44 local
 copy$1767 kind:bss addr:0x021ffa48 local
 sCommands kind:bss addr:0x021ffa4c local
-data_ov023_021ffefc kind:bss addr:0x021ffefc
+sEnd kind:bss addr:0x021ffefc local
+sTimer kind:bss addr:0x021fff00 local
+sEndStatesGuard kind:bss addr:0x021fff04 local
 sState kind:bss addr:0x021fff08 local
 sChosen kind:bss addr:0x021fff1c local
 sRepeatTime kind:bss addr:0x021fff24 local

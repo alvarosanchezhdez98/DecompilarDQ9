@@ -9,13 +9,18 @@
 // A page of a GuideWindow (0x244 bytes): a title and a text
 struct GuidePage
 {
-    unsigned int unk_0_0 : 30;
+    unsigned int unk_0_0 : 9;
+    unsigned int unk_0_9 : 9;
+    unsigned int unk_0_18 : 9;
+    unsigned int unk_0_27 : 3;
     // How the title is laid out (0 to 2)
     unsigned int layout_ : 2;
     // The text, which the message system formats
     const char* text_;
     int unk_8;
-    char title_[0x244 - 0xc];
+    char title_[0x38];
+    // What text_ points to, when the page has its own text
+    char buffer_[0x200];
 };
 
 // The flags of GuideWindow
