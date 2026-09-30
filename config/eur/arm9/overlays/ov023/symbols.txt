@@ -760,14 +760,14 @@ _ZN16MenuObjectClassF3Vc8EP8Vector3i kind:function(arm,size=0x1c) addr:0x021fbcd
 _ZN16MenuObjectClassF3V40Ev kind:function(arm,size=0x8) addr:0x021fbcf0
 _ZN16MenuObjectClassF3V3cEs kind:function(arm,size=0x4) addr:0x021fbcf8
 _ZN16MenuObjectClassF6UpdateEP10MenuScript kind:function(arm,size=0x4) addr:0x021fbcfc
-func_ov023_021fbd00 kind:function(arm,size=0x90) addr:0x021fbd00
-func_ov023_021fbd90 kind:function(arm,size=0x1c) addr:0x021fbd90
-func_ov023_021fbdac kind:function(arm,size=0x10) addr:0x021fbdac
-func_ov023_021fbdbc kind:function(arm,size=0x10) addr:0x021fbdbc
-func_ov023_021fbdcc kind:function(arm,size=0x10) addr:0x021fbdcc
-func_ov023_021fbddc kind:function(arm,size=0x10) addr:0x021fbddc
-func_ov023_021fbdec kind:function(arm,size=0x8) addr:0x021fbdec
-func_ov023_021fbdf4 kind:function(arm,size=0x14) addr:0x021fbdf4
+_ZN17MenuObjectClass1010InitializeEP10MenuScriptiiiih kind:function(arm,size=0x90) addr:0x021fbd00
+_ZN17MenuObjectClass106UpdateEP10MenuScript kind:function(arm,size=0x1c) addr:0x021fbd90
+_ZN17MenuObjectClass105Draw3Ev kind:function(arm,size=0x10) addr:0x021fbdac
+_ZN17MenuObjectClass106FinishEP14MenuObjectList kind:function(arm,size=0x10) addr:0x021fbdbc
+_ZN17MenuObjectClass1012Func021fbdccEv kind:function(arm,size=0x10) addr:0x021fbdcc
+_ZN17MenuObjectClass1012Func021fbddcEv kind:function(arm,size=0x10) addr:0x021fbddc
+_ZN17MenuObjectClass108GetUnk20Ev kind:function(arm,size=0x8) addr:0x021fbdec
+_ZN17MenuObjectClass109SetUnk77aEa kind:function(arm,size=0x14) addr:0x021fbdf4
 func_ov023_021fbe08 kind:function(arm,size=0x44) addr:0x021fbe08
 func_ov023_021fbe4c kind:function(arm,size=0x24) addr:0x021fbe4c
 func_ov023_021fbe70 kind:function(arm,size=0x80) addr:0x021fbe70
@@ -987,8 +987,8 @@ _ZTV16MenuObjectClassC kind:data(any) addr:0x021fee60
 @stringBase0 kind:data(any) addr:0x021fef64 local
 _ZTV16MenuObjectClassE kind:data(any) addr:0x021fef6c
 _ZTV16MenuObjectClassF kind:data(any) addr:0x021ff070
-data_ov023_021ff174 kind:data(any) addr:0x021ff174
-data_ov023_021ff17c kind:data(any) addr:0x021ff17c ambiguous
+_ZTV17MenuObjectClass10 kind:data(any) addr:0x021ff174
+data_ov023_021ff278 kind:data(any) addr:0x021ff278
 data_ov023_021ff280 kind:data(any) addr:0x021ff280 ambiguous
 data_ov023_021ff384 kind:data(any) addr:0x021ff384 ambiguous
 data_ov023_021ff480 kind:data(any) addr:0x021ff480

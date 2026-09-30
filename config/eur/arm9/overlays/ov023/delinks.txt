@@ -143,3 +143,8 @@ src/Scene/Overlay_23/MenuNumber.cpp:
     complete
     .text start:0x021fbb64 end:0x021fbd00
     .data start:0x021ff070 end:0x021ff174
+
+src/Scene/Overlay_23/MenuObject10.cpp:
+    complete
+    .text start:0x021fbd00 end:0x021fbe08
+    .data start:0x021ff174 end:0x021ff278
