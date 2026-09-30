@@ -38,8 +38,6 @@ extern "C"
 
     // Adds an object to the list, returns an object by its ID and returns its type
     // Returns the names that the object shows
-    int func_ov023_021fbd00(MenuObject_021fbd00* object, MenuScript* script, int id, int heap, int, int,
-                            unsigned char);
     int func_ov023_021fbe08(MenuObject_021fbe08* object, MenuScript* script, int id, int heap, int);
     int func_ov023_021fc1f4(MenuObject_021fc1f4* object, MenuScript* script, int id, int heap);
     int func_ov023_021fc408(MenuObject_021fc408* object, MenuScript* script, int id, int heap, int, int, int, int,
@@ -1186,7 +1184,7 @@ static int Command_2a(ScriptValue* params, int count)
 
     MenuObject_021fbd00 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fbd00));
-    if (!func_ov023_021fbd00(object, script, id, heapId, unk2, unk, unk4))
+    if (!((MenuObjectClass10*)object)->Initialize(script, id, heapId, unk2, unk, unk4))
         return 0;
 
     objects->Add((MenuObjectClass*)object);
@@ -1201,6 +1199,7 @@ extern "C"
     void _ZN10MenuScript8FindHeapEi(); // MenuScript::FindHeap
     void _ZN14MenuObjectList3AddEP15MenuObjectClass(); // MenuObjectList::Add
     void _ZN14MenuObjectList4FindEi(); // MenuObjectList::Find
+    void _ZN17MenuObjectClass1010InitializeEP10MenuScriptiiiih(); // MenuObjectClass10::Initialize
     void _ZN13SafeAllocator11CreateTypeBEPvji(); // SafeAllocator::CreateTypeB
     void _ZN13SafeAllocator21ResetAllocatorPointerEv(); // SafeAllocator::ResetAllocatorPointer
     void _ZN13SafeAllocator8AllocateEj(); // SafeAllocator::Allocate
@@ -1266,7 +1265,7 @@ static asm int Command_2a(ScriptValue* params, int count)
     mov r7, r0
 @L02186a7c:
     add r8, sp, #0x30
-    ldr r1, =data_ov023_021ff17c
+    ldr r1, =_ZTV17MenuObjectClass10+8
     mov r0, r8
     str r1, [sp, #0x10]
     bl _ZN13SafeAllocator21ResetAllocatorPointerEv
@@ -1297,7 +1296,7 @@ static asm int Command_2a(ScriptValue* params, int count)
     mov r3, r9
     mov r0, r6
     str r4, [sp, #0x8]
-    bl func_ov023_021fbd00
+    bl _ZN17MenuObjectClass1010InitializeEP10MenuScriptiiiih
     cmp r0, #0x0
     bne @L02186b18
     add r0, sp, #0x15c
