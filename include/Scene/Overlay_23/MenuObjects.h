@@ -757,6 +757,22 @@ public:
     }
 };
 
+// The objects of type 0xe, which pause and resume the music
+class MenuObjectClassE : public MenuObjectClass
+{
+public:
+    int Initialize(MenuScript* script, int id, int heap);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    // Resumes the music
+    virtual void Vd0();
+    // Pauses the music
+    virtual void Vd4();
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {
