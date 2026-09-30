@@ -3611,7 +3611,7 @@ from:0x0216b164 kind:arm_call to:0x02001a40 module:main
 from:0x0216b1a4 kind:arm_call to:0x021fc408 module:overlay(23)
 from:0x0216b1ac kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x0216b1b4 kind:arm_call to:0x021f67ac module:overlay(23)
-from:0x0216b1c0 kind:load to:0x021ff4b0 module:overlays(23,24)
+from:0x0216b1c0 kind:load to:0x021ff4a8 add:0x8 module:overlay(23)
 from:0x0216b1d0 kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x0216b1d8 kind:arm_call to:0x021f6880 module:overlay(23)
 from:0x0216b1e4 kind:arm_call to:0x021f6f10 module:overlays(23,24)
