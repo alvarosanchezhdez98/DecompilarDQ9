@@ -37,8 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021fa760(MenuObject_021fa760* object, MenuScript* script, int id, int heap, const char* archive,
-                            const char* file, int);
     int func_ov023_021fad84(MenuObject_021fad84* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
@@ -739,14 +737,14 @@ static int Command_CreateSprites(ScriptValue* params, int count)
 
     MenuObject_021fa760 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fa760));
-    if (!func_ov023_021fa760(object, script, id, heapId, 0, file, unk))
+    if (!((MenuObjectClassA*)object)->Initialize(script, id, heapId, 0, file, unk))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
     return 1;
 }
 
-MenuObject_021fa760::MenuObject_021fa760() : MenuObject(&data_ov023_021feb40) {}
+MenuObject_021fa760::MenuObject_021fa760() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClassA + 8)) {}
 
 static int Command_1a(ScriptValue* params, int count)
 {
@@ -2473,7 +2471,7 @@ static int Command_70(ScriptValue* params, int count)
 
     MenuObject_021fa760 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fa760));
-    if (!func_ov023_021fa760(object, script, id, heapId, archive, file, unk))
+    if (!((MenuObjectClassA*)object)->Initialize(script, id, heapId, archive, file, unk))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);

@@ -4614,10 +4614,10 @@ from:0x021fac9c kind:arm_call to:0x021fa854 module:overlay(23)
 from:0x021facac kind:arm_call to:0x0205af28 module:main
 from:0x021facbc kind:arm_call to:0x021f6e10 module:overlay(23)
 from:0x021facd0 kind:arm_call to:0x020421b0 module:main
-from:0x021fad08 kind:load to:0x021fec44 module:overlay(23)
-from:0x021fad0c kind:load to:0x021fec49 module:overlay(23)
-from:0x021fad10 kind:load to:0x021fec4e module:overlay(23)
-from:0x021fad14 kind:load to:0x021fec53 module:overlay(23)
+from:0x021fad08 kind:load to:0x021fec3c add:0x8 module:overlay(23)
+from:0x021fad0c kind:load to:0x021fec3c add:0xd module:overlay(23)
+from:0x021fad10 kind:load to:0x021fec3c add:0x12 module:overlay(23)
+from:0x021fad14 kind:load to:0x021fec3c add:0x17 module:overlay(23)
 from:0x021fad40 kind:arm_call to:0x0207551c module:main
 from:0x021fad6c kind:arm_call to:0x0204685c module:main
 from:0x021fad98 kind:arm_call to:0x021f6ed8 module:overlay(23)

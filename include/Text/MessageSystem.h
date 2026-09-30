@@ -10,10 +10,12 @@ struct MessageSystem
     // 0x960 bytes, which TitleScreen clears before writing the library versions to it
     void* unk_5c;
     char unk_60[0x2d8 - 0x60];
-    int unk_2d8;
-    int unk_2dc;
+    // The sprites that the texts can show (a SpriteRenderer, its sprites and its animations)
+    void* unk_2d8;
+    void* unk_2dc;
     void* unk_2e0;
-    char unk_2e4[3];
+    short unk_2e4;
+    unsigned char unk_2e6;
     // TitleScreen waits for 2 after func_02043368
     unsigned char unk_2e7;
     char unk_2e8[0x998 - 0x2e8];
