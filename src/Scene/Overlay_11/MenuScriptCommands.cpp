@@ -38,7 +38,6 @@ extern "C"
 
     // Adds an object to the list, returns an object by its ID and returns its type
     // Returns the names that the object shows
-    int func_ov023_021fbe08(MenuObject_021fbe08* object, MenuScript* script, int id, int heap, int);
     int func_ov023_021fc1f4(MenuObject_021fc1f4* object, MenuScript* script, int id, int heap);
     int func_ov023_021fc408(MenuObject_021fc408* object, MenuScript* script, int id, int heap, int, int, int, int,
                             int, int);
@@ -1338,7 +1337,7 @@ static int Command_2b(ScriptValue* params, int count)
 
     MenuObject_021fbe08 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fbe08));
-    if (!func_ov023_021fbe08(object, script, id, heapId, unk))
+    if (!((MenuObjectClass11*)object)->Initialize(script, id, heapId, unk))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
