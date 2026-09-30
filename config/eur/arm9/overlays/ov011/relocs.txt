@@ -498,7 +498,7 @@ from:0x02186954 kind:arm_call to:0x02001a40 module:main
 from:0x02186988 kind:arm_call to:0x021fbb64 module:overlay(23)
 from:0x0218699c kind:arm_call to:0x021849c8 module:overlay(11)
 from:0x021869a4 kind:arm_call to:0x021f67ac module:overlay(23)
-from:0x021869b4 kind:load to:0x021ff078 module:overlays(23,24)
+from:0x021869b4 kind:load to:0x021ff070 add:0x8 module:overlay(23)
 from:0x021869cc kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x021869d8 kind:arm_call to:0x02184c30 module:overlay(11)
 from:0x021869e4 kind:arm_call to:0x02184c30 module:overlay(11)

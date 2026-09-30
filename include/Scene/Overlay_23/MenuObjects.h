@@ -777,17 +777,36 @@ public:
 class MenuObjectClassF : public MenuObjectClass
 {
 public:
-    char unk_20[0x2c - 0x20];
+    Vector3fix unk_20;
     int value_;
     // The ID of the MenuObjectClass6
     unsigned short canvas_;
-    char unk_32[0x3a - 0x32];
+    // In pixels, on the canvas
+    unsigned short x_;
+    unsigned short y_;
+    // In pixels, that MenuObjectClass6 sets when it draws the number
+    unsigned short width_;
+    unsigned short height_;
     unsigned char font_ : 4;
     unsigned char color_ : 4;
     unsigned char unk_3b;
     unsigned char unk_3c;
     unsigned char unk_3d;
 
+    int Initialize(MenuScript* script, int id, int heap, int canvas, int x, int y, int font, int unk3b, int unk3c,
+                   int color);
+    virtual void Finish(MenuObjectList* list);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    virtual Vector3fix Vcc();
+    virtual void Vc8(Vector3fix* value);
+
+    virtual void Update(MenuScript* script) {}
+    virtual void V3c(short value) {}
+    virtual int V40()
+    {
+        return 0;
+    }
     virtual void Vd8(unsigned char value)
     {
         color_ = value;
