@@ -38,7 +38,22 @@ struct PartModelInfo
     unsigned int unk_4_28 : 1;
     unsigned int unk_4_29 : 1;
     unsigned int unk_4_30 : 2;
-    int unk_8[4];
+    // The item's stats (see ItemInfoWindow::DrawStats()): the last three of unk_8 and unk_c are tenths
+    int unk_8_0 : 10;
+    int unk_8_10 : 10;
+    unsigned int unk_8_20 : 10;
+    unsigned int unk_8_30 : 2;
+    unsigned int unk_c_0 : 10;
+    unsigned int unk_c_10 : 10;
+    unsigned int unk_c_20 : 12;
+    int unk_10_0 : 10;
+    int unk_10_10 : 10;
+    int unk_10_20 : 10;
+    int unk_10_30 : 2;
+    int unk_14_0 : 10;
+    int unk_14_10 : 10;
+    int unk_14_20 : 10;
+    int unk_14_30 : 2;
     // The item's bonuses (overlay 23's commands add them up)
     int unk_18_0 : 10;
     int unk_18_10 : 10;
@@ -59,7 +74,9 @@ struct PartEntry
     unsigned int category_ : 4;
     // 6 for the items that the character holds with the arms (arm2R and arm2L)
     unsigned int type_ : 5;
-    unsigned int unk_8_9 : 23;
+    // The stars of its rank (5 for the rarest ones, which sparkle)
+    unsigned int rank_ : 3;
+    unsigned int unk_8_12 : 20;
     unsigned int unk_c_0 : 12;
     // The flag that tells whether the player has the item (overlay 23's ItemSortList checks it)
     unsigned int flag_ : 11;

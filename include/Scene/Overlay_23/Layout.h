@@ -104,6 +104,7 @@ struct Layout
     int IsVisible(short id);
     void SetPosition(short id, short x, short y);
     void SetSize(short id, short width, short height);
-    // In another file of overlay 23
+    // In another file of overlay 23 (ItemInfoWindow.cpp)
     LayoutElement* FindElement(short id);
+    void SetElementPosition(short id, short x, short y);
 };
