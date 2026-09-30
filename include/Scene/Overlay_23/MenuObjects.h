@@ -5,6 +5,7 @@
 #include "Graphics/Vector.h"
 #include "Memory/SafeAllocator.h"
 #include "Resource/PartNameTable.h"
+#include "Scene/Overlay_23/ItemSortList.h"
 #include "Text/TextTable.h"
 
 class MenuScript;
@@ -175,7 +176,8 @@ public:
     {
         return 0;
     }
-    virtual int Vec()
+    // The ItemSortList that MenuObjectClass12 loaded
+    virtual void* Vec()
     {
         return 0;
     }
@@ -824,6 +826,21 @@ public:
     int State_Wait(MenuScript* script);
     int State_Loaded(MenuScript* script);
     virtual void* Ve8();
+};
+
+// The objects of type 0x12, which load the order of the items (data/prm/itemsort.gp2)
+class MenuObjectClass12 : public MenuObjectClass
+{
+public:
+    ItemSortList list_;
+
+    int Initialize(MenuScript* script, int id, int heap);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void* Vec();
 };
 
 // The objects of type 0xf, a number on a MenuObjectClass6
