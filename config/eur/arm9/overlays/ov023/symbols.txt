@@ -720,13 +720,13 @@ _ZN16MenuObjectClass111SetPriorityEa kind:function(arm,size=0x8) addr:0x021fb284
 _ZN16MenuObjectClass113ContainsTouchEv kind:function(arm,size=0x14) addr:0x021fb28c
 _ZN16MenuObjectClass13Vf4Ei kind:function(arm,size=0x8) addr:0x021fb2a0
 _ZN16MenuObjectClass13Vf0Ei kind:function(arm,size=0x8) addr:0x021fb2a8
-func_ov023_021fb2b0 kind:function(arm,size=0xb4) addr:0x021fb2b0
-func_ov023_021fb364 kind:function(arm,size=0x64) addr:0x021fb364
-func_ov023_021fb3c8 kind:function(arm,size=0xd0) addr:0x021fb3c8
-func_ov023_021fb498 kind:function(arm,size=0x44) addr:0x021fb498
-func_ov023_021fb4dc kind:function(arm,size=0x48) addr:0x021fb4dc
-func_ov023_021fb524 kind:function(arm,size=0x8) addr:0x021fb524
-func_ov023_021fb52c kind:function(arm,size=0x8) addr:0x021fb52c
+_ZN16MenuObjectClassB10InitializeEP10MenuScriptiiii kind:function(arm,size=0xb4) addr:0x021fb2b0
+_ZN16MenuObjectClassB6FinishEP14MenuObjectList kind:function(arm,size=0x64) addr:0x021fb364
+_ZN16MenuObjectClassB6UpdateEP10MenuScript kind:function(arm,size=0xd0) addr:0x021fb3c8
+_ZN16MenuObjectClassB11SetPositionEP8Vector3i kind:function(arm,size=0x44) addr:0x021fb498
+_ZN16MenuObjectClassB11GetPositionEv kind:function(arm,size=0x48) addr:0x021fb4dc
+_ZN16MenuObjectClassB3V3cEs kind:function(arm,size=0x8) addr:0x021fb524
+_ZN16MenuObjectClassB3V40Ev kind:function(arm,size=0x8) addr:0x021fb52c
 func_ov023_021fb534 kind:function(arm,size=0x10c) addr:0x021fb534
 func_ov023_021fb640 kind:function(arm,size=0x40) addr:0x021fb640
 func_ov023_021fb680 kind:function(arm,size=0x80) addr:0x021fb680
@@ -982,8 +982,8 @@ _ZTV16MenuObjectClass4 kind:data(any) addr:0x021fea2c
 _ZTV16MenuObjectClassA kind:data(any) addr:0x021feb38
 @stringBase0 kind:data(any) addr:0x021fec3c local
 _ZTV16MenuObjectClass1 kind:data(any) addr:0x021fec58
-data_ov023_021fed5c kind:data(any) addr:0x021fed5c
-data_ov023_021fed64 kind:data(any) addr:0x021fed64 ambiguous
+_ZTV16MenuObjectClassB kind:data(any) addr:0x021fed5c
+data_ov023_021fee60 kind:data(any) addr:0x021fee60
 data_ov023_021fee68 kind:data(any) addr:0x021fee68 ambiguous
 data_ov023_021fef64 kind:data(any) addr:0x021fef64
 data_ov023_021fef74 kind:data(any) addr:0x021fef74 ambiguous

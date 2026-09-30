@@ -37,7 +37,6 @@ extern "C"
     void func_ov017_021d4cc0(ScriptEngine* engine, ScriptCommand* commands, int count);
 
     // Adds an object to the list, returns an object by its ID and returns its type
-    int func_ov023_021fb2b0(MenuObject_021fb2b0* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fb534(MenuObject_021fb534* object, MenuScript* script, int id, int heap, const char* file, int);
     // Returns the names that the object shows
     int func_ov023_021fba80(MenuObject_021fba80* object, MenuScript* script, int id, int heap);
@@ -785,7 +784,7 @@ static int Command_1b(ScriptValue* params, int count)
 
     MenuObject_021fb2b0 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fb2b0));
-    if (!func_ov023_021fb2b0(object, script, id, heapId, unk2, unk3))
+    if (!((MenuObjectClassB*)object)->Initialize(script, id, heapId, unk2, unk3))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);

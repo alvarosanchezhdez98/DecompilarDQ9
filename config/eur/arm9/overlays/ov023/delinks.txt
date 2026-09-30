@@ -121,3 +121,8 @@ src/Scene/Overlay_23/MenuButton.cpp:
     complete
     .text start:0x021fad84 end:0x021fb2b0
     .data start:0x021fec58 end:0x021fed5c
+
+src/Scene/Overlay_23/MenuAnimation.cpp:
+    complete
+    .text start:0x021fb2b0 end:0x021fb534
+    .data start:0x021fed5c end:0x021fee60
