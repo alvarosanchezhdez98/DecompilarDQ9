@@ -148,7 +148,7 @@ extern "C"
     extern const char _ZTV17MenuObjectClass11[];
     extern const char _ZTV17MenuObjectClass12[];
     extern const char _ZTV17MenuObjectClass13[];
-    extern const MenuObjectVTable data_ov023_021ff5b4;
+    extern const char _ZTV16MenuObjectClass5[];
     extern const MenuObjectVTable data_ov023_021ff6b8;
     extern const MenuObjectVTable data_ov023_021ff7c4;
     extern const MenuObjectVTable data_ov023_021ff8c8;
@@ -433,14 +433,14 @@ struct MenuObject_021fc408 : MenuObject
     MenuObject_021fc408() : MenuObject((const MenuObjectVTable*)(_ZTV17MenuObjectClass13 + 8)) {}
 };
 
-// What func_ov023_021fc518 initializes (sizeof == 0x1870)
+// MenuObjectClass5 of overlay 23 (sizeof == 0x1870), which MenuObjectClass5::Initialize() initializes: a model
 struct MenuObject_021fc518 : MenuObject
 {
     char unk_10[0x10];
     CharacterModel unk_20[2];
     char unk_1860[0x10];
 
-    MenuObject_021fc518() : MenuObject(&data_ov023_021ff5b4) {}
+    MenuObject_021fc518() : MenuObject((const MenuObjectVTable*)(_ZTV16MenuObjectClass5 + 8)) {}
 };
 
 // What func_ov023_021fcdd4 initializes (sizeof == 0xcc)

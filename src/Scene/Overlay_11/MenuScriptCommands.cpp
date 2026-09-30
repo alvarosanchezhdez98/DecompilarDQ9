@@ -38,7 +38,6 @@ extern "C"
 
     // Adds an object to the list, returns an object by its ID and returns its type
     // Returns the names that the object shows
-    int func_ov023_021fc518(MenuObject_021fc518* object, MenuScript* script, int id, int heap, int, int);
     int func_ov023_021fcdd4(MenuObject_021fcdd4* object, MenuScript* script, int id, int heap, int, const char*);
     int func_ov023_021fd1e0(MenuObject_021fd1e0* object, MenuScript* script, int id, int heap, void*, void*);
     int func_ov023_021fd320(MenuObject_021fd320* object, MenuScript* script, int id, int heap, int, int, int, int,
@@ -1780,7 +1779,7 @@ static int Command_4a(ScriptValue* params, int count)
 
     MenuObject_021fc518 prototype;
     memcpy(object, &prototype, sizeof(MenuObject_021fc518));
-    if (!func_ov023_021fc518(object, script, id, heapId, unk2, unk))
+    if (!((MenuObjectClass5*)object)->Initialize(script, id, heapId, unk2, unk))
         return 0;
 
     script->GetObjects()->Add((MenuObjectClass*)object);
@@ -1794,6 +1793,7 @@ extern "C"
     void _ZN10MenuScript7GetHeapEv(); // MenuScript::GetHeap
     void _ZN10MenuScript8FindHeapEi(); // MenuScript::FindHeap
     void _ZN14MenuObjectList3AddEP15MenuObjectClass(); // MenuObjectList::Add
+    void _ZN16MenuObjectClass510InitializeEP10MenuScriptiiii(); // MenuObjectClass5::Initialize
     void _ZN13SafeAllocator11CreateTypeBEPvji(); // SafeAllocator::CreateTypeB
     void _ZN13SafeAllocator21ResetAllocatorPointerEv(); // SafeAllocator::ResetAllocatorPointer
     void _ZN13SafeAllocator8AllocateEj(); // SafeAllocator::Allocate
@@ -1840,7 +1840,7 @@ static asm int Command_4a(ScriptValue* params, int count)
     movs r5, r0
     moveq r0, #0x0
     beq @L02187840
-    ldr r0, =data_ov023_021ff5b4
+    ldr r0, =_ZTV16MenuObjectClass5+8
     add r7, sp, #0x2c
     str r0, [sp, #0xc]
 @L021877b0:
@@ -1872,7 +1872,7 @@ static asm int Command_4a(ScriptValue* params, int count)
     mov r1, r11
     mov r3, r9
     str r8, [sp, #0x4]
-    bl func_ov023_021fc518
+    bl _ZN16MenuObjectClass510InitializeEP10MenuScriptiiii
     cmp r0, #0x0
     moveq r0, #0x0
     beq @L02187840

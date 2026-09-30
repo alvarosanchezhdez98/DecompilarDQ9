@@ -5,6 +5,7 @@
 #include "Graphics/Vector.h"
 #include "Memory/SafeAllocator.h"
 #include "Resource/PartNameTable.h"
+#include "Scene/Overlay_23/CharacterModel.h"
 #include "Scene/Overlay_23/ItemSortList.h"
 #include "Text/TextTable.h"
 
@@ -841,6 +842,34 @@ public:
     int State_Wait(MenuScript* script);
     int State_Loaded(MenuScript* script);
     virtual void* Vec();
+};
+
+// The objects of type 5: a party member's 3D model, which L and R turn (overlay 4 uses them too). It loads the next
+// member in the other model and shows it when it's loaded
+class MenuObjectClass5 : public MenuObjectClass
+{
+public:
+    CharacterModel models_[2];
+    // The camera's perspective before the object changed it
+    int perspective_;
+    // The model that it shows
+    unsigned char current_ : 1;
+    // It turns the model back to the front
+    unsigned char turnBack_ : 1;
+    unsigned char unk_1864_2 : 1;
+    // The other model is loading, and it shows it when it's loaded
+    unsigned char swap_ : 1;
+    // What L and R run instead of turning the model (pointers to the functions)
+    void (**leftCallback_)(MenuScript* script);
+    void (**rightCallback_)(MenuScript* script);
+
+    int Initialize(MenuScript* script, int id, int heap, int names, int member);
+    virtual void Finish(MenuObjectList* list);
+    void Load(int member, int turn);
+    virtual void Update(MenuScript* script);
+    void TurnLeft();
+    void TurnRight();
+    virtual void Draw1();
 };
 
 // The objects of type 0xf, a number on a MenuObjectClass6
