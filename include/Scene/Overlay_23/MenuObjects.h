@@ -698,6 +698,65 @@ public:
     virtual int V40();
 };
 
+// What func_02075cdc initializes (0x74 bytes): graphics that func_02076080 loads from a file
+struct Unknown_02075cdc
+{
+    char unk_0[0x14];
+    // In the OAM
+    unsigned int unk_14;
+    char unk_18[0x38 - 0x18];
+    // In the VRAM of the sprites' graphics
+    unsigned int unk_38;
+    // The bit of MenuObjectList's masks
+    unsigned int unk_3c;
+    int unk_40;
+    char unk_44[0x5e - 0x44];
+    // The screen: 0 for the main one, 1 for the sub one
+    unsigned char unk_5e;
+    char unk_5f[0x70 - 0x5f];
+    // The slot of the OAM (see MenuObjectList::FindSlots())
+    unsigned short unk_70;
+    char unk_72[2];
+};
+
+// The objects of type 0xc: graphics whose file is under data/, alone or in the NARC of the script
+class MenuObjectClassC : public MenuObjectClass
+{
+public:
+    Unknown_02075cdc graphics_;
+    // The VRAM of the graphics
+    MenuObjectRange range_;
+    unsigned short unk_a4;
+    // Fixed-point
+    int x_;
+    int y_;
+    // It's drawn one pixel lower, to the right or to the left, once
+    unsigned char pressedRight_;
+    unsigned char pressedLeft_;
+
+    int Initialize(MenuScript* script, int id, int heap, const char* file, int screen);
+    virtual void Finish(MenuObjectList* list);
+    virtual void Update(MenuScript* script);
+    int State_Load(MenuScript* script);
+    int State_Wait(MenuScript* script);
+    int State_Loaded(MenuScript* script);
+    virtual void SetPosition(Vector3fix* position);
+    virtual Vector3fix GetPosition();
+    virtual void V3c(short value);
+    virtual int V40();
+    void Load(MenuScript* script);
+    void LoadFile(MenuScript* script, void* file, unsigned int size);
+
+    virtual void Vf0(int value)
+    {
+        pressedRight_ = value;
+    }
+    virtual void Vf4(int value)
+    {
+        pressedLeft_ = value;
+    }
+};
+
 // The objects of type 0xf, a number on a MenuObjectClass6
 class MenuObjectClassF : public MenuObjectClass
 {
