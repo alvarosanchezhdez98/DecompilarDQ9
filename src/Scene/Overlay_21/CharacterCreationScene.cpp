@@ -215,7 +215,7 @@ void CharacterCreationScene::Run()
     creation_ = (CharacterCreation*)allocator_.Allocate(sizeof(CharacterCreation));
     creation_->Initialize(0, 0);
     character_ = func_02010954(gameState);
-    character_->details_.unk_4e0 = func_020100a8(gameState);
+    character_->unk_568 = func_020100a8(gameState);
     creation_->member_ = character_;
     creation_->Load(&allocator_);
     func_0209c3b4(data_02109bf4, 2);

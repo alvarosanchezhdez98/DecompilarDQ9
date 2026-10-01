@@ -54,15 +54,15 @@ extern "C"
     void func_02074b64(void*);
     void func_02074bf4(void*);
     // The base stats of a party member
-    int func_02085fb4(void* data);
-    int func_02086020(void* data);
-    int func_0208608c(void* data);
-    int func_020860f8(void* data);
-    int func_02086164(void* data);
-    int func_020861d0(void* data);
-    int func_0208623c(void* data);
-    int func_020862a8(void* data);
-    int func_02086314(void* data);
+    int func_02085fb4(PartyMemberData* data);
+    int func_02086020(PartyMemberData* data);
+    int func_0208608c(PartyMemberData* data);
+    int func_020860f8(PartyMemberData* data);
+    int func_02086164(PartyMemberData* data);
+    int func_020861d0(PartyMemberData* data);
+    int func_0208623c(PartyMemberData* data);
+    int func_020862a8(PartyMemberData* data);
+    int func_02086314(PartyMemberData* data);
     const char* func_020e0434(TextTable* texts, int id);
     void func_020e4bf4(BattleResultName* name, int member);
 }
@@ -412,17 +412,17 @@ void BattleResultWindow::WriteLevelUp(char* text, unsigned char lines)
     BattleResultMember* member = FindMember(member_);
     if (member == NULL)
         return;
-    BattleResultStatWord* bonuses = member->bonuses_[member->vocation_];
+    BattleResultStatWord* bonuses = member->data_.bonuses_[member->vocation_];
     short stats[9][2];
-    stats[0][0] = func_02085fb4(member->data_) + before_.stats_[0].first_ + bonuses[0].first_;
-    stats[1][0] = func_02086020(member->data_) + before_.stats_[0].second_ + bonuses[0].second_;
-    stats[2][0] = func_0208608c(member->data_) + before_.stats_[0].third_ + bonuses[0].third_;
-    stats[3][0] = func_020860f8(member->data_) + before_.stats_[1].first_ + bonuses[1].first_;
-    stats[4][0] = func_02086164(member->data_) + before_.stats_[1].second_ + bonuses[1].second_;
-    stats[5][0] = func_020861d0(member->data_) + before_.stats_[1].third_ + bonuses[1].third_;
-    stats[6][0] = func_0208623c(member->data_) + before_.stats_[2].first_ + bonuses[2].first_;
-    stats[7][0] = func_020862a8(member->data_) + before_.stats_[2].second_ + bonuses[2].second_;
-    stats[8][0] = func_02086314(member->data_) + before_.stats_[2].third_ + bonuses[2].third_;
+    stats[0][0] = func_02085fb4(&member->data_) + before_.stats_[0].first_ + bonuses[0].first_;
+    stats[1][0] = func_02086020(&member->data_) + before_.stats_[0].second_ + bonuses[0].second_;
+    stats[2][0] = func_0208608c(&member->data_) + before_.stats_[0].third_ + bonuses[0].third_;
+    stats[3][0] = func_020860f8(&member->data_) + before_.stats_[1].first_ + bonuses[1].first_;
+    stats[4][0] = func_02086164(&member->data_) + before_.stats_[1].second_ + bonuses[1].second_;
+    stats[5][0] = func_020861d0(&member->data_) + before_.stats_[1].third_ + bonuses[1].third_;
+    stats[6][0] = func_0208623c(&member->data_) + before_.stats_[2].first_ + bonuses[2].first_;
+    stats[7][0] = func_020862a8(&member->data_) + before_.stats_[2].second_ + bonuses[2].second_;
+    stats[8][0] = func_02086314(&member->data_) + before_.stats_[2].third_ + bonuses[2].third_;
     stats[0][1] = stats[0][0] + after_.stats_[0].first_;
     stats[1][1] = stats[1][0] + after_.stats_[0].second_;
     stats[2][1] = stats[2][0] + after_.stats_[0].third_;

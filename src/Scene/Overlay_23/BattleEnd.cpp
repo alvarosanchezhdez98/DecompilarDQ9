@@ -402,7 +402,8 @@ static int IsMessageDone();
 static void ResetMembers();
 static int CanLearnSkill(int member);
 
-// Clears what a monster's record counts
+// Clears what a monster's record counts. End_Results inlines every function it can (see there), but not this one
+#pragma dont_inline on
 void ClearRecord(MonsterRecord* record)
 {
     record->defeated_ = 0;
@@ -410,6 +411,7 @@ void ClearRecord(MonsterRecord* record)
     record->drops1_ = 0;
     record->drops2_ = 0;
 }
+#pragma dont_inline reset
 
 // The name of a monster that the texts write
 MessageName GetMonsterName(MessageName name, MonsterEntry* monster)
@@ -863,25 +865,43 @@ MessageName& MessageName::operator=(const MessageName& other)
     return *this;
 }
 
-// NONMATCHING: the C matches 28.4 %, so the build uses the original's instructions after #else (see Decompiling.md).
-// The original copies PartyMemberData member by member, which this C copies at once
+// NONMATCHING: the C matches 92.3 %, so the build uses the original's instructions after #else (see Decompiling.md).
+// Registers of the first loop and of the victory's kinds. The copy of PartyMemberData is its implicit operator=,
+// which the original inlines: always_inline does it here (and dont_inline keeps ClearRecord a call)
 #ifdef NONMATCHING
+inline unsigned int GetScaled(int value, float multiplier) { return value * multiplier; }
+inline unsigned int GetScaled(unsigned int value, float multiplier) { return value * multiplier; }
+#pragma always_inline on
 int BattleScene::End_Results()
 {
-    GameState* gameState = GameState::GetInstance();
+    long flag;
+    int count;
+    int leader;
+    int kinds;
+    BattleMonster* monster;
+    GameState* gameState;
+    long ids[8];
+    int experience[4];
+    gameState = GameState::GetInstance();
     if (sEnd->experience_.Update() == 0)
         return endState_;
     if (BackgroundLoader::GetInstance()->GetNumQueuedTasks() > 0)
         return endState_;
     GameResources* resources = func_ov017_0218b5b0();
+    BattleData* data2;
+    GameObject* object;
     MessageSystem* messages = func_020421a0();
-    BattleData* data = data_;
     void* unk = func_0202ae18();
+    unsigned int defeated;
+    long i;
+    PlayRecords records;
+    short objects[0x10];
+    BattleData* data = data_;
     if (data != NULL)
     {
         GameState* gameState2 = GameState::GetInstance();
-        short objects[0x10];
-        int count = func_ov000_0215e9fc(data, objects, 0x10, 0);
+        int count = 0;
+        count += func_ov000_0215e9fc(data, objects, 0x10, 0);
         count += func_ov000_0215ec1c(data, &objects[count], 0x10 - count, 0);
         for (int i = 0; i < count; i++)
         {
@@ -893,8 +913,11 @@ int BattleScene::End_Results()
     ResetMembers();
     if (!func_0202b7d8(unk) || info_->leader_ == func_0202c1a4(unk))
     {
-        earnedExperience_ = data_->experience_ * data_->experienceMultiplier_;
-        earnedGold_ = data_->gold_ * data_->goldMultiplier_;
+        int monsterCount;
+        long leader;
+        earnedExperience_ = GetScaled(data_->experience_, data_->experienceMultiplier_);
+        unsigned int total;
+        earnedGold_ = GetScaled(data_->gold_, data_->goldMultiplier_);
         turns_ = data_->unk_8e20;
         short monsters[4];
         int count = func_ov000_0215e9fc(data_, monsters, 4, 1);
@@ -906,13 +929,13 @@ int BattleScene::End_Results()
             if (func_020a35e0(info_, i))
                 experience_[i] = GetExperience(i, 0);
         }
-        BattleData* data2 = data_;
-        int monsterCount = data2->monsterCount_;
+        data2 = data_;
+        monsterCount = data2->monsterCount_;
         BattleMonster* defeated = data2->monsters_;
         if (monsterCount == 0)
         {
             unsigned char* unk2 = &data2->unk_81b0;
-            int flag = 0;
+            flag = 0;
             unsigned char unk3 = unk2[0];
             if (unk3 <= data2->unk_8e15)
                 flag = 1;
@@ -923,6 +946,7 @@ int BattleScene::End_Results()
             }
             else if (unk3 > 1)
             {
+                victoryMonster_ = *(unsigned short*)(0x4e + unk2);
                 victory_ = flag == 0 ? 4 : 7;
                 victoryMonster_ = *(unsigned short*)(unk2 + 0x4e);
             }
@@ -934,13 +958,13 @@ int BattleScene::End_Results()
         }
         else
         {
-            int total = 0;
-            int kinds = 0;
-            int ids[8];
+            total = 0;
+            kinds = 0;
+
             for (int i = 0; i < monsterCount; i++)
             {
                 total += defeated[i].count_;
-                int j;
+                long j;
                 for (j = 0; j < kinds; j++)
                 {
                     if (defeated[i].id_ == ids[j])
@@ -954,15 +978,15 @@ int BattleScene::End_Results()
                 victory_ = 0;
                 victoryMonster_ = defeated->id_;
             }
-            else if (kinds <= 1)
-            {
-                victory_ = 1;
-                victoryMonster_ = defeated->id_;
-            }
-            else
+            else if (kinds > 1)
             {
                 victory_ = 2;
                 victoryMonster_ = 0;
+            }
+            else
+            {
+                victory_ = 1;
+                victoryMonster_ = defeated->id_;
             }
         }
         ComputeDrops();
@@ -975,9 +999,9 @@ int BattleScene::End_Results()
                 func_ov017_021cd4c8(info_->unk_8, mapItem_, memberMask_);
             if (data_->unk_8e34 != 0)
             {
-                unsigned int base = data_->unk_8e34 * data_->experienceMultiplier_;
+                unsigned int base = GetScaled(data_->unk_8e34, data_->experienceMultiplier_);
                 GameState* gameState2 = GameState::GetInstance();
-                int experience[4];
+
                 for (int i = 0; i < 4; i++)
                 {
                     if (func_020a35e0(info_, i))
@@ -1006,18 +1030,20 @@ int BattleScene::End_Results()
         if (!func_ov000_02160fd4(this, 0x8000))
             return endState_;
     }
-    BattleMonster* monsters = data_->monsters_;
-    int monsterCount = data_->monsterCount_;
-    for (int i = 0; i < monsterCount; i++)
+    BattleMonster* monsters;
+    int monsterCount;
+    monsterCount = data_->monsterCount_;
+    monsters = data_->monsters_;
+    for (i = 0; i < monsterCount; i++)
     {
-        BattleMonster* monster = &monsters[i];
+        monster = &monsters[i];
         MonsterRecord record;
         short id;
         ClearRecord(&record);
         id = monster->record_;
         if (func_020ac020(0, &id, &record, 1))
         {
-            unsigned int defeated = monster->count_ + record.defeated_;
+            unsigned int defeated = record.defeated_ + monster->count_;
             if (defeated > 999)
                 defeated = 999;
             record.defeated_ = defeated;
@@ -1039,7 +1065,7 @@ int BattleScene::End_Results()
         member->level_ = func_0202053c(partyMember);
         member->dead_ = func_02010088(partyMember);
         member->experience_ = experience_[i] + GetMemberExperience(partyMember);
-        *(PartyMemberData*)member->data_ = *func_02053c6c(partyMember);
+        member->data_ = *func_02053c6c(partyMember);
         strcpy(member->name_, partyMember->status_->name_);
         member++;
         sEnd->memberCount_++;
@@ -1051,6 +1077,7 @@ int BattleScene::End_Results()
         func_020e39d4(func_020e3808(), 0, 1, 0x71e8);
     return 2;
 }
+#pragma always_inline reset
 #else
 extern "C"
 {
@@ -1846,7 +1873,7 @@ asm int BattleScene::End_Results()
 static unsigned int GetMemberExperience(PartyMember* member)
 {
     PartyMemberData* data = member->data_;
-    return data->details_.unk_b0[data->vocation_];
+    return data->unk_138[data->vocation_];
 }
 
 // Adds items to the bag (0x38 bytes)
@@ -4315,11 +4342,11 @@ int BattleScene::End_LevelUp()
                 if (partyMember != NULL)
                 {
                     PartyMemberData* data = func_02053c6c(partyMember);
-                    data->details_.levels_[data->vocation_] = level;
-                    unsigned short left = 0xa28 - data->details_.unspentSkillPoints_;
+                    data->levels_[data->vocation_] = level;
+                    unsigned short left = 0xa28 - data->unspentSkillPoints_;
                     if (left < stats->skillPoints_)
                         stats->skillPoints_ = left;
-                    data->details_.unspentSkillPoints_ += stats->skillPoints_;
+                    data->unspentSkillPoints_ += stats->skillPoints_;
                     func_02083cbc(data, &levelUps_[id].after_, &levelUps_[id].unk_3c);
                     func_02083e28(data, 0);
                     end->skillCounts_[id] = func_0209aa54(end->spellTable_, partyMember, &end->skills_[id], oldLevel);
@@ -4337,7 +4364,7 @@ int BattleScene::End_LevelUp()
             if (partyMember != NULL)
             {
                 PartyMemberData* data = func_02053c6c(partyMember);
-                if ((int)data->details_.levels_[data->vocation_] >= sMaxLevel)
+                if ((int)data->levels_[data->vocation_] >= sMaxLevel)
                 {
                     int experience = levelUps_[id].before_.unk_0;
                     if (levelUp)
@@ -4345,7 +4372,7 @@ int BattleScene::End_LevelUp()
                     if (experience != 0 && experience <= GetMemberExperience(partyMember))
                     {
                         if (data != NULL)
-                            data->details_.unk_b0[data->vocation_] = experience;
+                            data->unk_138[data->vocation_] = experience;
                         member->experience_ = experience;
                     }
                 }
@@ -4463,7 +4490,7 @@ int BattleScene::End_LevelUp()
             {
                 PartyMemberData* data = func_02053c6c(member);
                 if (data != NULL)
-                    points = data->details_.unspentSkillPoints_;
+                    points = data->unspentSkillPoints_;
             }
             func_02010828(gameState);
             if (end->skillCounts_[id] != 0)
@@ -5402,8 +5429,8 @@ int BattleScene::End_SkillArts()
             namesSize = 0;
             __clear(gp2, sizeof(gp2));
             __clear(inner, sizeof(inner));
-            sprintf(gp2, STRING(0xc8, "data/bin/ttlname%d.gp2"), hero->partyData_->details_.appearance_.female_);
-            sprintf(inner, STRING(0xdf, "ttlname%d_<LG>.nat"), hero->partyData_->details_.appearance_.female_);
+            sprintf(gp2, STRING(0xc8, "data/bin/ttlname%d.gp2"), hero->partyData_->appearance_.female_);
+            sprintf(inner, STRING(0xdf, "ttlname%d_<LG>.nat"), hero->partyData_->appearance_.female_);
             void* file = ExtractFileFromGP2(gp2, inner, &namesSize);
             if (file != NULL)
                 func_020e0028(&names, &allocator_, file, namesSize, ids, (unsigned short)count);
@@ -6234,7 +6261,7 @@ int BattleScene::End_Spells()
             {
                 end->next_ = 0xc;
             }
-            else if (func_02086ef0(party, id) && CanLearnSkill(id) && data->details_.unspentSkillPoints_ != 0)
+            else if (func_02086ef0(party, id) && CanLearnSkill(id) && data->unspentSkillPoints_ != 0)
             {
                 end->next_ = 8;
                 void* unk = func_0205ec34();
@@ -8314,8 +8341,8 @@ int BattleScene::End_Titles()
             __clear(gp2, sizeof(gp2));
             char inner[0x20];
             __clear(inner, sizeof(inner));
-            sprintf(gp2, STRING(0xc8, "data/bin/ttlname%d.gp2"), hero->partyData_->details_.appearance_.female_);
-            sprintf(inner, STRING(0xdf, "ttlname%d_<LG>.nat"), hero->partyData_->details_.appearance_.female_);
+            sprintf(gp2, STRING(0xc8, "data/bin/ttlname%d.gp2"), hero->partyData_->appearance_.female_);
+            sprintf(inner, STRING(0xdf, "ttlname%d_<LG>.nat"), hero->partyData_->appearance_.female_);
             void* file = ExtractFileFromGP2(gp2, inner, &size);
             if (file != NULL)
                 func_020e0028(&names, &allocator_, file, size, ids, (unsigned short)count);
@@ -9591,7 +9618,7 @@ int BattleScene::AddExperience(BattleInfo* info, int* experience, int* gold, int
         {
             PartyMemberData* data = func_02053c6c(member);
             if (data != NULL)
-                data->details_.unk_b0[data->vocation_] += experience[i];
+                data->unk_138[data->vocation_] += experience[i];
         }
     }
     *gold = GetGold();
@@ -9615,7 +9642,7 @@ static int CanLearnSkill(int member)
     unsigned char vocation = partyMember->data_->vocation_;
     for (int i = 0; i < 5; i++)
     {
-        if (data->details_.skillPoints_[func_020dd11c(vocation, i)] < 100)
+        if (data->skillPoints_[func_020dd11c(vocation, i)] < 100)
             return 1;
     }
     return 0;

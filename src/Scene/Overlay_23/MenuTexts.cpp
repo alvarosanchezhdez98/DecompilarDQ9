@@ -63,7 +63,7 @@ int MenuObjectClass4::State_Load(MenuScript* script)
             GameState* gameState = GameState::GetInstance();
             GameObject* hero = gameState->GetPartyMemberByIndex(func_020100a8(gameState));
             if (hero != NULL)
-                variant = hero->partyData_->details_.appearance_.female_;
+                variant = hero->partyData_->appearance_.female_;
         }
         else if (variant_ == 2)
         {
@@ -171,7 +171,7 @@ void MenuObjectClass4::LoadFile(MenuScript* script, void* file, unsigned int siz
         GameState* gameState = GameState::GetInstance();
         GameObject* hero = gameState->GetPartyMemberByIndex(func_020100a8(gameState));
         if (hero != NULL)
-            variant = hero->partyData_->details_.appearance_.female_;
+            variant = hero->partyData_->appearance_.female_;
     }
     else if (variant_ == 2)
     {

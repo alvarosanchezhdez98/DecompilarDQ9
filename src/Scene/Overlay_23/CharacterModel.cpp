@@ -199,7 +199,7 @@ void CharacterModel::Update()
 
         if (!loading_)
         {
-            PartyMemberAppearance* appearance = &member_->details_.appearance_;
+            PartyMemberAppearance* appearance = &member_->appearance_;
             if (bodyChanged_)
             {
                 if (appearance->female_ == 1 && unk_c11 == 0)
@@ -243,27 +243,27 @@ static const short sColoredParts[] = {0, 1, 5, 4, 6, 7, -1};
 #ifdef NONMATCHING
 void CharacterModel::UpdateColors()
 {
-    PartyMemberDetails* details;
+    PartyMemberAppearance* appearance;
     int skin;
     unsigned int offset;
-    details = &member_->details_;
+    appearance = &member_->appearance_;
     CharacterColors* colors = func_02099cac();
-    int eyes = details->appearance_.eyeColor_;
+    int eyes = appearance->eyeColor_;
     offset = (0xffff & vramStates_[Part_2].unk_68) << 3;
-    skin = details->appearance_.skinColor_;
-    StageMemoryToVRAM(VRAMSubregion_TexturePalette, colors->hair_[details->appearance_.hairColor_], offset + 0x24, 4,
+    skin = appearance->skinColor_;
+    StageMemoryToVRAM(VRAMSubregion_TexturePalette, colors->hair_[appearance->hairColor_], offset + 0x24, 4,
                       false, true);
     StageMemoryToVRAM(VRAMSubregion_TexturePalette, colors->skin_[skin], offset + 0x28, 4, false, true);
     StageMemoryToVRAM(VRAMSubregion_TexturePalette, colors->colors8_[eyes], offset + 0x30, 0x10, false, true);
 
     short models[Part_Count];
-    GetModels(vocation_, models, &details->appearance_);
+    GetModels(vocation_, models, appearance);
     int i;
     int part;
     for (i = 0; (part = sColoredParts[i]) >= 0; i++)
     {
         int model = models[part];
-        int female = details->appearance_.female_;
+        int female = appearance->female_;
         if (names_ != NULL && &vramStates_[part] != NULL)
         {
             PartEntry* entry = func_020dedd0(names_, model);
@@ -818,7 +818,7 @@ static bool GetFileName(char* path, const PartEntry* entry, PartyMemberData* mem
         return false;
 
     const PartEntry* body = entries[0];
-    int female = member->details_.appearance_.female_;
+    int female = member->appearance_.female_;
     const PartEntry* face = entries[7];
     unsigned int number = func_020de234(entry, female);
     char extension[8] = "nsbmd";
@@ -855,7 +855,7 @@ static bool GetFileName(char* path, const PartEntry* entry, PartyMemberData* mem
     if (part == 5 && (appearance->models_[4] == 0x1f4a || appearance->models_[4] < 0))
         number = func_020de234(body, female);
     if (entry->unk_18 == 1000)
-        number += member->details_.unk_4e2;
+        number += member->unk_56a;
     sprintf(path, STRING(0x3c, "d_%c%03d%s.%s"), (char)entry->letter_, number, suffix, extension);
     return true;
 }
@@ -872,9 +872,9 @@ void CharacterModel::Load(PartyMemberData* member, int vocation, int, int reload
     CancelTasks();
     GameState* gameState = GameState::GetInstance();
     BackgroundLoader* loader = BackgroundLoader::GetInstance();
-    PartyMemberAppearance* appearance = &member->details_.appearance_;
+    PartyMemberAppearance* appearance = &member->appearance_;
     if (vocation < 0)
-        vocation = member->details_.unk_4e0;
+        vocation = member->unk_568;
     if (vocation < 0)
         vocation = func_020100a8(gameState);
     vocation_ = vocation;

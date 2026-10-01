@@ -1,16 +1,8 @@
 #pragma once
 
+#include "GameState/PartyMemberData.h"
 #include "Graphics/TextWindow.h"
 #include "Text/TextTable.h"
-
-// Three words of 10-bit values: the 9 stats of a party member
-struct BattleResultStatWord
-{
-    unsigned int first_ : 10;
-    unsigned int second_ : 10;
-    unsigned int third_ : 10;
-    unsigned int unk_30 : 2;
-};
 
 // The stats of a party member before or after a level up (0x14 bytes)
 struct BattleResultStats
@@ -44,11 +36,8 @@ struct BattleResultMember
     // The experience after the battle
     int experience_;
     char name_[0x30];
-    // What func_02085fb4 and the next functions read the base stats from
-    char data_[0x888 - 0x38];
-    // The bonus of each vocation to the stats
-    BattleResultStatWord bonuses_[13][3];
-    char unk_924[0x99c - 0x924];
+    // A copy of the member's data, which func_02085fb4 and the next functions read the base stats from
+    PartyMemberData data_;
 };
 
 // What BattleResultWindow copies its window and texts from

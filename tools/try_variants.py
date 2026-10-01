@@ -6,6 +6,7 @@ Compiles variants of a source file and diffs one of its functions for each, to f
   python tools/try_variants.py src/System/Foo.cpp func_020c1234 variants.cpp            The match of each variant
   python tools/try_variants.py src/System/Foo.cpp func_020c1234 variants.cpp --show     With the diffs
   python tools/try_variants.py src/System/Foo.cpp func_020c1234 variants.cpp --apply b  Writes variant b to the file
+  python tools/try_variants.py src/System/Foo.cpp func_020c1234 variants.cpp --nonmatching  The C of a NONMATCHING function
 
 The variants file has a line `//// name` before each variant, which is either a whole function, which replaces the
 function of the file with the same name (its first line up to the parenthesis), or substitutions in the file:
@@ -78,6 +79,8 @@ def main():
     parser.add_argument("variants", type=Path)
     parser.add_argument("--show", action="store_true", help="Print the diffs, not only the match percentages")
     parser.add_argument("--apply", metavar="NAME", help="Write this variant to the source file")
+    parser.add_argument("--nonmatching", action="store_true",
+                        help="Diff the C of a function in assembly, between #ifdef NONMATCHING and #else")
     args = parser.parse_args()
 
     text = args.source.read_text()
@@ -101,6 +104,7 @@ def main():
                 continue
             command = [sys.executable, str(root_path / "tools" / "diff_function.py"), str(temporary), args.symbol,
                        "--mwcc", version] + ([] if args.show else ["--summary"])
+            command += ["--nonmatching"] if args.nonmatching else []
             result = subprocess.run(command, capture_output=True, text=True, cwd=root_path)
             output = (result.stdout + result.stderr).strip()
             if args.show:

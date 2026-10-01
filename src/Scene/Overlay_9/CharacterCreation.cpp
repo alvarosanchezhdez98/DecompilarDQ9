@@ -942,7 +942,7 @@ void CharacterCreation::State_Load()
             hairColor_[1] = 0;
         }
 
-        PartyMemberAppearance* appearance = &member_->details_.appearance_;
+        PartyMemberAppearance* appearance = &member_->appearance_;
         appearance->female_ = sex_;
         appearance->eyeColor_ = eyeColor_[sex_];
         appearance->skinColor_ = GetModel(7, skinColor_[sex_]);
@@ -1173,8 +1173,8 @@ void CharacterCreation::State_Load()
     {
         characters_[0]->SetAngle(0x1eb);
         characters_[1]->SetAngle(0x1eb);
-        characters_[0]->Load(member_, member_->details_.unk_4e0, 0, 0);
-        characters_[1]->Load(member_, member_->details_.unk_4e0, 0, 0);
+        characters_[0]->Load(member_, member_->unk_568, 0, 0);
+        characters_[1]->Load(member_, member_->unk_568, 0, 0);
         character_ = characters_[0];
         nextCharacter_ = characters_[1];
         OpenStateWindow();
@@ -2684,7 +2684,7 @@ void CharacterCreation::State_Confirm()
         func_0204b088(&backgrounds_[4], 0);
         if (mode_ == 0)
         {
-            member_->details_.unk_4e2 = sSkinColors[skinColor_[sex_]];
+            member_->unk_56a = sSkinColors[skinColor_[sex_]];
             gameState->unk_63d4 = 1;
             ColorEffect_ConfigureBrightnessAdjust(REG_BLDCNT_SUB, 1, 0);
             func_0205deb4(&windows_[1], 3, 0);
@@ -2707,23 +2707,23 @@ void CharacterCreation::State_Confirm()
             void* party = func_02010828(gameState);
             func_02086404(&statistics);
             func_02083ca0(member, vocation_);
-            member->details_.unk_b0[vocation_] = 0;
-            member->details_.levels_[vocation_] = 1;
-            member->details_.unk_4e2 = NextRandomMax(GetBTRandom(), 16);
+            member->unk_138[vocation_] = 0;
+            member->levels_[vocation_] = 1;
+            member->unk_56a = NextRandomMax(GetBTRandom(), 16);
             sprintf(path, STRING(0x88, "data/prm/level%d.bin"), member->vocation_);
             func_0208247c(&levels);
             BackgroundLoader::AddLockGlobal();
             void* file = LoadFileIntoMemory(path, data_0211e33c, &size);
             if (file != NULL)
-                func_02082490(&levels, file, size, member->details_.levels_[vocation_], 0);
+                func_02082490(&levels, file, size, member->levels_[vocation_], 0);
             func_02083cbc(member, &levels, &levelStatistics);
             BackgroundLoader::RemoveLockGlobal();
-            short* models = member->details_.appearance_.models_;
+            short* models = member->appearance_.models_;
             for (int i = 0; i < 7; i++)
             {
                 const void* name = func_020dedd0(&partNames_, models[sPartNames[i].model_]);
                 if (name != NULL)
-                    memcpy(&member->details_.equipment_[sPartNames[i].name_], name, 0x20);
+                    memcpy(&member->equipment_[sPartNames[i].name_], name, 0x20);
             }
             func_02083e28(member, 0);
             func_020863c4(member);
@@ -2744,7 +2744,7 @@ void CharacterCreation::State_Confirm()
             func_0209a804(&unknown);
             func_0209a810(&unknown, &skills);
             LevelSkill* vocationSkills = skills.skills_[(unsigned char)member->vocation_];
-            unsigned char level = member->details_.levels_[member->vocation_];
+            unsigned char level = member->levels_[member->vocation_];
             for (int i = 0; i < 20; i++)
             {
                 if (level >= vocationSkills[i].level_ && vocationSkills[i].level_ != 0)
@@ -3396,7 +3396,7 @@ void CharacterCreation::State_Finish()
         Vector3fix rotation;
         memset(&rotation, 0, sizeof(rotation));
         rotation = preview->rotation_;
-        PartyMemberAppearance* appearance = &member_->details_.appearance_;
+        PartyMemberAppearance* appearance = &member_->appearance_;
         int scaleX;
         int scaleY;
         short width = appearance->width_;
@@ -3520,7 +3520,7 @@ void CharacterCreation::SwapCharacters()
     nextCharacter_ = swap;
     if (flags_ & 0x20000)
     {
-        PartyMemberAppearance* appearance = &member_->details_.appearance_;
+        PartyMemberAppearance* appearance = &member_->appearance_;
         GetBodyScale(bodyType_[sex_], &appearance->width_, &appearance->height_);
         character_->SetScale(appearance->width_, appearance->height_);
         nextCharacter_->SetScale(appearance->width_, appearance->height_);
@@ -3533,7 +3533,7 @@ void CharacterCreation::UpdateCharacter()
 {
     if (flags_ & 2)
     {
-        nextCharacter_->Load(member_, member_->details_.unk_4e0, 0, 0);
+        nextCharacter_->Load(member_, member_->unk_568, 0, 0);
         flags_ = (flags_ | 4) & ~2;
     }
 }
@@ -3619,7 +3619,7 @@ void CharacterCreation::Turn(unsigned int ticks)
 
 void CharacterCreation::SetChoice(int choice)
 {
-    PartyMemberAppearance* appearance = &member_->details_.appearance_;
+    PartyMemberAppearance* appearance = &member_->appearance_;
     int state = state_;
     CharacterModel* next = nextCharacter_;
     CharacterModel* current = character_;
@@ -4117,7 +4117,7 @@ int CharacterCreation::UpdateChoice()
         SetChoice(choice);
         if (state_ == 1)
         {
-            PartyMemberAppearance* appearance = &member_->details_.appearance_;
+            PartyMemberAppearance* appearance = &member_->appearance_;
             flags_ |= 0x60000;
             appearance->eyeColor_ = eyeColor_[sex_];
             appearance->skinColor_ = skinColor_[sex_];
