@@ -4,3 +4,7 @@
     .data       start:0x0215cd00 end:0x0215ce20 kind:data align:32
     .bss        start:0x0215ce20 end:0x0215ce20 kind:bss align:32
 
+src/Scene/Overlay_5/CursorFrame.cpp:
+    complete
+    .text start:0x021536e0 end:0x02153954
+

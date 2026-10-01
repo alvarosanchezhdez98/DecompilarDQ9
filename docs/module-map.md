@@ -57,7 +57,7 @@ Sizes include code and data. [progress.md](progress.md) has how much of each one
 | 2 | `0x021536e0` | 103.2 | 213 | *Likely* item, spell and skill menus | `itemname`, `spelltable.bin`, `skilltable.bin`, `treasure.nsarc` |
 | 3 | `0x021536e0` | 181.4 | 510 | *Likely* Alltrades Abbey (vocations; "Dharma" in Japanese) | `str_dam`, `bm_dama`, `lay_dama`, `level%d.bin` |
 | 4 | `0x021536e0` | 116.2 | 532 | Unclear: accolades, treasure maps | `ttldata`, `dqa_%02d`, `tmap/param.pac` |
-| 5 | `0x021536e0` | 37.8 | 89 | *Likely* equipment menu | `str_eq`, `itemsort` |
+| 5 | `0x021536e0` | 37.8 | 89 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled: the frame of four corners that moves towards what it selects (`CursorFrame`), with 1 function in assembly for now | `str_eq`, `itemsort` |
 | 6 | `0x021536e0` | 51.2 | 132 | Alchemy pot ("renkin" in Japanese) | `ren_in`, `ren_out`, `obj_rri`, `bm_rri` |
 | 7 | `0x021842a0` | 0.0 | 0 | Empty | |
 | 8 | `0x021842a0` | 28.8 | 63 | *Likely* battle records and profile | `title_clr.stb`, `profstr`, `tlkpcstr` |
