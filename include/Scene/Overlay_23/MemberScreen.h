@@ -8,6 +8,8 @@
 #include "Scene/Overlay_23/CharacterModel.h"
 #include "Scene/Overlay_23/Layout.h"
 
+struct EquipmentMenu;
+
 // The flags of MemberScreen
 #define MEMBER_SCREEN_TURNING 1
 #define MEMBER_SCREEN_TURN_BACK 2
@@ -30,7 +32,7 @@
 struct MemberScreen
 {
     // Overlay 5's equipment menu (0x428c bytes)
-    char* equipment_;
+    EquipmentMenu* equipment_;
     SafeAllocator* allocator_;
     VRAMManagerState* vramState_;
     int unk_c;

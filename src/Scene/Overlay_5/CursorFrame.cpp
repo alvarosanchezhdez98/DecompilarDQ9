@@ -19,10 +19,10 @@ void CursorFrame::Initialize()
 {
     corners_ = 0;
     size_ = 0x8000;
-    unk_c = 0;
-    unk_8 = 0;
-    unk_14 = 0;
-    unk_10 = 0;
+    right_ = 0;
+    left_ = 0;
+    bottom_ = 0;
+    top_ = 0;
     target_[1] = 0;
     target_[0] = 0;
     target_[3] = 0;

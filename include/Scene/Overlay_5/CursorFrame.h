@@ -8,10 +8,11 @@ struct CursorFrame
     char* corners_;
     // The size of a corner, which the right and bottom ones are moved by
     int size_;
-    int unk_8;
-    int unk_c;
-    int unk_10;
-    int unk_14;
+    // What the frame adds to the rectangle that it's given: to its left, right, top and bottom
+    int left_;
+    int right_;
+    int top_;
+    int bottom_;
     // Where the frame goes: x, y, width and height
     int target_[4];
     // Where it is now
@@ -23,4 +24,9 @@ struct CursorFrame
     void Update(int speed);
     void Draw(int kind, short alpha);
     void Approach(int* target, int* current, int rate, int threshold);
+    // Overlay 5's EquipmentMenu.cpp has these
+    void SetTargetPosition(int x, int y);
+    void SetPosition(int x, int y);
+    void SetTargetSize(int width, int height);
+    void SetSize(int width, int height);
 };

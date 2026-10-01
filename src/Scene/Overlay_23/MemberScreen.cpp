@@ -4,6 +4,7 @@
 // before the declarations (see Decompiling.md)
 #pragma ipa file
 #include "Scene/Overlay_23/MemberScreen.h"
+#include "Scene/Overlay_5/EquipmentMenu.h"
 #include "Filesystem/BackgroundLoader.h"
 #include "GameState/GameState.h"
 #include "Resource/Brightness.h"
@@ -127,21 +128,6 @@ extern "C"
     void func_020e4bf4(MemberScreenVocation* vocation, int);
     const char* func_020e51cc(int id);
 
-    void func_ov004_02154da8(char* equipment, void* file, unsigned int size);
-    void func_ov005_02153954(char* equipment, SafeAllocator* allocator, int);
-    void func_ov005_02153b20();
-    void func_ov005_02153ba4();
-    void func_ov005_02154198();
-    int func_ov005_0215436c();
-    void func_ov005_02154de8();
-    void func_ov005_02154ef0();
-    void func_ov005_02155108();
-    void func_ov005_021551d4();
-    void func_ov005_021551fc(char* equipment, int member, int);
-    void func_ov005_02155258(char* equipment, int level, short x, int y, int color);
-    void func_ov005_02159c24();
-    void func_ov005_0215a960();
-    void func_ov005_0215ae7c(char* equipment);
     GameResources* func_ov017_0218b5b0();
     void func_ov017_0219ba0c(GameResources* resources, int);
     int func_ov017_021bdbcc();
@@ -263,7 +249,7 @@ void MemberScreen::Finish()
     func_02094ab0(fade);
     if (equipment_ != NULL)
     {
-        func_ov005_02154198();
+        equipment_->Finish();
         equipment_ = NULL;
         func_02012fe4();
         func_02017d68();
@@ -346,7 +332,7 @@ void MemberScreen::Draw2D()
         DrawNext();
         DrawBack();
         if (equipment_ != NULL)
-            func_ov005_02154ef0();
+            equipment_->Draw2D();
     }
 }
 
@@ -354,7 +340,7 @@ void MemberScreen::DrawSub()
 {
     signed char state = state_;
     if (state != 0 && state != -1 && equipment_ != NULL)
-        func_ov005_02155108();
+        equipment_->DrawSub();
 }
 
 void MemberScreen::SetMembers(const unsigned char* members, int count)
@@ -490,10 +476,10 @@ void MemberScreen::State_Load()
             allocator3_->Reset();
             if (mode_ == 3)
             {
-                equipment_ = (char*)allocator2_->Allocate(0x428c);
-                func_ov005_02153ba4();
-                func_ov005_02153954(equipment_, allocator2_, unk_c);
-                func_ov004_02154da8(equipment_, file, size);
+                equipment_ = (EquipmentMenu*)allocator2_->Allocate(0x428c);
+                equipment_->Initialize();
+                equipment_->CreateAllocators(allocator2_, (SafeAllocator*)unk_c);
+                equipment_->LoadModelTable(file, size);
             }
             allocators_[0].CreateTypeA(allocator2_->Allocate(0x800), 0x800);
             allocators_[1].CreateTypeA(allocator2_->Allocate(0x100), 0x100);
@@ -508,7 +494,7 @@ void MemberScreen::State_Load()
             sprites_ = (Sprite*)allocator_->Allocate(0x280);
             animations_ = (SpriteAnimationList*)allocator_->Allocate(8);
             if (equipment_ != NULL && animations_ != NULL && renderer_ != NULL)
-                func_ov005_02159c24();
+                equipment_->CreateChoice(animations_, renderer_);
             allocators_[4].CreateTypeA(allocator_->Allocate(0x300), 0x300);
             allocators_[5].CreateTypeA(allocator_->Allocate(0x200), 0x200);
             for (int i = 0; i < 2; i++)
@@ -529,11 +515,11 @@ void MemberScreen::State_Load()
             buffer2_ = allocators_[0].Allocate(0x400);
             memset(buffer2_, 0, 0x400);
             if (equipment_ != NULL)
-                *(PartNameTable**)(equipment_ + 0xdf4) = &items_;
+                equipment_->items_ = &items_;
             func_0207de48(&vramStates_[1], 0x4000, 0x40);
             func_0207df50(&vramStates_[1]);
             if (mode_ == 3 && equipment_ != NULL)
-                func_ov005_02153b20();
+                equipment_->LoadVRAM();
             func_0207de48(&vramStates_[0], 0, 0);
             func_0207df50(&vramStates_[0]);
             MessageSystem* messages = func_020421a0();
@@ -602,7 +588,7 @@ void MemberScreen::State_Load()
     case 6:
         if (equipment_ != NULL)
         {
-            if (func_ov005_0215436c())
+            if (equipment_->Load())
                 step_++;
             return;
         }
@@ -613,7 +599,7 @@ void MemberScreen::State_Load()
         func_020e46c4(&vocation);
         func_020e4bf4(&vocation, func_020100a8(gameState));
         MessageSystem* messages = func_020421a0();
-        char* texts = equipment_ + 0x1f8;
+        char* texts = (char*)equipment_ + 0x1f8;
         for (int i = 0; i < 2; i++)
         {
             vocation.sex_ = i;
@@ -658,8 +644,8 @@ void MemberScreen::State_Load()
         LoadTexts();
         if (mode_ == 3 && equipment_ != NULL)
         {
-            func_ov005_0215a960();
-            func_ov005_0215ae7c(equipment_);
+            equipment_->WriteDigits();
+            equipment_->WriteNames();
         }
         func_020c555c(sEdgeColors);
         HideElement(&layout_, 0x11, LAYOUT_ELEMENT_FLAG_VISIBLE);
@@ -685,6 +671,14 @@ extern "C"
     void _ZN13SafeAllocator11CreateTypeAEPvj(); // SafeAllocator::CreateTypeA
     void _ZN13SafeAllocator5ResetEv(); // SafeAllocator::Reset
     void _ZN13SafeAllocator8AllocateEj(); // SafeAllocator::Allocate
+    void _ZN13EquipmentMenu10InitializeEv(); // EquipmentMenu::Initialize
+    void _ZN13EquipmentMenu10WriteNamesEv(); // EquipmentMenu::WriteNames
+    void _ZN13EquipmentMenu11WriteDigitsEv(); // EquipmentMenu::WriteDigits
+    void _ZN13EquipmentMenu12CreateChoiceEP19SpriteAnimationListP14SpriteRenderer(); // EquipmentMenu::CreateChoice
+    void _ZN13EquipmentMenu14LoadModelTableEPvj(); // EquipmentMenu::LoadModelTable
+    void _ZN13EquipmentMenu16CreateAllocatorsEP13SafeAllocatorS1_(); // EquipmentMenu::CreateAllocators
+    void _ZN13EquipmentMenu4LoadEv(); // EquipmentMenu::Load
+    void _ZN13EquipmentMenu8LoadVRAMEv(); // EquipmentMenu::LoadVRAM
     void _ZN14CharacterModel10InitializeEv(); // CharacterModel::Initialize
     void _ZN14CharacterModel10SetUnk_c11Eh(); // CharacterModel::SetUnk_c11
     void _ZN14CharacterModel16CreateAllocatorsEP13SafeAllocator(); // CharacterModel::CreateAllocators
@@ -817,15 +811,15 @@ asm void MemberScreen::State_Load()
     ldr r1, =0x428c
     bl _ZN13SafeAllocator8AllocateEj
     str r0, [r10, #0x0]
-    bl func_ov005_02153ba4
+    bl _ZN13EquipmentMenu10InitializeEv
     ldr r0, [r10, #0x0]
     ldr r1, [r10, #0x10]
     ldr r2, [r10, #0xc]
-    bl func_ov005_02153954
+    bl _ZN13EquipmentMenu16CreateAllocatorsEP13SafeAllocatorS1_
     ldr r0, [r10, #0x0]
     ldr r1, [sp, #0x30]
     ldr r2, [sp, #0x2c]
-    bl func_ov004_02154da8
+    bl _ZN13EquipmentMenu14LoadModelTableEPvj
 @L021e3588:
     ldr r0, [r10, #0x10]
     mov r1, #0x800
@@ -885,7 +879,7 @@ asm void MemberScreen::State_Load()
     ldrne r2, [r10, #0xc8]
     cmpne r2, #0x0
     beq @L021e366c
-    bl func_ov005_02159c24
+    bl _ZN13EquipmentMenu12CreateChoiceEP19SpriteAnimationListP14SpriteRenderer
 @L021e366c:
     ldr r0, [r10, #0x4]
     mov r1, #0x300
@@ -979,7 +973,7 @@ asm void MemberScreen::State_Load()
     ldr r0, [r10, #0x0]
     cmp r0, #0x0
     beq @L021e37e0
-    bl func_ov005_02153b20
+    bl _ZN13EquipmentMenu8LoadVRAMEv
 @L021e37e0:
     add r0, r10, #0x4
     mov r1, #0x0
@@ -1156,7 +1150,7 @@ asm void MemberScreen::State_Load()
     ldr r0, [r10, #0x0]
     cmp r0, #0x0
     beq @L021e3cf8
-    bl func_ov005_0215436c
+    bl _ZN13EquipmentMenu4LoadEv
     cmp r0, #0x0
     ldrneb r0, [r10, #0x4e4]
     addne r0, r0, #0x1
@@ -1288,9 +1282,9 @@ asm void MemberScreen::State_Load()
     ldr r0, [r10, #0x0]
     cmp r0, #0x0
     beq @L021e3c7c
-    bl func_ov005_0215a960
+    bl _ZN13EquipmentMenu11WriteDigitsEv
     ldr r0, [r10, #0x0]
-    bl func_ov005_0215ae7c
+    bl _ZN13EquipmentMenu10WriteNamesEv
 @L021e3c7c:
     ldr r0, =sEdgeColors
     bl func_020c555c
@@ -1382,7 +1376,7 @@ void MemberScreen::State_Main()
         UpdateBack();
     }
     if (equipment_ != NULL)
-        func_ov005_02154de8();
+        equipment_->Update();
 }
 
 void MemberScreen::UpdateBack()
@@ -1394,7 +1388,7 @@ void MemberScreen::UpdateBack()
         back = 0;
     if (back)
         flags_ |= MEMBER_SCREEN_BACK_PRESSED;
-    if (equipment_ != NULL && !(*(int*)(equipment_ + 0x3dcc) & 0x400))
+    if (equipment_ != NULL && !(equipment_->flags_ & 0x400))
         return;
     if (func_02012444(data_02114e30, PAD_BUTTON_B))
         back = 1;
@@ -1468,7 +1462,7 @@ void MemberScreen::DrawTexts()
         if (func_0200fb08(gameState) == 1)
             x += 2;
         PartyMemberData* data = member->data_;
-        func_ov005_02155258(equipment_, (short)data->levels_[data->vocation_], x, 0xa1, color);
+        equipment_->DrawLevel((short)data->levels_[data->vocation_], x, 0xa1, color);
     }
     GXFIFO_END_VTXS = 0;
     GXFIFO_MATRIX_POP = 1;
@@ -1478,6 +1472,7 @@ extern "C"
 {
     // The assembler doesn't take qualified names, so these are the member functions' symbols
     void _ZN12MemberScreen8GetStarsEP11PartyMember(); // MemberScreen::GetStars
+    void _ZN13EquipmentMenu9DrawLevelEisit(); // EquipmentMenu::DrawLevel
     void _ZN9GameState11GetInstanceEv(); // GameState::GetInstance
 }
 
@@ -1634,7 +1629,7 @@ asm void MemberScreen::DrawTexts()
     ldrsh r1, [r0, #0x6c]
     str r6, [sp, #0x0]
     ldr r0, [r8, #0x0]
-    bl func_ov005_02155258
+    bl _ZN13EquipmentMenu9DrawLevelEisit
 @L021e4218:
     ldr r1, =0x4000504
     mov r0, #0x0
@@ -1892,7 +1887,7 @@ void MemberScreen::LoadTexts()
     for (int i = 0; i < 8; i++)
         levelLabel_[i] = 0xffff;
     func_02045cac(messages);
-    char* texts = equipment_ + 0x1f8;
+    char* texts = (char*)equipment_ + 0x1f8;
     func_02045d14(messages, func_020e51cc(0x3f3), levelLabel_, 0);
     for (int i = 0; i < 4; i++)
     {
@@ -2132,7 +2127,7 @@ void MemberScreen::UpdateMember()
     if (equipment_ != NULL)
     {
         signed char member = members_[index];
-        void* background = equipment_ + 0xe84;
+        void* background = &equipment_->backgrounds_[0];
         if (background != NULL && func_0204af14(background, 1))
             func_020dc7e8(5, member);
     }
@@ -2149,9 +2144,9 @@ void MemberScreen::UpdateMember()
         return;
     if (equipment_ == NULL)
         return;
-    func_ov005_021551d4();
-    *(int*)(equipment_ + 0x3dcc) |= 0x200;
-    func_ov005_021551fc(equipment_, member_, 1);
+    equipment_->Reload();
+    equipment_->flags_ |= 0x200;
+    equipment_->SetMember(member_, 1);
 }
 
 void MemberScreen::DoNothing()

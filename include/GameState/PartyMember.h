@@ -16,7 +16,11 @@ struct PartyMemberStatus
 // A party member, which func_0200ff1c returns: func_02053c6c returns their data
 struct PartyMember
 {
-    char unk_0[0x130];
+    char unk_0[4];
+    // The member's index in GameState
+    short index_;
+    char unk_6[2];
+    char unk_8[0x130 - 8];
     // [2] is *likely* the HP (the member is down at 0)
     unsigned short* unk_130;
     PartyMemberStatus* status_;

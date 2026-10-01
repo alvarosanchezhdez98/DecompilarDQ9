@@ -8,3 +8,9 @@ src/Scene/Overlay_5/CursorFrame.cpp:
     complete
     .text start:0x021536e0 end:0x02153954
 
+src/Scene/Overlay_5/EquipmentMenu.cpp:
+    complete
+    .text start:0x02153954 end:0x0215cbd4
+    .rodata start:0x0215cbd4 end:0x0215cce4
+    .data start:0x0215cd00 end:0x0215ce0c
+
