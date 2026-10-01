@@ -234,13 +234,13 @@ Last recorded on 2026-10-01.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 439,628 | 2,959,024 | 14.86 % |
-| Functions | 3,088 | 14,779 | 20.89 % |
+| Code (bytes) | 457,216 | 2,959,024 | 15.45 % |
+| Functions | 3,145 | 14,779 | 21.28 % |
 | Modules | 4 complete, 16 in progress, 12 not started | 32 with code |  |
 
-Source files: 241 complete, 1 in progress.
+Source files: 242 complete, 1 in progress.
 
-Not counted as decompiled: 98 functions (100,576 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 126 functions (120,492 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -255,7 +255,7 @@ Not counted as decompiled: 98 functions (100,576 bytes) in assembly, since their
 | 2026-09-28 | 2,422 (16.39 %) | 358,388 (12.11 %) | 210 |
 | 2026-09-29 | 2,840 (19.22 %) | 402,944 (13.62 %) | 221 |
 | 2026-09-30 | 3,085 (20.87 %) | 439,088 (14.84 %) | 240 |
-| 2026-10-01 | 3,088 (20.89 %) | 439,628 (14.86 %) | 241 |
+| 2026-10-01 | 3,145 (21.28 %) | 457,216 (15.45 %) | 242 |
 
 ## Modules
 
@@ -269,7 +269,7 @@ Not counted as decompiled: 98 functions (100,576 bytes) in assembly, since their
 | ov002 | *Likely* item, spell and skill menus | 100.6 | 213 | 0 | 213 | 0.00 % | Not started |
 | ov003 | *Likely* Alltrades Abbey (vocations; "Dharma" in Japanese) | 175.0 | 510 | 0 | 510 | 0.00 % | Not started |
 | ov004 | Unclear: accolades, treasure maps | 112.9 | 532 | 0 | 532 | 0.00 % | Not started |
-| ov005 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled: the frame of four corners that moves towards what it selects (`CursorFrame`), with 1 function in assembly for now | 37.2 | 89 | 3 | 86 | 1.42 % | In progress |
+| ov005 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled whole: the frame of four corners that moves towards what it selects (`CursorFrame`, with 1 function in assembly for now) and the menu itself (`EquipmentMenu`: the equipped items around the model, the pages of items to drag onto it, the kinds, sorting and the menu of each item; 28 of its 85 functions in assembly for now) | 37.2 | 89 | 60 | 29 | 47.54 % | In progress |
 | ov006 | Alchemy pot ("renkin" in Japanese) | 50.1 | 132 | 0 | 132 | 0.00 % | Not started |
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov008 | *Likely* battle records and profile | 28.1 | 63 | 0 | 63 | 0.00 % | Not started |
@@ -325,6 +325,34 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | main | `func_020d2f88` | `0x020d2f98` | 0x68 |
 | main | `func_020d3160` | `0x020d3170` | 0x87c |
 | ov005 | `CursorFrame::Approach` | `0x021538fc` | 0x58 |
+| ov005 | `EquipmentMenu::Load` | `0x0215436c` | 0x9ac |
+| ov005 | `EquipmentMenu::DrawLevel` | `0x02155258` | 0x15c |
+| ov005 | `EquipmentMenu::GetSlotPosition` | `0x021553b4` | 0x70 |
+| ov005 | `EquipmentMenu::InitializeSlots` | `0x02155424` | 0x120 |
+| ov005 | `EquipmentMenu::LoadEquipped` | `0x02155544` | 0x7c |
+| ov005 | `EquipmentMenu::TouchTop` | `0x02156658` | 0x154 |
+| ov005 | `EquipmentMenu::Drag` | `0x02156e1c` | 0xb0 |
+| ov005 | `EquipmentMenu::SetCursor` | `0x021571d0` | 0x13c |
+| ov005 | `EquipmentMenu::Equip` | `0x02157b74` | 0x888 |
+| ov005 | `EquipmentMenu::SetKind` | `0x02158560` | 0x9c |
+| ov005 | `EquipmentMenu::GetTouchedPart` | `0x021586c4` | 0x1b4 |
+| ov005 | `EquipmentMenu::UpdateDialog` | `0x02158878` | 0x17c |
+| ov005 | `EquipmentMenu::WriteMessage` | `0x02158b3c` | 0x2c8 |
+| ov005 | `EquipmentMenu::UpdateMenu` | `0x02158e04` | 0xcc |
+| ov005 | `EquipmentMenu::UpdateMenuText` | `0x02158ed0` | 0xb0 |
+| ov005 | `EquipmentMenu::Menu_Discard` | `0x02159274` | 0x5dc |
+| ov005 | `EquipmentMenu::OpenMenu` | `0x02159904` | 0x12c |
+| ov005 | `EquipmentMenu::WriteMenu` | `0x02159a30` | 0x144 |
+| ov005 | `EquipmentMenu::OpenChoice` | `0x02159b74` | 0xb0 |
+| ov005 | `EquipmentMenu::DrawModels` | `0x02159c88` | 0x640 |
+| ov005 | `EquipmentMenu::DrawKinds` | `0x0215a418` | 0x208 |
+| ov005 | `EquipmentMenu::DrawCursor` | `0x0215a7ec` | 0x12c |
+| ov005 | `EquipmentMenu::DrawCounts` | `0x0215acc0` | 0x1bc |
+| ov005 | `EquipmentMenu::DrawNames` | `0x0215b0a0` | 0x21c |
+| ov005 | `EquipmentMenu::State_Start` | `0x0215b2bc` | 0x264 |
+| ov005 | `EquipmentMenu::State_Open` | `0x0215b520` | 0x940 |
+| ov005 | `EquipmentMenu::State_Move` | `0x0215c058` | 0x4d8 |
+| ov005 | `EquipmentMenu::State_Sort` | `0x0215c530` | 0x61c |
 | ov009 | `CharacterCreation::State_Load` | `0x02185634` | 0xd9c |
 | ov009 | `CharacterCreation::State_Confirm` | `0x0218742c` | 0x708 |
 | ov009 | `CharacterCreation::GetBodyScale` | `0x02188bf8` | 0x34 |
@@ -432,7 +460,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov002 | 24 | 127 | 57 | 5 | 100.6 |
 | ov003 | 101 | 319 | 79 | 11 | 175.0 |
 | ov004 | 229 | 243 | 57 | 3 | 112.9 |
-| ov005 | 12 | 52 | 19 | 3 | 36.7 |
+| ov005 | 0 | 18 | 8 | 3 | 19.5 |
 | ov006 | 24 | 82 | 22 | 4 | 50.1 |
 | ov008 | 11 | 38 | 12 | 2 | 28.1 |
 | ov009 | 1 | 1 | 2 | 3 | 11.4 |
@@ -453,5 +481,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4687** | **5911** | **964** | **129** | **2460.3** |
+| **Total** | **4675** | **5877** | **953** | **129** | **2443.2** |
 <!-- END GENERATED -->

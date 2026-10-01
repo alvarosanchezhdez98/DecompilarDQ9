@@ -1253,7 +1253,7 @@ from:0x021e3540 kind:arm_call to:0x02032698 module:main
 from:0x021e355c kind:arm_call to:0x02032554 module:main
 from:0x021e3564 kind:arm_call to:0x02153ba4 module:overlay(5)
 from:0x021e3574 kind:arm_call to:0x02153954 module:overlay(5)
-from:0x021e3584 kind:arm_call to:0x02154da8 module:overlays(4,5)
+from:0x021e3584 kind:arm_call to:0x02154da8 module:overlay(5)
 from:0x021e3590 kind:arm_call to:0x02032554 module:main
 from:0x021e35a0 kind:arm_call to:0x02032500 module:main
 from:0x021e35ac kind:arm_call to:0x02032554 module:main

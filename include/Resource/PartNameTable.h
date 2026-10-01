@@ -27,7 +27,9 @@ struct PartModelInfo
 {
     unsigned int unk_0_0 : 7;
     unsigned int unk_0_7 : 4;
-    unsigned int unk_0_11 : 18;
+    unsigned int unk_0_11 : 16;
+    // The sound that the equipment menu plays when the item is equipped (1 or 2)
+    unsigned int sound_ : 2;
     unsigned int unk_0_29 : 1;
     unsigned int unk_0_30 : 2;
     unsigned int unk_4_0 : 12;
@@ -76,7 +78,10 @@ struct PartEntry
     unsigned int type_ : 5;
     // The stars of its rank (5 for the rarest ones, which sparkle)
     unsigned int rank_ : 3;
-    unsigned int unk_8_12 : 20;
+    unsigned int unk_8_12 : 6;
+    // The item can't be removed once it's equipped
+    unsigned int cursed_ : 1;
+    unsigned int unk_8_19 : 13;
     unsigned int unk_c_0 : 12;
     // The flag that tells whether the player has the item (overlay 23's ItemSortList checks it)
     unsigned int flag_ : 11;
