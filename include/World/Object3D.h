@@ -296,6 +296,10 @@ public:
     BCFG* GetCurrentAnimationConfig();
 
     void SetScale(const Vector3fix* vec);
+    void SetPosition(const Vector3fix& position)
+    {
+        position_ = position;
+    }
     void SetScale(fix32_t x, fix32_t y, fix32_t z);
     Vector3fix GetScale() const;
 

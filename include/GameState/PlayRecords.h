@@ -8,6 +8,27 @@ struct PlayTime
     unsigned char seconds_;
 };
 
+// The records of the last clear of the game, in PlayRecords (0x18 bytes)
+struct ClearRecords
+{
+    PlayTime times_[2];
+    unsigned int unk_8_0 : 17;
+    unsigned int unk_8_17 : 7;
+    unsigned int unk_8_24 : 7;
+    unsigned int unk_8_31 : 1;
+    unsigned int unk_c_0 : 17;
+    unsigned int unk_c_17 : 7;
+    unsigned int unk_c_24 : 7;
+    unsigned int unk_c_31 : 1;
+    unsigned int unk_10_0 : 9;
+    unsigned int unk_10_9 : 14;
+    // The title of the protagonist
+    unsigned int title_ : 9;
+    unsigned int unk_14_0 : 8;
+    unsigned int unk_14_8 : 14;
+    unsigned int unk_14_22 : 10;
+};
+
 // The records of the game (0xb0 bytes, at 0x7540 in GameState): the play time and the counts that the scripts of the
 // menus show. func_020ac4c0 copies them and func_020ac494 writes them back. What each field counts isn't known yet
 struct PlayRecords
@@ -23,7 +44,10 @@ struct PlayRecords
     unsigned int unk_10_0 : 9;
     unsigned int unk_10_9 : 14;
     unsigned int unk_10_23 : 9;
-    unsigned int unk_14;
+    unsigned int unk_14_0 : 9;
+    unsigned int unk_14_9 : 9;
+    unsigned int unk_14_18 : 11;
+    unsigned int unk_14_29 : 3;
     unsigned int unk_18_0 : 9;
     unsigned int unk_18_9 : 7;
     unsigned int unk_18_16 : 4;
@@ -73,22 +97,8 @@ struct PlayRecords
     unsigned int unk_88_24 : 8;
     unsigned int unk_8c_0 : 24;
     unsigned int unk_8c_24 : 8;
-    PlayTime unk_90;
-    PlayTime unk_94;
-    unsigned int unk_98_0 : 17;
-    unsigned int unk_98_17 : 7;
-    unsigned int unk_98_24 : 7;
-    unsigned int unk_98_31 : 1;
-    unsigned int unk_9c_0 : 17;
-    unsigned int unk_9c_17 : 7;
-    unsigned int unk_9c_24 : 7;
-    unsigned int unk_9c_31 : 1;
-    unsigned int unk_a0_0 : 9;
-    unsigned int unk_a0_9 : 14;
-    unsigned int unk_a0_23 : 9;
-    unsigned int unk_a4_0 : 8;
-    unsigned int unk_a4_8 : 14;
-    unsigned int unk_a4_22 : 10;
+    // The records of the last clear of the game
+    ClearRecords lastClear_;
     unsigned int unk_a8_0 : 24;
     unsigned int unk_a8_24 : 8;
     unsigned int unk_ac;
