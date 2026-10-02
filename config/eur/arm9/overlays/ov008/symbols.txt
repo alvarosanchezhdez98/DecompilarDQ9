@@ -46,21 +46,21 @@ _ZN13BattleRecords14DrawBackButtonEv kind:function(arm,size=0x5c) addr:0x021889f
 _ZN13BattleRecords15LoadBackgroundsEi kind:function(arm,size=0x320) addr:0x02188a54
 _ZN13BattleRecords8LoadIconEv kind:function(arm,size=0x17c) addr:0x02188d74
 _ZN13BattleRecords10CheckCloseEv kind:function(arm,size=0x6c) addr:0x02188ef0
-func_ov008_02188f5c kind:function(arm,size=0x2cc) addr:0x02188f5c
-func_ov008_02189228 kind:function(arm,size=0x5c) addr:0x02189228
-func_ov008_02189284 kind:function(arm,size=0xe8) addr:0x02189284
-func_ov008_0218936c kind:function(arm,size=0x98) addr:0x0218936c
-func_ov008_02189404 kind:function(arm,size=0x68) addr:0x02189404
-func_ov008_0218946c kind:function(arm,size=0x4c) addr:0x0218946c
-func_ov008_021894b8 kind:function(arm,size=0xf0) addr:0x021894b8
-func_ov008_021895a8 kind:function(arm,size=0x6c8) addr:0x021895a8
-func_ov008_02189c70 kind:function(arm,size=0xdb4) addr:0x02189c70
-func_ov008_0218aa24 kind:function(arm,size=0x4c0) addr:0x0218aa24
-func_ov008_0218aee4 kind:function(arm,size=0x9c) addr:0x0218aee4
-func_ov008_0218af80 kind:function(arm,size=0x104) addr:0x0218af80
-func_ov008_0218b084 kind:function(arm,size=0x15c) addr:0x0218b084
-func_ov008_0218b1e0 kind:function(arm,size=0x60) addr:0x0218b1e0
-func_ov008_0218b240 kind:function(arm,size=0xc0) addr:0x0218b240
+_ZN11VisitorTalk10InitializeEaP9GuestData kind:function(arm,size=0x2cc) addr:0x02188f5c
+_Z10ClearEntryP10GuestEntry kind:function(arm,size=0x5c) addr:0x02189228 local
+_ZN11VisitorTalk16CreateAllocatorsEP13SafeAllocator kind:function(arm,size=0xe8) addr:0x02189284
+_ZN11VisitorTalk6UpdateEv kind:function(arm,size=0x98) addr:0x0218936c
+_ZN11VisitorTalk5Draw1Ev kind:function(arm,size=0x68) addr:0x02189404
+_ZN11VisitorTalk5Draw2Ev kind:function(arm,size=0x4c) addr:0x0218946c
+_ZN11VisitorTalk6FinishEv kind:function(arm,size=0xf0) addr:0x021894b8
+_ZN11VisitorTalk10State_LoadEv kind:function(arm,size=0x6c8) addr:0x021895a8
+_ZN11VisitorTalk10State_TalkEv kind:function(arm,size=0xdb4) addr:0x02189c70
+_ZN11VisitorTalk9WriteCardEv kind:function(arm,size=0x4c0) addr:0x0218aa24
+_ZN11VisitorTalk11DrawCornersEv kind:function(arm,size=0x9c) addr:0x0218aee4
+_ZN11VisitorTalk11OpenRecordsEv kind:function(arm,size=0x104) addr:0x0218af80
+_ZN11VisitorTalk12CloseRecordsEv kind:function(arm,size=0x15c) addr:0x0218b084
+_ZN11VisitorTalk10AddVisitorEv kind:function(arm,size=0x60) addr:0x0218b1e0
+_ZN11VisitorTalk5AbortEv kind:function(arm,size=0xc0) addr:0x0218b240
 sArrowSprites$2881 kind:data(any) addr:0x0218b300 local
 sArrowX$2882 kind:data(any) addr:0x0218b304 local
 sCanvasSize$2933 kind:data(any) addr:0x0218b308 local
@@ -70,18 +70,9 @@ sRotation kind:data(byte[0xc]) addr:0x0218b31c local
 sScale kind:data(byte[0xc]) addr:0x0218b328 local
 sPosition kind:data(byte[0xc]) addr:0x0218b334 local
 @1557 kind:data(any) addr:0x0218b340 local
-data_ov008_0218b3b8 kind:data(any) addr:0x0218b3b8
+@1585 kind:data(any) addr:0x0218b3b8 local
+@1583 kind:data(any) addr:0x0218b3ba local
+sCanvasSize$1546 kind:data(any) addr:0x0218b3bc local
 sFormat kind:data(byte[0x4]) addr:0x0218b3e0 local
 sStrings kind:data(byte[0xe4]) addr:0x0218b3e4 local
-data_ov008_0218b4c8 kind:data(any) addr:0x0218b4c8
-data_ov008_0218b4df kind:data(any) addr:0x0218b4df
-data_ov008_0218b4f2 kind:data(any) addr:0x0218b4f2
-data_ov008_0218b508 kind:data(any) addr:0x0218b508
-data_ov008_0218b51a kind:data(any) addr:0x0218b51a
-data_ov008_0218b52d kind:data(any) addr:0x0218b52d
-data_ov008_0218b544 kind:data(any) addr:0x0218b544
-data_ov008_0218b559 kind:data(any) addr:0x0218b559
-data_ov008_0218b56a kind:data(any) addr:0x0218b56a
-data_ov008_0218b57f kind:data(any) addr:0x0218b57f
-data_ov008_0218b590 kind:data(any) addr:0x0218b590
-data_ov008_0218b594 kind:data(any) addr:0x0218b594
+sStrings kind:data(byte[0xd6]) addr:0x0218b4c8 local
