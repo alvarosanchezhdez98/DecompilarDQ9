@@ -4,3 +4,10 @@
     .data       start:0x02193fa0 end:0x02194560 kind:data align:32
     .bss        start:0x02194560 end:0x02194600 kind:bss align:32
 
+src/Scene/Overlay_15/CharacterViewer.cpp:
+    complete
+    .text start:0x0218b5a0 end:0x02193cd0
+    .rodata start:0x02193cd0 end:0x02193f9c
+    .data start:0x02193fa0 end:0x02194560
+    .bss start:0x02194560 end:0x02194600
+

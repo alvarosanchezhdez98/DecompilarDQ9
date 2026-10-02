@@ -300,6 +300,27 @@ public:
     {
         position_ = position;
     }
+    // The ID of the object's model (the character viewer of overlay 15 keeps the part's ID there)
+    short GetModelId() const
+    {
+        return unknown_2_;
+    }
+    void SetModelId(short id)
+    {
+        unknown_2_ = id;
+    }
+    const Vector3fix& GetPosition() const
+    {
+        return position_;
+    }
+    void SetRotation(const Vector3fix& rotation)
+    {
+        rotation_ = rotation;
+    }
+    const Vector3fix& GetRotation() const
+    {
+        return rotation_;
+    }
     void SetScale(fix32_t x, fix32_t y, fix32_t z);
     Vector3fix GetScale() const;
 

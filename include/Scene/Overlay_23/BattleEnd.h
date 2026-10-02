@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Memory/SafeAllocator.h"
+#include "Resource/MonsterEntry.h"
 #include "Scene/Overlay_13/SkillUpScreen.h"
 #include "Scene/Overlay_23/BattleResultWindow.h"
 #include "Scene/Overlay_23/ExperienceTable.h"
@@ -10,28 +11,6 @@
 #include "Text/TextTable.h"
 
 struct PartyMember;
-
-// An entry of the monsters' data (mon_data), found by the monster's ID: the name that the texts write
-struct MonsterEntry
-{
-    const char* name_;
-    char unk_4[4];
-    short unk_8;
-    char unk_a[6];
-    // The monster's ID in the monster list
-    unsigned short id_;
-    char unk_12[2];
-    const char* unk_14;
-    unsigned int unk_18_0 : 6;
-    unsigned int unk_18_6 : 6;
-    unsigned int unk_18_12 : 6;
-    unsigned int unk_18_18 : 6;
-    unsigned int unk_18_24 : 2;
-    unsigned int unk_18_26 : 1;
-    unsigned int unk_18_27 : 1;
-    unsigned int unk_18_28 : 1;
-    unsigned int unk_18_29 : 3;
-};
 
 // A monster that the party defeated (10 bytes)
 struct BattleMonster
