@@ -234,13 +234,13 @@ Last recorded on 2026-10-02.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 470,084 | 2,959,024 | 15.89 % |
-| Functions | 3,187 | 14,779 | 21.56 % |
+| Code (bytes) | 474,328 | 2,959,024 | 16.03 % |
+| Functions | 3,199 | 14,779 | 21.65 % |
 | Modules | 4 complete, 17 in progress, 11 not started | 32 with code |  |
 
-Source files: 243 complete, 1 in progress.
+Source files: 244 complete, 1 in progress.
 
-Not counted as decompiled: 132 functions (127,268 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 135 functions (132,148 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -256,7 +256,7 @@ Not counted as decompiled: 132 functions (127,268 bytes) in assembly, since thei
 | 2026-09-29 | 2,840 (19.22 %) | 402,944 (13.62 %) | 221 |
 | 2026-09-30 | 3,085 (20.87 %) | 439,088 (14.84 %) | 240 |
 | 2026-10-01 | 3,145 (21.28 %) | 457,216 (15.45 %) | 242 |
-| 2026-10-02 | 3,187 (21.56 %) | 470,084 (15.89 %) | 243 |
+| 2026-10-02 | 3,199 (21.65 %) | 474,328 (16.03 %) | 244 |
 
 ## Modules
 
@@ -273,7 +273,7 @@ Not counted as decompiled: 132 functions (127,268 bytes) in assembly, since thei
 | ov005 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled whole: the frame of four corners that moves towards what it selects (`CursorFrame`, with 1 function in assembly for now) and the menu itself (`EquipmentMenu`: the equipped items around the model, the pages of items to drag onto it, the kinds, sorting and the menu of each item; 28 of its 85 functions in assembly for now) | 37.2 | 89 | 60 | 29 | 47.54 % | In progress |
 | ov006 | Alchemy pot ("renkin" in Japanese) | 50.1 | 132 | 0 | 132 | 0.00 % | Not started |
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
-| ov008 | The battle records ("Kampfarchiv" in German, `str_jr.gp2`) and *likely* another player's profile (`tlkpcstr`, `profsen`), which embeds them. Decompiled: the records (`BattleRecords`, `src/Scene/Overlay_8`): the play time, the counts, the titles earned with their guides and comments (`cmtFileTbl.bin`), the protagonist's 3D model and the menu of the records' kinds; 6 of its 47 functions in assembly for now | 28.1 | 63 | 42 | 21 | 44.73 % | In progress |
+| ov008 | Fully decompiled (`src/Scene/Overlay_8`): the battle records ("Kampfarchiv" in German, `str_jr.gp2`; `BattleRecords`): the play time, the counts, the titles earned with their guides and comments (`cmtFileTbl.bin`), the protagonist's 3D model and the menu of the records' kinds; and talking to a visitor of the inn (`VisitorTalk`): another player that tag mode received or a party member, whose card, profile, treasure map and battle records it shows, saving the visitors met in `GameState`. 9 of the 62 functions in assembly for now | 28.1 | 63 | 54 | 9 | 59.48 % | In progress |
 | ov009 | The creation of a character: the protagonist's (overlay 21) or a party member's at the Quester's Rest (overlay 3), with its sex, looks and name (`src/Scene/Overlay_9`). Decompiled, with 6 functions and the copy of `ForbiddenWordChecker::Match` in assembly for now | 25.7 | 43 | 36 | 7 | 55.71 % | In progress |
 | ov010 | A message and a hole effect for a party member (`src/World/Overlay_10`), fully decompiled. Run by overlay 17; its use in the game isn't known yet | 1.9 | 3 | 3 | 0 | 100.00 % | Complete |
 | ov011 | The system of the menus that run a script (`data/menu/*.stb`: the title, the treasure maps, the accolades...), and its 114 script commands (`src/Scene/Overlay_11`). Overlay 17 loads the script and overlay 23 has the objects that the commands create. Decompiled, with 3 commands in assembly for now. Needs `FORCE_ACTIVE` | 17.6 | 186 | 183 | 3 | 94.85 % | In progress |
@@ -360,6 +360,9 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov008 | `BattleRecords::UpdateTime` | `0x0218747c` | 0x1e8 |
 | ov008 | `BattleRecords::LoadBackgrounds` | `0x02188a54` | 0x320 |
 | ov008 | `BattleRecords::CheckClose` | `0x02188ef0` | 0x6c |
+| ov008 | `VisitorTalk::State_Talk` | `0x02189c70` | 0xdb4 |
+| ov008 | `VisitorTalk::WriteCard` | `0x0218aa24` | 0x4c0 |
+| ov008 | `VisitorTalk::DrawCorners` | `0x0218aee4` | 0x9c |
 | ov009 | `CharacterCreation::State_Load` | `0x02185634` | 0xd9c |
 | ov009 | `CharacterCreation::State_Confirm` | `0x0218742c` | 0x708 |
 | ov009 | `CharacterCreation::GetBodyScale` | `0x02188bf8` | 0x34 |
@@ -469,7 +472,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov004 | 229 | 243 | 57 | 3 | 112.9 |
 | ov005 | 0 | 18 | 8 | 3 | 19.5 |
 | ov006 | 24 | 82 | 22 | 4 | 50.1 |
-| ov008 | 0 | 14 | 5 | 2 | 15.5 |
+| ov008 | 0 | 4 | 3 | 2 | 11.4 |
 | ov009 | 1 | 1 | 2 | 3 | 11.4 |
 | ov011 | 0 | 3 | 0 | 0 | 0.9 |
 | ov012 | 0 | 2 | 4 | 1 | 5.2 |
@@ -488,5 +491,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4664** | **5853** | **946** | **129** | **2430.6** |
+| **Total** | **4664** | **5843** | **944** | **129** | **2426.5** |
 <!-- END GENERATED -->

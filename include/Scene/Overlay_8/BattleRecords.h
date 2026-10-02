@@ -35,8 +35,9 @@ struct GuestRecords
     unsigned int unk_10_30 : 2;
     short title_;
     unsigned char female_ : 1;
-    unsigned char unk_16_1 : 7;
-    char unk_17;
+    unsigned char unk_16_1 : 4;
+    unsigned char unk_16_5 : 3;
+    unsigned char unk_17;
 };
 
 // The flags of BattleRecords::flags_
