@@ -1178,7 +1178,7 @@ static int StateCommand_c9(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    PlayTime* time = &records.unk_90;
+    PlayTime* time = &records.lastClear_.times_[0];
     func_ov017_021d6134(&params[0], time->hours_);
     func_ov017_021d6134(&params[1], time->minutes_);
     return 1;
@@ -1188,7 +1188,7 @@ static int StateCommand_ca(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    PlayTime* time = &records.unk_94;
+    PlayTime* time = &records.lastClear_.times_[1];
     func_ov017_021d6134(&params[0], time->hours_);
     func_ov017_021d6134(&params[1], time->minutes_);
     return 1;
@@ -1198,7 +1198,7 @@ static int StateCommand_cb(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_98_0);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_8_0);
     return 1;
 }
 
@@ -1206,7 +1206,7 @@ static int StateCommand_cc(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_98_17);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_8_17);
     return 1;
 }
 
@@ -1214,7 +1214,7 @@ static int StateCommand_cd(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_98_24);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_8_24);
     return 1;
 }
 
@@ -1222,7 +1222,7 @@ static int StateCommand_ce(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_9c_0);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_c_0);
     return 1;
 }
 
@@ -1230,7 +1230,7 @@ static int StateCommand_cf(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_9c_17);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_c_17);
     return 1;
 }
 
@@ -1238,7 +1238,7 @@ static int StateCommand_d0(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_9c_24);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_c_24);
     return 1;
 }
 
@@ -1246,7 +1246,7 @@ static int StateCommand_d1(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_a0_0);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_10_0);
     return 1;
 }
 
@@ -1254,7 +1254,7 @@ static int StateCommand_d2(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_a4_0);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_14_0);
     return 1;
 }
 
@@ -1262,7 +1262,7 @@ static int StateCommand_d3(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_a0_9);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_10_9);
     return 1;
 }
 
@@ -1270,7 +1270,7 @@ static int StateCommand_d4(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_a4_8);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_14_8);
     return 1;
 }
 
@@ -1286,7 +1286,7 @@ static int StateCommand_d6(ScriptValue* params, int count)
 {
     PlayRecords records;
     func_020ac4c0(&records);
-    func_ov017_021d6134(&params[0], records.unk_a4_22);
+    func_ov017_021d6134(&params[0], records.lastClear_.unk_14_22);
     return 1;
 }
 

@@ -1,51 +1,51 @@
-func_ov008_021842a0 kind:function(arm,size=0x158) addr:0x021842a0
-func_ov008_021843f8 kind:function(arm,size=0x1a0) addr:0x021843f8
-func_ov008_02184598 kind:function(arm,size=0x14) addr:0x02184598
-func_ov008_021845ac kind:function(arm,size=0x1a8) addr:0x021845ac
-func_ov008_02184754 kind:function(arm,size=0x124) addr:0x02184754
-func_ov008_02184878 kind:function(arm,size=0xa0) addr:0x02184878
-func_ov008_02184918 kind:function(arm,size=0x50) addr:0x02184918
-func_ov008_02184968 kind:function(arm,size=0xc4) addr:0x02184968
-func_ov008_02184a2c kind:function(arm,size=0x10) addr:0x02184a2c
-func_ov008_02184a3c kind:function(arm,size=0x10) addr:0x02184a3c
-func_ov008_02184a4c kind:function(arm,size=0xf18) addr:0x02184a4c
-func_ov008_02185964 kind:function(arm,size=0x38) addr:0x02185964
-func_ov008_0218599c kind:function(arm,size=0xd4) addr:0x0218599c
-func_ov008_02185a70 kind:function(arm,size=0x350) addr:0x02185a70
-func_ov008_02185dc0 kind:function(arm,size=0x4c0) addr:0x02185dc0
-func_ov008_02186280 kind:function(arm,size=0x44) addr:0x02186280
-func_ov008_021862c4 kind:function(arm,size=0x1c) addr:0x021862c4
-func_ov008_021862e0 kind:function(arm,size=0x1c) addr:0x021862e0
-func_ov008_021862fc kind:function(arm,size=0x1c) addr:0x021862fc
-func_ov008_02186318 kind:function(arm,size=0x1c) addr:0x02186318
-func_ov008_02186334 kind:function(arm,size=0x1c) addr:0x02186334
-func_ov008_02186350 kind:function(arm,size=0x1c) addr:0x02186350
-func_ov008_0218636c kind:function(arm,size=0x1c) addr:0x0218636c
-func_ov008_02186388 kind:function(arm,size=0x520) addr:0x02186388
-func_ov008_021868a8 kind:function(arm,size=0xbc) addr:0x021868a8
-func_ov008_02186964 kind:function(arm,size=0xcc) addr:0x02186964
-func_ov008_02186a30 kind:function(arm,size=0xe8) addr:0x02186a30
-func_ov008_02186b18 kind:function(arm,size=0x1d4) addr:0x02186b18
-func_ov008_02186cec kind:function(arm,size=0x160) addr:0x02186cec
-func_ov008_02186e4c kind:function(arm,size=0x298) addr:0x02186e4c
-func_ov008_021870e4 kind:function(arm,size=0x48) addr:0x021870e4
-func_ov008_0218712c kind:function(arm,size=0x14c) addr:0x0218712c
-func_ov008_02187278 kind:function(arm,size=0x134) addr:0x02187278
-func_ov008_021873ac kind:function(arm,size=0xd0) addr:0x021873ac
-func_ov008_0218747c kind:function(arm,size=0x1e8) addr:0x0218747c
-func_ov008_02187664 kind:function(arm,size=0xa4) addr:0x02187664
-func_ov008_02187708 kind:function(arm,size=0x368) addr:0x02187708
-func_ov008_02187a70 kind:function(arm,size=0xb0) addr:0x02187a70
-func_ov008_02187b20 kind:function(arm,size=0x44c) addr:0x02187b20
-func_ov008_02187f6c kind:function(arm,size=0x49c) addr:0x02187f6c
-func_ov008_02188408 kind:function(arm,size=0x328) addr:0x02188408
-func_ov008_02188730 kind:function(arm,size=0x140) addr:0x02188730
-func_ov008_02188870 kind:function(arm,size=0xc4) addr:0x02188870
-func_ov008_02188934 kind:function(arm,size=0xc4) addr:0x02188934
-func_ov008_021889f8 kind:function(arm,size=0x5c) addr:0x021889f8
-func_ov008_02188a54 kind:function(arm,size=0x320) addr:0x02188a54
-func_ov008_02188d74 kind:function(arm,size=0x17c) addr:0x02188d74
-func_ov008_02188ef0 kind:function(arm,size=0x6c) addr:0x02188ef0
+_ZN13BattleRecords16CreateAllocatorsEP13SafeAllocator kind:function(arm,size=0x158) addr:0x021842a0
+_ZN13BattleRecords10InitializeEv kind:function(arm,size=0x1a0) addr:0x021843f8
+_Z9ResetTimeP8PlayTime kind:function(arm,size=0x14) addr:0x02184598 local
+_ZN13BattleRecords6FinishEv kind:function(arm,size=0x1a8) addr:0x021845ac
+_ZN13BattleRecords6UpdateEv kind:function(arm,size=0x124) addr:0x02184754
+_ZN13BattleRecords5Draw1Ev kind:function(arm,size=0xa0) addr:0x02184878
+_ZN13BattleRecords6Draw3DEv kind:function(arm,size=0x50) addr:0x02184918
+_ZN13BattleRecords5Draw2Ev kind:function(arm,size=0xc4) addr:0x02184968
+_ZN13BattleRecords5CloseEv kind:function(arm,size=0x10) addr:0x02184a2c
+_ZN13BattleRecords8SetStateEa kind:function(arm,size=0x10) addr:0x02184a3c
+_ZN13BattleRecords10State_LoadEj kind:function(arm,size=0xf18) addr:0x02184a4c
+_Z12IsScriptDoneP11TitleScript kind:function(arm,size=0x38) addr:0x02185964 local
+_ZN13BattleRecords11State_SetupEj kind:function(arm,size=0xd4) addr:0x0218599c
+_ZN13BattleRecords11State_GuideEj kind:function(arm,size=0x350) addr:0x02185a70
+_ZN13BattleRecords10State_MainEj kind:function(arm,size=0x4c0) addr:0x02185dc0
+_ZN13BattleRecords13State_FadeOutEj kind:function(arm,size=0x44) addr:0x02186280
+_ZN13BattleRecords11State_Exit1Ej kind:function(arm,size=0x1c) addr:0x021862c4
+_ZN13BattleRecords11State_Exit2Ej kind:function(arm,size=0x1c) addr:0x021862e0
+_ZN13BattleRecords11State_Exit5Ej kind:function(arm,size=0x1c) addr:0x021862fc
+_ZN13BattleRecords11State_Exit7Ej kind:function(arm,size=0x1c) addr:0x02186318
+_ZN13BattleRecords11State_Exit4Ej kind:function(arm,size=0x1c) addr:0x02186334
+_ZN13BattleRecords11State_Exit3Ej kind:function(arm,size=0x1c) addr:0x02186350
+_ZN13BattleRecords11State_Exit6Ej kind:function(arm,size=0x1c) addr:0x0218636c
+_ZN13BattleRecords15State_LastClearEj kind:function(arm,size=0x520) addr:0x02186388
+_ZN13BattleRecords11State_CloseEj kind:function(arm,size=0xbc) addr:0x021868a8
+_ZN13BattleRecords14InitializeMenuEv kind:function(arm,size=0xcc) addr:0x02186964
+_ZN13BattleRecords10UpdateMenuEi kind:function(arm,size=0xe8) addr:0x02186a30
+_ZN13BattleRecords14GetTouchedItemEii kind:function(arm,size=0x1d4) addr:0x02186b18
+_ZN13BattleRecords15InitializeItemsEv kind:function(arm,size=0x160) addr:0x02186cec
+_ZN13BattleRecords9TurnModelEj kind:function(arm,size=0x298) addr:0x02186e4c
+_ZN13BattleRecords15UpdateAnimationEj kind:function(arm,size=0x48) addr:0x021870e4
+_ZN13BattleRecords10WriteTimesEP12ClearRecords kind:function(arm,size=0x14c) addr:0x0218712c
+_ZN13BattleRecords9WriteTimeEPciP12ClearRecords kind:function(arm,size=0x134) addr:0x02187278
+_ZN13BattleRecords11RefreshTimeEi kind:function(arm,size=0xd0) addr:0x021873ac
+_ZN13BattleRecords10UpdateTimeEi kind:function(arm,size=0x1e8) addr:0x0218747c
+_ZN13BattleRecords10WriteTitleEP12ClearRecords kind:function(arm,size=0xa4) addr:0x02187664
+_ZN13BattleRecords9WriteNameEPcP12ClearRecords kind:function(arm,size=0x368) addr:0x02187708
+_ZN13BattleRecords11WriteCountsEP12ClearRecords kind:function(arm,size=0xb0) addr:0x02187a70
+_ZN13BattleRecords15WriteCountTextsEPcP12ClearRecords kind:function(arm,size=0x44c) addr:0x02187b20
+_ZN13BattleRecords9WriteMenuEP12ClearRecords kind:function(arm,size=0x49c) addr:0x02187f6c
+_ZN13BattleRecords14WriteMenuTextsEPciP12ClearRecords kind:function(arm,size=0x328) addr:0x02188408
+_ZN13BattleRecords9DrawItemsEv kind:function(arm,size=0x140) addr:0x02188730
+_ZN13BattleRecords10DrawCursorEv kind:function(arm,size=0xc4) addr:0x02188870
+_ZN13BattleRecords10DrawArrowsEv kind:function(arm,size=0xc4) addr:0x02188934
+_ZN13BattleRecords14DrawBackButtonEv kind:function(arm,size=0x5c) addr:0x021889f8
+_ZN13BattleRecords15LoadBackgroundsEi kind:function(arm,size=0x320) addr:0x02188a54
+_ZN13BattleRecords8LoadIconEv kind:function(arm,size=0x17c) addr:0x02188d74
+_ZN13BattleRecords10CheckCloseEv kind:function(arm,size=0x6c) addr:0x02188ef0
 func_ov008_02188f5c kind:function(arm,size=0x2cc) addr:0x02188f5c
 func_ov008_02189228 kind:function(arm,size=0x5c) addr:0x02189228
 func_ov008_02189284 kind:function(arm,size=0xe8) addr:0x02189284
@@ -61,29 +61,18 @@ func_ov008_0218af80 kind:function(arm,size=0x104) addr:0x0218af80
 func_ov008_0218b084 kind:function(arm,size=0x15c) addr:0x0218b084
 func_ov008_0218b1e0 kind:function(arm,size=0x60) addr:0x0218b1e0
 func_ov008_0218b240 kind:function(arm,size=0xc0) addr:0x0218b240
-data_ov008_0218b300 kind:data(any) addr:0x0218b300
-data_ov008_0218b30c kind:data(any) addr:0x0218b30c
-data_ov008_0218b314 kind:data(any) addr:0x0218b314
-data_ov008_0218b31c kind:data(any) addr:0x0218b31c
-data_ov008_0218b328 kind:data(any) addr:0x0218b328
-data_ov008_0218b334 kind:data(any) addr:0x0218b334
-data_ov008_0218b340 kind:data(any) addr:0x0218b340
+sArrowSprites$2881 kind:data(any) addr:0x0218b300 local
+sArrowX$2882 kind:data(any) addr:0x0218b304 local
+sCanvasSize$2933 kind:data(any) addr:0x0218b308 local
+sArrowsShown$2884 kind:data(any) addr:0x0218b30c local
+sArrowY$2883 kind:data(any) addr:0x0218b314 local
+sRotation kind:data(byte[0xc]) addr:0x0218b31c local
+sScale kind:data(byte[0xc]) addr:0x0218b328 local
+sPosition kind:data(byte[0xc]) addr:0x0218b334 local
+@1557 kind:data(any) addr:0x0218b340 local
 data_ov008_0218b3b8 kind:data(any) addr:0x0218b3b8
-data_ov008_0218b3e0 kind:data(any) addr:0x0218b3e0
-data_ov008_0218b3e4 kind:data(any) addr:0x0218b3e4
-data_ov008_0218b400 kind:data(any) addr:0x0218b400
-data_ov008_0218b41d kind:data(any) addr:0x0218b41d
-data_ov008_0218b43c kind:data(any) addr:0x0218b43c
-data_ov008_0218b455 kind:data(any) addr:0x0218b455
-data_ov008_0218b465 kind:data(any) addr:0x0218b465
-data_ov008_0218b47c kind:data(any) addr:0x0218b47c
-data_ov008_0218b48f kind:data(any) addr:0x0218b48f
-data_ov008_0218b490 kind:data(any) addr:0x0218b490
-data_ov008_0218b495 kind:data(any) addr:0x0218b495
-data_ov008_0218b49b kind:data(any) addr:0x0218b49b
-data_ov008_0218b4b0 kind:data(any) addr:0x0218b4b0
-data_ov008_0218b4c1 kind:data(any) addr:0x0218b4c1
-data_ov008_0218b4c3 kind:data(any) addr:0x0218b4c3
+sFormat kind:data(byte[0x4]) addr:0x0218b3e0 local
+sStrings kind:data(byte[0xe4]) addr:0x0218b3e4 local
 data_ov008_0218b4c8 kind:data(any) addr:0x0218b4c8
 data_ov008_0218b4df kind:data(any) addr:0x0218b4df
 data_ov008_0218b4f2 kind:data(any) addr:0x0218b4f2
