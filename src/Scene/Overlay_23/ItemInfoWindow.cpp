@@ -73,7 +73,6 @@ extern "C"
     void _fleq();
     long atol(const char* text);
     unsigned short func_020017b0(int value);
-    double func_0200c578(float value);
     GameResources* func_0200fb8c(GameState* gameState);
     int func_0201079c(GameState* gameState);
     void* func_02012d88(void* heap, unsigned int size);
@@ -453,7 +452,7 @@ static asm void GetPlaceIds(ItemInfoTable* table, short* ids, short* count)
 static void DrawDecimal(Canvas* canvas, short x, short y, float value, unsigned char color)
 {
     char text[0x40] = {0};
-    sprintf(text, STRING(0x0, "%.1f"), func_0200c578(value));
+    sprintf(text, STRING(0x0, "%.1f"), value);
     unsigned short width;
     unsigned short height;
     func_0204f41c(canvas, x - func_020420e8(text, 0), y, text, 8, color, &width, &height, 0);

@@ -234,13 +234,13 @@ Last recorded on 2026-10-02.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 474,328 | 2,959,024 | 16.03 % |
-| Functions | 3,199 | 14,779 | 21.65 % |
-| Modules | 4 complete, 17 in progress, 11 not started | 32 with code |  |
+| Code (bytes) | 491,620 | 2,959,024 | 16.61 % |
+| Functions | 3,285 | 14,779 | 22.23 % |
+| Modules | 4 complete, 18 in progress, 10 not started | 32 with code |  |
 
-Source files: 244 complete, 1 in progress.
+Source files: 245 complete, 1 in progress.
 
-Not counted as decompiled: 135 functions (132,148 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 152 functions (149,464 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -256,7 +256,7 @@ Not counted as decompiled: 135 functions (132,148 bytes) in assembly, since thei
 | 2026-09-29 | 2,840 (19.22 %) | 402,944 (13.62 %) | 221 |
 | 2026-09-30 | 3,085 (20.87 %) | 439,088 (14.84 %) | 240 |
 | 2026-10-01 | 3,145 (21.28 %) | 457,216 (15.45 %) | 242 |
-| 2026-10-02 | 3,199 (21.65 %) | 474,328 (16.03 %) | 244 |
+| 2026-10-02 | 3,285 (22.23 %) | 491,620 (16.61 %) | 245 |
 
 ## Modules
 
@@ -280,7 +280,7 @@ Not counted as decompiled: 135 functions (132,148 bytes) in assembly, since thei
 | ov012 | The editor of the profile that tag mode's card shows: its title, accolade, birthday, design and message, with overlay 3's keyboard and a check of forbidden words (`src/Scene/Overlay_12`). Overlay 23 draws the card. Decompiled, with 7 functions in assembly for now | 27.2 | 71 | 64 | 7 | 80.75 % | In progress |
 | ov013 | The skill up screen: the menu that spends skill points, and the list of each skill's abilities (`src/Scene/Overlay_13`) | 14.7 | 40 | 37 | 3 | 91.33 % | In progress |
 | ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
-| ov015 | *Likely* character model loading / viewer | 33.8 | 103 | 0 | 103 | 0.00 % | Not started |
+| ov015 | Fully decompiled (`src/Scene/Overlay_15`): the character viewer (`CharacterViewer`), a debug mode of `main()` with its own main loop. Its menus come from a script, `charaview4.bin`: it loads players, the party's models ("dolls"), NPCs, monsters, effects and event or skill cameras, changes the characters' look (gender, face, colours, hairstyle, build, equipment), plays and steps their motions, moves them, and shows the FPS, the triangles and quads drawn and the memory of the allocators. 17 of the 103 functions in assembly for now | 33.8 | 103 | 86 | 17 | 49.97 % | In progress |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 0 | 85 | 0.00 % | Not started |
 | ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 0 | 1194 | 0.00 % | Not started |
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
@@ -384,6 +384,23 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov013 | `SkillPointMenu::OpenMenu` | `0x02185990` | 0x11c |
 | ov013 | `SkillPointMenu::DrawIcon` | `0x02186db4` | 0xc0 |
 | ov014 | `MonsterInfoScreen::UpdateText` | `0x02185c90` | 0xc28 |
+| ov015 | `SaveCameraBones` | `0x0218bb3c` | 0x160 |
+| ov015 | `ViewObject::LoadPlayerAnimations` | `0x0218c538` | 0x3e8 |
+| ov015 | `ViewObject::LoadDollAnimations` | `0x0218c920` | 0x20c |
+| ov015 | `ViewObject::LoadPlayer` | `0x0218cc24` | 0x8e8 |
+| ov015 | `ViewObject::LoadDoll` | `0x0218d50c` | 0x6e0 |
+| ov015 | `ViewObject::LoadMonster` | `0x0218dbec` | 0x320 |
+| ov015 | `ViewObject::LoadNpc` | `0x0218df0c` | 0x120 |
+| ov015 | `ViewObject::LoadEffect` | `0x0218e02c` | 0x278 |
+| ov015 | `ViewObject::LoadCamera` | `0x0218e2a4` | 0x1f4 |
+| ov015 | `ViewObject::UpdateCamera` | `0x0218e670` | 0x1a0 |
+| ov015 | `ViewObject::DrawPlayer` | `0x0218e810` | 0x2f4 |
+| ov015 | `ViewObject::DrawMemory` | `0x0218f794` | 0x7e8 |
+| ov015 | `CharacterViewer::Update` | `0x02190d7c` | 0x10c |
+| ov015 | `CharacterViewer::UpdateOptionMenu` | `0x02191668` | 0x20c |
+| ov015 | `CharacterViewer::LoadPreset` | `0x02191c70` | 0x234 |
+| ov015 | `CharacterViewer::OpenMenu` | `0x02192700` | 0xa3c |
+| ov015 | `CharacterViewer::Run` | `0x021934f8` | 0x7d8 |
 | ov019 | `SaveErrorScreen::Run` | `0x0218b5a8` | 0xbd0 |
 | ov020 | `StartupScene::Run` | `0x0218b710` | 0x10ac |
 | ov021 | `CharacterCreationScene::Run` | `0x0218b5fc` | 0x4fc |
@@ -478,7 +495,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov012 | 0 | 2 | 4 | 1 | 5.2 |
 | ov013 | 0 | 2 | 1 | 0 | 1.3 |
 | ov014 | 0 | 0 | 0 | 1 | 3.0 |
-| ov015 | 28 | 57 | 16 | 2 | 33.8 |
+| ov015 | 0 | 5 | 10 | 2 | 16.9 |
 | ov016 | 51 | 26 | 5 | 3 | 21.0 |
 | ov017 | 420 | 626 | 132 | 16 | 300.4 |
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
@@ -491,5 +508,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4664** | **5843** | **944** | **129** | **2426.5** |
+| **Total** | **4636** | **5791** | **938** | **129** | **2409.6** |
 <!-- END GENERATED -->
