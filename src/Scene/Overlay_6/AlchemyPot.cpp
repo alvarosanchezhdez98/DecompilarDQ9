@@ -1131,8 +1131,8 @@ void AlchemyPot::UpdateItem()
             {
                 nextItemAllocator_->Reset();
                 func_020de848(&partNames_);
-                func_020de980(&partNames_, nextItemAllocator_, data, size, nextRecipe_->unk_2);
-                nextItem_ = func_020dedd0(&partNames_, nextRecipe_->unk_2);
+                func_020de980(&partNames_, nextItemAllocator_, data, size, nextRecipe_->item_);
+                nextItem_ = func_020dedd0(&partNames_, nextRecipe_->item_);
             }
             loader->RemoveTask(task_);
             task_ = -1;
@@ -1211,7 +1211,7 @@ void AlchemyPot::UpdateItem()
             window_.flags_ &= ~ITEM_INFO_WINDOW_QUEST;
         else
             window_.flags_ |= ITEM_INFO_WINDOW_QUEST;
-        window_.SetItem(nextRecipe_->unk_2);
+        window_.SetItem(nextRecipe_->item_);
         item_ = nextItem_;
         nextItem_ = 0;
         itemStep_ = 0;
@@ -3200,3 +3200,6 @@ void AlchemyPot::StopEffect()
 {
     effectMode_ = 3;
 }
+
+// Some bytes that nothing uses
+extern const unsigned char data_ov006_0215ffac[8] = {8, 9, 9, 0, 0xf0, 0, 3, 7};

@@ -5,9 +5,9 @@
 // A recipe of the alchemy pot (0x20 bytes), in a RecipeTable
 struct Recipe
 {
-    // The ID of the item that it makes
+    // The ID of the recipe, and the item that it makes
     short id_;
-    short unk_2;
+    short item_;
     // The items that it needs, and how many of each
     short ingredients_[3];
     unsigned short amount0_ : 4;
@@ -27,11 +27,13 @@ struct Recipe
     // The recipe has been learnt or made
     unsigned int known_ : 1;
     unsigned int unk_10_23 : 9;
-    short unk_14;
+    // The recipe that a great success makes instead
+    short greatRecipe_;
     short unk_16;
     short unk_18;
     short unk_1a;
-    int unk_1c;
+    // The next recipe of a list that func_02071ffc makes
+    Recipe* next_;
 };
 
 // The recipes of the alchemy pot (0xc bytes), which a script fills
@@ -57,15 +59,6 @@ struct RecipeRecord
     unsigned short unk_2_2 : 14;
 
     void Initialize();
-};
-
-// The items that alchemy made: a recipe and maybe another one
-struct AlchemyResult
-{
-    short recipe_;
-    short unk_2;
-    short extra_;
-    short unk_6;
 };
 
 extern "C"
@@ -100,7 +93,8 @@ public:
     void GetAmounts(short id, unsigned char* amounts);
     void SetRecords(RecipeRecord* records, unsigned short count);
     RecipeRecord* FindRecord(short id);
-    void AddResult(AlchemyResult result, RecipeTable* table);
+    // Records a recipe that alchemy made, and maybe another one (its great success)
+    void AddResult(short recipe, short extra, RecipeTable* table);
     void UpdateRecord(RecipeRecord* record);
     short GetSuccessRate(short id);
     short CountRecipes();

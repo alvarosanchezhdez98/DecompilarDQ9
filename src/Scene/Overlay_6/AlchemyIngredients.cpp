@@ -218,7 +218,7 @@ RecipeRecord* AlchemyIngredients::FindRecord(short id)
     return 0;
 }
 
-void AlchemyIngredients::AddResult(AlchemyResult result, RecipeTable* table)
+void AlchemyIngredients::AddResult(short recipe, short extra, RecipeTable* table)
 {
     RecipeRecord record;
     unsigned int count;
@@ -227,7 +227,7 @@ void AlchemyIngredients::AddResult(AlchemyResult result, RecipeTable* table)
     BackgroundLoader::AddLockGlobal();
     BackgroundLoader::FreeAllocationsGlobal();
     record.Initialize();
-    if (func_020ac2d4(0, &result.recipe_, &record, 1))
+    if (func_020ac2d4(0, &recipe, &record, 1))
     {
         record.known_ = 1;
         record.made_ = 1;
@@ -235,25 +235,25 @@ void AlchemyIngredients::AddResult(AlchemyResult result, RecipeTable* table)
         UpdateRecord(&record);
         if (table != 0)
         {
-            Recipe* recipe = func_02071d60(table, result.recipe_);
-            if (recipe != 0)
-                recipe->known_ = 1;
+            Recipe* entry = func_02071d60(table, recipe);
+            if (entry != 0)
+                entry->known_ = 1;
         }
     }
-    if (result.extra_ > 0)
+    if (extra > 0)
     {
         record.Initialize();
-        if (func_020ac2d4(0, &result.extra_, &record, 1))
+        if (func_020ac2d4(0, &extra, &record, 1))
         {
-            record.id_ = result.extra_;
+            record.id_ = extra;
             record.made_ = 1;
             func_020ac104(data_0211e33c, &record, 1);
             UpdateRecord(&record);
             if (table != 0)
             {
-                Recipe* recipe = func_02071d60(table, result.extra_);
-                if (recipe != 0)
-                    recipe->known_ = 1;
+                Recipe* entry = func_02071d60(table, extra);
+                if (entry != 0)
+                    entry->known_ = 1;
             }
             CountRecipes();
         }
