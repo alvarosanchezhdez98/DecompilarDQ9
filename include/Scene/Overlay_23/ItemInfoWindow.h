@@ -197,7 +197,7 @@ struct ItemInfoWindow
     void ChangeItem(short item);
     void SetUpSubScreen();
     void RestoreScreen();
-    static void ClearBackground();
+    void ClearBackground();
     void SetInMenu(unsigned char inMenu);
     void ResetItem();
     void ClearNames();

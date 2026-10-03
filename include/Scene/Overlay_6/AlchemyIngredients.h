@@ -18,7 +18,9 @@ struct Recipe
     // The success rate (0-100) between the two values of the stat
     unsigned int minRate_ : 10;
     unsigned int maxRate_ : 10;
-    unsigned int unk_c_20 : 12;
+    // The kind of the item that it makes, which tells where its sprite and texts are
+    unsigned int kind_ : 8;
+    unsigned int unk_c_28 : 4;
     unsigned int minStat_ : 10;
     unsigned int maxStat_ : 10;
     unsigned int unk_10_20 : 2;

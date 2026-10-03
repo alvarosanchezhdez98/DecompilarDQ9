@@ -705,7 +705,7 @@ public:
     virtual int V40();
 };
 
-// What func_02075cdc initializes (0x74 bytes): graphics that func_02076080 loads from a file
+// What func_02075cdc initializes (0x70 bytes): graphics that func_02076080 loads from a file
 struct Unknown_02075cdc
 {
     char unk_0[0x14];
@@ -717,13 +717,13 @@ struct Unknown_02075cdc
     // The bit of MenuObjectList's masks
     unsigned int unk_3c;
     int unk_40;
-    char unk_44[0x5e - 0x44];
+    int unk_44;
+    char unk_48[4];
+    int unk_4c;
+    char unk_50[0x5e - 0x50];
     // The screen: 0 for the main one, 1 for the sub one
     unsigned char unk_5e;
     char unk_5f[0x70 - 0x5f];
-    // The slot of the OAM (see MenuObjectList::FindSlots())
-    unsigned short unk_70;
-    char unk_72[2];
 };
 
 // The objects of type 0xc: graphics whose file is under data/, alone or in the NARC of the script
@@ -731,6 +731,8 @@ class MenuObjectClassC : public MenuObjectClass
 {
 public:
     Unknown_02075cdc graphics_;
+    // The slot of the OAM (see MenuObjectList::FindSlots())
+    unsigned short slot_;
     // The VRAM of the graphics
     MenuObjectRange range_;
     unsigned short unk_a4;

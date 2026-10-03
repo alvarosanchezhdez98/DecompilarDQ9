@@ -62,7 +62,7 @@ int MenuObjectClassC::Initialize(MenuScript* script, int id, int heap, const cha
 
 void MenuObjectClassC::Finish(MenuObjectList* list)
 {
-    list->ClearSlots(graphics_.unk_5e, graphics_.unk_70, 1);
+    list->ClearSlots(graphics_.unk_5e, slot_, 1);
     list->RemoveRange(&range_);
     list->ClearMask(graphics_.unk_5e, graphics_.unk_3c);
 }
