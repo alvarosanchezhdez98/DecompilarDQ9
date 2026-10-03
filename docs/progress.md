@@ -234,13 +234,13 @@ Last recorded on 2026-10-03.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 500,840 | 2,959,024 | 16.93 % |
-| Functions | 3,330 | 14,779 | 22.53 % |
+| Code (bytes) | 518,580 | 2,959,024 | 17.53 % |
+| Functions | 3,399 | 14,779 | 23.00 % |
 | Modules | 4 complete, 19 in progress, 9 not started | 32 with code |  |
 
-Source files: 247 complete, 1 in progress.
+Source files: 248 complete, 1 in progress.
 
-Not counted as decompiled: 155 functions (155,536 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
+Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
 ## History
 
@@ -257,7 +257,7 @@ Not counted as decompiled: 155 functions (155,536 bytes) in assembly, since thei
 | 2026-09-30 | 3,085 (20.87 %) | 439,088 (14.84 %) | 240 |
 | 2026-10-01 | 3,145 (21.28 %) | 457,216 (15.45 %) | 242 |
 | 2026-10-02 | 3,285 (22.23 %) | 491,620 (16.61 %) | 245 |
-| 2026-10-03 | 3,330 (22.53 %) | 500,840 (16.93 %) | 247 |
+| 2026-10-03 | 3,399 (23.00 %) | 518,580 (17.53 %) | 248 |
 
 ## Modules
 
@@ -272,7 +272,7 @@ Not counted as decompiled: 155 functions (155,536 bytes) in assembly, since thei
 | ov003 | *Likely* Alltrades Abbey (vocations; "Dharma" in Japanese) | 175.0 | 510 | 0 | 510 | 0.00 % | Not started |
 | ov004 | Unclear: accolades, treasure maps | 112.9 | 532 | 0 | 532 | 0.00 % | Not started |
 | ov005 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled whole: the frame of four corners that moves towards what it selects (`CursorFrame`, with 1 function in assembly for now) and the menu itself (`EquipmentMenu`: the equipped items around the model, the pages of items to drag onto it, the kinds, sorting and the menu of each item; 28 of its 85 functions in assembly for now) | 37.2 | 89 | 60 | 29 | 47.54 % | In progress |
-| ov006 | Alchemy pot ("renkin" in Japanese), run by overlay 17. Three files: the ingredients and records of the recipes (`src/Scene/Overlay_6/AlchemyIngredients`, decompiled: which items of each category the player has, whether there are enough for a recipe, its success rate from a stat of the protagonist, and the records of the recipes learnt or made), the pot's 3D scene and the item window (`AlchemyPot`, decompiled with 3 of its 33 functions in assembly for now: the protagonist, the pot and its animations, the ingredients' sprites going into it, and the window of the recipe's item with the names of its ingredients), and the alchemy menu (`0x0215729c`) | 50.1 | 132 | 45 | 87 | 17.97 % | In progress |
+| ov006 | Alchemy pot ("renkin" in Japanese), run by overlay 17. Three files: the ingredients and records of the recipes (`src/Scene/Overlay_6/AlchemyIngredients`, decompiled: which items of each category the player has, whether there are enough for a recipe, its success rate from a stat of the protagonist, and the records of the recipes learnt or made), the pot's 3D scene and the item window (`AlchemyPot`, decompiled with 3 of its 33 functions in assembly for now: the protagonist, the pot and its animations, the ingredients' sprites going into it, and the window of the recipe's item with the names of its ingredients), and the alchemy menu (`AlchemyMenu`, decompiled with 15 of its 85 functions in assembly for now: choosing up to three ingredients and how many of each, alchemy with its success rate and great successes, and the recipe book with its categories, filters and orders, from which a recipe can be made) | 50.1 | 132 | 114 | 18 | 52.54 % | In progress |
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov008 | Fully decompiled (`src/Scene/Overlay_8`): the battle records ("Kampfarchiv" in German, `str_jr.gp2`; `BattleRecords`): the play time, the counts, the titles earned with their guides and comments (`cmtFileTbl.bin`), the protagonist's 3D model and the menu of the records' kinds; and talking to a visitor of the inn (`VisitorTalk`): another player that tag mode received or a party member, whose card, profile, treasure map and battle records it shows, saving the visitors met in `GameState`. 9 of the 62 functions in assembly for now | 28.1 | 63 | 54 | 9 | 59.48 % | In progress |
 | ov009 | The creation of a character: the protagonist's (overlay 21) or a party member's at the Quester's Rest (overlay 3), with its sex, looks and name (`src/Scene/Overlay_9`). Decompiled, with 6 functions and the copy of `ForbiddenWordChecker::Match` in assembly for now | 25.7 | 43 | 36 | 7 | 55.71 % | In progress |
@@ -358,6 +358,21 @@ Their files are complete, since the build uses the assembly after `#else`, but t
 | ov006 | `AlchemyPot::Draw` | `0x02154a60` | 0x3f8 |
 | ov006 | `AlchemyPot::UpdateItem` | `0x021557c0` | 0x668 |
 | ov006 | `AlchemyPot::UpdateLoad` | `0x02155e28` | 0xd58 |
+| ov006 | `AlchemyMenu::Allocate` | `0x021576a0` | 0x3c0 |
+| ov006 | `AlchemyMenu::Update` | `0x02157d7c` | 0x2bc |
+| ov006 | `AlchemyMenu::ChangeSort` | `0x02159c64` | 0x14c |
+| ov006 | `AlchemyMenu::UpdateMessage` | `0x0215a00c` | 0x330 |
+| ov006 | `AlchemyMenu::State_Load` | `0x0215a5fc` | 0xb00 |
+| ov006 | `AlchemyMenu::State_Ingredient1` | `0x0215bb7c` | 0x5d8 |
+| ov006 | `AlchemyMenu::State_Ingredient2` | `0x0215c154` | 0x52c |
+| ov006 | `AlchemyMenu::State_Ingredient3` | `0x0215c680` | 0x5f0 |
+| ov006 | `AlchemyMenu::State_Make` | `0x0215cc70` | 0xe80 |
+| ov006 | `AlchemyMenu::State_MakeRecipe` | `0x0215e69c` | 0xc18 |
+| ov006 | `AlchemyMenu::UpdateItemPage` | `0x0215f3d8` | 0x104 |
+| ov006 | `AlchemyMenu::DrawItems` | `0x0215f4dc` | 0x264 |
+| ov006 | `AlchemyMenu::DrawBookTitle` | `0x0215fa1c` | 0x160 |
+| ov006 | `AlchemyMenu::LoadResultSprite` | `0x0215fe34` | 0x98 |
+| ov006 | `AlchemyMenu::UpdateResultSprite` | `0x0215fecc` | 0x88 |
 | ov008 | `BattleRecords::State_Load` | `0x02184a4c` | 0xf18 |
 | ov008 | `BattleRecords::State_LastClear` | `0x02186388` | 0x520 |
 | ov008 | `BattleRecords::InitializeMenu` | `0x02186964` | 0xcc |
@@ -492,7 +507,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov003 | 101 | 319 | 79 | 11 | 175.0 |
 | ov004 | 229 | 243 | 57 | 3 | 112.9 |
 | ov005 | 0 | 18 | 8 | 3 | 19.5 |
-| ov006 | 13 | 52 | 18 | 4 | 41.1 |
+| ov006 | 0 | 5 | 9 | 4 | 23.8 |
 | ov008 | 0 | 4 | 3 | 2 | 11.4 |
 | ov009 | 1 | 1 | 2 | 3 | 11.4 |
 | ov011 | 0 | 3 | 0 | 0 | 0.9 |
@@ -512,5 +527,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4625** | **5761** | **934** | **129** | **2400.6** |
+| **Total** | **4612** | **5714** | **925** | **129** | **2383.2** |
 <!-- END GENERATED -->

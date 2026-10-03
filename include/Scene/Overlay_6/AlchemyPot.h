@@ -20,6 +20,8 @@
 #define ALCHEMY_POT_RECIPE 4
 // No 3D scene: only the item window and the menu
 #define ALCHEMY_POT_NO_3D 8
+// Alchemy is being done: the item window is hidden
+#define ALCHEMY_POT_MAKING 0x10
 // The item window is shown
 #define ALCHEMY_POT_ITEM_SHOWN 0x40
 // The animations of the alchemy: the ingredients going in, the pot working, the item coming out
@@ -56,6 +58,8 @@ struct PotIngredient
     char unk_40[0x30];
     // The item, or -1
     short item_;
+
+    void Initialize();
 };
 
 // An effect of the sub screen (0x18 bytes): func_020dbd9c initializes it, func_020dbf18 loads it
