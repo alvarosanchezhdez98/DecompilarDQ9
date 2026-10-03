@@ -230,15 +230,15 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-10-02.
+Last recorded on 2026-10-03.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 491,620 | 2,959,024 | 16.61 % |
-| Functions | 3,285 | 14,779 | 22.23 % |
-| Modules | 4 complete, 18 in progress, 10 not started | 32 with code |  |
+| Code (bytes) | 494,576 | 2,959,024 | 16.71 % |
+| Functions | 3,300 | 14,779 | 22.33 % |
+| Modules | 4 complete, 19 in progress, 9 not started | 32 with code |  |
 
-Source files: 245 complete, 1 in progress.
+Source files: 246 complete, 1 in progress.
 
 Not counted as decompiled: 152 functions (149,464 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -257,6 +257,7 @@ Not counted as decompiled: 152 functions (149,464 bytes) in assembly, since thei
 | 2026-09-30 | 3,085 (20.87 %) | 439,088 (14.84 %) | 240 |
 | 2026-10-01 | 3,145 (21.28 %) | 457,216 (15.45 %) | 242 |
 | 2026-10-02 | 3,285 (22.23 %) | 491,620 (16.61 %) | 245 |
+| 2026-10-03 | 3,300 (22.33 %) | 494,576 (16.71 %) | 246 |
 
 ## Modules
 
@@ -271,7 +272,7 @@ Not counted as decompiled: 152 functions (149,464 bytes) in assembly, since thei
 | ov003 | *Likely* Alltrades Abbey (vocations; "Dharma" in Japanese) | 175.0 | 510 | 0 | 510 | 0.00 % | Not started |
 | ov004 | Unclear: accolades, treasure maps | 112.9 | 532 | 0 | 532 | 0.00 % | Not started |
 | ov005 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled whole: the frame of four corners that moves towards what it selects (`CursorFrame`, with 1 function in assembly for now) and the menu itself (`EquipmentMenu`: the equipped items around the model, the pages of items to drag onto it, the kinds, sorting and the menu of each item; 28 of its 85 functions in assembly for now) | 37.2 | 89 | 60 | 29 | 47.54 % | In progress |
-| ov006 | Alchemy pot ("renkin" in Japanese) | 50.1 | 132 | 0 | 132 | 0.00 % | Not started |
+| ov006 | Alchemy pot ("renkin" in Japanese), run by overlay 17. Three files: the ingredients and records of the recipes (`src/Scene/Overlay_6/AlchemyIngredients`, decompiled: which items of each category the player has, whether there are enough for a recipe, its success rate from a stat of the protagonist, and the records of the recipes learnt or made), then the pot's 3D scene (`0x0215426c`) and the alchemy menu (`0x021576a0`) | 50.1 | 132 | 15 | 117 | 5.76 % | In progress |
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov008 | Fully decompiled (`src/Scene/Overlay_8`): the battle records ("Kampfarchiv" in German, `str_jr.gp2`; `BattleRecords`): the play time, the counts, the titles earned with their guides and comments (`cmtFileTbl.bin`), the protagonist's 3D model and the menu of the records' kinds; and talking to a visitor of the inn (`VisitorTalk`): another player that tag mode received or a party member, whose card, profile, treasure map and battle records it shows, saving the visitors met in `GameState`. 9 of the 62 functions in assembly for now | 28.1 | 63 | 54 | 9 | 59.48 % | In progress |
 | ov009 | The creation of a character: the protagonist's (overlay 21) or a party member's at the Quester's Rest (overlay 3), with its sex, looks and name (`src/Scene/Overlay_9`). Decompiled, with 6 functions and the copy of `ForbiddenWordChecker::Match` in assembly for now | 25.7 | 43 | 36 | 7 | 55.71 % | In progress |
@@ -488,7 +489,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov003 | 101 | 319 | 79 | 11 | 175.0 |
 | ov004 | 229 | 243 | 57 | 3 | 112.9 |
 | ov005 | 0 | 18 | 8 | 3 | 19.5 |
-| ov006 | 24 | 82 | 22 | 4 | 50.1 |
+| ov006 | 19 | 74 | 20 | 4 | 47.2 |
 | ov008 | 0 | 4 | 3 | 2 | 11.4 |
 | ov009 | 1 | 1 | 2 | 3 | 11.4 |
 | ov011 | 0 | 3 | 0 | 0 | 0.9 |
@@ -508,5 +509,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 804 | 1071 | 83 | 4 | 279.6 |
-| **Total** | **4636** | **5791** | **938** | **129** | **2409.6** |
+| **Total** | **4631** | **5783** | **936** | **129** | **2406.7** |
 <!-- END GENERATED -->
