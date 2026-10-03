@@ -4,6 +4,7 @@
 #include "Filesystem/BackgroundLoader.h"
 #include "Filesystem/FileIO.h"
 #include "GameState/GameState.h"
+#include "GameState/Party.h"
 #include "GameState/PartyMember.h"
 #include "GameState/PlayRecords.h"
 #include "Grotto/Main/ActiveGrottoClass.h"
@@ -18,16 +19,6 @@
 #define REG_DISPCNT_SUB (*(volatile unsigned int*)0x04001000)
 // The flags of a party member: 1 when they are down
 #define MEMBER_FLAGS(member) (*(unsigned int*)(member)->unk_130)
-
-// The party, which func_02010828 returns
-struct Party
-{
-    char unk_0[0xf6c];
-    unsigned int gold_;
-    char unk_f70[8];
-    unsigned char members_[4];
-    unsigned char count_;
-};
 
 // The data of the current zone, which func_02012fe4 returns
 struct ZoneData
