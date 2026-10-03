@@ -14,11 +14,12 @@ Each step has a tool, so that the time goes into the code and not into bookkeepi
 | ---- | ---- |
 | Choose what to decompile | `python tools/progress.py --remaining <module>`, the status page (`python tools/progress.py --serve`), and `python tools/find_signatures.py --duplicates` for groups of functions with the same instructions: decompiling one gives the C of the others |
 | Library code (NitroSDK, NitroSystem) | `tools/find_signatures.py` names it and finds its files, `tools/library_draft.py` drafts it from a public decompilation (see [Identifying library code](#identifying-library-code)) |
+| Split a module into files | `python tools/map_functions.py <module> [start end]`: for each function, the data it uses, the modules that call it and the functions of the module it calls. A file's functions share its data and call each other |
 | Game code: a first draft | `python tools/draft.py <module> <start> <end>`: m2c's C of each function, with its callers, its strings, and our decompiled function with the same instructions, if there's one (see below) |
 | Diff the file while writing it | `python tools/rename_symbols.py <file> <module> <start>` gives the functions of `symbols.txt` the file's names, then `ninja delink` and `python tools/diff_function.py <file>` |
 | Registers or instructions in another order | `python tools/permute.py <file> <function>` searches the order of the declarations and statements, and the types, that match; `tools/try_variants.py` tries your own ideas |
 | A function that still doesn't match | `python tools/nonmatching.py <file> <function> "why"` writes it in assembly (see [Functions that don't match yet](#functions-that-dont-match-yet)) |
-| The file's data | `tools/data_order.py` |
+| The file's data | `tools/data_order.py`, and `python tools/dump_object_data.py <file.o>` to see where the compiler put each variable |
 | Add the file to the build | `python tools/complete_file.py <file> --build`, which checks it with `ninja check` |
 | Record the progress | `python tools/progress.py --record` |
 

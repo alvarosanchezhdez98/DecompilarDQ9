@@ -43,8 +43,15 @@ struct MessageSystem
     int unk_9a0;
     char unk_9a4[0x195a - 0x9a4];
     unsigned char unk_195a;
-    unsigned char unk_195b_0 : 7;
-    unsigned char unk_195b_7 : 1;
+    union
+    {
+        unsigned char unk_195b;
+        struct
+        {
+            unsigned char unk_195b_0 : 7;
+            unsigned char unk_195b_7 : 1;
+        };
+    };
     char unk_195c[0x19ae - 0x195c];
     unsigned char unk_19ae;
     unsigned char unk_19af;
