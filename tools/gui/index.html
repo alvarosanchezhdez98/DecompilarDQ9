@@ -24,10 +24,16 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-quick-start" class="btn btn-quick-start" title="Arranque Rápido: Selecciona el módulo más avanzado y prepara su siguiente función pendiente sin esperas">
+          <span class="btn-icon">⚡</span> Arranque Rápido
+        </button>
         <div class="status-indicator-pill" id="global-process-indicator">
           <span class="status-dot idle"></span>
           <span class="status-label" id="global-process-label">En reposo</span>
         </div>
+        <button id="btn-toggle-queue" class="btn btn-sm btn-outline queue-toggle-btn" title="Monitor de tareas concurrentes y cola de procesos">
+          <span class="btn-icon">🧵</span> Tareas (<span id="queue-badge-active">0</span>)
+        </button>
         <div class="version-badge" title="Versión objetivo activa">EUR (v1.0)</div>
         <button id="btn-quick-check" class="btn btn-secondary" title="Comprobar módulos y símbolos sin construir ROM entera">
           <span class="btn-icon">⚡</span> Ninja Check
@@ -290,6 +296,32 @@
                 </div>
               </div>
             </div>
+
+            <!-- Notes, Tags & History Panel -->
+            <div class="studio-notes-card" id="studio-notes-container" style="display: none;">
+              <div class="notes-header">
+                <div class="notes-title-group">
+                  <h4>📌 Notas de Función y Telemetría</h4>
+                  <span class="subtext-pill" id="notes-status-saved">Guardado</span>
+                </div>
+                <div class="tags-group" id="func-tags-container">
+                  <span class="tag-pill" data-tag="VTable">VTable</span>
+                  <span class="tag-pill" data-tag="RegAlloc">RegAlloc</span>
+                  <span class="tag-pill" data-tag="Thumb">Thumb</span>
+                  <span class="tag-pill" data-tag="ARM">ARM</span>
+                  <span class="tag-pill" data-tag="Inlined">Inlined</span>
+                  <span class="tag-pill" data-tag="Needs Struct">Needs Struct</span>
+                  <span class="tag-pill" data-tag="Loop Invert">Loop Invert</span>
+                </div>
+              </div>
+              <div class="notes-input-area">
+                <textarea id="func-notes-input" placeholder="Añadir notas de matching, conjeturas de tipos, registros conflictivos o detalles para el equipo..."></textarea>
+              </div>
+              <div class="notes-history-bar" id="func-history-bar">
+                <span class="subtext">Historial de matching del módulo:</span>
+                <span id="func-history-stats" class="mono-text">Sin registros previos</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -383,9 +415,84 @@
               </div>
             </div>
           </div>
+
+          <!-- Concurrency and Queue Control Settings -->
+          <div class="content-card">
+            <div class="card-header">
+              <h2>Rendimiento y Multiproceso</h2>
+              <span class="badge badge-info" id="detected-cpu-badge">Detectando núcleos...</span>
+            </div>
+            <div class="settings-form">
+              <div class="form-group">
+                <label for="cfg-max-workers">Hilos de Ejecución Simultáneos (Workers):</label>
+                <div class="worker-slider-group">
+                  <input type="range" id="cfg-max-workers" min="1" max="16" value="4" class="slider">
+                  <span id="cfg-max-workers-val" class="mono-text bold">4 workers</span>
+                </div>
+                <small class="form-hint" id="cfg-cores-hint">Aprovecha la CPU para compilar y comprobar múltiples módulos o tareas en paralelo.</small>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-container">
+                  <input type="checkbox" id="cfg-stop-on-error">
+                  <span class="checkbox-label">Detener la cola ante el primer fallo (Stop on Error)</span>
+                </label>
+                <small class="form-hint">Cancela tareas pendientes en la cola automáticamente si una tarea del pipeline falla.</small>
+              </div>
+
+              <div class="form-actions">
+                <button id="btn-save-concurrency-cfg" class="btn btn-primary">
+                  Guardar Ajustes de Rendimiento
+                </button>
+                <span id="cfg-save-feedback" class="feedback-text" style="display: none;">¡Configuración guardada!</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- Parallel Task Queue Drawer (Slide-up / Expandable) -->
+  <div id="task-queue-drawer" class="queue-drawer collapsed">
+    <div class="queue-drawer-header">
+      <div class="drawer-title-area">
+        <span class="drawer-icon">🧵</span>
+        <h3>Monitor de Tareas Concurrentes</h3>
+        <span class="badge badge-info" id="drawer-workers-status">Workers: 0/4</span>
+        <span class="badge badge-neutral" id="drawer-queue-state">En espera</span>
+      </div>
+      <div class="drawer-controls">
+        <button id="btn-queue-pause" class="btn btn-xs btn-outline" title="Pausar o reanudar el procesamiento de nuevas tareas">
+          ⏸️ Pausar
+        </button>
+        <button id="btn-queue-stop-current" class="btn btn-xs btn-outline" title="Esperar a que terminen las tareas en curso y no lanzar más">
+          ⏹️ Parar tras actual
+        </button>
+        <button id="btn-queue-cancel-all" class="btn btn-xs btn-danger" title="Cancelar todas las tareas en cola y detener activas">
+          🚫 Cancelar Todo
+        </button>
+        <button id="btn-close-queue-drawer" class="btn-close" title="Minimizar">&times;</button>
+      </div>
+    </div>
+    <div class="queue-drawer-body">
+      <table class="data-table small-table" id="queue-tasks-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tarea</th>
+            <th>Tipo</th>
+            <th>Módulo</th>
+            <th>Estado</th>
+            <th>Duración</th>
+            <th>Mensaje / Salida</th>
+          </tr>
+        </thead>
+        <tbody id="queue-tasks-tbody">
+          <tr><td colspan="7" class="loading-cell">No hay tareas en curso ni en cola.</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script src="app.js"></script>

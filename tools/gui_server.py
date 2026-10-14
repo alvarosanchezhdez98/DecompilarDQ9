@@ -3,11 +3,12 @@
 tools/gui_server.py
 
 Backend HTTP and REST API server for the Dragon Quest IX Decompilation GUI.
-Provides real-time process streaming (SSE), project status, decompilation tooling
-endpoints, and static web application serving.
+Provides multi-worker parallel task execution, real-time log streaming (SSE),
+Quick-Start auto-decompilation engine, persistence store, and static asset serving.
 """
 
 from collections import deque
+from dataclasses import asdict, dataclass, field
 import http.server
 import json
 import os
@@ -20,11 +21,14 @@ import sys
 import threading
 import time
 import urllib.parse
+import uuid
 
 root_path = Path(__file__).resolve().parent.parent
 gui_dir = root_path / "tools" / "gui"
 
-# Try importing project modules
+sys.path.insert(0, str(root_path / "tools"))
+
+# Project modules
 try:
     import progress
 except ImportError:
@@ -40,89 +44,195 @@ try:
 except ImportError:
     doctor = None
 
+from gui_store import store
 
-class ProcessManager:
-    """Manages execution of background commands and log streaming."""
+
+@dataclass
+class TaskItem:
+    id: str
+    label: str
+    cmd: list[str]
+    status: str = "queued"  # "queued", "running", "completed", "failed", "cancelled"
+    worker_id: int | None = None
+    start_time: float | None = None
+    end_time: float | None = None
+    exit_code: int | None = None
+    process: subprocess.Popen | None = None
+
+    def to_dict(self):
+        d = asdict(self)
+        d.pop("process", None)
+        d["elapsed"] = (
+            round((self.end_time or time.time()) - self.start_time, 2)
+            if self.start_time
+            else 0.0
+        )
+        return d
+
+
+class ParallelTaskManager:
+    """Manages parallel execution of commands, queueing, and stop policies."""
 
     def __init__(self):
-        self.process: subprocess.Popen | None = None
-        self.log_history: deque[str] = deque(maxlen=2000)
+        self.lock = threading.RLock()
+        self.tasks: dict[str, TaskItem] = {}
+        self.task_queue: deque[str] = deque()
+        self.running_tasks: dict[str, TaskItem] = {}
+        self.log_history: deque[dict] = deque(maxlen=4000)
         self.subscribers: list[queue.Queue] = []
-        self.lock = threading.Lock()
-        self.running_command: str = ""
-        self.exit_code: int | None = None
-        self.start_time: float = 0.0
+        self.is_paused: bool = False
+        self.stop_after_current: bool = False
+        self.stop_on_error: bool = store.get_config().get("stop_on_error", False)
+        self.max_workers: int = store.get_config().get("max_workers", 4)
+        self.worker_threads: list[threading.Thread] = []
+        self._init_workers()
+
+    def _init_workers(self):
+        for i in range(self.max_workers):
+            t = threading.Thread(target=self._worker_loop, args=(i + 1,), daemon=True)
+            t.start()
+            self.worker_threads.append(t)
+
+    def set_max_workers(self, n: int):
+        with self.lock:
+            self.max_workers = max(1, min(64, n))
+            store.update_config({"max_workers": self.max_workers})
+            # Spawn more worker threads if needed
+            while len(self.worker_threads) < self.max_workers:
+                wid = len(self.worker_threads) + 1
+                t = threading.Thread(target=self._worker_loop, args=(wid,), daemon=True)
+                t.start()
+                self.worker_threads.append(t)
 
     def is_running(self) -> bool:
         with self.lock:
-            return self.process is not None and self.process.poll() is None
+            return len(self.running_tasks) > 0
 
-    def start_process(self, cmd: list[str], label: str) -> bool:
+    @property
+    def running_command(self) -> str:
         with self.lock:
-            if self.process is not None and self.process.poll() is None:
-                return False  # Already running
+            if not self.running_tasks:
+                return "En reposo"
+            labels = [t.label for t in self.running_tasks.values()]
+            return ", ".join(labels[:2]) + (f" (+{len(labels)-2})" if len(labels) > 2 else "")
 
-            self.log_history.clear()
-            self.running_command = label
-            self.exit_code = None
-            self.start_time = time.time()
-
-            try:
-                # Add project root to PATH so local ninja.exe and tools can be executed
-                env = os.environ.copy()
-                env["PATH"] = str(root_path) + os.pathsep + env.get("PATH", "")
-                env["PYTHONUNBUFFERED"] = "1"
-
-                self.process = subprocess.Popen(
-                    cmd,
-                    cwd=root_path,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    bufsize=1,
-                    env=env,
-                )
-            except Exception as e:
-                self._broadcast(f"[ERROR] Failed to start process: {e}\n", done=True, code=-1)
-                return False
-
-            threading.Thread(target=self._read_output, daemon=True).start()
-            return True
-
-    def _read_output(self):
-        proc = self.process
-        if not proc or not proc.stdout:
-            return
-
-        for line in proc.stdout:
-            self._broadcast(line, done=False)
-
-        proc.wait()
-        elapsed = time.time() - self.start_time
-        code = proc.returncode
+    def enqueue_task(self, cmd: list[str], label: str) -> str:
+        task_id = uuid.uuid4().hex[:8]
+        item = TaskItem(id=task_id, label=label, cmd=cmd, status="queued")
         with self.lock:
-            self.exit_code = code
-        self._broadcast(f"\n[PROCESS FINISHED] Exit code: {code} in {elapsed:.2f}s\n", done=True, code=code)
+            self.tasks[task_id] = item
+            self.task_queue.append(task_id)
+            self._broadcast({
+                "type": "task_queued",
+                "task": item.to_dict(),
+                "text": f"[QUEUE] Encolada tarea [{task_id}]: {label}\n",
+            })
+        return task_id
 
-    def _broadcast(self, text: str, done: bool = False, code: int | None = None):
+    def _worker_loop(self, worker_id: int):
+        while True:
+            task = None
+            with self.lock:
+                if not self.is_paused and self.task_queue and len(self.running_tasks) < self.max_workers:
+                    task_id = self.task_queue.popleft()
+                    task = self.tasks.get(task_id)
+                    if task and task.status == "queued":
+                        task.status = "running"
+                        task.worker_id = worker_id
+                        task.start_time = time.time()
+                        self.running_tasks[task_id] = task
+
+            if not task:
+                time.sleep(0.15)
+                continue
+
+            self._execute_task(task, worker_id)
+
+    def _execute_task(self, task: TaskItem, worker_id: int):
+        self._broadcast({
+            "type": "task_started",
+            "task_id": task.id,
+            "worker_id": worker_id,
+            "label": task.label,
+            "text": f"\n>>> [WORKER {worker_id}] Iniciando [{task.id}]: {task.label}...\n",
+        })
+
+        env = os.environ.copy()
+        env["PATH"] = str(root_path) + os.pathsep + env.get("PATH", "")
+        env["PYTHONUNBUFFERED"] = "1"
+
+        try:
+            task.process = subprocess.Popen(
+                task.cmd,
+                cwd=root_path,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                env=env,
+            )
+            for line in task.process.stdout:
+                self._broadcast({
+                    "type": "log",
+                    "task_id": task.id,
+                    "worker_id": worker_id,
+                    "label": task.label,
+                    "text": line,
+                })
+            task.process.wait()
+            code = task.process.returncode
+        except Exception as e:
+            code = -1
+            self._broadcast({
+                "type": "log",
+                "task_id": task.id,
+                "worker_id": worker_id,
+                "label": task.label,
+                "text": f"[ERROR] Falló ejecución: {e}\n",
+            })
+
+        elapsed = time.time() - (task.start_time or time.time())
         with self.lock:
-            self.log_history.append(text)
+            task.end_time = time.time()
+            task.exit_code = code
+            task.status = "completed" if code == 0 else "failed"
+            self.running_tasks.pop(task.id, None)
+
+            # Check stop policies
+            if code != 0 and self.stop_on_error:
+                self._cancel_all_queued(reason="Cancelado automáticamente por error en tarea previa")
+
+            if self.stop_after_current and not self.running_tasks:
+                self.is_paused = True
+                self.stop_after_current = False
+                self._broadcast({"type": "policy_stop", "text": "[INFO] Cola detenida según política 'Parar tras tarea actual'.\n"})
+
+        self._broadcast({
+            "type": "task_finished",
+            "task_id": task.id,
+            "status": task.status,
+            "exit_code": code,
+            "elapsed": round(elapsed, 2),
+            "text": f"\n<<< [WORKER {worker_id}] Finalizada [{task.id}] '{task.label}' (Código: {code}, Tiempo: {elapsed:.2f}s)\n",
+        })
+
+    def _broadcast(self, event_data: dict):
+        with self.lock:
+            self.log_history.append(event_data)
             subs = list(self.subscribers)
 
-        payload = {"text": text, "done": done, "exit_code": code}
         for q in subs:
             try:
-                q.put_nowait(payload)
+                q.put_nowait(event_data)
             except queue.Full:
                 pass
 
     def add_subscriber(self) -> queue.Queue:
-        q = queue.Queue(maxsize=500)
+        q = queue.Queue(maxsize=1000)
         with self.lock:
-            # Send history
-            for line in self.log_history:
+            for item in self.log_history:
                 try:
-                    q.put_nowait({"text": line, "done": False, "exit_code": None})
+                    q.put_nowait(item)
                 except queue.Full:
                     break
             self.subscribers.append(q)
@@ -133,16 +243,137 @@ class ProcessManager:
             if q in self.subscribers:
                 self.subscribers.remove(q)
 
-    def kill_process(self) -> bool:
+    def cancel_task(self, task_id: str) -> bool:
         with self.lock:
-            if self.process is not None and self.process.poll() is None:
-                self.process.kill()
-                self._broadcast("\n[PROCESS TERMINATED BY USER]\n", done=True, code=-9)
+            task = self.tasks.get(task_id)
+            if not task:
+                return False
+
+            if task.status == "queued":
+                task.status = "cancelled"
+                if task_id in self.task_queue:
+                    self.task_queue.remove(task_id)
+                self._broadcast({"type": "task_cancelled", "task_id": task_id, "text": f"[CANCEL] Tarea [{task_id}] cancelada de la cola.\n"})
+                return True
+            elif task.status == "running" and task.process:
+                task.process.kill()
+                task.status = "cancelled"
+                self.running_tasks.pop(task_id, None)
+                self._broadcast({"type": "task_cancelled", "task_id": task_id, "text": f"[CANCEL] Tarea en ejecución [{task_id}] terminada forzosamente.\n"})
                 return True
             return False
 
+    def _cancel_all_queued(self, reason: str = "Canceladas por usuario"):
+        cancelled_ids = list(self.task_queue)
+        self.task_queue.clear()
+        for tid in cancelled_ids:
+            if t := self.tasks.get(tid):
+                t.status = "cancelled"
+        self._broadcast({"type": "queue_cleared", "text": f"[INFO] {reason} ({len(cancelled_ids)} tareas encoladas).\n"})
 
-proc_manager = ProcessManager()
+    def cancel_all(self):
+        with self.lock:
+            self._cancel_all_queued()
+            # Kill running
+            for tid, t in list(self.running_tasks.items()):
+                if t.process:
+                    try:
+                        t.process.kill()
+                    except Exception:
+                        pass
+                t.status = "cancelled"
+            self.running_tasks.clear()
+            self._broadcast({"type": "all_cancelled", "text": "[CANCEL] Todas las tareas fueron detenidas.\n"})
+
+    def pause_queue(self):
+        with self.lock:
+            self.is_paused = True
+            self._broadcast({"type": "queue_paused", "text": "[PAUSE] Cola de tareas en pausa.\n"})
+
+    def resume_queue(self):
+        with self.lock:
+            self.is_paused = False
+            self._broadcast({"type": "queue_resumed", "text": "[RESUME] Cola de tareas reanudada.\n"})
+
+    def get_summary(self) -> dict:
+        with self.lock:
+            all_list = [t.to_dict() for t in self.tasks.values()]
+            return {
+                "is_running": len(self.running_tasks) > 0,
+                "is_paused": self.is_paused,
+                "stop_after_current": self.stop_after_current,
+                "stop_on_error": self.stop_on_error,
+                "active_workers": len(self.running_tasks),
+                "max_workers": self.max_workers,
+                "queued_count": len(self.task_queue),
+                "running_count": len(self.running_tasks),
+                "tasks": sorted(all_list, key=lambda x: x.get("start_time") or 0, reverse=True)[:30],
+            }
+
+
+proc_manager = ParallelTaskManager()
+
+
+def run_quick_start() -> dict:
+    """Zero-prompt intelligent auto-decompile selector."""
+    if not progress:
+        return {"success": False, "error": "progress module not available"}
+
+    mods = progress.load_modules()
+    # Filter modules that have code and are not complete
+    in_progress = [
+        m for m in mods
+        if m.code_size > 0 and len(m.remaining) > 0 and m.status != "Complete"
+    ]
+    if not in_progress:
+        return {"success": False, "error": "¡Todos los módulos del juego están 100% completados!"}
+
+    def sort_key(m):
+        pct = (m.done_size / m.code_size * 100) if m.code_size else 0.0
+        # Priority: 1. Fewest remaining functions, 2. Highest completion %
+        return (len(m.remaining), -pct)
+
+    in_progress.sort(key=sort_key)
+    target_mod = in_progress[0]
+    pct = (target_mod.done_size / target_mod.code_size * 100) if target_mod.code_size else 0.0
+
+    # Sort remaining functions by size (smallest = easiest quick win)
+    remaining_funcs = sorted(target_mod.remaining, key=lambda f: f.size)
+    target_func = remaining_funcs[0]
+
+    # Check or generate draft
+    draft_file = root_path / "build" / "draft" / f"{target_mod.name}_{target_func.address:08x}.cpp"
+    draft_code = ""
+    if draft_file.is_file():
+        draft_code = draft_file.read_text(encoding="utf-8", errors="replace")
+    else:
+        try:
+            cmd = [sys.executable, str(root_path / "tools" / "draft.py"), target_mod.name, hex(target_func.address)]
+            res = subprocess.run(cmd, capture_output=True, text=True, cwd=root_path, timeout=12)
+            if draft_file.is_file():
+                draft_code = draft_file.read_text(encoding="utf-8", errors="replace")
+            else:
+                draft_code = res.stdout
+        except Exception:
+            draft_code = f"// Borrador preliminar para {target_func.name} @ {target_func.address:#010x}"
+
+    return {
+        "success": True,
+        "module": target_mod.name,
+        "module_progress": round(pct, 2),
+        "module_remaining_count": len(target_mod.remaining),
+        "function_name": target_func.name,
+        "function_address": target_func.address,
+        "function_address_hex": f"{target_func.address:#010x}",
+        "function": {
+            "name": target_func.name,
+            "address": target_func.address,
+            "address_hex": f"{target_func.address:#010x}",
+            "size": target_func.size,
+        },
+        "draft_code": draft_code,
+        "reason": f"Módulo {target_mod.name} está más cerca de completarse ({len(target_mod.remaining)} función/es pendiente/s, {pct:.1f}%)",
+    }
 
 
 class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -152,7 +383,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(gui_dir), **kwargs)
 
     def end_headers(self):
-        # Enable CORS and disable aggressive caching for development
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
@@ -169,7 +399,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path.startswith("/api/"):
             self.handle_api_get(path, urllib.parse.parse_qs(parsed.query))
         else:
-            # Static files
             super().do_GET()
 
     def do_POST(self):
@@ -209,10 +438,20 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.get_vtables()
             elif path == "/api/doctor":
                 self.get_doctor()
-            elif path == "/api/process/stream":
+            elif path == "/api/process/stream" or path == "/api/tasks/stream":
                 self.stream_process_logs()
-            elif path == "/api/process/status":
-                self.get_process_status()
+            elif path == "/api/tasks":
+                self.send_json(proc_manager.get_summary())
+            elif path == "/api/store/config":
+                self.send_json(store.get_config())
+            elif path.startswith("/api/store/notes/"):
+                parts = path[len("/api/store/notes/") :].split("/", 1)
+                mod = parts[0]
+                fn = parts[1] if len(parts) > 1 else ""
+                self.send_json(store.get_note(mod, fn))
+            elif path.startswith("/api/store/history/"):
+                mod = path[len("/api/store/history/") :]
+                self.send_json(store.get_history(module=mod))
             else:
                 self.send_error(404, f"API endpoint {path} not found")
         except Exception as e:
@@ -222,11 +461,41 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_api_post(self, path: str, data: dict):
         try:
-            if path == "/api/run":
+            if path == "/api/quick-start":
+                self.send_json(run_quick_start())
+            elif path == "/api/run":
                 self.post_run_command(data)
             elif path == "/api/process/kill":
-                killed = proc_manager.kill_process()
-                self.send_json({"killed": killed})
+                proc_manager.cancel_all()
+                self.send_json({"killed": True})
+            elif path == "/api/tasks/control":
+                action = data.get("action")
+                task_id = data.get("task_id")
+                if action == "pause":
+                    proc_manager.pause_queue()
+                elif action == "resume":
+                    proc_manager.resume_queue()
+                elif action == "stop_after_current":
+                    proc_manager.stop_after_current = bool(data.get("enabled", True))
+                elif action == "cancel_all":
+                    proc_manager.cancel_all()
+                elif action == "cancel_task" and task_id:
+                    proc_manager.cancel_task(task_id)
+                self.send_json(proc_manager.get_summary())
+            elif path == "/api/store/config":
+                updated = store.update_config(data)
+                if "max_workers" in data:
+                    proc_manager.set_max_workers(int(data["max_workers"]))
+                if "stop_on_error" in data:
+                    proc_manager.stop_on_error = bool(data["stop_on_error"])
+                self.send_json(updated)
+            elif path == "/api/store/notes":
+                mod = data.get("module", "")
+                fn = data.get("function", "")
+                note_text = data.get("notes", "")
+                tags = data.get("tags")
+                res = store.save_note(mod, fn, note_text, tags)
+                self.send_json(res)
             elif path == "/api/decomp/draft":
                 self.post_decomp_draft(data)
             elif path == "/api/decomp/diff":
@@ -247,18 +516,19 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"error": str(e), "traceback": traceback.format_exc()}, 500)
 
     def get_status(self):
-        """Returns overall progress statistics and history."""
-        # Try reading docs/status/data/summary.json if available
         summary_file = root_path / "docs" / "status" / "data" / "summary.json"
         if summary_file.is_file():
             try:
                 data = json.loads(summary_file.read_text(encoding="utf-8"))
+                data["is_running"] = proc_manager.is_running()
+                data["running_command"] = proc_manager.running_command
+                data["active_workers"] = len(proc_manager.running_tasks)
+                data["max_workers"] = proc_manager.max_workers
                 self.send_json(data)
                 return
             except Exception:
                 pass
 
-        # Fallback to computing directly via progress module
         if progress:
             modules = progress.load_modules()
             decomp_bytes = sum(m.done_size for m in modules)
@@ -277,18 +547,20 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "functions_percentage": round(pct_funcs, 2),
                 "is_running": proc_manager.is_running(),
                 "running_command": proc_manager.running_command,
+                "active_workers": len(proc_manager.running_tasks),
+                "max_workers": proc_manager.max_workers,
             }
             self.send_json(res)
         else:
             self.send_json({"error": "Progress module not loaded"}, 500)
 
     def get_modules(self):
-        """Returns list of modules with their current decompilation statistics."""
         if not progress:
             self.send_json({"error": "Progress module not available"}, 500)
             return
 
         mods = progress.load_modules()
+
         def calc_pct(m):
             return (m.done_size / m.code_size * 100) if m.code_size else 0.0
 
@@ -311,7 +583,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_json({"modules": res})
 
     def get_module_details(self, mod_name: str):
-        """Returns all functions of a module with metadata."""
         if not progress:
             self.send_json({"error": "Progress module not available"}, 500)
             return
@@ -324,6 +595,7 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         funcs = []
         for fn in mod.functions:
+            note = store.get_note(mod_name, fn.name)
             funcs.append({
                 "name": fn.name,
                 "address": fn.address,
@@ -331,11 +603,12 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "size": fn.size,
                 "decompiled": fn.decompiled,
                 "nonmatching": getattr(fn, "nonmatching", False),
+                "has_notes": bool(note.get("notes")),
+                "tags": note.get("tags", []),
             })
         self.send_json({"module": mod_name, "functions": funcs})
 
     def get_vtables(self):
-        """Returns list of all VTables and C++ classes."""
         if not vtable_helper:
             self.send_json({"error": "VTable helper not available"}, 500)
             return
@@ -355,7 +628,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_json({"vtables": res})
 
     def get_doctor(self):
-        """Runs doctor diagnostics in read-only mode and returns status."""
         try:
             res = subprocess.run(
                 [sys.executable, str(root_path / "tools" / "doctor.py")],
@@ -367,15 +639,7 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_json({"error": str(e)}, 500)
 
-    def get_process_status(self):
-        self.send_json({
-            "is_running": proc_manager.is_running(),
-            "running_command": proc_manager.running_command,
-            "exit_code": proc_manager.exit_code,
-        })
-
     def stream_process_logs(self):
-        """Server-Sent Events (SSE) log stream."""
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
@@ -391,7 +655,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(f"data: {line_data}\n\n".encode("utf-8"))
                     self.wfile.flush()
                 except queue.Empty:
-                    # Keep-alive heartbeat
                     self.wfile.write(b": heartbeat\n\n")
                     self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError):
@@ -400,14 +663,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             proc_manager.remove_subscriber(sub_queue)
 
     def post_run_command(self, data: dict):
-        """Starts a command in background."""
         cmd_type = data.get("action")
         label = data.get("label", cmd_type)
-
-        if proc_manager.is_running():
-            self.send_json({"error": "A process is already running", "command": proc_manager.running_command}, 409)
-            return
-
         cmd = []
         py_exe = sys.executable
 
@@ -439,8 +696,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"error": f"Unknown action {cmd_type}"}, 400)
             return
 
-        started = proc_manager.start_process(cmd, label)
-        self.send_json({"started": started, "command": " ".join(cmd), "label": label})
+        task_id = proc_manager.enqueue_task(cmd, label)
+        self.send_json({"task_id": task_id, "command": " ".join(cmd), "label": label})
 
     def post_decomp_draft(self, data: dict):
         module = data.get("module")
@@ -452,7 +709,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         cmd = [sys.executable, str(root_path / "tools" / "draft.py"), module, hex(address)]
         try:
             res = subprocess.run(cmd, capture_output=True, text=True, cwd=root_path)
-            # Find generated draft file
             draft_file = root_path / "build" / "draft" / f"{module}_{address:08x}.cpp"
             content = draft_file.read_text(encoding="utf-8") if draft_file.is_file() else res.stdout
             self.send_json({"success": res.returncode == 0, "code": content, "output": res.stdout + res.stderr})
@@ -488,7 +744,6 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             cmd.append("--dry-run")
         try:
             res = subprocess.run(cmd, capture_output=True, text=True, cwd=root_path)
-            # Find URL in output
             m = re.search(r"https://decomp\.me/scratch/\w+", res.stdout)
             scratch_url = m.group(0) if m else None
             self.send_json({
@@ -545,13 +800,16 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         cmd = [sys.executable, str(root_path / "tools" / "complete_file.py"), source_file, "--build"]
-        started = proc_manager.start_process(cmd, f"complete_file {source_file}")
-        self.send_json({"started": started, "label": f"complete_file {source_file}"})
+        task_id = proc_manager.enqueue_task(cmd, f"complete_file {source_file}")
+        self.send_json({"task_id": task_id, "label": f"complete_file {source_file}"})
+
+
+def create_server(host: str = "127.0.0.1", port: int = 8080):
+    return http.server.ThreadingHTTPServer((host, port), GUIRequestHandler)
 
 
 def run_server(port: int = 8080):
-    server_address = ("127.0.0.1", port)
-    httpd = http.server.ThreadingHTTPServer(server_address, GUIRequestHandler)
+    httpd = create_server("127.0.0.1", port)
     print(f"Dragon Quest IX Decompilation GUI running at http://127.0.0.1:{port}/")
     try:
         httpd.serve_forever()

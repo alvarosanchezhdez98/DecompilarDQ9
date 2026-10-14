@@ -33,7 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tabId === "dashboard") loadDashboardData();
     if (tabId === "studio" && !activeModule) loadStudioModules();
     if (tabId === "vtables") loadVTablesData();
-    if (tabId === "settings") loadDoctorData();
+    if (tabId === "settings") {
+      loadDoctorData();
+      loadConcurrencySettings();
+    }
   }
 
   tabButtons.forEach(btn => {
@@ -121,6 +124,53 @@ document.addEventListener("DOMContentLoaded", () => {
       runCommand(action, label);
     });
   });
+
+  // Quick Start Handler: One-click module auto-selection and function draft loading
+  const btnQuickStart = document.getElementById("btn-quick-start");
+  if (btnQuickStart) {
+    btnQuickStart.addEventListener("click", async () => {
+      btnQuickStart.classList.add("loading");
+      const origHtml = btnQuickStart.innerHTML;
+      btnQuickStart.innerHTML = `<span class="btn-icon">⏳</span> Seleccionando módulo...`;
+
+      try {
+        const res = await fetch("/api/quick-start", { method: "POST" });
+        const data = await res.json();
+
+        if (data.success) {
+          switchTab("studio");
+          await loadStudioModules();
+          await selectStudioModule(data.module);
+
+          // Find or synthesize target function
+          const targetAddr = data.function_address;
+          let fn = currentFunctions.find(f => f.address === targetAddr);
+          if (!fn) {
+            fn = {
+              name: data.function_name,
+              address: data.function_address,
+              address_hex: data.function_address_hex,
+              size: 0,
+              decompiled: false,
+            };
+          }
+          selectFunction(fn);
+
+          // Inject draft code directly
+          const codeViewer = document.getElementById("wb-code-viewer");
+          codeViewer.textContent = data.draft_code || "// Borrador no generado.";
+          switchWbTab("code");
+        } else {
+          alert(data.message || "No se encontró ningún módulo con funciones pendientes.");
+        }
+      } catch (err) {
+        alert(`Error en Arranque Rápido: ${err.message}`);
+      } finally {
+        btnQuickStart.classList.remove("loading");
+        btnQuickStart.innerHTML = origHtml;
+      }
+    });
+  }
 
   document.getElementById("btn-quick-check").addEventListener("click", () => {
     runCommand("ninja_check", "Ninja Check");
@@ -338,6 +388,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("wb-func-meta").textContent =
       `Módulo: ${activeModule} | Dirección: ${fn.address_hex} | Tamaño: ${fn.size} bytes | Estado: ${fn.decompiled ? "Decompilada" : "Pendiente"}`;
     document.getElementById("wb-action-buttons").style.display = "flex";
+
+    loadFunctionNotes(activeModule, fn.name);
   }
 
   // Decomp Studio Action Buttons
@@ -520,7 +572,297 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-run-doctor-now").addEventListener("click", loadDoctorData);
 
+  // --- 7. Notes & Tags System ---
+  let noteSaveTimeout = null;
+
+  async function loadFunctionNotes(moduleName, funcName) {
+    const notesContainer = document.getElementById("studio-notes-container");
+    const notesInput = document.getElementById("func-notes-input");
+    const savedStatus = document.getElementById("notes-status-saved");
+    const historyStats = document.getElementById("func-history-stats");
+    const tagPills = document.querySelectorAll(".tag-pill");
+
+    if (!notesContainer || !funcName) return;
+    notesContainer.style.display = "flex";
+    notesInput.value = "";
+    savedStatus.textContent = "Sincronizando...";
+
+    try {
+      const [resNote, resHist] = await Promise.all([
+        fetch(`/api/store/notes/${moduleName}/${encodeURIComponent(funcName)}`),
+        fetch(`/api/store/history/${moduleName}`)
+      ]);
+      const noteData = await resNote.json();
+      const histData = await resHist.json();
+
+      notesInput.value = noteData.notes || "";
+      const activeTags = new Set(noteData.tags || []);
+      tagPills.forEach(pill => {
+        pill.classList.toggle("active", activeTags.has(pill.dataset.tag));
+      });
+
+      if (noteData.updated_at) {
+        const timePart = noteData.updated_at.split("T")[1]?.slice(0, 5) || "";
+        savedStatus.textContent = `Guardado (${timePart})`;
+      } else {
+        savedStatus.textContent = "Guardado ✓";
+      }
+
+      if (Array.isArray(histData) && histData.length > 0) {
+        const latest = histData[histData.length - 1];
+        historyStats.textContent = `${latest.decompiled_funcs}/${latest.total_funcs} funciones coincidentes (${latest.percent_code.toFixed(1)}% bytes)`;
+      } else {
+        historyStats.textContent = "Sin historial previo";
+      }
+    } catch (err) {
+      savedStatus.textContent = "Sin sincronizar";
+    }
+  }
+
+  function saveCurrentFunctionNotes() {
+    if (!selectedFunction || !activeModule) return;
+    const notesInput = document.getElementById("func-notes-input");
+    const savedStatus = document.getElementById("notes-status-saved");
+    savedStatus.textContent = "Guardando...";
+
+    const activeTags = Array.from(document.querySelectorAll(".tag-pill.active")).map(p => p.dataset.tag);
+    fetch("/api/store/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        module: activeModule,
+        function: selectedFunction.name,
+        notes: notesInput.value,
+        tags: activeTags,
+      })
+    }).then(res => res.json()).then(data => {
+      savedStatus.textContent = "Guardado ✓";
+    }).catch(() => {
+      savedStatus.textContent = "Error al guardar";
+    });
+  }
+
+  document.querySelectorAll(".tag-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      pill.classList.toggle("active");
+      saveCurrentFunctionNotes();
+    });
+  });
+
+  const funcNotesInput = document.getElementById("func-notes-input");
+  if (funcNotesInput) {
+    funcNotesInput.addEventListener("input", () => {
+      const savedStatus = document.getElementById("notes-status-saved");
+      if (savedStatus) savedStatus.textContent = "Escribiendo...";
+      clearTimeout(noteSaveTimeout);
+      noteSaveTimeout = setTimeout(saveCurrentFunctionNotes, 600);
+    });
+  }
+
+  // --- 8. Parallel Task Manager & Queue UI ---
+  const taskDrawer = document.getElementById("task-queue-drawer");
+  const btnToggleQueue = document.getElementById("btn-toggle-queue");
+  const btnCloseDrawer = document.getElementById("btn-close-queue-drawer");
+  const queueBadge = document.getElementById("queue-badge-active");
+  const drawerWorkers = document.getElementById("drawer-workers-status");
+  const drawerQueueState = document.getElementById("drawer-queue-state");
+  const queueTasksTbody = document.getElementById("queue-tasks-tbody");
+  const btnQueuePause = document.getElementById("btn-queue-pause");
+  const btnQueueStopCurrent = document.getElementById("btn-queue-stop-current");
+  const btnQueueCancelAll = document.getElementById("btn-queue-cancel-all");
+
+  let queueSummary = { tasks: [], is_paused: false, stop_after_current: false };
+
+  function toggleQueueDrawer() {
+    if (taskDrawer) taskDrawer.classList.toggle("collapsed");
+  }
+
+  if (btnToggleQueue) btnToggleQueue.addEventListener("click", toggleQueueDrawer);
+  if (btnCloseDrawer) btnCloseDrawer.addEventListener("click", () => taskDrawer?.classList.add("collapsed"));
+
+  const drawerHeader = document.querySelector(".queue-drawer-header");
+  if (drawerHeader) {
+    drawerHeader.addEventListener("click", (e) => {
+      if (e.target.closest(".drawer-controls")) return;
+      toggleQueueDrawer();
+    });
+  }
+
+  async function refreshTaskQueue() {
+    try {
+      const res = await fetch("/api/tasks");
+      const data = await res.json();
+      queueSummary = data;
+
+      if (queueBadge) queueBadge.textContent = data.active_workers || 0;
+      if (drawerWorkers) drawerWorkers.textContent = `Workers: ${data.active_workers || 0}/${data.max_workers || 4}`;
+
+      if (drawerQueueState) {
+        if (data.is_paused) {
+          drawerQueueState.className = "badge badge-warning";
+          drawerQueueState.textContent = "Pausada";
+          if (btnQueuePause) btnQueuePause.textContent = "▶️ Reanudar";
+        } else if (data.active_workers > 0) {
+          drawerQueueState.className = "badge badge-info";
+          drawerQueueState.textContent = "Procesando";
+          if (btnQueuePause) btnQueuePause.textContent = "⏸️ Pausar";
+        } else {
+          drawerQueueState.className = "badge badge-neutral";
+          drawerQueueState.textContent = "En reposo";
+          if (btnQueuePause) btnQueuePause.textContent = "⏸️ Pausar";
+        }
+      }
+
+      if (btnQueueStopCurrent) {
+        if (data.stop_after_current) {
+          btnQueueStopCurrent.classList.add("btn-danger");
+          btnQueueStopCurrent.textContent = "⏹️ Parar tras actual (ACTIVO)";
+        } else {
+          btnQueueStopCurrent.classList.remove("btn-danger");
+          btnQueueStopCurrent.textContent = "⏹️ Parar tras actual";
+        }
+      }
+
+      renderQueueTable(data.tasks || []);
+    } catch (err) {
+      // Ignore transient fetch drop
+    }
+  }
+
+  function renderQueueTable(tasks) {
+    if (!queueTasksTbody) return;
+    if (!tasks || tasks.length === 0) {
+      queueTasksTbody.innerHTML = `<tr><td colspan="7" class="loading-cell">No hay tareas en curso ni en cola.</td></tr>`;
+      return;
+    }
+
+    queueTasksTbody.innerHTML = tasks.slice().reverse().map(t => {
+      let badgeCls = `badge-task-${t.status}`;
+      let statusLabel = t.status;
+      if (t.status === "running") statusLabel = "En curso";
+      if (t.status === "queued") statusLabel = "En cola";
+      if (t.status === "completed") statusLabel = "Completado";
+      if (t.status === "failed") statusLabel = "Fallido";
+      if (t.status === "cancelled") statusLabel = "Cancelado";
+
+      const dur = t.duration !== undefined ? `${t.duration.toFixed(1)}s` : "--";
+      const out = (t.output || t.error || "").slice(-80);
+
+      return `
+        <tr>
+          <td><code>${t.id.slice(0, 6)}</code></td>
+          <td><strong>${t.label}</strong></td>
+          <td><code>${t.action_type}</code></td>
+          <td>${t.module || "-"}</td>
+          <td><span class="badge ${badgeCls}">${statusLabel}</span></td>
+          <td>${dur}</td>
+          <td class="mono-text" style="font-size: 11px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${out || "-"}
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  if (btnQueuePause) {
+    btnQueuePause.addEventListener("click", async () => {
+      const action = queueSummary.is_paused ? "resume" : "pause";
+      await fetch("/api/tasks/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+      refreshTaskQueue();
+    });
+  }
+
+  if (btnQueueStopCurrent) {
+    btnQueueStopCurrent.addEventListener("click", async () => {
+      await fetch("/api/tasks/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "stop_after_current", enabled: !queueSummary.stop_after_current })
+      });
+      refreshTaskQueue();
+    });
+  }
+
+  if (btnQueueCancelAll) {
+    btnQueueCancelAll.addEventListener("click", async () => {
+      await fetch("/api/tasks/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel_all" })
+      });
+      refreshTaskQueue();
+    });
+  }
+
+  // --- 9. Concurrency & Hardware Settings ---
+  async function loadConcurrencySettings() {
+    try {
+      const res = await fetch("/api/store/config");
+      const cfg = await res.json();
+      const slider = document.getElementById("cfg-max-workers");
+      const valLabel = document.getElementById("cfg-max-workers-val");
+      const stopOnError = document.getElementById("cfg-stop-on-error");
+      const cpuBadge = document.getElementById("detected-cpu-badge");
+      const coresHint = document.getElementById("cfg-cores-hint");
+
+      if (cfg.detected_cores) {
+        if (slider) slider.max = Math.max(16, cfg.detected_cores * 2);
+        if (cpuBadge) cpuBadge.textContent = `${cfg.detected_cores} núcleos CPU detectados`;
+        if (coresHint) coresHint.textContent = `Detectados ${cfg.detected_cores} núcleos lógicos en este equipo. Recomendado: ${Math.max(1, cfg.detected_cores - 1)}.`;
+      }
+
+      if (cfg.max_workers !== undefined) {
+        if (slider) slider.value = cfg.max_workers;
+        if (valLabel) valLabel.textContent = `${cfg.max_workers} workers`;
+      }
+      if (cfg.stop_on_error !== undefined && stopOnError) {
+        stopOnError.checked = Boolean(cfg.stop_on_error);
+      }
+    } catch (err) {
+      console.error("Error loading config:", err);
+    }
+  }
+
+  const sliderMaxWorkers = document.getElementById("cfg-max-workers");
+  if (sliderMaxWorkers) {
+    sliderMaxWorkers.addEventListener("input", (e) => {
+      const valLabel = document.getElementById("cfg-max-workers-val");
+      if (valLabel) valLabel.textContent = `${e.target.value} workers`;
+    });
+  }
+
+  const btnSaveConcurrency = document.getElementById("btn-save-concurrency-cfg");
+  if (btnSaveConcurrency) {
+    btnSaveConcurrency.addEventListener("click", async () => {
+      const maxWorkers = parseInt(document.getElementById("cfg-max-workers").value);
+      const stopOnError = document.getElementById("cfg-stop-on-error").checked;
+      const feedback = document.getElementById("cfg-save-feedback");
+
+      try {
+        await fetch("/api/store/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ max_workers: maxWorkers, stop_on_error: stopOnError })
+        });
+        if (feedback) {
+          feedback.style.display = "inline";
+          setTimeout(() => feedback.style.display = "none", 2500);
+        }
+        refreshTaskQueue();
+      } catch (err) {
+        alert(`Error al guardar configuración: ${err.message}`);
+      }
+    });
+  }
+
   // Initial Load
   setupSSE();
   loadDashboardData();
+  loadConcurrencySettings();
+  refreshTaskQueue();
+  setInterval(refreshTaskQueue, 2500);
 });
