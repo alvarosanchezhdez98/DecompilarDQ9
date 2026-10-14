@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Quest IX Decompilation Studio</title>
+  <meta name="description" content="Centro de control gráfico autónomo para la decompilación de Dragon Quest IX (Nintendo DS).">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-badge">DQIX</div>
+        <div class="brand-text">
+          <h1>Dragon Quest IX <span class="accent-text">Decomp Studio</span></h1>
+          <p class="subtitle">Entorno gráfico autónomo de ingeniería inversa y matching 1:1</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-indicator-pill" id="global-process-indicator">
+          <span class="status-dot idle"></span>
+          <span class="status-label" id="global-process-label">En reposo</span>
+        </div>
+        <div class="version-badge" title="Versión objetivo activa">EUR (v1.0)</div>
+        <button id="btn-quick-check" class="btn btn-secondary" title="Comprobar módulos y símbolos sin construir ROM entera">
+          <span class="btn-icon">⚡</span> Ninja Check
+        </button>
+        <button id="btn-quick-build" class="btn btn-primary" title="Construir ROM completa y verificar">
+          <span class="btn-icon">🔨</span> Build (Ninja)
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="app-navbar" aria-label="Navegación principal">
+      <div class="nav-tabs">
+        <button id="tab-btn-dashboard" class="nav-tab active" data-tab="dashboard">
+          <span class="tab-icon">📊</span> Dashboard
+        </button>
+        <button id="tab-btn-control" class="nav-tab" data-tab="control">
+          <span class="tab-icon">⚙️</span> Centro de Control
+        </button>
+        <button id="tab-btn-studio" class="nav-tab" data-tab="studio">
+          <span class="tab-icon">🔬</span> Decomp Studio
+        </button>
+        <button id="tab-btn-vtables" class="nav-tab" data-tab="vtables">
+          <span class="tab-icon">🏛️</span> VTables & Clases C++
+        </button>
+        <button id="tab-btn-settings" class="nav-tab" data-tab="settings">
+          <span class="tab-icon">🛠️</span> Doctor & Ajustes
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Panels -->
+    <main class="app-main">
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="panel-dashboard" class="tab-panel active">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Código Decompilado</span>
+              <span class="kpi-icon">💾</span>
+            </div>
+            <div class="kpi-value" id="kpi-code-pct">-- %</div>
+            <div class="kpi-subtext" id="kpi-code-bytes">0 / 0 bytes</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill bytes-fill" id="kpi-code-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Funciones Coincidentes</span>
+              <span class="kpi-icon">🧩</span>
+            </div>
+            <div class="kpi-value" id="kpi-funcs-pct">-- %</div>
+            <div class="kpi-subtext" id="kpi-funcs-count">0 / 0 funciones</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill funcs-fill" id="kpi-funcs-bar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Módulos Completados</span>
+              <span class="kpi-icon">🏆</span>
+            </div>
+            <div class="kpi-value" id="kpi-modules-completed">-- / 32</div>
+            <div class="kpi-subtext">Overlays 100% byte-matched</div>
+            <div class="pill-group" id="kpi-completed-pills"></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Funciones en Ensamblador</span>
+              <span class="kpi-icon">⏳</span>
+            </div>
+            <div class="kpi-value" id="kpi-nonmatching-count">170</div>
+            <div class="kpi-subtext">Bloques NONMATCHING temporales</div>
+            <span class="badge badge-warning">Listas para matching</span>
+          </div>
+        </div>
+
+        <!-- Overlays Grid -->
+        <div class="content-card">
+          <div class="card-header">
+            <h2>Mapa de Overlays y Módulos</h2>
+            <div class="filter-controls">
+              <input type="text" id="module-search" class="search-input" placeholder="Filtrar módulo...">
+              <button class="btn btn-sm btn-outline active" data-mod-filter="all">Todos</button>
+              <button class="btn btn-sm btn-outline" data-mod-filter="progress">En progreso</button>
+              <button class="btn btn-sm btn-outline" data-mod-filter="complete">Completados</button>
+            </div>
+          </div>
+          <div class="modules-table-container">
+            <table class="data-table" id="table-modules">
+              <thead>
+                <tr>
+                  <th>Módulo</th>
+                  <th>Progreso</th>
+                  <th>Funciones Decompiladas</th>
+                  <th>Bytes</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="modules-table-body">
+                <tr><td colspan="6" class="loading-cell">Cargando datos del proyecto...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CONTROL CENTER VIEW -->
+      <section id="panel-control" class="tab-panel">
+        <div class="control-layout">
+          <!-- Command Buttons Panel -->
+          <div class="control-sidebar content-card">
+            <h2>Pipeline de Ejecución</h2>
+            <p class="section-desc">Ejecuta las herramientas oficiales sin necesidad de abrir la terminal.</p>
+            
+            <div class="action-btn-group">
+              <div class="group-title">Compilación y Matching</div>
+              <button class="btn btn-block btn-action" data-action="ninja">
+                <span class="btn-icon">🔨</span>
+                <div class="btn-text-col">
+                  <strong>Ninja Build</strong>
+                  <small>Compila y genera la ROM completa</small>
+                </div>
+              </button>
+              <button class="btn btn-block btn-action" data-action="ninja_check">
+                <span class="btn-icon">⚡</span>
+                <div class="btn-text-col">
+                  <strong>Ninja Check</strong>
+                  <small>Verifica módulos y símbolos rápido</small>
+                </div>
+              </button>
+              <button class="btn btn-block btn-action" data-action="ninja_min">
+                <span class="btn-icon">📦</span>
+                <div class="btn-text-col">
+                  <strong>Ninja Min</strong>
+                  <small>Build rápido sin comprobar ARM7 BIOS</small>
+                </div>
+              </button>
+            </div>
+
+            <div class="action-btn-group">
+              <div class="group-title">Herramientas de Extracción y Entorno</div>
+              <button class="btn btn-block btn-action" data-action="ninja_delink">
+                <span class="btn-icon">✂️</span>
+                <div class="btn-text-col">
+                  <strong>Ninja Delink</strong>
+                  <small>Desvincula objetos de la ROM original</small>
+                </div>
+              </button>
+              <button class="btn btn-block btn-action" data-action="doctor_fix">
+                <span class="btn-icon">🩺</span>
+                <div class="btn-text-col">
+                  <strong>Doctor (--fix)</strong>
+                  <small>Verifica y descarga herramientas faltantes</small>
+                </div>
+              </button>
+              <button class="btn btn-block btn-action" data-action="audit_overlays">
+                <span class="btn-icon">🔍</span>
+                <div class="btn-text-col">
+                  <strong>Auditar Overlays</strong>
+                  <small>Comprueba reubicaciones ambiguas</small>
+                </div>
+              </button>
+              <button class="btn btn-block btn-action" data-action="record_progress">
+                <span class="btn-icon">📝</span>
+                <div class="btn-text-col">
+                  <strong>Actualizar Progreso</strong>
+                  <small>Genera docs/progress.md y badges</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Terminal Window -->
+          <div class="terminal-container content-card">
+            <div class="terminal-header">
+              <div class="terminal-title-area">
+                <div class="terminal-window-dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
+                <span class="terminal-title" id="terminal-process-title">Consola de Salida</span>
+              </div>
+              <div class="terminal-controls">
+                <button id="btn-kill-process" class="btn btn-xs btn-danger" style="display: none;">
+                  Detener Proceso
+                </button>
+                <button id="btn-clear-terminal" class="btn btn-xs btn-outline">
+                  Limpiar
+                </button>
+              </div>
+            </div>
+            <pre class="terminal-body" id="terminal-output">Inicie un comando del pipeline para ver la salida en tiempo real...</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. DECOMP STUDIO VIEW -->
+      <section id="panel-studio" class="tab-panel">
+        <div class="studio-layout">
+          <!-- Left: Function Explorer -->
+          <div class="studio-sidebar content-card">
+            <div class="studio-selector-bar">
+              <label for="studio-module-select">Módulo:</label>
+              <select id="studio-module-select" class="form-select">
+                <option value="">Cargando módulos...</option>
+              </select>
+            </div>
+            <div class="studio-filter-bar">
+              <input type="text" id="studio-func-search" class="search-input" placeholder="Buscar función o dirección...">
+              <div class="pill-filters">
+                <button class="btn btn-xs btn-outline active" data-func-filter="all">Todas</button>
+                <button class="btn btn-xs btn-outline" data-func-filter="pending">Pendientes</button>
+                <button class="btn btn-xs btn-outline" data-func-filter="done">Listas</button>
+              </div>
+            </div>
+            <div class="functions-list-container" id="studio-functions-list">
+              <div class="empty-hint">Seleccione un módulo para listar sus funciones.</div>
+            </div>
+          </div>
+
+          <!-- Right: Workbench Pane -->
+          <div class="studio-main content-card">
+            <div class="workbench-header" id="wb-func-header">
+              <div>
+                <h3 id="wb-func-name">Seleccione una función</h3>
+                <p id="wb-func-meta" class="subtext">Detalles de dirección, tamaño y estado.</p>
+              </div>
+              <div class="wb-actions" id="wb-action-buttons" style="display: none;">
+                <button id="btn-draft-func" class="btn btn-sm btn-primary">
+                  <span class="btn-icon">📝</span> Borrador C++ (draft)
+                </button>
+                <button id="btn-diff-func" class="btn btn-sm btn-secondary">
+                  <span class="btn-icon">⚖️</span> Ver Diff (objdiff)
+                </button>
+                <button id="btn-export-scratch" class="btn btn-sm btn-accent">
+                  <span class="btn-icon">🌐</span> Exportar decomp.me
+                </button>
+              </div>
+            </div>
+
+            <!-- Workbench Tabs -->
+            <div class="wb-content-area">
+              <div class="wb-tabs">
+                <button class="wb-tab active" data-wb-tab="code">Código / Borrador C++</button>
+                <button class="wb-tab" data-wb-tab="diff">Diferencias (Diff)</button>
+              </div>
+              <div class="wb-panels">
+                <div id="wb-panel-code" class="wb-panel active">
+                  <pre class="code-viewer" id="wb-code-viewer">// Seleccione una función y pulse 'Borrador C++ (draft)' para generar su código con m2c.</pre>
+                </div>
+                <div id="wb-panel-diff" class="wb-panel">
+                  <pre class="diff-viewer" id="wb-diff-viewer">// Pulse 'Ver Diff (objdiff)' para comparar el objeto compilado contra la ROM original.</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. VTABLE STUDIO VIEW -->
+      <section id="panel-vtables" class="tab-panel">
+        <div class="content-card">
+          <div class="card-header">
+            <div>
+              <h2>Catálogo de Clases C++ y VTables</h2>
+              <p class="section-desc">Detectadas automáticamente desde symbols.txt mediante herramientas de ingeniería inversa.</p>
+            </div>
+            <button id="btn-refresh-vtables" class="btn btn-sm btn-outline">Actualizar Tablas</button>
+          </div>
+          <div class="modules-table-container">
+            <table class="data-table" id="table-vtables">
+              <thead>
+                <tr>
+                  <th>Clase</th>
+                  <th>Módulo</th>
+                  <th>Dirección VTable</th>
+                  <th>Símbolo Mangleado</th>
+                  <th>Tamaño</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="vtables-table-body">
+                <tr><td colspan="6" class="loading-cell">Cargando tablas virtuales...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Header Generator Modal / Drawer -->
+        <div id="vtable-modal" class="modal-backdrop" style="display: none;">
+          <div class="modal-box">
+            <div class="modal-header">
+              <h3 id="modal-class-title">Cabecera C++ Generada</h3>
+              <button id="btn-close-vtable-modal" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <pre class="code-viewer" id="modal-code-viewer"></pre>
+            </div>
+            <div class="modal-footer">
+              <input type="text" id="modal-save-path" class="input-text" placeholder="include/Scene/.../Clase.h">
+              <button id="btn-save-header" class="btn btn-primary">Guardar en include/</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DOCTOR & SETTINGS VIEW -->
+      <section id="panel-settings" class="tab-panel">
+        <div class="settings-grid">
+          <div class="content-card">
+            <div class="card-header">
+              <h2>Diagnóstico del Entorno (Doctor)</h2>
+              <button id="btn-run-doctor-now" class="btn btn-sm btn-primary">Re-evaluar Entorno</button>
+            </div>
+            <div id="doctor-output-container">
+              <pre class="terminal-body small-terminal" id="doctor-output-pre">Ejecutando diagnóstico...</pre>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="card-header">
+              <h2>Ajustes y Configuración</h2>
+            </div>
+            <div class="settings-form">
+              <div class="form-group">
+                <label for="cfg-version">Versión del Juego Objetivo:</label>
+                <select id="cfg-version" class="form-select">
+                  <option value="eur" selected>European (EUR) - Objetivo principal del fork</option>
+                  <option value="usa">USA (Original upstream)</option>
+                  <option value="jpn">Japanese (JPN)</option>
+                </select>
+                <small class="form-hint">La versión EUR compila con <code>-d usa -d eur</code>.</small>
+              </div>
+
+              <div class="form-group">
+                <label>ROMs Base en extract/:</label>
+                <ul class="rom-status-list">
+                  <li><code>baserom_dqix_eur.nds</code>: <span class="badge badge-neutral" id="badge-rom-eur">Comprobando...</span></li>
+                  <li><code>arm7_bios.bin</code> (opcional): <span class="badge badge-neutral" id="badge-rom-bios">Comprobando...</span></li>
+                </ul>
+              </div>
+
+              <div class="form-group">
+                <label>Compilador Metrowerks NDS:</label>
+                <p class="mono-text">mwccarm v2.0/sp2p2 (Instalado en tools/mwccarm)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

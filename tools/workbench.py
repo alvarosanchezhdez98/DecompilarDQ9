@@ -46,12 +46,16 @@ def print_banner():
     print(f"{BOLD}{CYAN}======================================================{RESET}\n")
 
 
+def calc_pct(m):
+    return (m.done_size / m.code_size * 100) if m.code_size else 0.0
+
+
 def load_module_stats():
     """Load module progress from progress.py"""
     if not progress:
         return []
     modules = progress.load_modules()
-    return sorted(modules, key=lambda m: (m.percentage, m.name))
+    return sorted(modules, key=lambda m: (calc_pct(m), m.name))
 
 
 def get_remaining_functions(module_name: str) -> list:
@@ -171,9 +175,10 @@ def interactive_main_menu():
         print("-" * 55)
 
         for idx, m in enumerate(modules, start=1):
-            pct_str = f"{m.percentage:.2f} %"
+            pct = calc_pct(m)
+            pct_str = f"{pct:.2f} %"
             left_str = f"{len([f for f in m.functions if not f.decompiled])}"
-            status = f"{GREEN}Complete{RESET}" if m.percentage == 100.0 else f"{YELLOW}In Progress{RESET}"
+            status = f"{GREEN}Complete{RESET}" if (pct >= 100.0 or m.status == 'Complete') else f"{YELLOW}In Progress{RESET}"
             print(f"{idx:<4} {m.name:<10} {pct_str:<10} {left_str:<8} {status}")
 
         print("\nQuick Actions:")
