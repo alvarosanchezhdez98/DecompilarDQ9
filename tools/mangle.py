@@ -9,7 +9,7 @@ DEFAULT_WIBO_PATH = "./wibo"
 
 parser = argparse.ArgumentParser(description='Mangles function declarations')
 parser.add_argument('file', help='C/C++ source file with defined function to mangle')
-parser.add_argument('-version', default='usa', help="Game version (usa or jpn)")
+parser.add_argument('-version', default='eur', choices=['usa', 'jpn', 'eur'], help="Game version (usa, jpn, eur)")
 parser.add_argument('-w', type=str, default=DEFAULT_WIBO_PATH, dest="wine", required=False, help="Path to Wine/Wibo (linux only)")
 
 tools_dir = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -44,7 +44,7 @@ cc.extend([
     '-i', libc_include_dir,
     '-i', libcpp_include_dir,
     '-i', libnds_include_dir,
-    '-d', args.version,
+    *(['-d', 'usa', '-d', 'eur'] if args.version == 'eur' else ['-d', args.version]),
     args.file
 ])
 

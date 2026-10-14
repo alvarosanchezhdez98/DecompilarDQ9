@@ -133,7 +133,8 @@ def module_asm_files(module: str) -> list[Path]:
         if changed > asm_path.stat().st_mtime:
             shutil.rmtree(asm_path)
     if not asm_path.exists():
-        subprocess.run([str(root_path / "dsd"), "dis", "--config-path", str(root_path / "config/eur/arm9/config.yaml"),
+        dsd_cli = root_path / ("dsd.exe" if sys.platform == "win32" else "dsd")
+        subprocess.run([str(dsd_cli), "dis", "--config-path", str(root_path / "config/eur/arm9/config.yaml"),
                         "--asm-path", str(asm_path)], check=True, stdout=subprocess.DEVNULL)
     config = progress.config_path
     if module.startswith("ov"):

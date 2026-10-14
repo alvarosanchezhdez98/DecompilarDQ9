@@ -35,7 +35,8 @@ RELOCATION = re.compile(r"^from:(0x[0-9a-f]+) kind:(\w+) to:(0x[0-9a-f]+)(?: add
 
 
 def disassemble():
-    subprocess.run([str(root_path / "dsd"), "dis", "--config-path", str(root_path / "config/eur/arm9/config.yaml"),
+    dsd_cli = root_path / ("dsd.exe" if sys.platform == "win32" else "dsd")
+    subprocess.run([str(dsd_cli), "dis", "--config-path", str(root_path / "config/eur/arm9/config.yaml"),
                     "--asm-path", str(ASM_PATH), "--ual"], cwd=root_path, check=True, stdout=subprocess.DEVNULL,
                    stderr=subprocess.DEVNULL)
 
