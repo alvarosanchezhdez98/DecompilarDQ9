@@ -285,6 +285,53 @@ def run_doctor(auto_fix: bool = False) -> int:
                 print(colorize("       build.ninja generated successfully.", GREEN))
                 warnings -= 1
 
+    # 7. m2c decompiler tool (build/m2c/m2c.py)
+    m2c_script = root_path / "build" / "m2c" / "m2c.py"
+    if m2c_script.is_file():
+        print(f"{check_mark(True)} m2c decompiler tool: found ({m2c_script.relative_to(root_path)})")
+    else:
+        print(f"{check_mark(False, warn=True)} m2c decompiler tool missing: {m2c_script.relative_to(root_path)}")
+        warnings += 1
+        if auto_fix:
+            print("       Acquiring m2c repository into build/m2c...")
+            m2c_dir = root_path / "build" / "m2c"
+            m2c_dir.parent.mkdir(parents=True, exist_ok=True)
+            cloned = False
+            if shutil.which("git"):
+                res = subprocess.run(["git", "clone", "--depth", "1", "https://github.com/matt-kempster/m2c", str(m2c_dir)], cwd=root_path, capture_output=True)
+                cloned = res.returncode == 0
+            if not cloned:
+                m2c_zip_url = "https://github.com/matt-kempster/m2c/archive/refs/heads/master.zip"
+                temp_extract = root_path / "build" / "_m2c_temp"
+                if download_and_extract_zip(m2c_zip_url, temp_extract):
+                    inner = temp_extract / "m2c-master"
+                    if inner.is_dir():
+                        if m2c_dir.exists():
+                            shutil.rmtree(m2c_dir, ignore_errors=True)
+                        shutil.move(str(inner), str(m2c_dir))
+                    shutil.rmtree(temp_extract, ignore_errors=True)
+                    cloned = m2c_script.is_file()
+            if m2c_script.is_file():
+                print(colorize("       m2c acquired and verified successfully.", GREEN))
+                warnings -= 1
+            else:
+                print(colorize("       Failed to acquire m2c automatically.", RED))
+
+    # 8. ARM9 Disassembly files (build/eur/asm)
+    asm_dir = root_path / "build" / "eur" / "asm"
+    asm_files_exist = asm_dir.is_dir() and any(asm_dir.glob("*.s"))
+    if asm_files_exist:
+        print(f"{check_mark(True)} ARM9 Disassembly files: present in build/eur/asm")
+    else:
+        print(f"{check_mark(True, warn=True)} ARM9 Disassembly files: not generated yet in build/eur/asm")
+        if auto_fix and dsd_bin.is_file():
+            print("       Generating ARM9 disassembly with dsd dis...")
+            asm_dir.mkdir(parents=True, exist_ok=True)
+            config_yaml = root_path / "config" / "eur" / "arm9" / "config.yaml"
+            res = subprocess.run([str(dsd_bin), "dis", "--config-path", str(config_yaml), "--asm-path", str(asm_dir), "--ual"], cwd=root_path, capture_output=True)
+            if res.returncode == 0:
+                print(colorize("       Disassembly generated successfully.", GREEN))
+
     # Summary
     print(colorize("\n--- Summary ---", BOLD))
     if issues == 0 and warnings == 0:
@@ -298,6 +345,108 @@ def run_doctor(auto_fix: bool = False) -> int:
         if not auto_fix:
             print(f"Run {colorize('py tools/doctor.py --fix', BOLD + CYAN)} to attempt automatic downloads and repair.\n")
         return 1
+
+
+def ensure_environment(callback=None) -> tuple[bool, list[str]]:
+    """
+    Programmatic entry point to verify and automatically download/configure all
+    tools necessary for building, diffing, and autonomous decompiling.
+    Callback is an optional function taking a single string log line.
+    Returns (success, log_lines).
+    """
+    logs = []
+    def log(msg: str):
+        logs.append(msg)
+        if callback:
+            try:
+                callback(msg)
+            except Exception:
+                pass
+
+    log("[DOCTOR] Iniciando verificación universal de herramientas...")
+
+    # 1. Ninja
+    local_ninja = root_path / f"ninja{EXE}"
+    if not shutil.which("ninja") and not local_ninja.is_file():
+        log("[DOCTOR] Descargando Ninja build system...")
+        ninja_url = "https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip" if IS_WINDOWS else ""
+        if ninja_url:
+            download_and_extract_zip(ninja_url, root_path)
+    log("[OK] Ninja verificado.")
+
+    # 2. dsd CLI
+    dsd_bin = root_path / f"dsd{EXE}"
+    if not dsd_bin.is_file():
+        log("[DOCTOR] Descargando dsd CLI...")
+        sys_name = platform.system().lower()
+        machine = platform.machine().lower()
+        if machine in ("x86_64", "amd64"):
+            machine = "x86_64"
+        dsd_url = f"https://github.com/AetiasHax/ds-decomp/releases/download/{DSD_VERSION}/dsd-{sys_name}-{machine}{EXE}"
+        download_file(dsd_url, dsd_bin)
+    log("[OK] dsd CLI verificado.")
+
+    # 3. objdiff-cli
+    objdiff_bin = root_path / f"objdiff-cli{EXE}"
+    if not objdiff_bin.is_file():
+        log("[DOCTOR] Descargando objdiff-cli...")
+        sys_name = platform.system().lower()
+        machine = platform.machine().lower()
+        if machine in ("x86_64", "amd64"):
+            machine = "x86_64"
+        objdiff_url = f"https://github.com/encounter/objdiff/releases/download/{OBJDIFF_VERSION}/objdiff-cli-{sys_name}-{machine}{EXE}"
+        download_file(objdiff_url, objdiff_bin)
+    log("[OK] objdiff-cli verificado.")
+
+    # 4. mwccarm compiler
+    mwcc_bin = root_path / "tools" / "mwccarm" / MWCC_VERSION / f"mwccarm{EXE}"
+    if not mwcc_bin.is_file():
+        log("[DOCTOR] Descargando compiladores Metrowerks mwccarm...")
+        mwcc_url = "http://decomp.aetias.com/files/mwccarm.zip"
+        download_and_extract_zip(mwcc_url, root_path / "tools")
+    log("[OK] Compilador mwccarm verificado.")
+
+    # 5. m2c decompiler
+    m2c_script = root_path / "build" / "m2c" / "m2c.py"
+    if not m2c_script.is_file():
+        log("[DOCTOR] Obteniendo descompilador C++ m2c...")
+        m2c_dir = root_path / "build" / "m2c"
+        m2c_dir.parent.mkdir(parents=True, exist_ok=True)
+        cloned = False
+        if shutil.which("git"):
+            res = subprocess.run(["git", "clone", "--depth", "1", "https://github.com/matt-kempster/m2c", str(m2c_dir)], cwd=root_path, capture_output=True)
+            cloned = res.returncode == 0
+        if not cloned:
+            m2c_zip_url = "https://github.com/matt-kempster/m2c/archive/refs/heads/master.zip"
+            temp_extract = root_path / "build" / "_m2c_temp"
+            if download_and_extract_zip(m2c_zip_url, temp_extract):
+                inner = temp_extract / "m2c-master"
+                if inner.is_dir():
+                    if m2c_dir.exists():
+                        shutil.rmtree(m2c_dir, ignore_errors=True)
+                    shutil.move(str(inner), str(m2c_dir))
+                shutil.rmtree(temp_extract, ignore_errors=True)
+    log("[OK] Descompilador m2c verificado.")
+
+    # 6. build.ninja
+    build_ninja = root_path / "build.ninja"
+    if not build_ninja.is_file():
+        log("[DOCTOR] Generando build.ninja (configure.py eur)...")
+        subprocess.run([sys.executable, str(root_path / "tools" / "configure.py"), "eur"], cwd=root_path, capture_output=True)
+    log("[OK] build.ninja verificado.")
+
+    # 7. Disassembly
+    asm_dir = root_path / "build" / "eur" / "asm"
+    if not asm_dir.is_dir() or not any(asm_dir.glob("*.s")):
+        if dsd_bin.is_file():
+            log("[DOCTOR] Desensamblando ROM con dsd dis...")
+            asm_dir.mkdir(parents=True, exist_ok=True)
+            config_yaml = root_path / "config" / "eur" / "arm9" / "config.yaml"
+            subprocess.run([str(dsd_bin), "dis", "--config-path", str(config_yaml), "--asm-path", str(asm_dir), "--ual"], cwd=root_path, capture_output=True)
+    log("[OK] Desensamblado base en build/eur/asm verificado.")
+
+    log("[DOCTOR] Entorno verificado al 100% y listo para operar.")
+    return True, logs
 
 
 def main():

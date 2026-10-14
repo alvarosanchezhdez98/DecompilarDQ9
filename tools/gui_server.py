@@ -44,6 +44,11 @@ try:
 except ImportError:
     doctor = None
 
+try:
+    import auto_pilot
+except ImportError:
+    auto_pilot = None
+
 from gui_store import store
 
 
@@ -312,6 +317,7 @@ class ParallelTaskManager:
 
 
 proc_manager = ParallelTaskManager()
+auto_pilot_engine = auto_pilot.AutoPilotEngine(proc_manager=proc_manager, store_instance=store) if auto_pilot else None
 
 
 def run_quick_start() -> dict:
@@ -452,6 +458,11 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             elif path.startswith("/api/store/history/"):
                 mod = path[len("/api/store/history/") :]
                 self.send_json(store.get_history(module=mod))
+            elif path == "/api/autopilot/status":
+                if auto_pilot_engine:
+                    self.send_json(auto_pilot_engine.get_status())
+                else:
+                    self.send_json({"error": "AutoPilot not available"}, 500)
             else:
                 self.send_error(404, f"API endpoint {path} not found")
         except Exception as e:
@@ -461,7 +472,32 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_api_post(self, path: str, data: dict):
         try:
-            if path == "/api/quick-start":
+            if path == "/api/autopilot/start":
+                if not auto_pilot_engine:
+                    self.send_json({"error": "AutoPilot not available"}, 500)
+                else:
+                    scope = data.get("scope", "all")
+                    mod = data.get("module")
+                    max_fn = int(data.get("max_functions", 0))
+                    started = auto_pilot_engine.start(scope=scope, module=mod, max_functions=max_fn)
+                    self.send_json({"started": started, "status": auto_pilot_engine.get_status()})
+            elif path == "/api/autopilot/stop":
+                if not auto_pilot_engine:
+                    self.send_json({"error": "AutoPilot not available"}, 500)
+                else:
+                    graceful = bool(data.get("graceful", True))
+                    if graceful:
+                        auto_pilot_engine.request_graceful_stop()
+                    else:
+                        auto_pilot_engine.emergency_stop()
+                    self.send_json(auto_pilot_engine.get_status())
+            elif path == "/api/doctor/ensure":
+                if doctor:
+                    ok, logs = doctor.ensure_environment()
+                    self.send_json({"ok": ok, "logs": logs})
+                else:
+                    self.send_json({"ok": False, "logs": ["doctor module not found"]}, 500)
+            elif path == "/api/quick-start":
                 self.send_json(run_quick_start())
             elif path == "/api/run":
                 self.post_run_command(data)

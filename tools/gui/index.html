@@ -24,6 +24,9 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-autopilot-toggle" class="btn btn-autopilot" title="Modo Automático: Decompilación continua desatendida mientras descansas o dejas el PC trabajando">
+          <span class="btn-icon">🚀</span> <span id="autopilot-btn-text">Modo Automático</span>
+        </button>
         <button id="btn-quick-start" class="btn btn-quick-start" title="Arranque Rápido: Selecciona el módulo más avanzado y prepara su siguiente función pendiente sin esperas">
           <span class="btn-icon">⚡</span> Arranque Rápido
         </button>
@@ -112,6 +115,82 @@
             <div class="kpi-value" id="kpi-nonmatching-count">170</div>
             <div class="kpi-subtext">Bloques NONMATCHING temporales</div>
             <span class="badge badge-warning">Listas para matching</span>
+          </div>
+        </div>
+
+        <!-- Auto-Pilot Overnight Decompilation Panel -->
+        <div class="content-card autopilot-card" id="autopilot-card">
+          <div class="card-header">
+            <div class="autopilot-title-group">
+              <span class="card-icon">🤖</span>
+              <div>
+                <h2>Modo Automático Desatendido (Auto-Pilot)</h2>
+                <p class="section-desc">Decompilación continua autónoma para dejar el proyecto trabajando de noche con parada limpia.</p>
+              </div>
+            </div>
+            <div class="autopilot-header-controls">
+              <span class="badge badge-neutral" id="ap-status-badge">En reposo</span>
+              <button id="btn-ap-ensure-tools" class="btn btn-xs btn-outline" title="Verificar que todas las herramientas están descargadas y configuradas para este PC">
+                🩺 Comprobar Herramientas
+              </button>
+            </div>
+          </div>
+
+          <div class="autopilot-body">
+            <div class="ap-metrics-grid">
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Fase Actual</span>
+                <span class="ap-metric-value" id="ap-metric-phase">En reposo</span>
+                <span class="ap-metric-sub" id="ap-metric-target">Sin tarea activa</span>
+              </div>
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Procesadas Esta Sesión</span>
+                <span class="ap-metric-value" id="ap-metric-processed">0</span>
+                <span class="ap-metric-sub">Funciones analizadas</span>
+              </div>
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Matches 1:1 Logrados</span>
+                <span class="ap-metric-value text-success" id="ap-metric-matches">0</span>
+                <span class="ap-metric-sub">Consolidadas en código</span>
+              </div>
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Borradores C++</span>
+                <span class="ap-metric-value text-info" id="ap-metric-drafts">0</span>
+                <span class="ap-metric-sub">Generados con m2c</span>
+              </div>
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Tiempo Activo</span>
+                <span class="ap-metric-value" id="ap-metric-time">00:00</span>
+                <span class="ap-metric-sub">Duración de la sesión</span>
+              </div>
+            </div>
+
+            <div class="ap-controls-bar">
+              <div class="ap-scope-selector">
+                <label for="ap-scope-select">Ámbito de Ejecución:</label>
+                <select id="ap-scope-select" class="form-select small-select">
+                  <option value="all" selected>Todos los módulos (Priorizar overlays cercanos al 100% - Modo Noche)</option>
+                  <option value="module">Solo módulo activo en Decomp Studio</option>
+                </select>
+              </div>
+
+              <div class="ap-action-buttons">
+                <button id="btn-ap-card-start" class="btn btn-primary btn-ap-start">
+                  <span class="btn-icon">🚀</span> Iniciar Modo Automático
+                </button>
+                <button id="btn-ap-card-stop" class="btn btn-warning btn-ap-stop" style="display: none;">
+                  <span class="btn-icon">⏹️</span> Parar tras tarea actual
+                </button>
+              </div>
+            </div>
+
+            <div class="ap-live-log-box" id="ap-live-log" style="display: none;">
+              <div class="ap-log-header">
+                <span class="status-dot running"></span>
+                <span id="ap-log-phase-msg">Iniciando ciclo autónomo...</span>
+              </div>
+              <pre class="ap-log-preview" id="ap-log-preview">// Registros en tiempo real del motor automático...</pre>
+            </div>
           </div>
         </div>
 

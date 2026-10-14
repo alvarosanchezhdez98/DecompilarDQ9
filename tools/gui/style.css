@@ -1099,3 +1099,172 @@ body {
   font-weight: 500;
 }
 
+/* Auto-Pilot (Modo Automático) Styles */
+.btn-autopilot {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.btn-autopilot:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  filter: brightness(1.1);
+}
+.btn-autopilot.running {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #ea580c 100%);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+  animation: ap-pulse 2s infinite ease-in-out;
+}
+.btn-autopilot.stopping {
+  background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+  border-color: #f59e0b;
+  opacity: 0.85;
+  cursor: wait;
+}
+
+@keyframes ap-pulse {
+  0% { box-shadow: 0 0 14px rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 28px rgba(245, 158, 11, 0.7); }
+  100% { box-shadow: 0 0 14px rgba(245, 158, 11, 0.4); }
+}
+
+/* Auto-Pilot Card in Dashboard */
+.autopilot-card {
+  border-left: 3px solid #8b5cf6;
+  background: linear-gradient(180deg, rgba(26, 34, 52, 0.6) 0%, rgba(19, 24, 36, 0.95) 100%);
+  margin-bottom: 24px;
+}
+.autopilot-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.autopilot-title-group .card-icon {
+  font-size: 26px;
+}
+.autopilot-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.autopilot-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ap-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+.ap-metric-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ap-metric-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+.ap-metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ap-metric-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(10, 13, 20, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+.ap-scope-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ap-scope-selector label {
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.small-select {
+  padding: 6px 12px;
+  min-width: 280px;
+}
+.ap-action-buttons {
+  display: flex;
+  gap: 10px;
+}
+.btn-ap-stop {
+  background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+  color: white;
+  font-weight: 700;
+  border-color: #f59e0b;
+}
+
+.ap-live-log-box {
+  background: var(--terminal-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ap-log-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+}
+.ap-log-preview {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--terminal-text);
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.text-success { color: var(--success) !important; }
+.text-info { color: var(--primary) !important; }
+.text-warning { color: var(--warning) !important; }
+
+

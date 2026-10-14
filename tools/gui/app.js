@@ -56,6 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.text) {
           appendTerminal(data.text);
         }
+        if (data.type === "autopilot_log" || data.type === "autopilot_finished") {
+          refreshAutoPilotStatus();
+        }
         if (data.done) {
           setProcessRunning(false);
           loadDashboardData(); // Refresh metrics after build/tools finish
@@ -859,10 +862,205 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- 10. Auto-Pilot (Modo Automático) Controller ---
+  let apState = { is_running: false, stop_requested: false };
+
+  async function refreshAutoPilotStatus() {
+    try {
+      const res = await fetch("/api/autopilot/status");
+      const data = await res.json();
+      apState = data;
+
+      const btnToggle = document.getElementById("btn-autopilot-toggle");
+      const statusBadge = document.getElementById("ap-status-badge");
+      const metricPhase = document.getElementById("ap-metric-phase");
+      const metricTarget = document.getElementById("ap-metric-target");
+      const metricProcessed = document.getElementById("ap-metric-processed");
+      const metricMatches = document.getElementById("ap-metric-matches");
+      const metricDrafts = document.getElementById("ap-metric-drafts");
+      const metricTime = document.getElementById("ap-metric-time");
+      const btnCardStart = document.getElementById("btn-ap-card-start");
+      const btnCardStop = document.getElementById("btn-ap-card-stop");
+      const liveLogBox = document.getElementById("ap-live-log");
+      const logPhaseMsg = document.getElementById("ap-log-phase-msg");
+      const logPreview = document.getElementById("ap-log-preview");
+
+      // Format elapsed time (MM:SS or HH:MM:SS)
+      const sec = data.stats?.elapsed_seconds || 0;
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = Math.floor(sec % 60);
+      const timeStr = h > 0
+        ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+        : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+      if (metricTime) metricTime.textContent = timeStr;
+      if (metricProcessed) metricProcessed.textContent = data.stats?.processed || 0;
+      if (metricMatches) metricMatches.textContent = data.stats?.matches_100 || 0;
+      if (metricDrafts) metricDrafts.textContent = data.stats?.drafts_created || 0;
+
+      if (data.is_running) {
+        if (data.stop_requested) {
+          if (btnToggle) {
+            btnToggle.className = "btn btn-autopilot stopping";
+            btnToggle.innerHTML = `<span class="btn-icon">⏳</span> <span id="autopilot-btn-text">Deteniendo tras actual...</span>`;
+            btnToggle.title = "Esperando a que concluya la tarea actual para detener el modo automático limpiamente";
+          }
+          if (statusBadge) {
+            statusBadge.className = "badge badge-warning";
+            statusBadge.textContent = "Deteniendo tras actual...";
+          }
+          if (btnCardStop) {
+            btnCardStop.disabled = true;
+            btnCardStop.innerHTML = `<span class="btn-icon">⏳</span> Deteniendo...`;
+          }
+        } else {
+          if (btnToggle) {
+            btnToggle.className = "btn btn-autopilot running";
+            btnToggle.innerHTML = `<span class="btn-icon">⏹️</span> <span id="autopilot-btn-text">Parar tras actual</span>`;
+            btnToggle.title = "Detener limpiamente tras finalizar la función que está en compilación";
+          }
+          if (statusBadge) {
+            statusBadge.className = "badge badge-info";
+            statusBadge.textContent = "Ejecutando";
+          }
+          if (btnCardStop) {
+            btnCardStop.disabled = false;
+            btnCardStop.innerHTML = `<span class="btn-icon">⏹️</span> Parar tras tarea actual`;
+            btnCardStop.style.display = "inline-flex";
+          }
+          if (btnCardStart) btnCardStart.style.display = "none";
+        }
+
+        if (metricPhase) metricPhase.textContent = data.phase || "En curso";
+        if (metricTarget) {
+          metricTarget.textContent = data.current_module
+            ? `${data.current_module}::${data.current_function?.name || ''}`
+            : (data.phase_message || "Procesando...");
+        }
+
+        if (liveLogBox) liveLogBox.style.display = "flex";
+        if (logPhaseMsg) logPhaseMsg.textContent = data.phase_message || "Modo automático activo";
+        if (logPreview && data.log_preview) {
+          logPreview.textContent = data.log_preview.join("");
+          logPreview.scrollTop = logPreview.scrollHeight;
+        }
+      } else {
+        if (btnToggle) {
+          btnToggle.className = "btn btn-autopilot";
+          btnToggle.innerHTML = `<span class="btn-icon">🚀</span> <span id="autopilot-btn-text">Modo Automático</span>`;
+          btnToggle.title = "Modo Automático: Decompilación continua desatendida mientras descansas o dejas el PC trabajando";
+        }
+        if (statusBadge) {
+          statusBadge.className = "badge badge-neutral";
+          statusBadge.textContent = "En reposo";
+        }
+        if (metricPhase) metricPhase.textContent = "En reposo";
+        if (metricTarget) metricTarget.textContent = "Sin tarea activa";
+        if (btnCardStart) btnCardStart.style.display = "inline-flex";
+        if (btnCardStop) btnCardStop.style.display = "none";
+      }
+    } catch (err) {
+      // Ignore background network transient
+    }
+  }
+
+  async function startAutoPilot() {
+    const scopeSelect = document.getElementById("ap-scope-select");
+    const scope = scopeSelect ? scopeSelect.value : "all";
+    const mod = scope === "module" ? activeModule : null;
+
+    try {
+      const res = await fetch("/api/autopilot/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope, module: mod, max_functions: 0 }),
+      });
+      const data = await res.json();
+      if (data.started) {
+        refreshAutoPilotStatus();
+      } else {
+        alert("El Modo Automático ya se encuentra en ejecución o no se pudo iniciar.");
+      }
+    } catch (err) {
+      alert(`Error al iniciar Modo Automático: ${err.message}`);
+    }
+  }
+
+  async function stopAutoPilot(graceful = true) {
+    const btnToggle = document.getElementById("btn-autopilot-toggle");
+    if (btnToggle) {
+      btnToggle.className = "btn btn-autopilot stopping";
+      btnToggle.innerHTML = `<span class="btn-icon">⏳</span> <span id="autopilot-btn-text">Deteniendo tras actual...</span>`;
+    }
+
+    try {
+      await fetch("/api/autopilot/stop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ graceful }),
+      });
+      refreshAutoPilotStatus();
+    } catch (err) {
+      alert(`Error al solicitar parada: ${err.message}`);
+    }
+  }
+
+  async function ensureDoctorTools() {
+    const btn = document.getElementById("btn-ap-ensure-tools");
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = `<span class="btn-icon">⏳</span> Verificando...`;
+    btn.disabled = true;
+
+    try {
+      const res = await fetch("/api/doctor/ensure", { method: "POST" });
+      const data = await res.json();
+      if (data.ok) {
+        alert("¡Verificación de herramientas exitosa!\nTodas las herramientas (Ninja, dsd, objdiff, mwccarm, m2c) están listas para operar en este PC.");
+      } else {
+        alert("Aviso al verificar herramientas:\n" + (data.logs || []).join("\n"));
+      }
+    } catch (err) {
+      alert(`Error al verificar herramientas: ${err.message}`);
+    } finally {
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
+    }
+  }
+
+  // Bind Auto-Pilot Buttons
+  const btnApToggle = document.getElementById("btn-autopilot-toggle");
+  if (btnApToggle) {
+    btnApToggle.addEventListener("click", () => {
+      if (apState.is_running) {
+        stopAutoPilot(true);
+      } else {
+        startAutoPilot();
+      }
+    });
+  }
+
+  const btnApCardStart = document.getElementById("btn-ap-card-start");
+  if (btnApCardStart) {
+    btnApCardStart.addEventListener("click", startAutoPilot);
+  }
+
+  const btnApCardStop = document.getElementById("btn-ap-card-stop");
+  if (btnApCardStop) {
+    btnApCardStop.addEventListener("click", () => stopAutoPilot(true));
+  }
+
+  const btnApEnsure = document.getElementById("btn-ap-ensure-tools");
+  if (btnApEnsure) {
+    btnApEnsure.addEventListener("click", ensureDoctorTools);
+  }
+
   // Initial Load
   setupSSE();
   loadDashboardData();
   loadConcurrencySettings();
   refreshTaskQueue();
+  refreshAutoPilotStatus();
   setInterval(refreshTaskQueue, 2500);
+  setInterval(refreshAutoPilotStatus, 2000);
 });
