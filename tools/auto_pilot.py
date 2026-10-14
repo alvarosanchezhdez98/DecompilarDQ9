@@ -61,9 +61,13 @@ class AutoPilotEngine:
         self.phase_message: str = "En reposo"
 
         self.draft_limit: int = 100
+        self.processed_in_session: set[tuple[str, int]] = set()
         self.stats = {
             "started_at": 0.0,
             "stage": "idle",  # "idle", "preflight", "drafting", "matching", "completed"
+            "current_batch": 1,
+            "batches_completed": 0,
+            "batch_drafts": 0,
             "processed": 0,
             "matches_100": 0,
             "drafts_created": 0,
@@ -100,9 +104,13 @@ class AutoPilotEngine:
             self.current_phase = "preflight"
             self.phase_message = "Verificando herramientas del entorno..."
             self.draft_limit = max(1, draft_limit)
+            self.processed_in_session = set()
             self.stats = {
                 "started_at": time.time(),
                 "stage": "preflight",
+                "current_batch": 1,
+                "batches_completed": 0,
+                "batch_drafts": 0,
                 "processed": 0,
                 "matches_100": 0,
                 "drafts_created": 0,
@@ -191,6 +199,9 @@ class AutoPilotEngine:
         for mod in in_progress:
             sorted_funcs = sorted(mod.remaining, key=lambda f: f.size)
             for func in sorted_funcs:
+                # Skip functions already drafted/matched in earlier batches of this run
+                if (mod.name, func.address) in self.processed_in_session:
+                    continue
                 candidates.append((mod.name, func))
                 if len(candidates) >= limit:
                     return candidates
@@ -362,16 +373,21 @@ class AutoPilotEngine:
 
         self._log("[AUTOPILOT] Pre-flight completado exitosamente. Iniciando pipeline...")
 
-        # 2. Main Two-Stage Pipeline
+        # 2. Main Two-Stage Pipeline (Continuous Batch-by-Batch Loop)
+        batch_index = 1
         try:
             while self.is_running:
                 if self.stop_requested:
-                    self._log("[AUTOPILOT] Parada limpia confirmada antes de iniciar siguiente ciclo.")
+                    self._log("[AUTOPILOT] Parada limpia confirmada antes de iniciar siguiente lote.")
                     break
 
                 if max_functions > 0 and self.stats["processed"] >= max_functions:
-                    self._log(f"[AUTOPILOT] Límite de {max_functions} funciones alcanzado.")
+                    self._log(f"[AUTOPILOT] Límite global de {max_functions} funciones alcanzado.")
                     break
+
+                with self.lock:
+                    self.stats["current_batch"] = batch_index
+                    self.stats["batch_drafts"] = 0
 
                 # -------------------------------------------------------------
                 # STAGE 1: BATCH DRAFTING (Up to draft_limit functions)
@@ -379,19 +395,19 @@ class AutoPilotEngine:
                 with self.lock:
                     self.stats["stage"] = "drafting"
                     self.current_phase = "drafting"
-                    self.phase_message = f"Fase 1/2: Drafting por lotes (Buscando hasta {draft_limit} funciones)..."
+                    self.phase_message = f"[Lote #{batch_index}] Fase 1/2: Drafting por lotes (Buscando hasta {draft_limit} funciones)..."
 
                 candidates = self._select_pending_candidates(scope, target_module_filter, limit=draft_limit)
                 if not candidates:
-                    self._log("[AUTOPILOT] ¡No quedan funciones pendientes en el ámbito seleccionado!")
+                    self._log(f"[AUTOPILOT] ¡No quedan más funciones pendientes en el ámbito seleccionado tras {self.stats['batches_completed']} lote(s)!")
                     break
 
                 batch_drafted: list[tuple[str, any, Path]] = []
-                self._log(f"\n>>> [FASE 1/2: DRAFTING] Generando lote de {len(candidates)} borradores con m2c...")
+                self._log(f"\n>>> [LOTE #{batch_index} | FASE 1/2: DRAFTING] Generando lote de {len(candidates)} borradores con m2c...")
 
                 for cand_idx, (mod_name, func) in enumerate(candidates):
                     if self.stop_requested:
-                        self._log(f"[AUTOPILOT] Parada solicitada durante drafting. Finalizando tras {len(batch_drafted)} borradores.")
+                        self._log(f"[AUTOPILOT] Parada solicitada durante drafting del Lote #{batch_index}. Finalizando tras {len(batch_drafted)} borradores.")
                         break
 
                     with self.lock:
@@ -402,13 +418,15 @@ class AutoPilotEngine:
                             "address_hex": f"{func.address:#010x}",
                             "size": func.size,
                         }
-                        self.phase_message = f"Fase 1/2: Drafting ({cand_idx + 1}/{len(candidates)}) - {mod_name}::{func.name}"
+                        self.phase_message = f"[Lote #{batch_index}] Fase 1/2: Drafting ({cand_idx + 1}/{len(candidates)}) - {mod_name}::{func.name}"
 
                     draft_file = self._generate_draft(mod_name, func)
                     batch_drafted.append((mod_name, func, draft_file))
+                    self.processed_in_session.add((mod_name, func.address))
 
                     with self.lock:
                         self.stats["drafts_created"] += 1
+                        self.stats["batch_drafts"] = len(batch_drafted)
 
                     self._log(f"  [DRAFT {cand_idx + 1}/{len(candidates)}] {mod_name}::{func.name} ({func.address:#010x}) guardado.")
 
@@ -426,7 +444,7 @@ class AutoPilotEngine:
                     break
 
                 self._log("\n-------------------------------------------------------")
-                self._log(f">>> [TRANSICIÓN AUTOMÁTICA] Lote de drafting completado: {len(batch_drafted)} funciones.")
+                self._log(f">>> [LOTE #{batch_index}] Drafting completado: {len(batch_drafted)} funciones.")
                 self._log(f">>> Iniciando Fase 2: Proceso de matching y decompilación profunda...")
                 self._log("-------------------------------------------------------\n")
 
@@ -436,11 +454,11 @@ class AutoPilotEngine:
                 with self.lock:
                     self.stats["stage"] = "matching"
                     self.current_phase = "matching"
-                    self.phase_message = f"Fase 2/2: Evaluando matching de {len(batch_drafted)} funciones..."
+                    self.phase_message = f"[Lote #{batch_index}] Fase 2/2: Evaluando matching de {len(batch_drafted)} funciones..."
 
                 for match_idx, (mod_name, func, draft_file) in enumerate(batch_drafted):
                     if self.stop_requested:
-                        self._log(f"[AUTOPILOT] Parada solicitada durante matching tras {match_idx} funciones.")
+                        self._log(f"[AUTOPILOT] Parada solicitada durante matching del Lote #{batch_index} tras {match_idx} funciones.")
                         break
 
                     with self.lock:
@@ -451,7 +469,7 @@ class AutoPilotEngine:
                             "address_hex": f"{func.address:#010x}",
                             "size": func.size,
                         }
-                        self.phase_message = f"Fase 2/2: Matching ({match_idx + 1}/{len(batch_drafted)}) - {mod_name}::{func.name}"
+                        self.phase_message = f"[Lote #{batch_index}] Fase 2/2: Matching ({match_idx + 1}/{len(batch_drafted)}) - {mod_name}::{func.name}"
 
                     self._process_matching_target(mod_name, func, draft_file)
 
@@ -465,15 +483,28 @@ class AutoPilotEngine:
                     if max_functions > 0 and self.stats["processed"] >= max_functions:
                         break
 
-                # Check if batch completed or max_functions reached
+                # Increment batches completed
+                with self.lock:
+                    self.stats["batches_completed"] += 1
+
+                self._log(f"\n=======================================================")
+                self._log(f">>> [LOTE #{batch_index} FINALIZADO CON ÉXITO] <<<")
+                self._log(f"    Funciones del lote:   {len(batch_drafted)}")
+                self._log(f"    Total acumulado:      {self.stats['processed']} funciones procesadas")
+                self._log(f"    Matches 1:1 globales: {self.stats['matches_100']}")
+                self._log(f"=======================================================\n")
+
+                if self.stop_requested:
+                    self._log("[AUTOPILOT] Parada solicitada confirmada al finalizar el lote.")
+                    break
+
                 if max_functions > 0 and self.stats["processed"] >= max_functions:
                     self._log(f"[AUTOPILOT] Meta global de {max_functions} funciones alcanzada.")
                     break
 
-                # If the batch was large (e.g. 50, 100, 200) or user specified target batch, finish loop
-                if draft_limit >= 50 or draft_limit >= len(candidates):
-                    self._log(f"[AUTOPILOT] Lote de {len(batch_drafted)} funciones completó ambas fases (Drafting + Matching).")
-                    break
+                # AUTOMATIC CONTINUATION: Proceed immediately to next batch!
+                batch_index += 1
+                self._log(f">>> [MODO AUTOMÁTICO CONTINUO] Avanzando automáticamente al Lote #{batch_index} ({draft_limit} funciones)... <<<\n")
 
         except Exception as e:
             import traceback
@@ -492,6 +523,7 @@ class AutoPilotEngine:
 
             self._log("\n=======================================================")
             self._log(f">>> [AUTOPILOT] SESIÓN FINALIZADA <<<")
+            self._log(f"    Lotes completados:    {self.stats['batches_completed']}")
             self._log(f"    Funciones procesadas: {self.stats['processed']}")
             self._log(f"    Borradores creados:   {self.stats['drafts_created']}")
             self._log(f"    Matches evaluados:    {self.stats['matching_attempted']}")

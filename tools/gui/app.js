@@ -876,9 +876,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const metricPhase = document.getElementById("ap-metric-phase");
       const metricTarget = document.getElementById("ap-metric-target");
       const metricProcessed = document.getElementById("ap-metric-processed");
+      const metricProcessedSub = document.getElementById("ap-metric-processed-sub");
       const metricMatches = document.getElementById("ap-metric-matches");
       const metricDrafts = document.getElementById("ap-metric-drafts");
+      const metricDraftsSub = document.getElementById("ap-metric-drafts-sub");
       const metricMatching = document.getElementById("ap-metric-matching");
+      const metricBatches = document.getElementById("ap-metric-batches");
+      const metricBatchesSub = document.getElementById("ap-metric-batches-sub");
       const metricTime = document.getElementById("ap-metric-time");
       const btnCardStart = document.getElementById("btn-ap-card-start");
       const btnCardStop = document.getElementById("btn-ap-card-stop");
@@ -897,12 +901,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (metricTime) metricTime.textContent = timeStr;
       if (metricProcessed) metricProcessed.textContent = data.stats?.processed || 0;
+      if (metricProcessedSub) {
+        const total = data.stats?.processed || 0;
+        metricProcessedSub.textContent = `${total} procesadas en total`;
+      }
       if (metricMatches) metricMatches.textContent = data.stats?.matches_100 || 0;
       if (metricMatching) metricMatching.textContent = data.stats?.matching_attempted || 0;
+      if (metricBatches) {
+        const completed = data.stats?.batches_completed || 0;
+        metricBatches.textContent = `${completed} completado${completed === 1 ? '' : 's'}`;
+      }
+      if (metricBatchesSub) {
+        metricBatchesSub.textContent = data.is_running ? "Modo continuo activo" : "Modo continuo en espera";
+      }
       if (metricDrafts) {
-        const created = data.stats?.drafts_created || 0;
+        const batchDrafts = data.stats?.batch_drafts !== undefined ? data.stats.batch_drafts : (data.stats?.drafts_created || 0);
         const limit = data.stats?.draft_limit || 100;
-        metricDrafts.textContent = `${created} / ${limit}`;
+        metricDrafts.textContent = `${batchDrafts} / ${limit}`;
+      }
+      if (metricDraftsSub) {
+        const currentBatch = data.stats?.current_batch || 1;
+        metricDraftsSub.textContent = `Lote actual (#${currentBatch})`;
       }
 
       const stage = data.stats?.stage || data.stage || "idle";
@@ -928,9 +947,10 @@ document.addEventListener("DOMContentLoaded", () => {
             btnToggle.innerHTML = `<span class="btn-icon">⏹️</span> <span id="autopilot-btn-text">Parar tras actual</span>`;
             btnToggle.title = "Detener limpiamente tras finalizar la función que está en proceso";
           }
+          const currentBatch = data.stats?.current_batch || 1;
           if (statusBadge) {
             statusBadge.className = "badge badge-info";
-            statusBadge.textContent = stage === "drafting" ? "Fase 1: Drafting" : (stage === "matching" ? "Fase 2: Matching" : "Ejecutando");
+            statusBadge.textContent = stage === "drafting" ? `Lote #${currentBatch} • Drafting` : (stage === "matching" ? `Lote #${currentBatch} • Matching` : "Ejecutando");
           }
           if (btnCardStop) {
             btnCardStop.disabled = false;
@@ -941,10 +961,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (metricPhase) {
+          const currentBatch = data.stats?.current_batch || 1;
           if (stage === "drafting") {
-            metricPhase.textContent = "Fase 1: Drafting";
+            metricPhase.textContent = `Lote #${currentBatch} • Drafting`;
           } else if (stage === "matching") {
-            metricPhase.textContent = "Fase 2: Matching";
+            metricPhase.textContent = `Lote #${currentBatch} • Matching`;
           } else if (stage === "preflight") {
             metricPhase.textContent = "Verificando entorno";
           } else {
@@ -972,14 +993,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (statusBadge) {
           if (stage === "completed") {
             statusBadge.className = "badge badge-success";
-            statusBadge.textContent = "Lote completado ✓";
+            statusBadge.textContent = "Sesión completada ✓";
           } else {
             statusBadge.className = "badge badge-neutral";
             statusBadge.textContent = "En reposo";
           }
         }
         if (metricPhase) {
-          metricPhase.textContent = stage === "completed" ? "Lote completado ✓" : "En reposo";
+          metricPhase.textContent = stage === "completed" ? "Sesión completada ✓" : "En reposo";
         }
         if (metricTarget) metricTarget.textContent = "Sin tarea activa";
         if (btnCardStart) btnCardStart.style.display = "inline-flex";
