@@ -479,7 +479,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     scope = data.get("scope", "all")
                     mod = data.get("module")
                     max_fn = int(data.get("max_functions", 0))
-                    started = auto_pilot_engine.start(scope=scope, module=mod, max_functions=max_fn)
+                    draft_limit = int(data.get("draft_limit", 100))
+                    started = auto_pilot_engine.start(scope=scope, module=mod, max_functions=max_fn, draft_limit=draft_limit)
                     self.send_json({"started": started, "status": auto_pilot_engine.get_status()})
             elif path == "/api/autopilot/stop":
                 if not auto_pilot_engine:

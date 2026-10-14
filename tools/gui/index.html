@@ -139,24 +139,24 @@
           <div class="autopilot-body">
             <div class="ap-metrics-grid">
               <div class="ap-metric-box">
-                <span class="ap-metric-label">Fase Actual</span>
+                <span class="ap-metric-label">Fase y Estado</span>
                 <span class="ap-metric-value" id="ap-metric-phase">En reposo</span>
                 <span class="ap-metric-sub" id="ap-metric-target">Sin tarea activa</span>
               </div>
               <div class="ap-metric-box">
-                <span class="ap-metric-label">Procesadas Esta Sesión</span>
-                <span class="ap-metric-value" id="ap-metric-processed">0</span>
-                <span class="ap-metric-sub">Funciones analizadas</span>
+                <span class="ap-metric-label">Fase 1: Drafting de Lote</span>
+                <span class="ap-metric-value text-info" id="ap-metric-drafts">0 / 100</span>
+                <span class="ap-metric-sub" id="ap-metric-drafts-sub">Borradores con m2c</span>
+              </div>
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Fase 2: Matching Evaluado</span>
+                <span class="ap-metric-value text-accent" id="ap-metric-matching">0</span>
+                <span class="ap-metric-sub" id="ap-metric-matching-sub">Candidatos analizados</span>
               </div>
               <div class="ap-metric-box">
                 <span class="ap-metric-label">Matches 1:1 Logrados</span>
                 <span class="ap-metric-value text-success" id="ap-metric-matches">0</span>
-                <span class="ap-metric-sub">Consolidadas en código</span>
-              </div>
-              <div class="ap-metric-box">
-                <span class="ap-metric-label">Borradores C++</span>
-                <span class="ap-metric-value text-info" id="ap-metric-drafts">0</span>
-                <span class="ap-metric-sub">Generados con m2c</span>
+                <span class="ap-metric-sub">Coincidencias exactas</span>
               </div>
               <div class="ap-metric-box">
                 <span class="ap-metric-label">Tiempo Activo</span>
@@ -169,9 +169,23 @@
               <div class="ap-scope-selector">
                 <label for="ap-scope-select">Ámbito de Ejecución:</label>
                 <select id="ap-scope-select" class="form-select small-select">
-                  <option value="all" selected>Todos los módulos (Priorizar overlays cercanos al 100% - Modo Noche)</option>
+                  <option value="all" selected>Todos los módulos (Priorizar overlays cercanos al 100%)</option>
                   <option value="module">Solo módulo activo en Decomp Studio</option>
                 </select>
+              </div>
+
+              <div class="ap-limit-selector">
+                <label for="ap-draft-limit-select">Lote de Drafting (Parar y pasar a matching):</label>
+                <div class="limit-input-group">
+                  <select id="ap-draft-limit-select" class="form-select small-select">
+                    <option value="100" selected>100 funciones (Recomendado)</option>
+                    <option value="200">200 funciones (Lote grande)</option>
+                    <option value="50">50 funciones (Lote rápido)</option>
+                    <option value="1">1 función (Intercalado continuo)</option>
+                    <option value="custom">Personalizado...</option>
+                  </select>
+                  <input id="ap-draft-limit-custom" type="number" min="1" max="5000" value="100" class="form-input small-input" style="display: none; width: 90px;" placeholder="Límite">
+                </div>
               </div>
 
               <div class="ap-action-buttons">

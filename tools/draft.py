@@ -96,6 +96,8 @@ def main():
     parser.add_argument("--all", action="store_true", help="Also the functions that are already decompiled")
     parser.add_argument("--no-reuse", action="store_true",
                         help="Don't look for functions with the same instructions, which takes ~30 s")
+    parser.add_argument("--no-disassemble", action="store_true",
+                        help="Skip generating disassembly again with dsd if asm files exist")
     args = parser.parse_args()
 
     if not M2C.is_file():
@@ -108,7 +110,8 @@ def main():
     if not functions:
         sys.exit("No functions left to decompile in that range (--all includes the decompiled ones)")
 
-    disassemble()
+    if not args.no_disassemble or not ASM_PATH.exists():
+        disassemble()
     files = asm_files()
     rom_modules = {rom_module.name: rom_module for rom_module in all_modules()}
     relocations_by_module = relocations()

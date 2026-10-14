@@ -878,6 +878,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const metricProcessed = document.getElementById("ap-metric-processed");
       const metricMatches = document.getElementById("ap-metric-matches");
       const metricDrafts = document.getElementById("ap-metric-drafts");
+      const metricMatching = document.getElementById("ap-metric-matching");
       const metricTime = document.getElementById("ap-metric-time");
       const btnCardStart = document.getElementById("btn-ap-card-start");
       const btnCardStop = document.getElementById("btn-ap-card-stop");
@@ -897,7 +898,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (metricTime) metricTime.textContent = timeStr;
       if (metricProcessed) metricProcessed.textContent = data.stats?.processed || 0;
       if (metricMatches) metricMatches.textContent = data.stats?.matches_100 || 0;
-      if (metricDrafts) metricDrafts.textContent = data.stats?.drafts_created || 0;
+      if (metricMatching) metricMatching.textContent = data.stats?.matching_attempted || 0;
+      if (metricDrafts) {
+        const created = data.stats?.drafts_created || 0;
+        const limit = data.stats?.draft_limit || 100;
+        metricDrafts.textContent = `${created} / ${limit}`;
+      }
+
+      const stage = data.stats?.stage || data.stage || "idle";
 
       if (data.is_running) {
         if (data.stop_requested) {
@@ -918,11 +926,11 @@ document.addEventListener("DOMContentLoaded", () => {
           if (btnToggle) {
             btnToggle.className = "btn btn-autopilot running";
             btnToggle.innerHTML = `<span class="btn-icon">⏹️</span> <span id="autopilot-btn-text">Parar tras actual</span>`;
-            btnToggle.title = "Detener limpiamente tras finalizar la función que está en compilación";
+            btnToggle.title = "Detener limpiamente tras finalizar la función que está en proceso";
           }
           if (statusBadge) {
             statusBadge.className = "badge badge-info";
-            statusBadge.textContent = "Ejecutando";
+            statusBadge.textContent = stage === "drafting" ? "Fase 1: Drafting" : (stage === "matching" ? "Fase 2: Matching" : "Ejecutando");
           }
           if (btnCardStop) {
             btnCardStop.disabled = false;
@@ -932,7 +940,17 @@ document.addEventListener("DOMContentLoaded", () => {
           if (btnCardStart) btnCardStart.style.display = "none";
         }
 
-        if (metricPhase) metricPhase.textContent = data.phase || "En curso";
+        if (metricPhase) {
+          if (stage === "drafting") {
+            metricPhase.textContent = "Fase 1: Drafting";
+          } else if (stage === "matching") {
+            metricPhase.textContent = "Fase 2: Matching";
+          } else if (stage === "preflight") {
+            metricPhase.textContent = "Verificando entorno";
+          } else {
+            metricPhase.textContent = data.phase || "En curso";
+          }
+        }
         if (metricTarget) {
           metricTarget.textContent = data.current_module
             ? `${data.current_module}::${data.current_function?.name || ''}`
@@ -952,10 +970,17 @@ document.addEventListener("DOMContentLoaded", () => {
           btnToggle.title = "Modo Automático: Decompilación continua desatendida mientras descansas o dejas el PC trabajando";
         }
         if (statusBadge) {
-          statusBadge.className = "badge badge-neutral";
-          statusBadge.textContent = "En reposo";
+          if (stage === "completed") {
+            statusBadge.className = "badge badge-success";
+            statusBadge.textContent = "Lote completado ✓";
+          } else {
+            statusBadge.className = "badge badge-neutral";
+            statusBadge.textContent = "En reposo";
+          }
         }
-        if (metricPhase) metricPhase.textContent = "En reposo";
+        if (metricPhase) {
+          metricPhase.textContent = stage === "completed" ? "Lote completado ✓" : "En reposo";
+        }
         if (metricTarget) metricTarget.textContent = "Sin tarea activa";
         if (btnCardStart) btnCardStart.style.display = "inline-flex";
         if (btnCardStop) btnCardStop.style.display = "none";
@@ -970,11 +995,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const scope = scopeSelect ? scopeSelect.value : "all";
     const mod = scope === "module" ? activeModule : null;
 
+    const limitSelect = document.getElementById("ap-draft-limit-select");
+    let draftLimit = 100;
+    if (limitSelect) {
+      if (limitSelect.value === "custom") {
+        const customInput = document.getElementById("ap-draft-limit-custom");
+        draftLimit = parseInt(customInput?.value || "100", 10) || 100;
+      } else {
+        draftLimit = parseInt(limitSelect.value, 10) || 100;
+      }
+    }
+
     try {
       const res = await fetch("/api/autopilot/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scope, module: mod, max_functions: 0 }),
+        body: JSON.stringify({ scope, module: mod, max_functions: 0, draft_limit: draftLimit }),
       });
       const data = await res.json();
       if (data.started) {
@@ -1053,6 +1089,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnApEnsure = document.getElementById("btn-ap-ensure-tools");
   if (btnApEnsure) {
     btnApEnsure.addEventListener("click", ensureDoctorTools);
+  }
+
+  const apDraftLimitSelect = document.getElementById("ap-draft-limit-select");
+  const apDraftLimitCustom = document.getElementById("ap-draft-limit-custom");
+  if (apDraftLimitSelect && apDraftLimitCustom) {
+    apDraftLimitSelect.addEventListener("change", () => {
+      apDraftLimitCustom.style.display = apDraftLimitSelect.value === "custom" ? "inline-block" : "none";
+      if (apDraftLimitSelect.value === "custom") {
+        apDraftLimitCustom.focus();
+      }
+    });
   }
 
   // Initial Load
