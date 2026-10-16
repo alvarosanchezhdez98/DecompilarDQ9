@@ -52,6 +52,7 @@ is recorded in `build/autopilot/results.json`, with the strategies tried on it, 
 | -------- | ------------ | --------------------------- |
 | `m2c` | m2c's C as it is | 1537 of 11210 functions |
 | `repair` | The C that doesn't compile, repaired: the stack variables (`spNN`) that m2c uses without declaring them, and the calls without prototypes (`T f();`) where m2c's prototype doesn't fit its own calls | 39 of 2092 |
+| `context` | m2c with `--context build/autopilot/m2c_context.c`, the prototypes that `tools/m2c_context.py` writes: the named functions of `symbols.txt` (the parameters from the mangled name, with `this`, and the return type from the headers) and the autopilot's matches. m2c then passes the arguments that it can't see (`this`) and types the returned values (`float`, pointers); fast, on the functions that don't match | 18 of 747 from 50 % that m2c's C alone didn't match (2.4 %); 30 of 257 in ov004, whose menus call many member functions |
 | `permute` | `permute.py` on the functions from 85 % | |
 | `compilers` | The older compilers of `MWCC_VERSIONS` (2.0/sp2, 2.0/sp1p5, 2.0/sp2p3, 1.2/sp4); a match goes in `MWCC_VERSIONS` | |
 | `variants` | m2c's options (`--no-switches`, `--reg-vars saved`, `--descending-regs`, `--no-andor`, `--void`) and pragmas (`optimization_level 4`, `optimize_for_size off`): slow, about 1 % | |

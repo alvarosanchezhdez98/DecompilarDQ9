@@ -16,6 +16,8 @@ For each function, the next of the strategies (STRATEGIES) that the earlier ones
              type), compiled alone in build/autopilot/work, as C (m2c's C does arithmetic on `void *`), with the
              build's flags, and diffed against the original with objdiff, like tools/diff_function.py
   repair     the C that doesn't compile, repaired (see REPAIRS)
+  context    m2c with the prototypes of the functions whose types we know (tools/m2c_context.py), so that it passes
+             `this` and the other arguments that it can't see, and types what they return
   permute    tools/permute.py, from --permute-from
   compilers  the older compiler versions (COMPILER_VERSIONS)
   variants   m2c's options and pragmas (M2C_VARIANTS, PRAGMA_VARIANTS)
@@ -44,6 +46,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import diff_function
 import draft
+import m2c_context
 import progress
 from module_files import root_path
 
@@ -372,6 +375,7 @@ def m2c_source(declarations: list[str], body: str, symbol: str, thumb: bool) -> 
 STRATEGIES = {
     "m2c": "C de m2c tal cual",
     "repair": "Reparar el C que no compila",
+    "context": "m2c con los prototipos del proyecto",
     "permute": "permute.py en los casi-matches",
     "compilers": "Otras versiones del compilador",
     "variants": "Variantes de m2c y pragmas (lenta)",
@@ -410,6 +414,8 @@ def next_strategy(entry: dict | None, enabled: list[str], permute_from: float) -
         if strategy == "m2c":
             return strategy
         if strategy == "repair" and status == COMPILE_ERROR:
+            return strategy
+        if strategy == "context" and status in (NEAR, NO_MATCH):
             return strategy
         if strategy == "permute" and status in (NEAR, NO_MATCH) and best >= permute_from:
             return strategy
@@ -510,6 +516,8 @@ class Matcher:
         self.thumb: set[str] = set()
         for path in set(self.asm.values()):
             self.thumb.update(THUMB_START.findall(path.read_text(encoding="utf-8", errors="replace")))
+        self.context_lock = threading.Lock()
+        self.context_prototypes: list[str] | None = None
 
     # 1. m2c's C ---------------------------------------------------------------------------------------------------
 
@@ -699,13 +707,13 @@ class Matcher:
             return
         self.keep_if_better(attempt, text, percent, note, "m2c")
 
-    def base_text(self, attempt: "Attempt", flags: tuple = ()) -> str | None:
-        '''m2c's C of the function, with these options'''
+    def base_text(self, attempt: "Attempt", flags: tuple = (), prototypes: tuple = ()) -> str | None:
+        '''m2c's C of the function, with these options, declaring the prototypes of its context that it uses'''
         declarations, bodies = self.m2c([attempt.function], flags)
         body = bodies.get(attempt.function)
         if body is None:
             return None
-        return m2c_source(declarations, body, attempt.function, attempt.function in self.thumb)
+        return m2c_source(declarations + list(prototypes), body, attempt.function, attempt.function in self.thumb)
 
     def best_text(self, attempt: "Attempt") -> str | None:
         source = self.work_source(attempt)
@@ -722,6 +730,28 @@ class Matcher:
             self.keep_if_better(attempt, text, percent, note, "repair")
         elif note:
             attempt.note = note
+
+    def context_text(self, attempt: "Attempt") -> str | None:
+        '''m2c's C of the function with the context of prototypes, written in the first call of the run (with the
+        functions matched until then). That call also parses it, while the others wait, so that m2c's cache of it
+        (m2c_context.c.m2c) is written once'''
+        flags = ("--context", str(m2c_context.OUTPUT_PATH))
+        with self.context_lock:
+            if self.context_prototypes is None:
+                m2c_context.write_context()
+                self.context_prototypes = [item for item in split_declarations(m2c_context.OUTPUT_PATH.read_text())
+                                           if not item.startswith("typedef")]
+                return self.base_text(attempt, flags, self.context_prototypes)
+        return self.base_text(attempt, flags, self.context_prototypes)
+
+    def strategy_context(self, attempt: "Attempt") -> None:
+        text = self.context_text(attempt)
+        if text is None:
+            return
+        percent, note = self.evaluate(attempt, text, "context")
+        if percent is None:
+            text, percent, note = self.repaired(attempt, text, note, "context")
+        self.keep_if_better(attempt, text, percent, note, "context")
 
     def strategy_permute(self, attempt: "Attempt") -> None:
         source = self.work_source(attempt)
@@ -780,8 +810,9 @@ class Matcher:
         attempt.timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
         if strategy not in attempt.strategies:
             attempt.strategies.append(strategy)
-        {"m2c": self.strategy_m2c, "repair": self.strategy_repair, "permute": self.strategy_permute,
-         "compilers": self.strategy_compilers, "variants": self.strategy_variants}[strategy](attempt)
+        {"m2c": self.strategy_m2c, "repair": self.strategy_repair, "context": self.strategy_context,
+         "permute": self.strategy_permute, "compilers": self.strategy_compilers,
+         "variants": self.strategy_variants}[strategy](attempt)
         return attempt
 
     def classify(self, attempt: "Attempt", percent: float, note: str):
@@ -913,7 +944,16 @@ class Integrator:
 
     @staticmethod
     def source_of(entry: dict) -> Path:
-        return SOURCE_PATH / entry["module"] / f"{entry['address']:08x}.c"
+        '''The function's file in src/Autopilot: <module>/<address>.c, or <module>/<address>_<module>.c when another
+        overlay at the same addresses has that name already, since the linker script needs unique object names'''
+        directory = SOURCE_PATH / entry["module"]
+        plain = directory / f"{entry['address']:08x}.c"
+        unique = directory / f"{entry['address']:08x}_{entry['module']}.c"
+        if unique.is_file() or plain.is_file():
+            return unique if unique.is_file() else plain
+        if any(other.parent != directory for other in SOURCE_PATH.glob(f"*/{plain.name}")):
+            return unique
+        return plain
 
     # Building -----------------------------------------------------------------------------------------------------
 
