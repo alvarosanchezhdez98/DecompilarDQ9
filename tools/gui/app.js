@@ -863,178 +863,366 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- 10. Auto-Pilot (Modo Automático) Controller ---
-  let apState = { is_running: false, stop_requested: false };
+  let apState = { is_running: false, stop_requested: false, paused: false };
+  let apDefaults = null;
+  let apConfigLoaded = false;
+  let apConfigDirty = false;
+  let apResultsTimer = 0;
 
-  async function refreshAutoPilotStatus() {
+  const AP_STATUS_LABELS = {
+    matched: "100%",
+    near: "Casi-match",
+    no_match: "No coincide",
+    compile_error: "No compila",
+    m2c_failed: "m2c falló",
+    error: "Error",
+  };
+  const AP_BOOL_FIELDS = ["retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority", "auto_start"];
+  const AP_NUMBER_FIELDS = ["min_size", "max_size", "batch_size", "max_functions", "max_hours", "batch_pause_seconds",
+    "max_consecutive_errors", "jobs", "permute_seconds", "permute_threshold"];
+
+  const apEl = (id) => document.getElementById(id);
+  const apForm = () => apEl("ap-config-form");
+
+  function formatDuration(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return h > 0
+      ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  function escapeHtml(text) {
+    return String(text ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  // Configuration form
+  function fillConfigForm(config) {
+    const form = apForm();
+    if (!form) return;
+    form.scope.value = config.scope;
+    const wanted = new Set(config.modules || []);
+    Array.from(form.modules.options).forEach((opt) => { opt.selected = wanted.has(opt.value); });
+    // Modules saved earlier that the list doesn't have (complete since) stay selected
+    wanted.forEach((name) => {
+      if (!Array.from(form.modules.options).some((opt) => opt.value === name)) {
+        form.modules.add(new Option(name, name, true, true));
+      }
+    });
+    form.exclude_modules.value = (config.exclude_modules || []).join(", ");
+    form.order.value = config.order;
+    form.stop_at.value = config.stop_at || "";
+    AP_NUMBER_FIELDS.forEach((name) => { form[name].value = config[name]; });
+    AP_BOOL_FIELDS.forEach((name) => { form[name].checked = !!config[name]; });
+    updateModulesFieldState();
+    apConfigDirty = false;
+  }
+
+  function readConfigForm() {
+    const form = apForm();
+    const config = {
+      scope: form.scope.value,
+      modules: Array.from(form.modules.selectedOptions).map((opt) => opt.value),
+      exclude_modules: form.exclude_modules.value,
+      order: form.order.value,
+      stop_at: form.stop_at.value,
+    };
+    AP_NUMBER_FIELDS.forEach((name) => { config[name] = form[name].value === "" ? null : Number(form[name].value); });
+    AP_BOOL_FIELDS.forEach((name) => { config[name] = form[name].checked; });
+    return config;
+  }
+
+  function updateModulesFieldState() {
+    const form = apForm();
+    if (!form) return;
+    const field = form.querySelector(".ap-modules-field");
+    if (field) field.classList.toggle("disabled", form.scope.value !== "modules");
+  }
+
+  function setConfigStatus(text, isError = false) {
+    const status = apEl("ap-config-status");
+    if (!status) return;
+    status.textContent = text;
+    status.classList.toggle("text-warning", isError);
+  }
+
+  async function loadAutoPilotModules() {
     try {
-      const res = await fetch("/api/autopilot/status");
+      const res = await fetch("/api/modules");
       const data = await res.json();
-      apState = data;
-
-      const btnToggle = document.getElementById("btn-autopilot-toggle");
-      const statusBadge = document.getElementById("ap-status-badge");
-      const metricPhase = document.getElementById("ap-metric-phase");
-      const metricTarget = document.getElementById("ap-metric-target");
-      const metricProcessed = document.getElementById("ap-metric-processed");
-      const metricProcessedSub = document.getElementById("ap-metric-processed-sub");
-      const metricMatches = document.getElementById("ap-metric-matches");
-      const metricDrafts = document.getElementById("ap-metric-drafts");
-      const metricDraftsSub = document.getElementById("ap-metric-drafts-sub");
-      const metricMatching = document.getElementById("ap-metric-matching");
-      const metricBatches = document.getElementById("ap-metric-batches");
-      const metricBatchesSub = document.getElementById("ap-metric-batches-sub");
-      const metricTime = document.getElementById("ap-metric-time");
-      const btnCardStart = document.getElementById("btn-ap-card-start");
-      const btnCardStop = document.getElementById("btn-ap-card-stop");
-      const liveLogBox = document.getElementById("ap-live-log");
-      const logPhaseMsg = document.getElementById("ap-log-phase-msg");
-      const logPreview = document.getElementById("ap-log-preview");
-
-      // Format elapsed time (MM:SS or HH:MM:SS)
-      const sec = data.stats?.elapsed_seconds || 0;
-      const h = Math.floor(sec / 3600);
-      const m = Math.floor((sec % 3600) / 60);
-      const s = Math.floor(sec % 60);
-      const timeStr = h > 0
-        ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-        : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-      if (metricTime) metricTime.textContent = timeStr;
-      if (metricProcessed) metricProcessed.textContent = data.stats?.processed || 0;
-      if (metricProcessedSub) {
-        const total = data.stats?.processed || 0;
-        metricProcessedSub.textContent = `${total} procesadas en total`;
+      const modules = (data.modules || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+      const form = apForm();
+      const resultsModule = apEl("ap-results-module");
+      if (form) {
+        form.modules.innerHTML = "";
+        modules.filter((m) => m.remaining_functions > 0).forEach((m) => {
+          form.modules.add(new Option(`${m.name} · ${m.remaining_functions} pendientes · ${m.percentage}%`, m.name));
+        });
       }
-      if (metricMatches) metricMatches.textContent = data.stats?.matches_100 || 0;
-      if (metricMatching) metricMatching.textContent = data.stats?.matching_attempted || 0;
-      if (metricBatches) {
-        const completed = data.stats?.batches_completed || 0;
-        metricBatches.textContent = `${completed} completado${completed === 1 ? '' : 's'}`;
-      }
-      if (metricBatchesSub) {
-        metricBatchesSub.textContent = data.is_running ? "Modo continuo activo" : "Modo continuo en espera";
-      }
-      if (metricDrafts) {
-        const batchDrafts = data.stats?.batch_drafts !== undefined ? data.stats.batch_drafts : (data.stats?.drafts_created || 0);
-        const limit = data.stats?.draft_limit || 100;
-        metricDrafts.textContent = `${batchDrafts} / ${limit}`;
-      }
-      if (metricDraftsSub) {
-        const currentBatch = data.stats?.current_batch || 1;
-        metricDraftsSub.textContent = `Lote actual (#${currentBatch})`;
-      }
-
-      const stage = data.stats?.stage || data.stage || "idle";
-
-      if (data.is_running) {
-        if (data.stop_requested) {
-          if (btnToggle) {
-            btnToggle.className = "btn btn-autopilot stopping";
-            btnToggle.innerHTML = `<span class="btn-icon">⏳</span> <span id="autopilot-btn-text">Deteniendo tras actual...</span>`;
-            btnToggle.title = "Esperando a que concluya la tarea actual para detener el modo automático limpiamente";
-          }
-          if (statusBadge) {
-            statusBadge.className = "badge badge-warning";
-            statusBadge.textContent = "Deteniendo tras actual...";
-          }
-          if (btnCardStop) {
-            btnCardStop.disabled = true;
-            btnCardStop.innerHTML = `<span class="btn-icon">⏳</span> Deteniendo...`;
-          }
-        } else {
-          if (btnToggle) {
-            btnToggle.className = "btn btn-autopilot running";
-            btnToggle.innerHTML = `<span class="btn-icon">⏹️</span> <span id="autopilot-btn-text">Parar tras actual</span>`;
-            btnToggle.title = "Detener limpiamente tras finalizar la función que está en proceso";
-          }
-          const currentBatch = data.stats?.current_batch || 1;
-          if (statusBadge) {
-            statusBadge.className = "badge badge-info";
-            statusBadge.textContent = stage === "drafting" ? `Lote #${currentBatch} • Drafting` : (stage === "matching" ? `Lote #${currentBatch} • Matching` : "Ejecutando");
-          }
-          if (btnCardStop) {
-            btnCardStop.disabled = false;
-            btnCardStop.innerHTML = `<span class="btn-icon">⏹️</span> Parar tras tarea actual`;
-            btnCardStop.style.display = "inline-flex";
-          }
-          if (btnCardStart) btnCardStart.style.display = "none";
-        }
-
-        if (metricPhase) {
-          const currentBatch = data.stats?.current_batch || 1;
-          if (stage === "drafting") {
-            metricPhase.textContent = `Lote #${currentBatch} • Drafting`;
-          } else if (stage === "matching") {
-            metricPhase.textContent = `Lote #${currentBatch} • Matching`;
-          } else if (stage === "preflight") {
-            metricPhase.textContent = "Verificando entorno";
-          } else {
-            metricPhase.textContent = data.phase || "En curso";
-          }
-        }
-        if (metricTarget) {
-          metricTarget.textContent = data.current_module
-            ? `${data.current_module}::${data.current_function?.name || ''}`
-            : (data.phase_message || "Procesando...");
-        }
-
-        if (liveLogBox) liveLogBox.style.display = "flex";
-        if (logPhaseMsg) logPhaseMsg.textContent = data.phase_message || "Modo automático activo";
-        if (logPreview && data.log_preview) {
-          logPreview.textContent = data.log_preview.join("");
-          logPreview.scrollTop = logPreview.scrollHeight;
-        }
-      } else {
-        if (btnToggle) {
-          btnToggle.className = "btn btn-autopilot";
-          btnToggle.innerHTML = `<span class="btn-icon">🚀</span> <span id="autopilot-btn-text">Modo Automático</span>`;
-          btnToggle.title = "Modo Automático: Decompilación continua desatendida mientras descansas o dejas el PC trabajando";
-        }
-        if (statusBadge) {
-          if (stage === "completed") {
-            statusBadge.className = "badge badge-success";
-            statusBadge.textContent = "Sesión completada ✓";
-          } else {
-            statusBadge.className = "badge badge-neutral";
-            statusBadge.textContent = "En reposo";
-          }
-        }
-        if (metricPhase) {
-          metricPhase.textContent = stage === "completed" ? "Sesión completada ✓" : "En reposo";
-        }
-        if (metricTarget) metricTarget.textContent = "Sin tarea activa";
-        if (btnCardStart) btnCardStart.style.display = "inline-flex";
-        if (btnCardStop) btnCardStop.style.display = "none";
+      if (resultsModule) {
+        resultsModule.innerHTML = `<option value="">Todos los módulos</option>`;
+        modules.forEach((m) => resultsModule.add(new Option(m.name, m.name)));
       }
     } catch (err) {
-      // Ignore background network transient
+      // The list stays empty; the saved modules are still added by fillConfigForm
     }
   }
 
-  async function startAutoPilot() {
-    const scopeSelect = document.getElementById("ap-scope-select");
-    const scope = scopeSelect ? scopeSelect.value : "all";
-    const mod = scope === "module" ? activeModule : null;
+  async function loadAutoPilotConfig() {
+    try {
+      await loadAutoPilotModules();
+      const res = await fetch("/api/autopilot/config");
+      const data = await res.json();
+      apDefaults = data.defaults;
+      fillConfigForm(data.config);
+      apConfigLoaded = true;
+    } catch (err) {
+      setConfigStatus(`No se pudo cargar la configuración: ${err.message}`, true);
+    }
+  }
 
-    const limitSelect = document.getElementById("ap-draft-limit-select");
-    let draftLimit = 100;
-    if (limitSelect) {
-      if (limitSelect.value === "custom") {
-        const customInput = document.getElementById("ap-draft-limit-custom");
-        draftLimit = parseInt(customInput?.value || "100", 10) || 100;
-      } else {
-        draftLimit = parseInt(limitSelect.value, 10) || 100;
+  async function saveAutoPilotConfig() {
+    const res = await fetch("/api/autopilot/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config: readConfigForm() }),
+    });
+    const data = await res.json();
+    if (data.config) fillConfigForm(data.config);
+    setConfigStatus(`Guardada a las ${new Date().toLocaleTimeString()}`);
+    return data.config;
+  }
+
+  // Status
+  async function refreshAutoPilotStatus() {
+    let data;
+    try {
+      const res = await fetch("/api/autopilot/status");
+      data = await res.json();
+    } catch (err) {
+      return; // Ignore background network transient
+    }
+    apState = data;
+    const st = data.stats || {};
+    const stage = st.stage || data.stage || "idle";
+
+    const banner = apEl("ap-integration-banner");
+    if (banner) {
+      const blocked = data.integration_blocked;
+      banner.style.display = blocked ? "block" : "none";
+      if (blocked) {
+        banner.textContent = `⚠️ No se puede integrar en el build: dsd no puede ejecutarse (${blocked}). ` +
+          `Los matches se guardan en build/autopilot/matched/ y se integrarán con “Integrar pendientes” cuando dsd funcione.`;
       }
     }
 
+    apEl("ap-metric-time").textContent = formatDuration(st.elapsed_seconds);
+    apEl("ap-metric-time-sub").textContent = data.is_running && st.remaining_seconds != null
+      ? `Quedan ${formatDuration(st.remaining_seconds)}`
+      : (data.is_running ? "Sin límite de tiempo" : "Duración de la sesión");
+    apEl("ap-metric-matches").textContent = st.matches_100 || 0;
+    apEl("ap-metric-processed-sub").textContent =
+      `${st.integrated || 0} integradas · ${st.pending_integration || 0} pendientes`;
+    apEl("ap-metric-processed").textContent = st.processed || 0;
+    apEl("ap-metric-breakdown").textContent =
+      `${st.near || 0} casi · ${st.no_match || 0} no · ${st.compile_errors || 0} no compilan · ${st.tool_errors || 0} errores`;
+    apEl("ap-metric-drafts").textContent = `${st.batch_drafts || 0} / ${st.batch_total || st.draft_limit || 0}`;
+    apEl("ap-metric-drafts-sub").textContent = `Lote #${st.current_batch || 1} · ${st.batches_completed || 0} completados`;
+
+    const btnToggle = apEl("btn-autopilot-toggle");
+    const statusBadge = apEl("ap-status-badge");
+    const metricPhase = apEl("ap-metric-phase");
+    const metricTarget = apEl("ap-metric-target");
+    const btnStart = apEl("btn-ap-card-start");
+    const btnStop = apEl("btn-ap-card-stop");
+    const btnPause = apEl("btn-ap-pause");
+    const btnKill = apEl("btn-ap-kill");
+    const btnIntegrate = apEl("btn-ap-integrate");
+    const liveLogBox = apEl("ap-live-log");
+    const logPhaseMsg = apEl("ap-log-phase-msg");
+    const logPreview = apEl("ap-log-preview");
+
+    const stageText = { preflight: "Verificando entorno", drafting: "m2c + compilación", matching: "permute + integración" }[stage] || "En curso";
+    const batch = st.current_batch || 1;
+
+    if (data.is_running) {
+      let badgeClass = "badge badge-info";
+      let badgeText = `Lote #${batch} • ${stageText}`;
+      let toggleClass = "btn btn-autopilot running";
+      let toggleText = "Parar tras actual";
+      if (data.stop_requested) {
+        badgeClass = "badge badge-warning";
+        badgeText = data.immediate_stop ? "Deteniendo ya..." : "Deteniendo tras actual...";
+        toggleClass = "btn btn-autopilot stopping";
+        toggleText = badgeText;
+      } else if (data.paused) {
+        badgeClass = "badge badge-warning";
+        badgeText = "En pausa";
+      }
+      if (btnToggle) {
+        btnToggle.className = toggleClass;
+        btnToggle.innerHTML = `<span class="btn-icon">${data.stop_requested ? "⏳" : "⏹️"}</span> <span id="autopilot-btn-text">${toggleText}</span>`;
+        btnToggle.title = "Detener limpiamente tras finalizar las funciones en curso";
+      }
+      if (statusBadge) { statusBadge.className = badgeClass; statusBadge.textContent = badgeText; }
+      if (metricPhase) metricPhase.textContent = data.paused ? "En pausa" : `Lote #${batch} • ${stageText}`;
+      if (metricTarget) {
+        metricTarget.textContent = data.current_module
+          ? `${data.current_module}::${data.current_function?.name || ""}`
+          : (data.phase_message || "Procesando...");
+      }
+      btnStart.style.display = "none";
+      btnStop.style.display = "inline-flex";
+      btnStop.disabled = !!data.stop_requested;
+      btnKill.style.display = data.immediate_stop ? "none" : "inline-flex";
+      btnPause.style.display = data.stop_requested ? "none" : "inline-flex";
+      btnPause.innerHTML = data.paused ? `<span class="btn-icon">▶️</span> Reanudar` : `<span class="btn-icon">⏸️</span> Pausar`;
+      btnIntegrate.disabled = true;
+    } else {
+      if (btnToggle) {
+        btnToggle.className = "btn btn-autopilot";
+        btnToggle.innerHTML = `<span class="btn-icon">🚀</span> <span id="autopilot-btn-text">Modo Automático</span>`;
+        btnToggle.title = "Modo Automático: decompilación continua desatendida con la configuración guardada";
+      }
+      if (statusBadge) {
+        statusBadge.className = stage === "completed" ? "badge badge-success" : "badge badge-neutral";
+        statusBadge.textContent = data.busy_integrating ? "Integrando..." : (stage === "completed" ? "Sesión completada ✓" : "En reposo");
+      }
+      if (metricPhase) metricPhase.textContent = stage === "completed" ? "Sesión completada ✓" : "En reposo";
+      if (metricTarget) metricTarget.textContent = data.last_session?.stop_reason || "Sin tarea activa";
+      btnStart.style.display = "inline-flex";
+      btnStop.style.display = "none";
+      btnPause.style.display = "none";
+      btnKill.style.display = "none";
+      btnIntegrate.disabled = !!data.busy_integrating;
+    }
+
+    const hasLog = (data.log_preview || []).length > 0;
+    if (liveLogBox) liveLogBox.style.display = hasLog ? "flex" : "none";
+    if (logPhaseMsg) logPhaseMsg.textContent = data.is_running ? (data.phase_message || "Modo automático activo") : "Última sesión";
+    if (logPreview && hasLog) {
+      const atBottom = logPreview.scrollTop + logPreview.clientHeight >= logPreview.scrollHeight - 20;
+      logPreview.textContent = data.log_preview.join("");
+      if (atBottom) logPreview.scrollTop = logPreview.scrollHeight;
+    }
+
+    const last = apEl("ap-last-session");
+    if (last && data.last_session?.ended_at) {
+      const ls = data.last_session;
+      last.textContent = `Última: ${ls.ended_at} · ${formatDuration(ls.duration_seconds)} · ${ls.processed} intentadas · ` +
+        `${ls.matches_100} al 100% · ${ls.integrated} integradas · ${ls.stop_reason || "completada"}`;
+    }
+
+    // While it runs, the results table follows it (at most every 10 s)
+    const resultsOpen = apEl("ap-results-section")?.open;
+    if (data.is_running && resultsOpen && Date.now() - apResultsTimer > 10000) loadAutoPilotResults();
+  }
+
+  // Results
+  async function loadAutoPilotResults() {
+    apResultsTimer = Date.now();
+    const status = apEl("ap-results-status")?.value || "";
+    const module = apEl("ap-results-module")?.value || "";
+    const params = new URLSearchParams({ limit: "300" });
+    if (status) params.set("status", status);
+    if (module) params.set("module", module);
     try {
+      const res = await fetch(`/api/autopilot/results?${params}`);
+      const data = await res.json();
+      const summary = data.summary || { total: {}, integrated: 0, tried: 0 };
+      const chips = apEl("ap-results-chips");
+      const total = summary.total || {};
+      chips.innerHTML = [`<span class="badge badge-neutral">${summary.tried} intentadas</span>`,
+        `<span class="badge badge-success">${summary.integrated} integradas</span>`]
+        .concat(Object.keys(AP_STATUS_LABELS).filter((k) => total[k])
+          .map((k) => `<span class="badge ap-status-${k}">${AP_STATUS_LABELS[k]}: ${total[k]}</span>`)).join(" ");
+      apEl("ap-results-inline").textContent =
+        `· ${total.matched || 0} al 100% · ${summary.integrated} integradas · ${summary.tried} intentadas`;
+      const body = apEl("ap-results-body");
+      const entries = data.entries || [];
+      body.innerHTML = entries.length === 0
+        ? `<tr><td colspan="7">Sin resultados para este filtro.</td></tr>`
+        : entries.map((e) => `<tr>
+            <td>${escapeHtml(e.module)}</td>
+            <td class="mono" title="${escapeHtml(e.function)}">${escapeHtml(e.function)}</td>
+            <td class="mono">${e.size}</td>
+            <td><span class="badge ap-status-${escapeHtml(e.status)}">${AP_STATUS_LABELS[e.status] || escapeHtml(e.status)}${e.integrated ? " ✓ build" : ""}${e.permuted ? " · permute" : ""}</span></td>
+            <td class="mono">${Number(e.percent || 0).toFixed(1)}</td>
+            <td class="ap-note" title="${escapeHtml(e.note)}">${escapeHtml((e.note || "").split("\n")[0])}</td>
+            <td class="mono">${escapeHtml(e.timestamp)}</td>
+          </tr>`).join("");
+    } catch (err) {
+      apEl("ap-results-body").innerHTML = `<tr><td colspan="7">Error al cargar resultados: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
+  async function resetAutoPilotResults() {
+    const status = apEl("ap-results-status")?.value || "";
+    const module = apEl("ap-results-module")?.value || "";
+    if (status === "matched" || status === "integrated") {
+      alert("Los matches no se reintentan: ya coinciden al 100%.");
+      return;
+    }
+    const what = `${status ? AP_STATUS_LABELS[status] : "todas las que no coincidieron"}${module ? ` de ${module}` : ""}`;
+    if (!confirm(`¿Olvidar los resultados (${what}) para que el modo automático las intente otra vez?`)) return;
+    const res = await fetch("/api/autopilot/results/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ statuses: status ? [status] : null, module: module || null }),
+    });
+    const data = await res.json();
+    alert(`${data.reset} funciones se intentarán otra vez.`);
+    loadAutoPilotResults();
+  }
+
+  // Sessions
+  async function loadAutoPilotSessions() {
+    const select = apEl("ap-session-select");
+    try {
+      const res = await fetch("/api/autopilot/sessions");
+      const sessions = await res.json();
+      const previous = select.value;
+      select.innerHTML = sessions.length ? "" : `<option value="">Sin sesiones todavía</option>`;
+      sessions.forEach((s) => select.add(new Option(`${s.name} (${Math.ceil(s.size / 1024)} KB)`, s.name)));
+      if (previous && sessions.some((s) => s.name === previous)) select.value = previous;
+      if (select.value) loadAutoPilotSession(select.value);
+    } catch (err) {
+      select.innerHTML = `<option value="">Error al cargar</option>`;
+    }
+  }
+
+  async function loadAutoPilotSession(name) {
+    const pre = apEl("ap-session-log");
+    try {
+      const res = await fetch(`/api/autopilot/session?name=${encodeURIComponent(name)}`);
+      const data = await res.json();
+      pre.textContent = data.text || data.error || "";
+      pre.scrollTop = pre.scrollHeight;
+    } catch (err) {
+      pre.textContent = `Error: ${err.message}`;
+    }
+  }
+
+  // Controls
+  async function startAutoPilot() {
+    try {
+      if (!apConfigLoaded) await loadAutoPilotConfig();
+      const config = readConfigForm();
+      if (config.scope === "modules" && config.modules.length === 0) {
+        alert("Elige al menos un módulo, o cambia el ámbito a “Todos los módulos”.");
+        return;
+      }
       const res = await fetch("/api/autopilot/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scope, module: mod, max_functions: 0, draft_limit: draftLimit }),
+        body: JSON.stringify({ config }),
       });
       const data = await res.json();
       if (data.started) {
+        setConfigStatus("Guardada e iniciada");
+        apConfigDirty = false;
         refreshAutoPilotStatus();
       } else {
         alert("El Modo Automático ya se encuentra en ejecución o no se pudo iniciar.");
@@ -1044,27 +1232,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function stopAutoPilot(graceful = true) {
-    const btnToggle = document.getElementById("btn-autopilot-toggle");
-    if (btnToggle) {
-      btnToggle.className = "btn btn-autopilot stopping";
-      btnToggle.innerHTML = `<span class="btn-icon">⏳</span> <span id="autopilot-btn-text">Deteniendo tras actual...</span>`;
-    }
-
+  async function postAutoPilot(path, body = {}) {
     try {
-      await fetch("/api/autopilot/stop", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ graceful }),
-      });
-      refreshAutoPilotStatus();
+      await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     } catch (err) {
-      alert(`Error al solicitar parada: ${err.message}`);
+      alert(`Error: ${err.message}`);
     }
+    refreshAutoPilotStatus();
   }
 
+  const stopAutoPilot = (graceful = true) => postAutoPilot("/api/autopilot/stop", { graceful });
+
   async function ensureDoctorTools() {
-    const btn = document.getElementById("btn-ap-ensure-tools");
+    const btn = apEl("btn-ap-ensure-tools");
     const origHtml = btn.innerHTML;
     btn.innerHTML = `<span class="btn-icon">⏳</span> Verificando...`;
     btn.disabled = true;
@@ -1086,42 +1266,50 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Bind Auto-Pilot Buttons
-  const btnApToggle = document.getElementById("btn-autopilot-toggle");
-  if (btnApToggle) {
-    btnApToggle.addEventListener("click", () => {
-      if (apState.is_running) {
-        stopAutoPilot(true);
-      } else {
-        startAutoPilot();
-      }
-    });
-  }
-
-  const btnApCardStart = document.getElementById("btn-ap-card-start");
-  if (btnApCardStart) {
-    btnApCardStart.addEventListener("click", startAutoPilot);
-  }
-
-  const btnApCardStop = document.getElementById("btn-ap-card-stop");
-  if (btnApCardStop) {
-    btnApCardStop.addEventListener("click", () => stopAutoPilot(true));
-  }
-
-  const btnApEnsure = document.getElementById("btn-ap-ensure-tools");
-  if (btnApEnsure) {
-    btnApEnsure.addEventListener("click", ensureDoctorTools);
-  }
-
-  const apDraftLimitSelect = document.getElementById("ap-draft-limit-select");
-  const apDraftLimitCustom = document.getElementById("ap-draft-limit-custom");
-  if (apDraftLimitSelect && apDraftLimitCustom) {
-    apDraftLimitSelect.addEventListener("change", () => {
-      apDraftLimitCustom.style.display = apDraftLimitSelect.value === "custom" ? "inline-block" : "none";
-      if (apDraftLimitSelect.value === "custom") {
-        apDraftLimitCustom.focus();
-      }
-    });
-  }
+  apEl("btn-autopilot-toggle")?.addEventListener("click", () => {
+    if (apState.is_running) {
+      stopAutoPilot(true);
+    } else {
+      startAutoPilot();
+    }
+  });
+  apEl("btn-ap-card-start")?.addEventListener("click", startAutoPilot);
+  apEl("btn-ap-card-stop")?.addEventListener("click", () => stopAutoPilot(true));
+  apEl("btn-ap-kill")?.addEventListener("click", () => {
+    if (confirm("¿Parar ya? Las herramientas en curso se terminan; una integración a medias restaura la configuración.")) {
+      stopAutoPilot(false);
+    }
+  });
+  apEl("btn-ap-pause")?.addEventListener("click", () =>
+    postAutoPilot(apState.paused ? "/api/autopilot/resume" : "/api/autopilot/pause"));
+  apEl("btn-ap-integrate")?.addEventListener("click", () => postAutoPilot("/api/autopilot/integrate"));
+  apEl("btn-ap-ensure-tools")?.addEventListener("click", ensureDoctorTools);
+  apEl("btn-ap-save-config")?.addEventListener("click", () =>
+    saveAutoPilotConfig().catch((err) => setConfigStatus(`Error al guardar: ${err.message}`, true)));
+  apEl("btn-ap-default-config")?.addEventListener("click", () => {
+    if (apDefaults) {
+      fillConfigForm(apDefaults);
+      apConfigDirty = true;
+      setConfigStatus("Valores por defecto (sin guardar)");
+    }
+  });
+  apForm()?.addEventListener("input", () => {
+    apConfigDirty = true;
+    setConfigStatus("Cambios sin guardar");
+    updateModulesFieldState();
+  });
+  apEl("ap-results-section")?.addEventListener("toggle", (event) => { if (event.target.open) loadAutoPilotResults(); });
+  apEl("ap-sessions-section")?.addEventListener("toggle", (event) => { if (event.target.open) loadAutoPilotSessions(); });
+  apEl("ap-results-status")?.addEventListener("change", loadAutoPilotResults);
+  apEl("ap-results-module")?.addEventListener("change", loadAutoPilotResults);
+  apEl("btn-ap-results-refresh")?.addEventListener("click", loadAutoPilotResults);
+  apEl("btn-ap-reset-failed")?.addEventListener("click", resetAutoPilotResults);
+  apEl("btn-ap-session-refresh")?.addEventListener("click", loadAutoPilotSessions);
+  apEl("ap-session-select")?.addEventListener("change", (event) => { if (event.target.value) loadAutoPilotSession(event.target.value); });
+  window.addEventListener("beforeunload", (event) => {
+    if (apConfigDirty) event.preventDefault();
+  });
+  loadAutoPilotConfig();
 
   // Initial Load
   setupSSE();
