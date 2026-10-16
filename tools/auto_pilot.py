@@ -4,8 +4,9 @@ tools/auto_pilot.py
 
 Autonomous Decompilation Engine ("Modo Automático") for Dragon Quest IX, driven by tools/auto_match.py.
 Each batch of functions left to decompile goes through:
-1. Matching: the next strategy of each function (see auto_match.STRATEGIES: m2c's C, its repairs, permute.py, other
-   compilers, m2c's variants), compiled alone with the build's flags and diffed against the original with objdiff.
+1. Matching: the next strategy of each function (see auto_match.STRATEGIES: m2c's C, its repairs, m2c with the
+   project's prototypes, permute.py, other compilers, m2c's variants), compiled alone with the build's flags and diffed
+   against the original with objdiff.
    Several functions at a time; permute.py one at a time.
 2. Integration: only the 100 % matches are kept, in build/autopilot/matched/, and added to the build (src/Autopilot) in
    groups checked by one `ninja check`, bisected when it fails, so that only the functions that break the build are
@@ -63,6 +64,9 @@ STATUS_TEXT = {
     auto_match.ERROR: "Error de herramienta (se reintentará)",
 }
 
+# The strategies before tools/auto_match.py had "context": a configuration saved then has them all or the ones chosen
+FIRST_STRATEGIES = ["m2c", "repair", "permute", "compilers", "variants"]
+
 DEFAULT_CONFIG = {
     # What to try
     "scope": "all",               # "all" or "modules"
@@ -73,6 +77,7 @@ DEFAULT_CONFIG = {
     "max_size": 0,                # bytes, 0 = no maximum
     "retry_failed": False,        # start again from m2c's C the functions whose strategies are all done
     "strategies": list(auto_match.STRATEGIES), # the strategies to try, see auto_match.STRATEGIES
+    "strategies_known": list(auto_match.STRATEGIES), # the ones that existed when it was saved (see normalize_config)
     # How much
     "batch_size": 100,
     "max_functions": 0,           # 0 = no limit
@@ -133,7 +138,12 @@ def normalize_config(config: dict) -> dict:
     names("modules")
     names("exclude_modules")
     names("strategies")
-    result["strategies"] = [name for name in auto_match.STRATEGIES if name in result["strategies"]]
+    # A strategy added after the configuration was saved is on: the saved list only turns off the ones it knew
+    known = (config or {}).get("strategies_known") or (FIRST_STRATEGIES if "strategies" in (config or {})
+                                                         else list(auto_match.STRATEGIES))
+    result["strategies"] = [name for name in auto_match.STRATEGIES
+                            if name in result["strategies"] or name not in known]
+    result["strategies_known"] = list(auto_match.STRATEGIES)
     if result["scope"] not in ("all", "modules"):
         result["scope"] = "all"
     if result["order"] not in ("nearest_module", "smallest", "address"):
