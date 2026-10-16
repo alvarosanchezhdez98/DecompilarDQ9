@@ -5,3 +5,47 @@
     .data       start:0x02170360 end:0x021707c0 kind:data align:32
     .bss        start:0x021707c0 end:0x02171060 kind:bss align:32
 
+src/Autopilot/ov004/02153778.c:
+    complete
+    .text start:0x02153778 end:0x0215377c
+
+src/Autopilot/ov004/021537dc.c:
+    complete
+    .text start:0x021537dc end:0x021537e0
+
+src/Autopilot/ov004/0215434c.c:
+    complete
+    .text start:0x0215434c end:0x02154350
+
+src/Autopilot/ov004/02156e28.c:
+    complete
+    .text start:0x02156e28 end:0x02156e2c
+
+src/Autopilot/ov004/0215e2d8.c:
+    complete
+    .text start:0x0215e2d8 end:0x0215e2dc
+
+src/Autopilot/ov004/0215e2dc.c:
+    complete
+    .text start:0x0215e2dc end:0x0215e2e0
+
+src/Autopilot/ov004/0215e2e0.c:
+    complete
+    .text start:0x0215e2e0 end:0x0215e2e8
+
+src/Autopilot/ov004/0215e2e8.c:
+    complete
+    .text start:0x0215e2e8 end:0x0215e2f0
+
+src/Autopilot/ov004/0215e2f0.c:
+    complete
+    .text start:0x0215e2f0 end:0x0215e2f8
+
+src/Autopilot/ov004/0215e2f8.c:
+    complete
+    .text start:0x0215e2f8 end:0x0215e2fc
+
+src/Autopilot/ov004/0215e2fc.c:
+    complete
+    .text start:0x0215e2fc end:0x0215e300
+
