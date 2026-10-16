@@ -26,7 +26,7 @@ import webbrowser
 root_path = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(root_path / "tools"))
 
-from gui_server import GUIRequestHandler
+from gui_server import GUIRequestHandler, auto_start_autopilot
 
 
 def find_free_port(start_port: int = 8080) -> int:
@@ -89,6 +89,8 @@ def main():
     print(f"  DRAGON QUEST IX DECOMP STUDIO GUI")
     print(f"  Running at: {url}")
     print(f"=======================================================\n")
+
+    auto_start_autopilot()
 
     if not args.headless:
         # Give server a moment to start

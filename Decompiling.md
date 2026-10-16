@@ -40,6 +40,27 @@ python tools/draft.py ov009 0x021842a0 0x0218b000
 ```
 The draft names members by their offsets (`arg0->unk4`) and calls functions by their symbols, since m2c can't read our C++ headers. Give it the types from the headers, and the structures that the offsets suggest, then diff it (see `src/World/Overlay_10/PitEvent.cpp`, drafted this way). It's a draft of what the code does, not of how the source was written: the order of the declarations, the local variables and the repeated blocks still come from the diff.
 
+## Matching functions automatically
+Many small functions match with m2c's C as it is, compiled as C (it does arithmetic on `void *`, which C++ doesn't
+allow). `tools/auto_match.py` tries that for the functions left in a module: m2c writes the C in valid syntax
+(`--valid-syntax`, with the types and macros of `include/m2c.h`), each function is compiled alone with the build's flags
+and diffed with objdiff, and `--permute` searches the near matches with `permute.py`. Only the 100 % matches are kept,
+in `build/autopilot/matched/`, and `--integrate` adds each one to the build in its own file, `src/Autopilot/<module>/<address>.c`,
+with `complete_file.py`, keeping it only when `ninja check` passes (otherwise the configuration files are restored).
+The result of each function is recorded in `build/autopilot/results.json`, so that it isn't tried again.
+```shell
+python tools/auto_match.py ov026                   # every function left in the module
+python tools/auto_match.py ov026 --permute 60      # also 60 s of permute.py for each near match
+python tools/auto_match.py --integrate-pending     # adds the matches kept earlier to the build
+```
+The GUI's "Modo Automático" (`run_gui.bat`) does it unattended, batch after batch, with a configuration that it keeps:
+the modules, the order and sizes of the functions, how many and until when (a number of functions, hours, or a time
+of day), how long to permute, whether to integrate, record the progress and commit, and whether to keep the computer
+awake, at a low priority, and to start on its own when the GUI opens. It can pause, stop after the functions in
+progress, or stop at once, and writes a log of each session in `build/autopilot/sessions/`. Without the GUI, e.g. from
+the Task Scheduler: `python tools/auto_pilot.py --hours 8` (see its help). The files in `src/Autopilot` are m2c's C,
+with members by offset: they're a start that matches, to give types and move to the right files later.
+
 ## Matching functions locally
 `tools/diff_function.py` compiles a source file with the same flags as the build and diffs its functions against the original game with objdiff, marking every instruction that differs. It's a local alternative to decomp.me scratches that doesn't need GCC. It needs `build.ninja` and the delinked objects, so run `python tools/configure.py eur` and `ninja delink` first.
 ```shell

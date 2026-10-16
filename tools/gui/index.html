@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body class="dark-theme">
   <div class="app-container">
@@ -137,6 +137,8 @@
           </div>
 
           <div class="autopilot-body">
+            <div class="ap-banner ap-banner-warning" id="ap-integration-banner" style="display: none;"></div>
+
             <div class="ap-metrics-grid">
               <div class="ap-metric-box">
                 <span class="ap-metric-label">Fase y Estado</span>
@@ -144,59 +146,183 @@
                 <span class="ap-metric-sub" id="ap-metric-target">Sin tarea activa</span>
               </div>
               <div class="ap-metric-box">
-                <span class="ap-metric-label">Borradores en Lote</span>
-                <span class="ap-metric-value text-info" id="ap-metric-drafts">0 / 100</span>
-                <span class="ap-metric-sub" id="ap-metric-drafts-sub">Lote actual (#1)</span>
+                <span class="ap-metric-label">Lote actual</span>
+                <span class="ap-metric-value text-info" id="ap-metric-drafts">0 / 0</span>
+                <span class="ap-metric-sub" id="ap-metric-drafts-sub">Lote #1 · 0 completados</span>
               </div>
               <div class="ap-metric-box">
-                <span class="ap-metric-label">Progreso de Lotes</span>
-                <span class="ap-metric-value text-accent" id="ap-metric-batches">0 completados</span>
-                <span class="ap-metric-sub" id="ap-metric-batches-sub">Modo continuo activo</span>
-              </div>
-              <div class="ap-metric-box">
-                <span class="ap-metric-label">Matches 1:1 Logrados</span>
+                <span class="ap-metric-label">Matches 100%</span>
                 <span class="ap-metric-value text-success" id="ap-metric-matches">0</span>
-                <span class="ap-metric-sub" id="ap-metric-processed-sub">0 procesadas en total</span>
+                <span class="ap-metric-sub" id="ap-metric-processed-sub">0 integradas · 0 pendientes</span>
+              </div>
+              <div class="ap-metric-box">
+                <span class="ap-metric-label">Intentadas (sesión)</span>
+                <span class="ap-metric-value text-accent" id="ap-metric-processed">0</span>
+                <span class="ap-metric-sub" id="ap-metric-breakdown">—</span>
               </div>
               <div class="ap-metric-box">
                 <span class="ap-metric-label">Tiempo Activo</span>
                 <span class="ap-metric-value" id="ap-metric-time">00:00</span>
-                <span class="ap-metric-sub">Duración de la sesión</span>
+                <span class="ap-metric-sub" id="ap-metric-time-sub">Sin límite de tiempo</span>
               </div>
             </div>
 
             <div class="ap-controls-bar">
-              <div class="ap-scope-selector">
-                <label for="ap-scope-select">Ámbito de Ejecución:</label>
-                <select id="ap-scope-select" class="form-select small-select">
-                  <option value="all" selected>Todos los módulos (Priorizar overlays cercanos al 100%)</option>
-                  <option value="module">Solo módulo activo en Decomp Studio</option>
-                </select>
-              </div>
-
-              <div class="ap-limit-selector">
-                <label for="ap-draft-limit-select">Lote de Drafting (Parar y pasar a matching):</label>
-                <div class="limit-input-group">
-                  <select id="ap-draft-limit-select" class="form-select small-select">
-                    <option value="100" selected>100 funciones (Recomendado)</option>
-                    <option value="200">200 funciones (Lote grande)</option>
-                    <option value="50">50 funciones (Lote rápido)</option>
-                    <option value="1">1 función (Intercalado continuo)</option>
-                    <option value="custom">Personalizado...</option>
-                  </select>
-                  <input id="ap-draft-limit-custom" type="number" min="1" max="5000" value="100" class="form-input small-input" style="display: none; width: 90px;" placeholder="Límite">
-                </div>
-              </div>
-
               <div class="ap-action-buttons">
-                <button id="btn-ap-card-start" class="btn btn-primary btn-ap-start">
-                  <span class="btn-icon">🚀</span> Iniciar Modo Automático
+                <button id="btn-ap-card-start" class="btn btn-primary btn-ap-start" title="Guarda la configuración y empieza">
+                  <span class="btn-icon">🚀</span> Iniciar
                 </button>
-                <button id="btn-ap-card-stop" class="btn btn-warning btn-ap-stop" style="display: none;">
+                <button id="btn-ap-pause" class="btn btn-outline" style="display: none;" title="Las funciones en curso terminan y no empiezan otras hasta reanudar">
+                  <span class="btn-icon">⏸️</span> Pausar
+                </button>
+                <button id="btn-ap-card-stop" class="btn btn-warning btn-ap-stop" style="display: none;" title="Termina las funciones en curso, integra lo que coincidió y para">
                   <span class="btn-icon">⏹️</span> Parar tras tarea actual
+                </button>
+                <button id="btn-ap-kill" class="btn btn-danger" style="display: none;" title="Termina ya las herramientas en curso. Una integración a medias restaura la configuración">
+                  <span class="btn-icon">⛔</span> Parada inmediata
+                </button>
+              </div>
+              <div class="ap-action-buttons">
+                <button id="btn-ap-integrate" class="btn btn-outline" title="Añade al build los matches guardados que aún no están integrados (verificados con ninja check)">
+                  <span class="btn-icon">🧩</span> Integrar pendientes
                 </button>
               </div>
             </div>
+
+            <details class="ap-section" id="ap-config-section" open>
+              <summary>⚙️ Configuración</summary>
+              <form id="ap-config-form" class="ap-config-grid" autocomplete="off">
+                <fieldset class="ap-fieldset">
+                  <legend>Qué intentar</legend>
+                  <label>Ámbito
+                    <select name="scope" class="form-select">
+                      <option value="all">Todos los módulos</option>
+                      <option value="modules">Solo los módulos elegidos</option>
+                    </select>
+                  </label>
+                  <label class="ap-modules-field">Módulos (Ctrl/Mayús para varios)
+                    <select name="modules" class="form-select" multiple size="6"></select>
+                  </label>
+                  <label>Excluir módulos (separados por comas)
+                    <input name="exclude_modules" type="text" class="input-text" placeholder="p. ej. main, ov031">
+                  </label>
+                  <label>Orden
+                    <select name="order" class="form-select">
+                      <option value="nearest_module">Módulos más cerca del 100% primero</option>
+                      <option value="smallest">Funciones más pequeñas primero (todas)</option>
+                      <option value="address">Por módulo y dirección</option>
+                    </select>
+                  </label>
+                  <div class="ap-row">
+                    <label>Tamaño mín. (bytes)
+                      <input name="min_size" type="number" min="0" class="input-text">
+                    </label>
+                    <label>Tamaño máx. (0 = sin límite)
+                      <input name="max_size" type="number" min="0" class="input-text">
+                    </label>
+                  </div>
+                  <label class="ap-check"><input name="retry_failed" type="checkbox"> Reintentar las que fallaron en sesiones anteriores</label>
+                </fieldset>
+
+                <fieldset class="ap-fieldset">
+                  <legend>Cuánto y hasta cuándo</legend>
+                  <div class="ap-row">
+                    <label>Funciones por lote
+                      <input name="batch_size" type="number" min="1" max="5000" class="input-text">
+                    </label>
+                    <label>Máx. funciones (0 = sin límite)
+                      <input name="max_functions" type="number" min="0" class="input-text">
+                    </label>
+                  </div>
+                  <div class="ap-row">
+                    <label>Máx. horas (0 = sin límite)
+                      <input name="max_hours" type="number" min="0" step="0.5" class="input-text">
+                    </label>
+                    <label>Parar a las (vacío = nunca)
+                      <input name="stop_at" type="time" class="input-text">
+                    </label>
+                  </div>
+                  <div class="ap-row">
+                    <label>Descanso entre lotes (s)
+                      <input name="batch_pause_seconds" type="number" min="0" max="3600" class="input-text">
+                    </label>
+                    <label>Parar tras N errores seguidos (0 = nunca)
+                      <input name="max_consecutive_errors" type="number" min="0" class="input-text">
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset class="ap-fieldset">
+                  <legend>Cómo</legend>
+                  <div class="ap-row">
+                    <label>Funciones a la vez (0 = auto)
+                      <input name="jobs" type="number" min="0" max="64" class="input-text">
+                    </label>
+                    <label>permute.py por casi-match (s, 0 = no)
+                      <input name="permute_seconds" type="number" min="0" max="3600" class="input-text">
+                    </label>
+                  </div>
+                  <label>Casi-match desde (%)
+                    <input name="permute_threshold" type="number" min="0" max="99.9" step="0.5" class="input-text">
+                  </label>
+                  <label class="ap-check"><input name="integrate" type="checkbox"> Integrar los matches en el build (verificado con ninja check)</label>
+                  <label class="ap-check"><input name="record_progress" type="checkbox"> Registrar el progreso (progress.py --record)</label>
+                  <label class="ap-check"><input name="auto_commit" type="checkbox"> Hacer git commit tras cada lote con integraciones</label>
+                </fieldset>
+
+                <fieldset class="ap-fieldset">
+                  <legend>El ordenador</legend>
+                  <label class="ap-check"><input name="keep_awake" type="checkbox"> Impedir que el PC entre en suspensión mientras trabaja</label>
+                  <label class="ap-check"><input name="low_priority" type="checkbox"> Prioridad baja (el PC sigue usable)</label>
+                  <label class="ap-check"><input name="auto_start" type="checkbox"> Arrancar solo al abrir el Studio (p. ej. tras reiniciar)</label>
+                  <div class="ap-config-actions">
+                    <button type="button" id="btn-ap-save-config" class="btn btn-sm btn-primary">💾 Guardar configuración</button>
+                    <button type="button" id="btn-ap-default-config" class="btn btn-sm btn-outline">↺ Valores por defecto</button>
+                    <span class="ap-config-status" id="ap-config-status"></span>
+                  </div>
+                </fieldset>
+              </form>
+            </details>
+
+            <details class="ap-section" id="ap-results-section">
+              <summary>📊 Resultados acumulados <span class="ap-summary-inline" id="ap-results-inline"></span></summary>
+              <div class="ap-results-toolbar">
+                <select id="ap-results-status" class="form-select small-select">
+                  <option value="">Todos los estados</option>
+                  <option value="matched">100% (matched)</option>
+                  <option value="integrated">Integradas en el build</option>
+                  <option value="near">Casi-matches</option>
+                  <option value="no_match">No coinciden</option>
+                  <option value="compile_error">No compilan</option>
+                  <option value="m2c_failed">m2c falló</option>
+                  <option value="error">Errores de herramienta</option>
+                </select>
+                <select id="ap-results-module" class="form-select small-select">
+                  <option value="">Todos los módulos</option>
+                </select>
+                <button id="btn-ap-results-refresh" class="btn btn-sm btn-outline">⟳ Actualizar</button>
+                <button id="btn-ap-reset-failed" class="btn btn-sm btn-outline" title="Olvida los resultados de este filtro (excepto los matches) para que se intenten otra vez">↺ Reintentar las del filtro</button>
+              </div>
+              <div class="ap-results-chips" id="ap-results-chips"></div>
+              <div class="ap-table-wrap">
+                <table class="ap-results-table">
+                  <thead>
+                    <tr><th>Módulo</th><th>Función</th><th>Tamaño</th><th>Estado</th><th>%</th><th>Nota</th><th>Fecha</th></tr>
+                  </thead>
+                  <tbody id="ap-results-body"><tr><td colspan="7">Sin resultados todavía.</td></tr></tbody>
+                </table>
+              </div>
+            </details>
+
+            <details class="ap-section" id="ap-sessions-section">
+              <summary>🗂️ Registros de sesiones</summary>
+              <div class="ap-results-toolbar">
+                <select id="ap-session-select" class="form-select small-select"></select>
+                <button id="btn-ap-session-refresh" class="btn btn-sm btn-outline">⟳ Actualizar</button>
+                <span class="ap-config-status" id="ap-last-session"></span>
+              </div>
+              <pre class="ap-log-preview ap-session-log" id="ap-session-log">Elige una sesión.</pre>
+            </details>
 
             <div class="ap-live-log-box" id="ap-live-log" style="display: none;">
               <div class="ap-log-header">
@@ -588,6 +714,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

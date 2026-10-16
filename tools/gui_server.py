@@ -320,6 +320,17 @@ proc_manager = ParallelTaskManager()
 auto_pilot_engine = auto_pilot.AutoPilotEngine(proc_manager=proc_manager, store_instance=store) if auto_pilot else None
 
 
+def auto_start_autopilot(delay: float = 5.0):
+    """Starts the autopilot with the saved configuration when it says so (auto_start), e.g. after a reboot"""
+    if not auto_pilot_engine:
+        return
+    config = auto_pilot.load_config(store)
+    if config["auto_start"]:
+        timer = threading.Timer(delay, lambda: auto_pilot_engine.start(config=config))
+        timer.daemon = True
+        timer.start()
+
+
 def run_quick_start() -> dict:
     """Zero-prompt intelligent auto-decompile selector."""
     if not progress:
@@ -392,6 +403,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        # The browser checks the files again on each load, so that an update of the GUI is seen at once
+        self.send_header("Cache-Control", "no-cache")
         super().end_headers()
 
     def do_OPTIONS(self):
@@ -431,6 +444,76 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    # --- Auto-Pilot API ---
+    def handle_autopilot_get(self, path: str, query: dict):
+        if not auto_pilot_engine:
+            self.send_json({"error": "AutoPilot not available"}, 500)
+            return
+        first = lambda name: (query.get(name) or [None])[0]
+        if path == "/api/autopilot/status":
+            status = auto_pilot_engine.get_status()
+            status["busy_integrating"] = auto_pilot_engine.busy_integrating
+            self.send_json(status)
+        elif path == "/api/autopilot/config":
+            self.send_json({"config": auto_pilot.load_config(store), "defaults": auto_pilot.DEFAULT_CONFIG})
+        elif path == "/api/autopilot/results":
+            results = auto_pilot.auto_match.shared_results()
+            limit = int(first("limit") or 200)
+            self.send_json({
+                "summary": results.summary(),
+                "entries": results.entries(first("status") or None, first("module") or None, limit),
+            })
+        elif path == "/api/autopilot/sessions":
+            sessions = (sorted(auto_pilot.SESSIONS_PATH.glob("*.log"), reverse=True)[:30]
+                        if auto_pilot.SESSIONS_PATH.is_dir() else [])
+            self.send_json([{"name": log.name, "size": log.stat().st_size} for log in sessions])
+        elif path == "/api/autopilot/session":
+            name = Path(first("name") or "").name
+            log = auto_pilot.SESSIONS_PATH / name
+            if not name.endswith(".log") or not log.is_file():
+                self.send_json({"error": "Session not found"}, 404)
+                return
+            lines = log.read_text(encoding="utf-8", errors="replace").splitlines()
+            self.send_json({"name": name, "text": "\n".join(lines[-int(first("lines") or 2000):])})
+        else:
+            self.send_error(404, f"API endpoint {path} not found")
+
+    def handle_autopilot_post(self, path: str, data: dict):
+        if not auto_pilot_engine:
+            self.send_json({"error": "AutoPilot not available"}, 500)
+            return
+        engine = auto_pilot_engine
+        if path == "/api/autopilot/start":
+            if isinstance(data.get("config"), dict):
+                config = auto_pilot.save_config(data["config"], store)
+                started = engine.start(config=config)
+            else: # The old API
+                started = engine.start(scope=data.get("scope", "all"), module=data.get("module"),
+                                       max_functions=int(data.get("max_functions", 0)),
+                                       draft_limit=int(data.get("draft_limit", 100)),
+                                       permute_seconds=float(data.get("permute_seconds", 60)))
+            self.send_json({"started": started, "status": engine.get_status()})
+        elif path == "/api/autopilot/stop":
+            if bool(data.get("graceful", True)):
+                engine.request_graceful_stop()
+            else:
+                engine.emergency_stop()
+            self.send_json(engine.get_status())
+        elif path == "/api/autopilot/pause":
+            self.send_json({"ok": engine.pause(), "status": engine.get_status()})
+        elif path == "/api/autopilot/resume":
+            self.send_json({"ok": engine.resume(), "status": engine.get_status()})
+        elif path == "/api/autopilot/config":
+            self.send_json({"config": auto_pilot.save_config(data.get("config") or data, store)})
+        elif path == "/api/autopilot/integrate":
+            self.send_json({"started": engine.integrate_pending()})
+        elif path == "/api/autopilot/results/reset":
+            statuses = data.get("statuses") or None
+            count = auto_pilot.auto_match.shared_results().reset(statuses, data.get("module") or None)
+            self.send_json({"reset": count})
+        else:
+            self.send_error(404, f"API endpoint {path} not found")
+
     def handle_api_get(self, path: str, query: dict):
         try:
             if path == "/api/status":
@@ -458,11 +541,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             elif path.startswith("/api/store/history/"):
                 mod = path[len("/api/store/history/") :]
                 self.send_json(store.get_history(module=mod))
-            elif path == "/api/autopilot/status":
-                if auto_pilot_engine:
-                    self.send_json(auto_pilot_engine.get_status())
-                else:
-                    self.send_json({"error": "AutoPilot not available"}, 500)
+            elif path.startswith("/api/autopilot/"):
+                self.handle_autopilot_get(path, query)
             else:
                 self.send_error(404, f"API endpoint {path} not found")
         except Exception as e:
@@ -472,26 +552,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_api_post(self, path: str, data: dict):
         try:
-            if path == "/api/autopilot/start":
-                if not auto_pilot_engine:
-                    self.send_json({"error": "AutoPilot not available"}, 500)
-                else:
-                    scope = data.get("scope", "all")
-                    mod = data.get("module")
-                    max_fn = int(data.get("max_functions", 0))
-                    draft_limit = int(data.get("draft_limit", 100))
-                    started = auto_pilot_engine.start(scope=scope, module=mod, max_functions=max_fn, draft_limit=draft_limit)
-                    self.send_json({"started": started, "status": auto_pilot_engine.get_status()})
-            elif path == "/api/autopilot/stop":
-                if not auto_pilot_engine:
-                    self.send_json({"error": "AutoPilot not available"}, 500)
-                else:
-                    graceful = bool(data.get("graceful", True))
-                    if graceful:
-                        auto_pilot_engine.request_graceful_stop()
-                    else:
-                        auto_pilot_engine.emergency_stop()
-                    self.send_json(auto_pilot_engine.get_status())
+            if path.startswith("/api/autopilot/"):
+                self.handle_autopilot_post(path, data)
             elif path == "/api/doctor/ensure":
                 if doctor:
                     ok, logs = doctor.ensure_environment()
@@ -848,6 +910,7 @@ def create_server(host: str = "127.0.0.1", port: int = 8080):
 def run_server(port: int = 8080):
     httpd = create_server("127.0.0.1", port)
     print(f"Dragon Quest IX Decompilation GUI running at http://127.0.0.1:{port}/")
+    auto_start_autopilot()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
