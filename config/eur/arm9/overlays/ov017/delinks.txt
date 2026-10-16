@@ -197,6 +197,10 @@ src/Autopilot/ov017/021b98f8.c:
     complete
     .text start:0x021b98f8 end:0x021b9904
 
+src/Autopilot/ov017/021bb108.c:
+    complete
+    .text start:0x021bb108 end:0x021bb1a4
+
 src/Autopilot/ov017/021bb9ec.c:
     complete
     .text start:0x021bb9ec end:0x021bb9f4

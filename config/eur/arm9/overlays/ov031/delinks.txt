@@ -125,6 +125,10 @@ src/Autopilot/ov031/022077c0.c:
     complete
     .text start:0x022077c0 end:0x022077cc
 
+src/Autopilot/ov031/022079ac.c:
+    complete
+    .text start:0x022079ac end:0x02207a10
+
 src/Autopilot/ov031/02207cd0.c:
     complete
     .text start:0x02207cd0 end:0x02207ce0

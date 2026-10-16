@@ -189,6 +189,10 @@ src/Autopilot/main/020122a8.c:
     complete
     .text start:0x020122a8 end:0x020122ac
 
+src/Autopilot/main/020122ac.c:
+    complete
+    .text start:0x020122ac end:0x02012364
+
 src/Autopilot/main/0201239c.c:
     complete
     .text start:0x0201239c end:0x020123a0
@@ -293,6 +297,10 @@ src/Autopilot/main/0201ce88.c:
     complete
     .text start:0x0201ce88 end:0x0201ce90
 
+src/Autopilot/main/0201d4fc.c:
+    complete
+    .text start:0x0201d4fc end:0x0201d540
+
 src/Autopilot/main/0201e830.c:
     complete
     .text start:0x0201e830 end:0x0201e838
@@ -321,6 +329,18 @@ src/Autopilot/main/0201edf8.c:
     complete
     .text start:0x0201edf8 end:0x0201ee00
 
+src/Autopilot/main/0201f5b8.c:
+    complete
+    .text start:0x0201f5b8 end:0x0201f610
+
+src/Autopilot/main/0201f874.c:
+    complete
+    .text start:0x0201f874 end:0x0201f8a4
+
+src/Autopilot/main/0201f8a4.c:
+    complete
+    .text start:0x0201f8a4 end:0x0201f8e0
+
 src/Autopilot/main/0201f9b0.c:
     complete
     .text start:0x0201f9b0 end:0x0201f9b8
@@ -344,6 +364,10 @@ src/Autopilot/main/02026428.c:
 src/Autopilot/main/02026430.c:
     complete
     .text start:0x02026430 end:0x02026438
+
+src/Autopilot/main/02026438.c:
+    complete
+    .text start:0x02026438 end:0x02026480
 
 src/Autopilot/main/0202664c.c:
     complete
@@ -404,6 +428,10 @@ src/Autopilot/main/0202bafc.c:
 src/Autopilot/main/0202c1ac.c:
     complete
     .text start:0x0202c1ac end:0x0202c1b4
+
+src/Autopilot/main/0202c7cc.c:
+    complete
+    .text start:0x0202c7cc end:0x0202c824
 
 src/Autopilot/main/0202d118.c:
     complete
@@ -721,6 +749,14 @@ src/Autopilot/main/02040548.c:
     complete
     .text start:0x02040548 end:0x02040550
 
+src/Autopilot/main/02040678.c:
+    complete
+    .text start:0x02040678 end:0x020406c0
+
+src/Autopilot/main/020406c0.c:
+    complete
+    .text start:0x020406c0 end:0x02040708
+
 src/Autopilot/main/0204129c.c:
     complete
     .text start:0x0204129c end:0x020412a8
@@ -728,6 +764,10 @@ src/Autopilot/main/0204129c.c:
 src/Autopilot/main/020416d0.c:
     complete
     .text start:0x020416d0 end:0x020416dc
+
+src/Autopilot/main/02042094.c:
+    complete
+    .text start:0x02042094 end:0x020420f8
 
 src/Autopilot/main/02042b20.c:
     complete
@@ -1230,6 +1270,18 @@ src/Autopilot/main/0207d79c.c:
     complete
     .text start:0x0207d79c end:0x0207d7a8
 
+src/Autopilot/main/0207d7a8.c:
+    complete
+    .text start:0x0207d7a8 end:0x0207d7d0
+
+src/Autopilot/main/0207de00.c:
+    complete
+    .text start:0x0207de00 end:0x0207de2c
+
+src/Autopilot/main/0207de2c.c:
+    complete
+    .text start:0x0207de2c end:0x0207de58
+
 src/Graphics/Animation3D.cpp:
     complete
     .text start:0x0207e070 end:0x0207e24c
@@ -1385,6 +1437,10 @@ src/Autopilot/main/02094d88.c:
 src/Autopilot/main/02094d90.c:
     complete
     .text start:0x02094d90 end:0x02094d98
+
+src/Autopilot/main/02095af0.c:
+    complete
+    .text start:0x02095af0 end:0x02095b40
 
 src/Autopilot/main/02096608.c:
     complete
