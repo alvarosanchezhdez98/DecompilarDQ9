@@ -230,15 +230,15 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-10-16.
+Last recorded on 2026-10-17.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 567,412 | 2,959,024 | 19.18 % |
-| Functions | 4,962 | 14,779 | 33.57 % |
+| Code (bytes) | 582,604 | 2,959,024 | 19.69 % |
+| Functions | 5,218 | 14,779 | 35.31 % |
 | Modules | 4 complete, 28 in progress, 0 not started | 32 with code |  |
 
-Source files: 1811 complete, 1 in progress.
+Source files: 2067 complete, 1 in progress.
 
 Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -259,6 +259,7 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | 2026-10-02 | 3,285 (22.23 %) | 491,620 (16.61 %) | 245 |
 | 2026-10-03 | 3,399 (23.00 %) | 518,580 (17.53 %) | 248 |
 | 2026-10-16 | 4,962 (33.57 %) | 567,412 (19.18 %) | 1811 |
+| 2026-10-17 | 5,218 (35.31 %) | 582,604 (19.69 %) | 2067 |
 
 ## Modules
 
@@ -271,7 +272,7 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | ov001 | *Likely* events and cutscenes | 69.1 | 515 | 46 | 469 | 2.99 % | In progress |
 | ov002 | *Likely* item, spell and skill menus | 100.6 | 213 | 34 | 179 | 3.59 % | In progress |
 | ov003 | *Likely* Alltrades Abbey (vocations; "Dharma" in Japanese) | 175.0 | 510 | 34 | 476 | 0.36 % | In progress |
-| ov004 | Unclear: accolades, treasure maps | 112.9 | 532 | 11 | 521 | 0.05 % | In progress |
+| ov004 | Unclear: accolades, treasure maps | 112.9 | 532 | 267 | 265 | 13.18 % | In progress |
 | ov005 | The equipment menu, which overlay 23's `MemberScreen` runs in its mode 3 with an object of 0x428c bytes (`src/Scene/Overlay_5`). Decompiled whole: the frame of four corners that moves towards what it selects (`CursorFrame`, with 1 function in assembly for now) and the menu itself (`EquipmentMenu`: the equipped items around the model, the pages of items to drag onto it, the kinds, sorting and the menu of each item; 28 of its 85 functions in assembly for now) | 37.2 | 89 | 60 | 29 | 47.54 % | In progress |
 | ov006 | Alchemy pot ("renkin" in Japanese), run by overlay 17. Three files: the ingredients and records of the recipes (`src/Scene/Overlay_6/AlchemyIngredients`, decompiled: which items of each category the player has, whether there are enough for a recipe, its success rate from a stat of the protagonist, and the records of the recipes learnt or made), the pot's 3D scene and the item window (`AlchemyPot`, decompiled with 3 of its 33 functions in assembly for now: the protagonist, the pot and its animations, the ingredients' sprites going into it, and the window of the recipe's item with the names of its ingredients), and the alchemy menu (`AlchemyMenu`, decompiled with 15 of its 85 functions in assembly for now: choosing up to three ingredients and how many of each, alchemy with its success rate and great successes, and the recipe book with its categories, filters and orders, from which a recipe can be made) | 50.1 | 132 | 114 | 18 | 52.54 % | In progress |
 | ov007 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
@@ -506,7 +507,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov001 | 205 | 242 | 21 | 1 | 67.0 |
 | ov002 | 11 | 106 | 57 | 5 | 97.0 |
 | ov003 | 68 | 318 | 79 | 11 | 174.4 |
-| ov004 | 218 | 243 | 57 | 3 | 112.9 |
+| ov004 | 26 | 180 | 56 | 3 | 98.1 |
 | ov005 | 0 | 18 | 8 | 3 | 19.5 |
 | ov006 | 0 | 5 | 9 | 4 | 23.8 |
 | ov008 | 0 | 4 | 3 | 2 | 11.4 |
@@ -528,5 +529,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 478 | 1070 | 83 | 4 | 273.4 |
-| **Total** | **3271** | **5492** | **925** | **129** | **2335.6** |
+| **Total** | **3079** | **5429** | **924** | **129** | **2320.7** |
 <!-- END GENERATED -->
