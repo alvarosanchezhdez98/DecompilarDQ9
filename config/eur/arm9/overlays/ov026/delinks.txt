@@ -4,3 +4,27 @@
     .data       start:0x021de840 end:0x021def00 kind:data align:32
     .bss        start:0x021def00 end:0x021def20 kind:bss align:32
 
+src/Autopilot/ov026/021d8a40.c:
+    complete
+    .text start:0x021d8a40 end:0x021d8a78
+
+src/Autopilot/ov026/021d8a78.c:
+    complete
+    .text start:0x021d8a78 end:0x021d8aac
+
+src/Autopilot/ov026/021d8b98.c:
+    complete
+    .text start:0x021d8b98 end:0x021d8ba0
+
+src/Autopilot/ov026/021dbe44.c:
+    complete
+    .text start:0x021dbe44 end:0x021dbf04
+
+src/Autopilot/ov026/021dce1c.c:
+    complete
+    .text start:0x021dce1c end:0x021dce34
+
+src/Autopilot/ov026/021dd3c4.c:
+    complete
+    .text start:0x021dd3c4 end:0x021dd3dc
+

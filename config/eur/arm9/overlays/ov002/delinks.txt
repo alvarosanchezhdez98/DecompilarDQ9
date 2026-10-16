@@ -4,3 +4,87 @@
     .data       start:0x0216ccc0 end:0x0216d3a0 kind:data align:32
     .bss        start:0x0216d3a0 end:0x0216d3c0 kind:bss align:32
 
+src/Autopilot/ov002/021536e0.c:
+    complete
+    .text start:0x021536e0 end:0x021536ec
+
+src/Autopilot/ov002/02153e90.c:
+    complete
+    .text start:0x02153e90 end:0x02153ea4
+
+src/Autopilot/ov002/02154bcc.c:
+    complete
+    .text start:0x02154bcc end:0x02154c30
+
+src/Autopilot/ov002/021556ec.c:
+    complete
+    .text start:0x021556ec end:0x021556fc
+
+src/Autopilot/ov002/02156178.c:
+    complete
+    .text start:0x02156178 end:0x021561b0
+
+src/Autopilot/ov002/0215a878.c:
+    complete
+    .text start:0x0215a878 end:0x0215a8cc
+
+src/Autopilot/ov002/0215a8cc.c:
+    complete
+    .text start:0x0215a8cc end:0x0215a920
+
+src/Autopilot/ov002/0215a920.c:
+    complete
+    .text start:0x0215a920 end:0x0215a938
+
+src/Autopilot/ov002/0215a9cc.c:
+    complete
+    .text start:0x0215a9cc end:0x0215a9f0
+
+src/Autopilot/ov002/0215af64.c:
+    complete
+    .text start:0x0215af64 end:0x0215afb8
+
+src/Autopilot/ov002/0215b234.c:
+    complete
+    .text start:0x0215b234 end:0x0215b268
+
+src/Autopilot/ov002/0215b268.c:
+    complete
+    .text start:0x0215b268 end:0x0215b2c8
+
+src/Autopilot/ov002/0215b428.c:
+    complete
+    .text start:0x0215b428 end:0x0215b458
+
+src/Autopilot/ov002/0215b7d0.c:
+    complete
+    .text start:0x0215b7d0 end:0x0215b814
+
+src/Autopilot/ov002/0215edc8.c:
+    complete
+    .text start:0x0215edc8 end:0x0215ee04
+
+src/Autopilot/ov002/0216197c.c:
+    complete
+    .text start:0x0216197c end:0x021619b4
+
+src/Autopilot/ov002/02161b48.c:
+    complete
+    .text start:0x02161b48 end:0x02161b98
+
+src/Autopilot/ov002/0216364c.c:
+    complete
+    .text start:0x0216364c end:0x02163664
+
+src/Autopilot/ov002/02164744.c:
+    complete
+    .text start:0x02164744 end:0x02164748
+
+src/Autopilot/ov002/02168c00.c:
+    complete
+    .text start:0x02168c00 end:0x02168c38
+
+src/Autopilot/ov002/02168d10.c:
+    complete
+    .text start:0x02168d10 end:0x02168d54
+
