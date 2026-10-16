@@ -320,6 +320,78 @@ proc_manager = ParallelTaskManager()
 auto_pilot_engine = auto_pilot.AutoPilotEngine(proc_manager=proc_manager, store_instance=store) if auto_pilot else None
 
 
+_progress_cache: dict = {"key": None, "data": None}
+_progress_lock = threading.Lock()
+
+
+def progress_snapshot() -> dict:
+    """The decompilation's progress now, from config/ (not docs/, which is updated only by progress.py --record).
+    Cached until a delinks.txt changes, since reading every module takes a few seconds"""
+    if not progress:
+        return {"error": "Progress module not available"}
+    delinks = sorted((root_path / "config").rglob("delinks.txt"))
+    key = tuple((str(path), path.stat().st_mtime_ns) for path in delinks)
+    with _progress_lock:
+        if _progress_cache["key"] == key:
+            return _progress_cache["data"]
+        modules = progress.load_modules()
+        totals = progress.totals(modules)
+        autopilot_files = sum(1 for _ in (root_path / "src" / "Autopilot").rglob("*.c"))             if (root_path / "src" / "Autopilot").is_dir() else 0
+        history = []
+        for row in progress.read_history():
+            history.append({key_: (row[key_] if key_ == "date" else int(row[key_])) for key_ in progress.HISTORY_FIELDS})
+        today = time.strftime("%Y-%m-%d")
+        live = {"date": today, **totals}
+        if history and history[-1]["date"] == today:
+            history[-1] = live
+        else:
+            history.append(live)
+
+        def pct(done, total):
+            return round(done / total * 100, 2) if total else 0.0
+
+        per_module = []
+        for m in modules:
+            if not m.code_size:
+                continue
+            done_functions = len(m.functions) - len(m.remaining)
+            per_module.append({
+                "name": m.name,
+                "status": m.status,
+                "functions_done": done_functions,
+                "functions_total": len(m.functions),
+                "bytes_done": m.done_size,
+                "bytes_total": m.code_size,
+                "functions_percentage": pct(done_functions, len(m.functions)),
+                "code_percentage": pct(m.done_size, m.code_size),
+            })
+        data = {
+            **totals,
+            "functions_percentage": pct(totals["functions_done"], totals["functions_total"]),
+            "code_percentage": pct(totals["bytes_done"], totals["bytes_total"]),
+            "modules_complete": sum(1 for m in per_module if m["bytes_done"] >= m["bytes_total"]),
+            "modules_total": len(per_module),
+            "autopilot_files": autopilot_files,
+            "history": history,
+            "modules": per_module,
+            "computed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        _progress_cache.update(key=key, data=data)
+        return data
+
+
+_uncommitted_cache = {"time": 0.0, "count": 0}
+
+
+def uncommitted_count() -> int:
+    """How many functions of src/Autopilot aren't committed (git status, at most every 20 s)"""
+    if not auto_pilot:
+        return 0
+    if time.time() - _uncommitted_cache["time"] > 20:
+        _uncommitted_cache.update(time=time.time(), count=len(auto_pilot.uncommitted_sources()))
+    return _uncommitted_cache["count"]
+
+
 def auto_start_autopilot(delay: float = 5.0):
     """Starts the autopilot with the saved configuration when it says so (auto_start), e.g. after a reboot"""
     if not auto_pilot_engine:
@@ -453,6 +525,7 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/autopilot/status":
             status = auto_pilot_engine.get_status()
             status["busy_integrating"] = auto_pilot_engine.busy_integrating
+            status["uncommitted"] = uncommitted_count()
             self.send_json(status)
         elif path == "/api/autopilot/config":
             self.send_json({"config": auto_pilot.load_config(store), "defaults": auto_pilot.DEFAULT_CONFIG})
@@ -507,6 +580,11 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"config": auto_pilot.save_config(data.get("config") or data, store)})
         elif path == "/api/autopilot/integrate":
             self.send_json({"started": engine.integrate_pending()})
+        elif path == "/api/autopilot/repair":
+            self.send_json({"started": engine.repair_build()})
+        elif path == "/api/autopilot/commit":
+            _uncommitted_cache["time"] = 0
+            self.send_json({"started": engine.commit_now()})
         elif path == "/api/autopilot/results/reset":
             statuses = data.get("statuses") or None
             count = auto_pilot.auto_match.shared_results().reset(statuses, data.get("module") or None)
@@ -520,6 +598,8 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.get_status()
             elif path == "/api/modules":
                 self.get_modules()
+            elif path == "/api/progress":
+                self.send_json(progress_snapshot())
             elif path.startswith("/api/module/"):
                 mod_name = path[len("/api/module/") :]
                 self.get_module_details(mod_name)
@@ -615,43 +695,23 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"error": str(e), "traceback": traceback.format_exc()}, 500)
 
     def get_status(self):
-        summary_file = root_path / "docs" / "status" / "data" / "summary.json"
-        if summary_file.is_file():
-            try:
-                data = json.loads(summary_file.read_text(encoding="utf-8"))
-                data["is_running"] = proc_manager.is_running()
-                data["running_command"] = proc_manager.running_command
-                data["active_workers"] = len(proc_manager.running_tasks)
-                data["max_workers"] = proc_manager.max_workers
-                self.send_json(data)
-                return
-            except Exception:
-                pass
-
-        if progress:
-            modules = progress.load_modules()
-            decomp_bytes = sum(m.done_size for m in modules)
-            total_bytes = sum(m.code_size for m in modules)
-            decomp_funcs = sum(len(m.functions) - len(m.remaining) for m in modules)
-            total_funcs = sum(len(m.functions) for m in modules)
-            pct_code = (decomp_bytes / total_bytes * 100) if total_bytes else 0.0
-            pct_funcs = (decomp_funcs / total_funcs * 100) if total_funcs else 0.0
-
-            res = {
-                "decompiled_bytes": decomp_bytes,
-                "total_bytes": total_bytes,
-                "code_percentage": round(pct_code, 2),
-                "decompiled_functions": decomp_funcs,
-                "total_functions": total_funcs,
-                "functions_percentage": round(pct_funcs, 2),
-                "is_running": proc_manager.is_running(),
-                "running_command": proc_manager.running_command,
-                "active_workers": len(proc_manager.running_tasks),
-                "max_workers": proc_manager.max_workers,
-            }
-            self.send_json(res)
-        else:
-            self.send_json({"error": "Progress module not loaded"}, 500)
+        data = dict(progress_snapshot())
+        if "error" in data:
+            self.send_json(data, 500)
+            return
+        data.pop("history", None)
+        data.pop("modules", None)
+        data.update({
+            "decompiled_bytes": data["bytes_done"],
+            "total_bytes": data["bytes_total"],
+            "decompiled_functions": data["functions_done"],
+            "total_functions": data["functions_total"],
+            "is_running": proc_manager.is_running(),
+            "running_command": proc_manager.running_command,
+            "active_workers": len(proc_manager.running_tasks),
+            "max_workers": proc_manager.max_workers,
+        })
+        self.send_json(data)
 
     def get_modules(self):
         if not progress:

@@ -44,22 +44,39 @@ The draft names members by their offsets (`arg0->unk4`) and calls functions by t
 Many small functions match with m2c's C as it is, compiled as C (it does arithmetic on `void *`, which C++ doesn't
 allow). `tools/auto_match.py` tries that for the functions left in a module: m2c writes the C in valid syntax
 (`--valid-syntax`, with the types and macros of `include/m2c.h`), each function is compiled alone with the build's flags
-and diffed with objdiff, and `--permute` searches the near matches with `permute.py`. Only the 100 % matches are kept,
-in `build/autopilot/matched/`, and `--integrate` adds each one to the build in its own file, `src/Autopilot/<module>/<address>.c`,
-with `complete_file.py`, keeping it only when `ninja check` passes (otherwise the configuration files are restored).
-The result of each function is recorded in `build/autopilot/results.json`, so that it isn't tried again.
+and diffed with objdiff. Only the 100 % matches are kept, in `build/autopilot/matched/`, and `--integrate` adds each one
+to the build in its own file, `src/Autopilot/<module>/<address>.c`, with `complete_file.py`. The result of each function
+is recorded in `build/autopilot/results.json`, with the strategies tried on it, so that nothing is tried twice:
+
+| Strategy | What it does | What it gave (October 2026) |
+| -------- | ------------ | --------------------------- |
+| `m2c` | m2c's C as it is | 1537 of 11210 functions |
+| `repair` | The C that doesn't compile, repaired: the stack variables (`spNN`) that m2c uses without declaring them, and the calls without prototypes (`T f();`) where m2c's prototype doesn't fit its own calls | 39 of 2092 |
+| `permute` | `permute.py` on the functions from 85 % | |
+| `compilers` | The older compilers of `MWCC_VERSIONS` (2.0/sp2, 2.0/sp1p5, 2.0/sp2p3, 1.2/sp4); a match goes in `MWCC_VERSIONS` | |
+| `variants` | m2c's options (`--no-switches`, `--reg-vars saved`, `--descending-regs`, `--no-andor`, `--void`) and pragmas (`optimization_level 4`, `optimize_for_size off`): slow, about 1 % | |
+
+The matches are added to the build together and checked by one `ninja check`; when it fails, the group is split in
+halves until the functions that break it are found, which are marked as failed integrations and not tried again (the
+static initializers, or the functions of main's startup code, whose delinked neighbours have symbols bigger than
+their sections). The build without the group is checked first, so that a build broken by other changes isn't blamed
+on them. `--repair-build` finds the autopilot's files that break the build and takes them out of it.
 ```shell
-python tools/auto_match.py ov026                   # every function left in the module
-python tools/auto_match.py ov026 --permute 60      # also 60 s of permute.py for each near match
-python tools/auto_match.py --integrate-pending     # adds the matches kept earlier to the build
+python tools/auto_match.py ov026                          # the next strategy for every function left in the module
+python tools/auto_match.py ov026 --strategies repair      # only that strategy
+python tools/auto_match.py --integrate-pending            # adds the matches kept earlier to the build
+python tools/auto_match.py --repair-build                 # takes out the autopilot's files that break the build
 ```
-The GUI's "Modo Automático" (`run_gui.bat`) does it unattended, batch after batch, with a configuration that it keeps:
-the modules, the order and sizes of the functions, how many and until when (a number of functions, hours, or a time
-of day), how long to permute, whether to integrate, record the progress and commit, and whether to keep the computer
-awake, at a low priority, and to start on its own when the GUI opens. It can pause, stop after the functions in
-progress, or stop at once, and writes a log of each session in `build/autopilot/sessions/`. Without the GUI, e.g. from
-the Task Scheduler: `python tools/auto_pilot.py --hours 8` (see its help). The files in `src/Autopilot` are m2c's C,
-with members by offset: they're a start that matches, to give types and move to the right files later.
+The GUI's "Modo Automático" (`run_gui.bat`) does it unattended, batch after batch and strategy after strategy, with a
+configuration that it keeps: the strategies, the modules, the order and sizes of the functions, how many and until when
+(a number of functions, hours, or a time of day), how long to permute, whether to integrate (how many matches per
+check, and whether to repair a build that fails at the start), record the progress and commit, and whether to keep the
+computer awake, at a low priority, and to start on its own when the GUI opens. It can pause, stop after the functions
+in progress, or stop at once, integrate the pending matches, repair the build and commit what isn't committed, and
+writes a log of each session in `build/autopilot/sessions/`. The bar under its header shows the total progress, from
+`config/` (the dashboard has its history). Without the GUI, e.g. from the Task Scheduler:
+`python tools/auto_pilot.py --hours 8` (see its help). The files in `src/Autopilot` are m2c's C, with members by
+offset: they're a start that matches, to give types and move to the right files later.
 
 ## Matching functions locally
 `tools/diff_function.py` compiles a source file with the same flags as the build and diffs its functions against the original game with objdiff, marking every instruction that differs. It's a local alternative to decomp.me scratches that doesn't need GCC. It needs `build.ninja` and the delinked objects, so run `python tools/configure.py eur` and `ninja delink` first.

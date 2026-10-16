@@ -1,0 +1,8 @@
+#include <m2c.h>
+
+void *func_ov017_0218b5b0();
+
+s32 func_ov025_021e861c(void) {
+    M2C_FIELD(func_ov017_0218b5b0(), s8 *, 0x4488) = 0;
+    return 1;
+}

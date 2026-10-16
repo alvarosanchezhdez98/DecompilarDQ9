@@ -192,7 +192,100 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- 3. Dashboard View ---
+  // --- Total progress (header strip and dashboard card) ---
+  const numberFormat = new Intl.NumberFormat("es-ES");
+  const pctFormat = new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function renderProgressHistory(history) {
+    const svg = document.getElementById("po-history");
+    if (!svg || !history || history.length === 0) return;
+    const width = 600, height = 120, pad = 6;
+    const values = history.map((h) => h.functions_done);
+    const total = history[history.length - 1].functions_total || Math.max(...values);
+    const max = Math.max(...values, 1);
+    const top = Math.min(total, Math.ceil(max * 1.1));
+    // By date, so that the days without records keep their place
+    const times = history.map((h) => Date.parse(h.date));
+    const span = times[times.length - 1] - times[0];
+    const x = (i) => (span <= 0 ? width / 2 : pad + ((times[i] - times[0]) * (width - 2 * pad)) / span);
+    const y = (v) => height - pad - (v / top) * (height - 2 * pad);
+    const line = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    const area = `${line} L${x(values.length - 1).toFixed(1)},${height - pad} L${x(0).toFixed(1)},${height - pad} Z`;
+    svg.innerHTML = `
+      <path d="${area}" class="po-history-area"></path>
+      <path d="${line}" class="po-history-line" vector-effect="non-scaling-stroke"></path>
+      ${values.map((v, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.5" class="po-history-dot"><title>${history[i].date}: ${numberFormat.format(v)} funciones</title></circle>`).join("")}`;
+    document.getElementById("po-history-start").textContent = history[0].date;
+    document.getElementById("po-history-end").textContent = `${history[history.length - 1].date} · ${numberFormat.format(values[values.length - 1])}`;
+  }
+
+  async function loadProgress() {
+    let data;
+    try {
+      const res = await fetch("/api/progress");
+      data = await res.json();
+    } catch (err) {
+      return;
+    }
+    if (data.error) return;
+    const fPct = data.functions_percentage, cPct = data.code_percentage;
+
+    // Header strip
+    const fill = document.getElementById("global-progress-fill");
+    if (fill) fill.style.width = `${fPct}%`;
+    const value = document.getElementById("global-progress-value");
+    if (value) value.textContent = `${pctFormat.format(fPct)} %`;
+    const detail = document.getElementById("global-progress-detail");
+    if (detail) {
+      detail.textContent = `${numberFormat.format(data.functions_done)} / ${numberFormat.format(data.functions_total)} funciones · ` +
+        `código ${pctFormat.format(cPct)} % · ${data.modules_complete}/${data.modules_total} módulos completos`;
+    }
+
+    // Dashboard card
+    const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    const width = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = `${pct}%`; };
+    set("po-functions-pct", `${pctFormat.format(fPct)} %`);
+    set("po-functions-count", `${numberFormat.format(data.functions_done)} / ${numberFormat.format(data.functions_total)} funciones decompiladas`);
+    width("po-functions-bar", fPct);
+    set("po-functions-bar-text", `${pctFormat.format(fPct)} %`);
+    width("po-code-bar", cPct);
+    set("po-code-bar-text", `${pctFormat.format(cPct)} %`);
+    const mPct = data.modules_total ? (data.modules_complete / data.modules_total) * 100 : 0;
+    width("po-modules-bar", mPct);
+    set("po-modules-bar-text", `${data.modules_complete} / ${data.modules_total}`);
+
+    const history = data.history || [];
+    const facts = [];
+    const last = history[history.length - 1];
+    const previous = history.length > 1 ? history[history.length - 2] : null;
+    if (last && previous) {
+      facts.push(`<span><strong>+${numberFormat.format(last.functions_done - previous.functions_done)}</strong> desde el ${previous.date}</span>`);
+    }
+    const weekAgo = history.find((h) => (Date.parse(last?.date) - Date.parse(h.date)) <= 7 * 864e5);
+    if (last && weekAgo && weekAgo !== last) {
+      facts.push(`<span><strong>+${numberFormat.format(last.functions_done - weekAgo.functions_done)}</strong> en 7 días</span>`);
+    }
+    facts.push(`<span><strong>${numberFormat.format(data.functions_total - data.functions_done)}</strong> funciones por hacer</span>`);
+    facts.push(`<span><strong>${numberFormat.format(data.autopilot_files)}</strong> del modo automático</span>`);
+    facts.push(`<span><strong>${numberFormat.format(data.functions_nonmatching)}</strong> en ensamblador (NONMATCHING)</span>`);
+    const factsBox = document.getElementById("po-facts");
+    if (factsBox) factsBox.innerHTML = facts.join("");
+    renderProgressHistory(history);
+
+    // The KPI cards below
+    set("kpi-nonmatching-count", numberFormat.format(data.functions_nonmatching));
+    set("kpi-code-pct", `${cPct.toFixed(2)} %`);
+    width("kpi-code-bar", cPct);
+    set("kpi-code-bytes", `${data.bytes_done.toLocaleString()} / ${data.bytes_total.toLocaleString()} bytes`);
+    set("kpi-funcs-pct", `${fPct.toFixed(2)} %`);
+    width("kpi-funcs-bar", fPct);
+    set("kpi-funcs-count", `${data.functions_done.toLocaleString()} / ${data.functions_total.toLocaleString()} funciones`);
+  }
+
+  document.getElementById("global-progress")?.addEventListener("click", () => switchTab("dashboard"));
+
   async function loadDashboardData() {
+    loadProgress();
     try {
       const [resStatus, resModules] = await Promise.all([
         fetch("/api/status"),
@@ -877,9 +970,13 @@ document.addEventListener("DOMContentLoaded", () => {
     m2c_failed: "m2c falló",
     error: "Error",
   };
-  const AP_BOOL_FIELDS = ["retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority", "auto_start"];
+  const AP_BOOL_FIELDS = ["retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority",
+    "auto_start", "repair_build"];
   const AP_NUMBER_FIELDS = ["min_size", "max_size", "batch_size", "max_functions", "max_hours", "batch_pause_seconds",
-    "max_consecutive_errors", "jobs", "permute_seconds", "permute_threshold"];
+    "max_consecutive_errors", "jobs", "permute_seconds", "permute_threshold", "permute_from", "integration_group"];
+  const AP_STRATEGY_LABELS = {
+    m2c: "C de m2c", repair: "Reparar", permute: "permute.py", compilers: "Compiladores", variants: "Variantes",
+  };
 
   const apEl = (id) => document.getElementById(id);
   const apForm = () => apEl("ap-config-form");
@@ -916,6 +1013,8 @@ document.addEventListener("DOMContentLoaded", () => {
     form.stop_at.value = config.stop_at || "";
     AP_NUMBER_FIELDS.forEach((name) => { form[name].value = config[name]; });
     AP_BOOL_FIELDS.forEach((name) => { form[name].checked = !!config[name]; });
+    const enabled = new Set(config.strategies || []);
+    form.querySelectorAll('input[name="strategies"]').forEach((box) => { box.checked = enabled.has(box.value); });
     updateModulesFieldState();
     apConfigDirty = false;
   }
@@ -931,6 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     AP_NUMBER_FIELDS.forEach((name) => { config[name] = form[name].value === "" ? null : Number(form[name].value); });
     AP_BOOL_FIELDS.forEach((name) => { config[name] = form[name].checked; });
+    config.strategies = Array.from(form.querySelectorAll('input[name="strategies"]:checked')).map((box) => box.value);
     return config;
   }
 
@@ -1018,6 +1118,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    const uncommitted = data.uncommitted || 0;
+    const uncommittedBanner = apEl("ap-uncommitted-banner");
+    if (uncommittedBanner) {
+      uncommittedBanner.style.display = uncommitted > 0 && !data.config?.auto_commit ? "block" : "none";
+      uncommittedBanner.textContent = `💾 ${uncommitted} funciones integradas sin commitear. ` +
+        `Pulsa “Commit ahora” para guardarlas en git, o activa “Hacer git commit tras cada lote”.`;
+    }
+    const countBadge = apEl("ap-uncommitted-count");
+    if (countBadge) countBadge.textContent = uncommitted ? `(${uncommitted})` : "";
+
     apEl("ap-metric-time").textContent = formatDuration(st.elapsed_seconds);
     apEl("ap-metric-time-sub").textContent = data.is_running && st.remaining_seconds != null
       ? `Quedan ${formatDuration(st.remaining_seconds)}`
@@ -1068,6 +1178,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (statusBadge) { statusBadge.className = badgeClass; statusBadge.textContent = badgeText; }
       if (metricPhase) metricPhase.textContent = data.paused ? "En pausa" : `Lote #${batch} • ${stageText}`;
+      if (metricPhase && st.strategy && !data.paused) metricPhase.title = `Estrategia: ${st.strategy}`;
       if (metricTarget) {
         metricTarget.textContent = data.current_module
           ? `${data.current_module}::${data.current_function?.name || ""}`
@@ -1080,6 +1191,8 @@ document.addEventListener("DOMContentLoaded", () => {
       btnPause.style.display = data.stop_requested ? "none" : "inline-flex";
       btnPause.innerHTML = data.paused ? `<span class="btn-icon">▶️</span> Reanudar` : `<span class="btn-icon">⏸️</span> Pausar`;
       btnIntegrate.disabled = true;
+      apEl("btn-ap-repair").disabled = true;
+      apEl("btn-ap-commit").disabled = true;
     } else {
       if (btnToggle) {
         btnToggle.className = "btn btn-autopilot";
@@ -1097,11 +1210,21 @@ document.addEventListener("DOMContentLoaded", () => {
       btnPause.style.display = "none";
       btnKill.style.display = "none";
       btnIntegrate.disabled = !!data.busy_integrating;
+      apEl("btn-ap-repair").disabled = !!data.busy_integrating;
+      apEl("btn-ap-commit").disabled = !!data.busy_integrating || uncommitted === 0;
+      if (data.busy_integrating && statusBadge) {
+        statusBadge.className = "badge badge-info";
+        statusBadge.textContent = { "integración": "Integrando...", reparar: "Reparando build...", commit: "Haciendo commit..." }[data.busy_action] || "Trabajando...";
+      }
     }
 
     const hasLog = (data.log_preview || []).length > 0;
     if (liveLogBox) liveLogBox.style.display = hasLog ? "flex" : "none";
-    if (logPhaseMsg) logPhaseMsg.textContent = data.is_running ? (data.phase_message || "Modo automático activo") : "Última sesión";
+    if (logPhaseMsg) {
+      logPhaseMsg.textContent = data.is_running
+        ? `${data.phase_message || "Modo automático activo"}${st.strategy ? ` · ${st.strategy}` : ""}`
+        : (data.busy_integrating ? "Acción en curso" : "Última sesión");
+    }
     if (logPreview && hasLog) {
       const atBottom = logPreview.scrollTop + logPreview.clientHeight >= logPreview.scrollHeight - 20;
       logPreview.textContent = data.log_preview.join("");
@@ -1138,6 +1261,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `<span class="badge badge-success">${summary.integrated} integradas</span>`]
         .concat(Object.keys(AP_STATUS_LABELS).filter((k) => total[k])
           .map((k) => `<span class="badge ap-status-${k}">${AP_STATUS_LABELS[k]}: ${total[k]}</span>`)).join(" ");
+      const byStrategy = summary.by_strategy || {};
+      const strategyChips = apEl("ap-strategy-chips");
+      if (strategyChips) {
+        strategyChips.innerHTML = Object.entries(byStrategy).filter(([, c]) => c.tried)
+          .map(([name, c]) => `<span class="badge badge-neutral" title="Funciones en las que se probó · matches que dio">${AP_STRATEGY_LABELS[name] || name}: ${numberFormat.format(c.tried)} probadas · ${numberFormat.format(c.matched)} al 100%</span>`)
+          .join(" ") + (summary.integration_failed ? ` <span class="badge ap-status-error">${summary.integration_failed} integraciones fallidas</span>` : "");
+      }
       apEl("ap-results-inline").textContent =
         `· ${total.matched || 0} al 100% · ${summary.integrated} integradas · ${summary.tried} intentadas`;
       const body = apEl("ap-results-body");
@@ -1148,9 +1278,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${escapeHtml(e.module)}</td>
             <td class="mono" title="${escapeHtml(e.function)}">${escapeHtml(e.function)}</td>
             <td class="mono">${e.size}</td>
-            <td><span class="badge ap-status-${escapeHtml(e.status)}">${AP_STATUS_LABELS[e.status] || escapeHtml(e.status)}${e.integrated ? " ✓ build" : ""}${e.permuted ? " · permute" : ""}</span></td>
+            <td><span class="badge ap-status-${e.integration_failed ? "error" : escapeHtml(e.status)}" title="${escapeHtml((e.strategies || []).join(" → "))}">${AP_STATUS_LABELS[e.status] || escapeHtml(e.status)}${e.integrated ? " ✓ build" : ""}${e.integration_failed ? " ✗ build" : ""}${e.strategy && e.status === "matched" ? ` · ${escapeHtml(e.strategy)}` : ""}</span></td>
             <td class="mono">${Number(e.percent || 0).toFixed(1)}</td>
-            <td class="ap-note" title="${escapeHtml(e.note)}">${escapeHtml((e.note || "").split("\n")[0])}</td>
+            <td class="ap-note" title="${escapeHtml(e.integration_error || e.note)}">${escapeHtml(((e.integration_failed ? e.integration_error : e.note) || "").split("\n")[0])}</td>
             <td class="mono">${escapeHtml(e.timestamp)}</td>
           </tr>`).join("");
     } catch (err) {
@@ -1165,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Los matches no se reintentan: ya coinciden al 100%.");
       return;
     }
-    const what = `${status ? AP_STATUS_LABELS[status] : "todas las que no coincidieron"}${module ? ` de ${module}` : ""}`;
+    const what = `${status === "integration_failed" ? "las integraciones fallidas" : (status ? AP_STATUS_LABELS[status] : "todas las que no coincidieron")}${module ? ` de ${module}` : ""}`;
     if (!confirm(`¿Olvidar los resultados (${what}) para que el modo automático las intente otra vez?`)) return;
     const res = await fetch("/api/autopilot/results/reset", {
       method: "POST",
@@ -1210,6 +1340,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (!apConfigLoaded) await loadAutoPilotConfig();
       const config = readConfigForm();
+      if (config.strategies.length === 0) {
+        alert("Activa al menos una estrategia.");
+        return;
+      }
       if (config.scope === "modules" && config.modules.length === 0) {
         alert("Elige al menos un módulo, o cambia el ámbito a “Todos los módulos”.");
         return;
@@ -1283,6 +1417,16 @@ document.addEventListener("DOMContentLoaded", () => {
   apEl("btn-ap-pause")?.addEventListener("click", () =>
     postAutoPilot(apState.paused ? "/api/autopilot/resume" : "/api/autopilot/pause"));
   apEl("btn-ap-integrate")?.addEventListener("click", () => postAutoPilot("/api/autopilot/integrate"));
+  apEl("btn-ap-repair")?.addEventListener("click", () => {
+    if (confirm("¿Comprobar el build y retirar los archivos del modo automático que lo rompan? Puede tardar varios minutos.")) {
+      postAutoPilot("/api/autopilot/repair");
+    }
+  });
+  apEl("btn-ap-commit")?.addEventListener("click", () => {
+    if (confirm("¿Hacer git commit de las funciones integradas por el modo automático que aún no están commiteadas?")) {
+      postAutoPilot("/api/autopilot/commit");
+    }
+  });
   apEl("btn-ap-ensure-tools")?.addEventListener("click", ensureDoctorTools);
   apEl("btn-ap-save-config")?.addEventListener("click", () =>
     saveAutoPilotConfig().catch((err) => setConfigStatus(`Error al guardar: ${err.message}`, true)));
@@ -1319,4 +1463,5 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshAutoPilotStatus();
   setInterval(refreshTaskQueue, 2500);
   setInterval(refreshAutoPilotStatus, 2000);
+  setInterval(loadProgress, 15000);
 });

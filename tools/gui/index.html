@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body class="dark-theme">
   <div class="app-container">
@@ -47,6 +47,16 @@
       </div>
     </header>
 
+    <!-- Total progress, always visible -->
+    <div class="global-progress" id="global-progress" title="Progreso total del decompilado (pulsa para ver el detalle)">
+      <span class="global-progress-label">Progreso total</span>
+      <div class="global-progress-bar">
+        <div class="global-progress-fill" id="global-progress-fill" style="width: 0%"></div>
+      </div>
+      <span class="global-progress-value" id="global-progress-value">-- %</span>
+      <span class="global-progress-detail" id="global-progress-detail">Calculando...</span>
+    </div>
+
     <!-- Navigation Bar -->
     <nav class="app-navbar" aria-label="Navegación principal">
       <div class="nav-tabs">
@@ -72,6 +82,39 @@
     <main class="app-main">
       <!-- 1. DASHBOARD VIEW -->
       <section id="panel-dashboard" class="tab-panel active">
+        <div class="content-card progress-overview-card" id="progress-overview">
+          <div class="progress-overview-main">
+            <div class="progress-overview-figure">
+              <span class="progress-overview-label">Progreso total del decompilado</span>
+              <span class="progress-overview-pct" id="po-functions-pct">-- %</span>
+              <span class="progress-overview-sub" id="po-functions-count">0 / 0 funciones decompiladas</span>
+            </div>
+            <div class="progress-overview-bars">
+              <div class="po-bar-row">
+                <span>Funciones</span>
+                <div class="progress-bar-container"><div class="progress-bar-fill funcs-fill" id="po-functions-bar" style="width: 0%"></div></div>
+                <span class="mono" id="po-functions-bar-text">--</span>
+              </div>
+              <div class="po-bar-row">
+                <span>Código (bytes)</span>
+                <div class="progress-bar-container"><div class="progress-bar-fill bytes-fill" id="po-code-bar" style="width: 0%"></div></div>
+                <span class="mono" id="po-code-bar-text">--</span>
+              </div>
+              <div class="po-bar-row">
+                <span>Módulos al 100%</span>
+                <div class="progress-bar-container"><div class="progress-bar-fill modules-fill" id="po-modules-bar" style="width: 0%"></div></div>
+                <span class="mono" id="po-modules-bar-text">--</span>
+              </div>
+            </div>
+            <div class="progress-overview-facts" id="po-facts"></div>
+          </div>
+          <div class="progress-overview-history">
+            <span class="progress-overview-label">Funciones decompiladas por día</span>
+            <svg id="po-history" class="po-history" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="Evolución de las funciones decompiladas"></svg>
+            <div class="po-history-axis"><span id="po-history-start"></span><span id="po-history-end"></span></div>
+          </div>
+        </div>
+
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-header">
@@ -102,7 +145,7 @@
               <span class="kpi-title">Módulos Completados</span>
               <span class="kpi-icon">🏆</span>
             </div>
-            <div class="kpi-value" id="kpi-modules-completed">-- / 32</div>
+            <div class="kpi-value" id="kpi-modules-completed">--</div>
             <div class="kpi-subtext">Overlays 100% byte-matched</div>
             <div class="pill-group" id="kpi-completed-pills"></div>
           </div>
@@ -112,7 +155,7 @@
               <span class="kpi-title">Funciones en Ensamblador</span>
               <span class="kpi-icon">⏳</span>
             </div>
-            <div class="kpi-value" id="kpi-nonmatching-count">170</div>
+            <div class="kpi-value" id="kpi-nonmatching-count">--</div>
             <div class="kpi-subtext">Bloques NONMATCHING temporales</div>
             <span class="badge badge-warning">Listas para matching</span>
           </div>
@@ -138,6 +181,7 @@
 
           <div class="autopilot-body">
             <div class="ap-banner ap-banner-warning" id="ap-integration-banner" style="display: none;"></div>
+            <div class="ap-banner ap-banner-info" id="ap-uncommitted-banner" style="display: none;"></div>
 
             <div class="ap-metrics-grid">
               <div class="ap-metric-box">
@@ -183,8 +227,14 @@
                 </button>
               </div>
               <div class="ap-action-buttons">
-                <button id="btn-ap-integrate" class="btn btn-outline" title="Añade al build los matches guardados que aún no están integrados (verificados con ninja check)">
+                <button id="btn-ap-integrate" class="btn btn-outline" title="Añade al build los matches guardados que aún no están integrados (verificados con ninja check, por grupos)">
                   <span class="btn-icon">🧩</span> Integrar pendientes
+                </button>
+                <button id="btn-ap-repair" class="btn btn-outline" title="Si el build falla, busca qué archivos del modo automático lo rompen y los retira">
+                  <span class="btn-icon">🩹</span> Reparar build
+                </button>
+                <button id="btn-ap-commit" class="btn btn-outline" title="Hace git commit de las funciones integradas que aún no están commiteadas">
+                  <span class="btn-icon">💾</span> Commit ahora <span id="ap-uncommitted-count"></span>
                 </button>
               </div>
             </div>
@@ -221,7 +271,7 @@
                       <input name="max_size" type="number" min="0" class="input-text">
                     </label>
                   </div>
-                  <label class="ap-check"><input name="retry_failed" type="checkbox"> Reintentar las que fallaron en sesiones anteriores</label>
+                  <label class="ap-check"><input name="retry_failed" type="checkbox"> Volver a empezar las que agotaron todas las estrategias</label>
                 </fieldset>
 
                 <fieldset class="ap-fieldset">
@@ -253,19 +303,39 @@
                 </fieldset>
 
                 <fieldset class="ap-fieldset">
-                  <legend>Cómo</legend>
+                  <legend>Estrategias (en este orden)</legend>
+                  <div class="ap-strategies" id="ap-strategies">
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="m2c"> 1. C de m2c tal cual <small>(la que más matches da)</small></label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="repair"> 2. Reparar el C que no compila <small>(rápida)</small></label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="permute"> 3. permute.py en los casi-matches</label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="compilers"> 4. Otras versiones del compilador</label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="variants"> 5. Variantes de m2c y pragmas <small>(lenta)</small></label>
+                  </div>
+                  <div class="ap-row">
+                    <label>permute.py por función (s, 0 = no)
+                      <input name="permute_seconds" type="number" min="0" max="3600" class="input-text">
+                    </label>
+                    <label>permute.py desde (%)
+                      <input name="permute_from" type="number" min="0" max="99.9" step="0.5" class="input-text">
+                    </label>
+                  </div>
                   <div class="ap-row">
                     <label>Funciones a la vez (0 = auto)
                       <input name="jobs" type="number" min="0" max="64" class="input-text">
                     </label>
-                    <label>permute.py por casi-match (s, 0 = no)
-                      <input name="permute_seconds" type="number" min="0" max="3600" class="input-text">
+                    <label>Casi-match desde (%)
+                      <input name="permute_threshold" type="number" min="0" max="99.9" step="0.5" class="input-text">
                     </label>
                   </div>
-                  <label>Casi-match desde (%)
-                    <input name="permute_threshold" type="number" min="0" max="99.9" step="0.5" class="input-text">
-                  </label>
+                </fieldset>
+
+                <fieldset class="ap-fieldset">
+                  <legend>Build y git</legend>
                   <label class="ap-check"><input name="integrate" type="checkbox"> Integrar los matches en el build (verificado con ninja check)</label>
+                  <label>Matches por ninja check (se divide si falla)
+                    <input name="integration_group" type="number" min="1" max="500" class="input-text">
+                  </label>
+                  <label class="ap-check"><input name="repair_build" type="checkbox"> Si el build está roto al empezar, retirar los archivos que lo rompen</label>
                   <label class="ap-check"><input name="record_progress" type="checkbox"> Registrar el progreso (progress.py --record)</label>
                   <label class="ap-check"><input name="auto_commit" type="checkbox"> Hacer git commit tras cada lote con integraciones</label>
                 </fieldset>
@@ -296,6 +366,7 @@
                   <option value="compile_error">No compilan</option>
                   <option value="m2c_failed">m2c falló</option>
                   <option value="error">Errores de herramienta</option>
+                  <option value="integration_failed">Integración fallida</option>
                 </select>
                 <select id="ap-results-module" class="form-select small-select">
                   <option value="">Todos los módulos</option>
@@ -304,6 +375,7 @@
                 <button id="btn-ap-reset-failed" class="btn btn-sm btn-outline" title="Olvida los resultados de este filtro (excepto los matches) para que se intenten otra vez">↺ Reintentar las del filtro</button>
               </div>
               <div class="ap-results-chips" id="ap-results-chips"></div>
+              <div class="ap-results-chips" id="ap-strategy-chips"></div>
               <div class="ap-table-wrap">
                 <table class="ap-results-table">
                   <thead>
@@ -714,6 +786,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
