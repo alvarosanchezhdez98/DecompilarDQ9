@@ -77,7 +77,8 @@ class DecompStore:
         with self.lock:
             return self.data["notes"].get(key, {"notes": "", "tags": [], "updated_at": None})
 
-    def save_note(self, module: str, func_name: str, notes: str, tags: list[str] | None = None) -> dict:
+    def save_note(self, module: str, func_name: str, notes: str, tags: list[str] | None = None,
+                  save: bool = True) -> dict:
         key = f"{module}:{func_name}"
         now = datetime.now(timezone.utc).isoformat()
         with self.lock:
@@ -89,7 +90,8 @@ class DecompStore:
                 "updated_at": now,
             }
             self.data["notes"][key] = entry
-        self.save()
+        if save: # The autopilot saves once per batch, since each save writes the whole file
+            self.save()
         return entry
 
     # History Methods
