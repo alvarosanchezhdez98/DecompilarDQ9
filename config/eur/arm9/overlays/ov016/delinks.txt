@@ -180,6 +180,10 @@ src/Autopilot/ov016/0218f540.c:
     complete
     .text start:0x0218f540 end:0x0218f58c
 
+src/Autopilot/ov016/0218f58c.c:
+    complete
+    .text start:0x0218f58c end:0x0218f5fc
+
 src/Autopilot/ov016/0218f5fc.c:
     complete
     .text start:0x0218f5fc end:0x0218f678

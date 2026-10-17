@@ -548,6 +548,7 @@ MWCC_VERSIONS = { # Files compiled with another version than MWCC_VERSION
     "src/Autopilot/main/0201134c.c": "2.0/sp2", # Autopilot
     "src/Autopilot/main/0201bb88.c": "2.0/sp2", # Autopilot
     "src/Autopilot/main/0201ba78.c": "2.0/sp2", # Autopilot
+    "src/Autopilot/ov031/0220a444.c": "2.0/sp2", # Autopilot
 }
 DECOMP_ME_COMPILER = "mwcc_30_137"
 CC_FLAGS = " ".join([

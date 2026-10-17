@@ -1,0 +1,13 @@
+#include <m2c.h>
+#pragma optimization_level 4
+
+void *func_02012fe4();
+s32 func_ov017_021d60f4(M2C_UNK);
+
+s32 func_ov001_02161f3c(M2C_UNK arg0) {
+    void *temp_r4;
+
+    temp_r4 = func_02012fe4();
+    M2C_FIELD(temp_r4, s32 *, 0x2750) = func_ov017_021d60f4(arg0);
+    return 1;
+}

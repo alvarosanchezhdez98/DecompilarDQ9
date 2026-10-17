@@ -17,6 +17,10 @@ src/Autopilot/ov031/02200290.c:
     complete
     .text start:0x02200290 end:0x02200298
 
+src/Autopilot/ov031/022004d4.c:
+    complete
+    .text start:0x022004d4 end:0x02200524
+
 src/Autopilot/ov031/02200524.c:
     complete
     .text start:0x02200524 end:0x02200534
@@ -45,6 +49,10 @@ src/Autopilot/ov031/02200790.c:
     complete
     .text start:0x02200790 end:0x022007a4
 
+src/Autopilot/ov031/02200850.c:
+    complete
+    .text start:0x02200850 end:0x022008ac
+
 src/Autopilot/ov031/02201b94.c:
     complete
     .text start:0x02201b94 end:0x02201bb4
@@ -72,6 +80,10 @@ src/Autopilot/ov031/02203164.c:
 src/Autopilot/ov031/02203178.c:
     complete
     .text start:0x02203178 end:0x02203190
+
+src/Autopilot/ov031/02203190.c:
+    complete
+    .text start:0x02203190 end:0x022031bc
 
 src/Autopilot/ov031/022031bc.c:
     complete
@@ -105,6 +117,10 @@ src/Autopilot/ov031/0220376c.c:
     complete
     .text start:0x0220376c end:0x022037a8
 
+src/Autopilot/ov031/02203a84.c:
+    complete
+    .text start:0x02203a84 end:0x02203b1c
+
 src/Autopilot/ov031/02203b8c.c:
     complete
     .text start:0x02203b8c end:0x02203bcc
@@ -125,6 +141,10 @@ src/Autopilot/ov031/02204df8.c:
     complete
     .text start:0x02204df8 end:0x02204e38
 
+src/Autopilot/ov031/02204f94.c:
+    complete
+    .text start:0x02204f94 end:0x02205000
+
 src/Autopilot/ov031/02205000.c:
     complete
     .text start:0x02205000 end:0x02205018
@@ -136,6 +156,10 @@ src/Autopilot/ov031/02205018.c:
 src/Autopilot/ov031/0220510c.c:
     complete
     .text start:0x0220510c end:0x02205134
+
+src/Autopilot/ov031/02205134.c:
+    complete
+    .text start:0x02205134 end:0x02205174
 
 src/Autopilot/ov031/02205174.c:
     complete
@@ -161,13 +185,41 @@ src/Autopilot/ov031/0220529c.c:
     complete
     .text start:0x0220529c end:0x022052b4
 
+src/Autopilot/ov031/02205364.c:
+    complete
+    .text start:0x02205364 end:0x022053a0
+
 src/Autopilot/ov031/02205620.c:
     complete
     .text start:0x02205620 end:0x02205648
 
+src/Autopilot/ov031/02205648.c:
+    complete
+    .text start:0x02205648 end:0x022056bc
+
 src/Autopilot/ov031/02205eac.c:
     complete
     .text start:0x02205eac end:0x02205ebc
+
+src/Autopilot/ov031/02206758.c:
+    complete
+    .text start:0x02206758 end:0x022067f0
+
+src/Autopilot/ov031/0220689c.c:
+    complete
+    .text start:0x0220689c end:0x022068cc
+
+src/Autopilot/ov031/022068cc.c:
+    complete
+    .text start:0x022068cc end:0x02206900
+
+src/Autopilot/ov031/02206c08.c:
+    complete
+    .text start:0x02206c08 end:0x02206c44
+
+src/Autopilot/ov031/02206f08.c:
+    complete
+    .text start:0x02206f08 end:0x02206f3c
 
 src/Autopilot/ov031/022070bc.c:
     complete
@@ -217,6 +269,10 @@ src/Autopilot/ov031/02207434.c:
     complete
     .text start:0x02207434 end:0x02207440
 
+src/Autopilot/ov031/02207500.c:
+    complete
+    .text start:0x02207500 end:0x02207538
+
 src/Autopilot/ov031/02207620.c:
     complete
     .text start:0x02207620 end:0x0220764c
@@ -245,6 +301,10 @@ src/Autopilot/ov031/02208aa0.c:
     complete
     .text start:0x02208aa0 end:0x02208ab0
 
+src/Autopilot/ov031/0220911c.c:
+    complete
+    .text start:0x0220911c end:0x02209158
+
 src/Autopilot/ov031/022093d0.c:
     complete
     .text start:0x022093d0 end:0x022093f4
@@ -252,6 +312,10 @@ src/Autopilot/ov031/022093d0.c:
 src/Autopilot/ov031/022098ac.c:
     complete
     .text start:0x022098ac end:0x022098d8
+
+src/Autopilot/ov031/0220a444.c:
+    complete
+    .text start:0x0220a444 end:0x0220a474
 
 src/Autopilot/ov031/0220ab78.c:
     complete
