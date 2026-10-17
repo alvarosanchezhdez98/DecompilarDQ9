@@ -93,6 +93,10 @@ src/Autopilot/ov025/021e24d0.c:
     complete
     .text start:0x021e24d0 end:0x021e25a4
 
+src/Autopilot/ov025/021e2628.c:
+    complete
+    .text start:0x021e2628 end:0x021e267c
+
 src/Autopilot/ov025/021e2f4c.c:
     complete
     .text start:0x021e2f4c end:0x021e2f54
