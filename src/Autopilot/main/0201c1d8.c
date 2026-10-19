@@ -1,0 +1,11 @@
+#include <m2c.h>
+
+s32 _ZNK6Script9Parameter5ToIntEv();
+M2C_UNK func_0201c444(s32, s32);
+extern M2C_UNK data_020fdc14;
+
+s32 func_0201c1c8(void) {
+    func_0201c444(M2C_FIELD(&data_020fdc14, s32 *, 8), _ZNK6Script9Parameter5ToIntEv());
+    M2C_FIELD(&data_020fdc14, s32 *, 0) = 0;
+    return 1;
+}
