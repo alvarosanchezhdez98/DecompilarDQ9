@@ -1,0 +1,20 @@
+#include <m2c.h>
+
+M2C_UNK func_ov031_022274c0(M2C_UNK *);
+M2C_UNK func_ov031_02234570();
+M2C_UNK ov13_022277B8(M2C_UNK, M2C_UNK, M2C_UNK);
+M2C_UNK ov13_02227964(M2C_UNK);
+M2C_UNK ov13_022279EC(M2C_UNK);
+M2C_UNK ov13_02227DE4(M2C_UNK);
+extern s8 data_ov031_02290ce0;
+extern M2C_UNK func_ov031_02234618;
+
+void ov13_022388A0(void) {
+    data_ov031_02290ce0 = 0;
+    func_ov031_02234570();
+    ov13_02227DE4(8);
+    ov13_022277B8(0x38, -1, 0);
+    ov13_02227964(1);
+    ov13_022279EC(0x27);
+    func_ov031_022274c0(&func_ov031_02234618);
+}
