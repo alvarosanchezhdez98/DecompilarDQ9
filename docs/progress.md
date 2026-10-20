@@ -230,15 +230,15 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-10-19.
+Last recorded on 2026-10-20.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 688,428 | 2,959,024 | 23.27 % |
-| Functions | 7,307 | 14,779 | 49.44 % |
+| Code (bytes) | 708,592 | 2,959,024 | 23.95 % |
+| Functions | 7,540 | 14,779 | 51.02 % |
 | Modules | 4 complete, 28 in progress, 0 not started | 32 with code |  |
 
-Source files: 4156 complete, 1 in progress.
+Source files: 4389 complete, 1 in progress.
 
 Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -261,13 +261,14 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | 2026-10-16 | 4,962 (33.57 %) | 567,412 (19.18 %) | 1811 |
 | 2026-10-17 | 6,315 (42.73 %) | 633,056 (21.39 %) | 3164 |
 | 2026-10-18 | 7,036 (47.61 %) | 672,232 (22.72 %) | 3885 |
-| 2026-10-19 | 7,307 (49.44 %) | 688,428 (23.27 %) | 4156 |
+| 2026-10-19 | 7,537 (51.00 %) | 707,984 (23.93 %) | 4386 |
+| 2026-10-20 | 7,540 (51.02 %) | 708,592 (23.95 %) | 4389 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 3043 | 3164 | 26.93 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 3188 | 3019 | 27.68 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 38 | 0 | 94.02 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 298 | 528 | 8.84 % | In progress |
@@ -287,7 +288,7 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
 | ov015 | Fully decompiled (`src/Scene/Overlay_15`): the character viewer (`CharacterViewer`), a debug mode of `main()` with its own main loop. Its menus come from a script, `charaview4.bin`: it loads players, the party's models ("dolls"), NPCs, monsters, effects and event or skill cameras, changes the characters' look (gender, face, colours, hairstyle, build, equipment), plays and steps their motions, moves them, and shows the FPS, the triangles and quads drawn and the memory of the allocators. 17 of the 103 functions in assembly for now | 33.8 | 103 | 86 | 17 | 49.97 % | In progress |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 53 | 32 | 10.06 % | In progress |
-| ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 406 | 788 | 5.11 % | In progress |
+| ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 431 | 763 | 6.68 % | In progress |
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov019 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | 3.2 | 5 | 4 | 1 | 8.70 % | In progress |
 | ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
@@ -301,7 +302,7 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | ov028 | The staff roll (`src/Scene/Overlay_28`): `StaffRoll` loads the lines of `staffroll.bin` with a script and scrolls them on the sub screen. Overlay 1 runs one itself, and the overlay has one that a V-count alarm runs (`StartStaffRoll()`). Decompiled, in two files | 4.0 | 34 | 34 | 0 | 100.00 % | Complete |
 | ov029 | *Likely* encrypted code: dsd only finds data, but `main()` calls three addresses in it at startup, as checks that decide whether to load overlay 33 or 34 | 0.0 | 0 | 0 | 0 | - | No code |
 | ov030 | Creates, initializes and destroys `GameResources` and its data (`src/Resource/Overlay_30`): `main()` loads it before and after running overlay 17. Decompiled, with `CreateGameResources` and `GameResources::Initialize` in assembly for now. Needs `FORCE_ACTIVE` to be linked | 4.5 | 11 | 9 | 2 | 5.18 % | In progress |
-| ov031 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | 279.6 | 1962 | 823 | 1139 | 13.50 % | In progress |
+| ov031 | Wireless: Nintendo Wi-Fi Connection and DS Download Play | 279.6 | 1962 | 886 | 1076 | 16.37 % | In progress |
 | ov032 | 648 KB of `.bss` only, a buffer in overlay 31's place | 0.0 | 0 | 0 | 0 | - | No code |
 | ov033 | Background loader (`src/Filesystem/Overlay_33`), fully decompiled | 2.1 | 5 | 5 | 0 | 100.00 % | Complete |
 | ov034 | Overlay 33's background loader with a random memory leak, *likely* anti-piracy (`src/Filesystem/Overlay_34`), fully decompiled. Needs `FORCE_ACTIVE` to be linked | 2.2 | 5 | 5 | 0 | 100.00 % | Complete |
@@ -313,12 +314,12 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | Secure area and startup | `0x02000000-0x02000c9c` | 3.2 | 26 | 0 | 26 | 0.00 % |
 | Level-5 code: main | `0x02000c9c-0x02001578` | 2.2 | 1 | 0 | 1 | 0.00 % |
 | C and C++ runtime (MSL, floating point) | `0x02001578-0x0200f398` | 55.5 | 173 | 9 | 164 | 0.29 % |
-| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 1679 | 2519 | 15.85 % |
-| NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 11 | 55 | 2.14 % |
+| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 1809 | 2389 | 16.84 % |
+| NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 13 | 53 | 2.84 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 194 | 19 | 95.32 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 902 | 108 | 81.95 % |
-| Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 78 | 232 | 4.50 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 905 | 105 | 82.05 % |
+| Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 88 | 222 | 5.50 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
 ## Functions in assembly
@@ -504,7 +505,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 936 | 1940 | 258 | 30 | 674.0 |
+| main | 808 | 1923 | 258 | 30 | 667.0 |
 | ov000 | 91 | 342 | 86 | 9 | 172.5 |
 | ov001 | 56 | 189 | 21 | 1 | 56.4 |
 | ov002 | 11 | 104 | 56 | 5 | 96.3 |
@@ -520,7 +521,7 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov014 | 0 | 0 | 0 | 1 | 3.0 |
 | ov015 | 0 | 5 | 10 | 2 | 16.9 |
 | ov016 | 5 | 19 | 5 | 3 | 18.9 |
-| ov017 | 95 | 545 | 132 | 16 | 285.1 |
+| ov017 | 95 | 520 | 132 | 16 | 280.3 |
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
 | ov020 | 0 | 0 | 0 | 1 | 4.2 |
 | ov021 | 0 | 0 | 1 | 0 | 1.2 |
@@ -530,6 +531,6 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov026 | 0 | 8 | 8 | 2 | 22.7 |
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
-| ov031 | 189 | 863 | 83 | 4 | 241.9 |
-| **Total** | **1486** | **4938** | **919** | **129** | **2217.4** |
+| ov031 | 189 | 800 | 83 | 4 | 233.8 |
+| **Total** | **1358** | **4833** | **919** | **129** | **2197.7** |
 <!-- END GENERATED -->

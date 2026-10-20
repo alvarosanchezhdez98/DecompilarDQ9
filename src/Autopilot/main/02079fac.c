@@ -1,0 +1,8 @@
+#include <m2c.h>
+
+M2C_UNK memset(s32, M2C_UNK, M2C_UNK);
+
+void func_02079f9c(s32 arg0) {
+    memset(arg0 + 0xC, 0, 0xC);
+    memset(arg0 + 0x24, 0, 0xC);
+}
