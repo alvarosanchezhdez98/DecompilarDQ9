@@ -1,0 +1,39 @@
+#include <m2c.h>
+
+M2C_UNK func_ov031_022274c0(M2C_UNK *);
+M2C_UNK ov13_0222788C();
+M2C_UNK ov13_0222B8F8(M2C_UNK, M2C_UNK);
+M2C_UNK ov13_0222B934(M2C_UNK, M2C_UNK);
+M2C_UNK ov13_0222B948(M2C_UNK, s32 *);
+s32 ov13_0223B6C8();
+s32 ov13_02240394(M2C_UNK);
+M2C_UNK ov13_02240B04(M2C_UNK);
+M2C_UNK ov13_02240EFC(M2C_UNK, M2C_UNK);
+extern M2C_UNK ov13_0222C44C;
+extern M2C_UNK ov13_02232E04;
+
+void ov13_0223832C(void) {
+    s32 sp0;
+
+    if (ov13_02240394(1) != 0) {
+        return;
+    }
+    if (ov13_02240394(0) != 0) {
+        return;
+    }
+    if (ov13_0223B6C8() == 0) {
+        return;
+    }
+    ov13_02240B04(0);
+    ov13_0222788C();
+    ov13_02240EFC(1, 1);
+    ov13_02240EFC(0, 0x15);
+    ov13_0222B8F8(2, 1);
+    ov13_0222B948(0, &sp0);
+    if (sp0 == 0) {
+        ov13_0222B934(0, 0);
+        func_ov031_022274c0(&ov13_02232E04);
+        return;
+    }
+    func_ov031_022274c0(&ov13_0222C44C);
+}
