@@ -230,15 +230,15 @@ The script keeps everything outside the generated section, so this is the place 
 <!-- BEGIN GENERATED: tools/progress.py -->
 ## Summary
 
-Last recorded on 2026-10-21.
+Last recorded on 2026-10-22.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 733,692 | 2,959,024 | 24.80 % |
-| Functions | 7,843 | 14,779 | 53.07 % |
+| Code (bytes) | 742,716 | 2,959,024 | 25.10 % |
+| Functions | 7,954 | 14,779 | 53.82 % |
 | Modules | 4 complete, 28 in progress, 0 not started | 32 with code |  |
 
-Source files: 4692 complete, 1 in progress.
+Source files: 4803 complete, 1 in progress.
 
 Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -264,12 +264,13 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | 2026-10-19 | 7,537 (51.00 %) | 707,984 (23.93 %) | 4386 |
 | 2026-10-20 | 7,810 (52.85 %) | 730,704 (24.69 %) | 4659 |
 | 2026-10-21 | 7,843 (53.07 %) | 733,692 (24.80 %) | 4692 |
+| 2026-10-22 | 7,954 (53.82 %) | 742,716 (25.10 %) | 4803 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 3441 | 2766 | 29.34 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 3552 | 2655 | 30.30 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 38 | 0 | 94.02 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 298 | 528 | 8.84 % | In progress |
@@ -315,12 +316,12 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | Secure area and startup | `0x02000000-0x02000c9c` | 3.2 | 26 | 0 | 26 | 0.00 % |
 | Level-5 code: main | `0x02000c9c-0x02001578` | 2.2 | 1 | 0 | 1 | 0.00 % |
 | C and C++ runtime (MSL, floating point) | `0x02001578-0x0200f398` | 55.5 | 173 | 9 | 164 | 0.29 % |
-| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 2032 | 2166 | 19.01 % |
-| NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 13 | 53 | 2.84 % |
-| NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 200 | 13 | 96.03 % |
+| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 2125 | 2073 | 20.18 % |
+| NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 18 | 48 | 5.47 % |
+| NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 201 | 12 | 96.19 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
-| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 914 | 96 | 82.45 % |
-| Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 103 | 207 | 7.42 % |
+| NitroSDK | `0x020c0338-0x020dc300` | 111.9 | 1010 | 920 | 90 | 82.78 % |
+| Level-5 code, after the libraries | `0x020dc300-0x020e5930` | 37.5 | 310 | 109 | 201 | 8.98 % |
 | Static initializers (.init) | `0x020e5930-0x020e693c` | 4.0 | 42 | 3 | 39 | 10.22 % |
 
 ## Functions in assembly
@@ -506,7 +507,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 608 | 1870 | 258 | 30 | 651.7 |
+| main | 591 | 1776 | 258 | 30 | 642.9 |
 | ov000 | 91 | 342 | 86 | 9 | 172.5 |
 | ov001 | 56 | 189 | 21 | 1 | 56.4 |
 | ov002 | 11 | 104 | 56 | 5 | 96.3 |
@@ -533,5 +534,5 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 189 | 751 | 83 | 4 | 225.0 |
-| **Total** | **1158** | **4730** | **919** | **129** | **2173.2** |
+| **Total** | **1141** | **4636** | **919** | **129** | **2164.4** |
 <!-- END GENERATED -->
