@@ -3,11 +3,11 @@
   "version": "eur",
   "recorded": "2026-10-22",
   "totals": {
-    "functions_done": 7954,
+    "functions_done": 7981,
     "functions_total": 14779,
-    "bytes_done": 742716,
+    "bytes_done": 745276,
     "bytes_total": 2959024,
-    "complete_files": 4803,
+    "complete_files": 4830,
     "functions_nonmatching": 170,
     "bytes_nonmatching": 173820,
     "partial_files": 1,
@@ -36,10 +36,10 @@
     {"date": "2026-10-19", "functions_done": 7537, "functions_total": 14779, "bytes_done": 707984, "bytes_total": 2959024, "complete_files": 4386, "functions_nonmatching": 170, "bytes_nonmatching": 173820},
     {"date": "2026-10-20", "functions_done": 7810, "functions_total": 14779, "bytes_done": 730704, "bytes_total": 2959024, "complete_files": 4659, "functions_nonmatching": 170, "bytes_nonmatching": 173820},
     {"date": "2026-10-21", "functions_done": 7843, "functions_total": 14779, "bytes_done": 733692, "bytes_total": 2959024, "complete_files": 4692, "functions_nonmatching": 170, "bytes_nonmatching": 173820},
-    {"date": "2026-10-22", "functions_done": 7954, "functions_total": 14779, "bytes_done": 742716, "bytes_total": 2959024, "complete_files": 4803, "functions_nonmatching": 170, "bytes_nonmatching": 173820}
+    {"date": "2026-10-22", "functions_done": 7981, "functions_total": 14779, "bytes_done": 745276, "bytes_total": 2959024, "complete_files": 4830, "functions_nonmatching": 170, "bytes_nonmatching": 173820}
   ],
   "modules": [
-    {"name": "main", "purpose": "Always loaded: game code, engine and libraries", "status": "In progress", "range": "0x02000000-0x020e693c", "code_bytes": 944444, "done_bytes": 286164, "nonmatching_bytes": 3224, "functions": 6207, "decompiled": 3552, "nonmatching": 3, "remaining": 2655, "complete_files": 2000, "partial_files": 0, "remaining_by_size": [591, 1776, 258, 30]},
+    {"name": "main", "purpose": "Always loaded: game code, engine and libraries", "status": "In progress", "range": "0x02000000-0x020e693c", "code_bytes": 944444, "done_bytes": 288724, "nonmatching_bytes": 3224, "functions": 6207, "decompiled": 3579, "nonmatching": 3, "remaining": 2628, "complete_files": 2027, "partial_files": 0, "remaining_by_size": [591, 1749, 258, 30]},
     {"name": "itcm", "purpose": "Always loaded, fast memory", "status": "In progress", "range": "0x01ff8000-0x01ff9740", "code_bytes": 5952, "done_bytes": 5596, "nonmatching_bytes": 0, "functions": 38, "decompiled": 38, "nonmatching": 0, "remaining": 0, "complete_files": 5, "partial_files": 0, "remaining_by_size": [0, 0, 0, 0]},
     {"name": "dtcm", "purpose": "Always loaded, fast memory", "status": "No code", "range": null, "code_bytes": 0, "done_bytes": 0, "nonmatching_bytes": 0, "functions": 0, "decompiled": 0, "nonmatching": 0, "remaining": 0, "complete_files": 0, "partial_files": 0, "remaining_by_size": [0, 0, 0, 0]},
     {"name": "ov000", "purpose": "*Likely* battle: actors, actions and damage", "status": "In progress", "range": "0x021536e0-0x021838a4", "code_bytes": 193804, "done_bytes": 17128, "nonmatching_bytes": 0, "functions": 826, "decompiled": 298, "nonmatching": 0, "remaining": 528, "complete_files": 292, "partial_files": 0, "remaining_by_size": [91, 342, 86, 9]},
@@ -82,12 +82,12 @@
     {"name": "Secure area and startup", "range": "0x02000000-0x02000c9c", "code_bytes": 3228, "done_bytes": 0, "nonmatching_bytes": 0, "functions": 26, "decompiled": 0, "nonmatching": 0, "remaining": 26},
     {"name": "Level-5 code: main", "range": "0x02000c9c-0x02001578", "code_bytes": 2268, "done_bytes": 0, "nonmatching_bytes": 0, "functions": 1, "decompiled": 0, "nonmatching": 0, "remaining": 1},
     {"name": "C and C++ runtime (MSL, floating point)", "range": "0x02001578-0x0200f398", "code_bytes": 56864, "done_bytes": 164, "nonmatching_bytes": 0, "functions": 173, "decompiled": 9, "nonmatching": 0, "remaining": 164},
-    {"name": "Level-5 code", "range": "0x0200f398-0x020afe44", "code_bytes": 658092, "done_bytes": 132804, "nonmatching_bytes": 0, "functions": 4198, "decompiled": 2125, "nonmatching": 0, "remaining": 2073},
+    {"name": "Level-5 code", "range": "0x0200f398-0x020afe44", "code_bytes": 658092, "done_bytes": 134988, "nonmatching_bytes": 0, "functions": 4198, "decompiled": 2147, "nonmatching": 0, "remaining": 2051},
     {"name": "NitroSystem FND and G2D", "range": "0x020afe44-0x020b2adc", "code_bytes": 11416, "done_bytes": 624, "nonmatching_bytes": 0, "functions": 66, "decompiled": 18, "nonmatching": 0, "remaining": 48},
-    {"name": "NitroSystem G3D and GFD", "range": "0x020b2adc-0x020bbd24", "code_bytes": 37448, "done_bytes": 36020, "nonmatching_bytes": 0, "functions": 213, "decompiled": 201, "nonmatching": 0, "remaining": 12},
+    {"name": "NitroSystem G3D and GFD", "range": "0x020b2adc-0x020bbd24", "code_bytes": 37448, "done_bytes": 36096, "nonmatching_bytes": 0, "functions": 213, "decompiled": 202, "nonmatching": 0, "remaining": 11},
     {"name": "NitroSystem sound", "range": "0x020bbd24-0x020c0338", "code_bytes": 17940, "done_bytes": 17788, "nonmatching_bytes": 0, "functions": 168, "decompiled": 167, "nonmatching": 0, "remaining": 1},
-    {"name": "NitroSDK", "range": "0x020c0338-0x020dc300", "code_bytes": 114632, "done_bytes": 94892, "nonmatching_bytes": 3224, "functions": 1010, "decompiled": 920, "nonmatching": 3, "remaining": 90},
-    {"name": "Level-5 code, after the libraries", "range": "0x020dc300-0x020e5930", "code_bytes": 38448, "done_bytes": 3452, "nonmatching_bytes": 0, "functions": 310, "decompiled": 109, "nonmatching": 0, "remaining": 201},
+    {"name": "NitroSDK", "range": "0x020c0338-0x020dc300", "code_bytes": 114632, "done_bytes": 95044, "nonmatching_bytes": 3224, "functions": 1010, "decompiled": 922, "nonmatching": 3, "remaining": 88},
+    {"name": "Level-5 code, after the libraries", "range": "0x020dc300-0x020e5930", "code_bytes": 38448, "done_bytes": 3600, "nonmatching_bytes": 0, "functions": 310, "decompiled": 111, "nonmatching": 0, "remaining": 199},
     {"name": "Static initializers (.init)", "range": "0x020e5930-0x020e693c", "code_bytes": 4108, "done_bytes": 420, "nonmatching_bytes": 0, "functions": 42, "decompiled": 3, "nonmatching": 0, "remaining": 39}
   ],
   "nonmatching": [
