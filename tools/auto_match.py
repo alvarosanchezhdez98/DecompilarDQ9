@@ -10,6 +10,8 @@ stage of tools/auto_pilot.py, which can also be run on its own.
   python tools/auto_match.py ov026 --integrate            Adds the matches to the build (checked by `ninja check`)
   python tools/auto_match.py --integrate-pending          Adds the matches kept earlier that aren't in the build
   python tools/auto_match.py --repair-build               Takes out the autopilot's files that break the build
+  python tools/auto_match.py --rescore                    Compiles again the best C of the functions that didn't match
+  python tools/auto_match.py --prune-sources              Takes out of src/Autopilot the declarations not used
 
 For each function, the next of the strategies (STRATEGIES) that the earlier ones didn't match:
   m2c        m2c writes its C in valid syntax (`--valid-syntax`, with the macros of include/m2c.h for what it can't
@@ -247,11 +249,12 @@ class Results:
         with self.lock:
             total: dict[str, int] = {}
             by_module: dict[str, dict[str, int]] = {}
-            by_strategy: dict[str, dict[str, int]] = {name: {"tried": 0, "matched": 0} for name in STRATEGIES}
+            by_strategy: dict[str, dict[str, int]] = {name: {"tried": 0, "matched": 0}
+                                                      for name in [*STRATEGIES, "rescore"]}
             integrated = failed = 0
             for entry in self.data.values():
                 failed += bool(entry.get("integration_failed"))
-                for name in entry.get("strategies") or ["m2c"]:
+                for name in set(entry.get("strategies") or ["m2c"]):
                     if name in by_strategy:
                         by_strategy[name]["tried"] += 1
                 if entry["status"] == MATCHED:
@@ -345,14 +348,29 @@ def is_function(declaration: str) -> bool:
     return re.search(r"\w\s*\((?!\s*\*)", declaration) is not None
 
 
+def declared_name(declarator: str) -> str | None:
+    '''The name that a declaration declares: the function of a prototype, the variable of a data declaration, or the
+    tag of a structure. Not its parameters' names (arg0...), which every function uses'''
+    if "{" in declarator: # A structure (m2c's --stack-structs)
+        match = re.match(r"\s*(?:typedef\s+)?(?:struct|union|enum)\s+([A-Za-z_]\w*)", declarator)
+        return match[1] if match else None
+    first = re.search(r"([A-Za-z_]\w*)?\s*\((\s*\*)?", declarator) # The first parenthesis decides
+    if first and first[2]: # (*name)(...) or (*name[8])[]: a pointer
+        pointer = re.match(r"\s*([A-Za-z_]\w*)", declarator[first.end():])
+        return pointer[1] if pointer else None
+    if first and first[1] and first[1] not in NOT_NAMES: # name(...): a function
+        return first[1]
+    names = [name for name in IDENTIFIER.findall(declarator.split("[")[0]) if name not in NOT_NAMES]
+    return names[-1] if names else None
+
+
 def m2c_source(declarations: list[str], body: str, symbol: str, thumb: bool) -> str:
     '''A C file with one function of m2c's output, and the declarations that it uses'''
     lines = ["#include <m2c.h>", ""]
     used = set(IDENTIFIER.findall(body)) - NOT_NAMES
     for declaration in declarations:
         declarator = declaration.split("=")[0].strip()
-        names = set(IDENTIFIER.findall(declarator)) - NOT_NAMES
-        if not names & used:
+        if declared_name(declarator) not in used:
             continue
         if re.search(rf"\b{re.escape(symbol)}\s*\(", declarator):
             continue # m2c declares the function itself when it's recursive
@@ -696,7 +714,8 @@ class Matcher:
         if percent is None:
             attempt.status, attempt.note = COMPILE_ERROR, note
             # The repairs are cheap: they're tried at once
-            attempt.strategies.append("repair")
+            if "repair" not in attempt.strategies:
+                attempt.strategies.append("repair")
             text, percent, note = self.repaired(attempt, text, note, "m2c")
             if percent is None:
                 attempt.note = note or attempt.note
@@ -770,7 +789,19 @@ class Matcher:
             elif percent is not None and percent >= attempt.best_percent:
                 attempt.permuted = True
 
+    def rescore(self, attempt: "Attempt") -> bool:
+        '''The function's best C compiled again as it is: a function that didn't match can match later with the same
+        C, when the functions around it are added to the build. True when it matches now'''
+        source = self.work_source(attempt)
+        if attempt.status not in (NEAR, NO_MATCH) or not source.is_file():
+            return False
+        text = source.read_text(encoding="utf-8")
+        percent, note = self.evaluate(attempt, text, "rescore")
+        return self.keep_if_better(attempt, text, percent, note, "rescore")
+
     def strategy_compilers(self, attempt: "Attempt") -> None:
+        if self.rescore(attempt):
+            return # It matches as it is: no other compiler needed
         text = self.best_text(attempt)
         if text is None:
             return
@@ -780,6 +811,8 @@ class Matcher:
                 return
 
     def strategy_variants(self, attempt: "Attempt") -> None:
+        if self.rescore(attempt):
+            return # It matches as it is: no pragma or option needed
         base = self.best_text(attempt)
         if base is not None and attempt.status not in (COMPILE_ERROR, M2C_FAILED):
             for label, pragma in PRAGMA_VARIANTS.items():
@@ -874,6 +907,40 @@ class Matcher:
         finally:
             self.results.flush()
         return attempts
+
+    def run_rescore(self, entries: list[dict], should_stop: Callable[[], bool] = lambda: False,
+                    on_result: Callable[["Attempt"], None] = lambda attempt: None, jobs: int = 0) -> list["Attempt"]:
+        '''Re-scores the best C of the functions that didn't match (see rescore()), several at a time. It doesn't run
+        m2c, so it takes minutes where trying the strategies again takes hours. Records only what changed'''
+        changed: list[Attempt] = []
+
+        def one(entry: dict) -> "Attempt | None":
+            if should_stop():
+                return None
+            attempt = attempt_of(entry)
+            attempt.strategies = list(previous_strategies(entry))
+            if not attempt.best_percent:
+                attempt.best_percent = attempt.percent
+            try:
+                if self.rescore(attempt):
+                    attempt.timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                    return attempt
+            except Cancelled:
+                raise
+            except Exception:
+                pass # Tried again in the next pass
+            return None
+
+        try:
+            with ThreadPoolExecutor(max_workers=jobs or max(1, (os.cpu_count() or 2) // 2)) as pool:
+                for attempt in pool.map(one, entries):
+                    if attempt is not None:
+                        self.results.record(attempt)
+                        changed.append(attempt)
+                        on_result(attempt)
+        finally:
+            self.results.flush()
+        return changed
 
     def run(self, module: str, functions: list[progress.Function], should_stop: Callable[[], bool] = lambda: False,
             on_result: Callable[["Attempt"], None] = lambda attempt: None, jobs: int = 0) -> list["Attempt"]:
@@ -1187,6 +1254,49 @@ def attempt_of(entry: dict) -> "Attempt":
     return Attempt(**{key: value for key, value in entry.items() if key in ATTEMPT_FIELDS})
 
 
+DEFINITION_START = re.compile(r"^[^\s/#].*\)\s*\{\s*$")
+
+
+def prune_declarations(text: str) -> str:
+    '''The file without the declarations that its function doesn't use (m2c_source writes one per line, before the
+    function). They don't change the code: the files of the context strategy had ~1000 of them before m2c_source
+    kept only the used ones'''
+    lines = text.split("\n")
+    start = next((index for index, line in enumerate(lines) if DEFINITION_START.match(line)), None)
+    if start is None:
+        return text
+    used = set(IDENTIFIER.findall("\n".join(lines[start:])))
+    kept = []
+    for line in lines[:start]:
+        stripped = line.strip()
+        if stripped.endswith(";") and not stripped.startswith("#"):
+            name = declared_name(stripped[:-1].removeprefix("extern ").strip())
+            if name is not None and name not in used:
+                continue
+        kept.append(line)
+    return "\n".join(kept + lines[start:])
+
+
+def prune_sources(dry_run: bool = False) -> tuple[int, int, int]:
+    '''prune_declarations() on the files of src/Autopilot and their kept copies in build/autopilot/matched.
+    Returns the files changed and the lines before and after'''
+    changed = before = after = 0
+    for directory in (SOURCE_PATH, MATCHED_PATH):
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.rglob("*.c")):
+            text = path.read_text(encoding="utf-8")
+            pruned = prune_declarations(text)
+            if directory == SOURCE_PATH:
+                before += text.count("\n")
+                after += pruned.count("\n")
+            if pruned != text:
+                changed += directory == SOURCE_PATH
+                if not dry_run:
+                    retry_io(lambda: path.write_text(pruned, encoding="utf-8", newline="\n"))
+    return changed, before, after
+
+
 def pending_functions(module: progress.Module, results: Results, retry: bool,
                       strategies: list[str] | None = None, permute_from: float = 85.0) -> list[tuple]:
     '''The functions of the module left to decompile, with the next strategy to try on each, smallest first. The
@@ -1220,6 +1330,11 @@ def main():
                         help="Add the matches kept earlier that aren't in the build yet")
     parser.add_argument("--repair-build", action="store_true",
                         help="When the build fails, take out the autopilot's files that break it")
+    parser.add_argument("--rescore", action="store_true",
+                        help="Compile again the best C of the functions that didn't match (all, or the module's)")
+    parser.add_argument("--prune-sources", action="store_true",
+                        help="Take out of src/Autopilot the declarations that its functions don't use")
+    parser.add_argument("--dry-run", action="store_true", help="With --prune-sources, only count")
     parser.add_argument("--retry", action="store_true", help="Start again the functions whose strategies are done")
     parser.add_argument("--jobs", type=int, default=0, help="Functions tried at a time (default: half the cores)")
     args = parser.parse_args()
@@ -1231,6 +1346,19 @@ def main():
     if args.repair_build:
         ok, removed = Integrator().repair(results, on_log=print)
         sys.exit(0 if ok else 1)
+    if args.rescore:
+        entries = [entry for entry in results.data.values() if entry["status"] in (NEAR, NO_MATCH)
+                   and (not args.module or entry["module"] == args.module)]
+        print(f"Re-scoring {len(entries)} functions...", flush=True)
+        found = Matcher().run_rescore(entries, on_result=lambda attempt: print(
+            f"{attempt.module} {attempt.function}: matches now", flush=True), jobs=args.jobs)
+        print(f"{len(found)} match now (--integrate-pending adds them to the build)")
+        return
+    if args.prune_sources:
+        changed, before, after = prune_sources(args.dry_run)
+        print(f"{changed} files of src/Autopilot {'would change' if args.dry_run else 'changed'}: "
+              f"{before} lines -> {after}")
+        return
     if args.integrate_pending:
         integrator = Integrator()
         pending = results.pending_integration()

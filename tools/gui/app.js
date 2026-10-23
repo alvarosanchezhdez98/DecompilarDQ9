@@ -971,11 +971,12 @@ document.addEventListener("DOMContentLoaded", () => {
     error: "Error",
   };
   const AP_BOOL_FIELDS = ["retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority",
-    "auto_start", "repair_build"];
+    "auto_start", "repair_build", "reevaluate"];
   const AP_NUMBER_FIELDS = ["min_size", "max_size", "batch_size", "max_functions", "max_hours", "batch_pause_seconds",
     "max_consecutive_errors", "jobs", "permute_seconds", "permute_threshold", "permute_from", "integration_group"];
   const AP_STRATEGY_LABELS = {
     m2c: "C de m2c", repair: "Reparar", context: "Prototipos", permute: "permute.py", compilers: "Compiladores", variants: "Variantes",
+    rescore: "Re-evaluación",
   };
 
   const apEl = (id) => document.getElementById(id);
