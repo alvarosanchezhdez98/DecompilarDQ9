@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 _Z24GetStaffRollMillisecondsv();
 M2C_UNK func_ov017_021d6134(M2C_UNK, s32);

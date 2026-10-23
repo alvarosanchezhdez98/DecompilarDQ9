@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK _ZN8Object3D10MakeHiddenEv(s32);
 M2C_UNK _ZN9GameState11GetInstanceEv();

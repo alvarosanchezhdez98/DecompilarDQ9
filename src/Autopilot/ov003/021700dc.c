@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK LoadToMainBG1CharacterData(s32, M2C_UNK, M2C_UNK);
 M2C_UNK _Z25CleanInvalidateCacheRangePKvj(s32, M2C_UNK);

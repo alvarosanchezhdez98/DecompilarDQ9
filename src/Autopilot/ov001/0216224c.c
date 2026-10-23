@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK _Z14StartStaffRollP13SafeAllocator(s32);
 M2C_UNK func_0203b4a0(s32, M2C_UNK);

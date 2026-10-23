@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 _ZN9GameState11GetInstanceEv();
 void *func_02010828(s32);

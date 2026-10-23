@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 _ZN9GameState21GetPartyMemberByIndexEi(M2C_UNK, s8);
 M2C_UNK func_02039d84();

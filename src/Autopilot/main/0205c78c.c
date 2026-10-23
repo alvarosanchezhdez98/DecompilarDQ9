@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 
 void func_0205c77c(void *arg0, s8 arg1) {

@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK func_0203c0cc(M2C_UNK);
 M2C_UNK func_0203c198();

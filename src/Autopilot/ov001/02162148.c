@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 _ZN9GameState11GetInstanceEv();
 M2C_UNK _ZN9GameState12SetTimeOfDayE9TimeOfDay(s32, s32);

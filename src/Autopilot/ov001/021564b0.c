@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK _Z17SetMainBrightnessP13GameResourcesii(void *, M2C_UNK, M2C_UNK);
 void *func_020421a0();

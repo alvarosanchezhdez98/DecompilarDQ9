@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK _ZN13SafeAllocator11CreateTypeAEPvj(s32, s32, M2C_UNK);
 s32 _ZN13SafeAllocator8AllocateEj(s32, M2C_UNK);
