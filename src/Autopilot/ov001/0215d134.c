@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK func_ov001_021588e4(s32);
 extern M2C_UNK data_ov001_02165880;

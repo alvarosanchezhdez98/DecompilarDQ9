@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 u32 SOCL_GetHostID();
 

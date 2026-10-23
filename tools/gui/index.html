@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body class="dark-theme">
   <div class="app-container">
@@ -271,7 +271,8 @@
                       <input name="max_size" type="number" min="0" class="input-text">
                     </label>
                   </div>
-                  <label class="ap-check"><input name="retry_failed" type="checkbox"> Volver a empezar las que agotaron todas las estrategias</label>
+                  <label class="ap-check"><input name="reevaluate" type="checkbox"> Re-evaluar las que no coincidían cuando se integran otras <small>(minutos)</small></label>
+                  <label class="ap-check"><input name="retry_failed" type="checkbox"> Volver a empezar las que agotaron todas las estrategias <small>(horas, rinde poco)</small></label>
                 </fieldset>
 
                 <fieldset class="ap-fieldset">
@@ -787,6 +788,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

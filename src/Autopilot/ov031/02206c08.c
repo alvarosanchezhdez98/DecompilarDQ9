@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK SOCLi_CleanupSocket();
 s32 _Z20DisableIRQInterruptsv();

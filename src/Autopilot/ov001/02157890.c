@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 func_ov001_021570b4(void *);
 M2C_UNK func_ov001_02157570(void *, M2C_UNK);

@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK _ZN9StaffRoll6FinishEv(s32);
 M2C_UNK func_020a1f4c(M2C_UNK);

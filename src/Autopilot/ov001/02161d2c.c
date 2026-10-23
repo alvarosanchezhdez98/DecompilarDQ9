@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 void *func_02012fe4();
 s32 func_ov017_021d60f4(M2C_UNK);

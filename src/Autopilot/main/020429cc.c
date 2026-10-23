@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 extern M2C_UNK data_02107800;
 

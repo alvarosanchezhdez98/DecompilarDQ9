@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK VectorizedInvertedMemcpy(M2C_UNK *, s32, M2C_UNK);
 s32 WCM_SendDCFDataEx(s32, s32, s32, M2C_UNK, s32);

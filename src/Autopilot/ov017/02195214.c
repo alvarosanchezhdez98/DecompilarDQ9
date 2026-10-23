@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimize_for_size off
 
 
 void func_ov017_02195214(void *arg0, void *arg1) {

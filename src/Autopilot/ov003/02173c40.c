@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK VectorizedMemset(void *, M2C_UNK, M2C_UNK);
 M2C_UNK _ZN13SafeAllocator21ResetAllocatorPointerEv(void *);

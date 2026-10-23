@@ -54,6 +54,7 @@ except ImportError:
 import auto_match
 
 SESSIONS_PATH = auto_match.AUTOPILOT_PATH / "sessions"
+RESCORE_PATH = auto_match.AUTOPILOT_PATH / "rescore.json" # The integrated count at the last re-evaluation
 
 STATUS_TEXT = {
     auto_match.MATCHED: "100% Coincidente",
@@ -75,7 +76,9 @@ DEFAULT_CONFIG = {
     "order": "nearest_module",    # "nearest_module" (modules closest to 100 % first), "smallest" (all, by size), "address"
     "min_size": 0,                # bytes, 0 = no minimum
     "max_size": 0,                # bytes, 0 = no maximum
-    "retry_failed": False,        # start again from m2c's C the functions whose strategies are all done
+    "retry_failed": False,        # start again from m2c's C the functions whose strategies are all done (hours)
+    "reevaluate": True,           # when the strategies are done, compile again the best C of the functions that
+                                  # didn't match, if functions were integrated since (minutes)
     "strategies": list(auto_match.STRATEGIES), # the strategies to try, see auto_match.STRATEGIES
     "strategies_known": list(auto_match.STRATEGIES), # the ones that existed when it was saved (see normalize_config)
     # How much
@@ -156,7 +159,7 @@ def normalize_config(config: dict) -> dict:
         stop_at = ""
     result["stop_at"] = stop_at
     for key in ("retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority",
-                "auto_start", "repair_build"):
+                "auto_start", "repair_build", "reevaluate"):
         result[key] = bool(result[key])
     return result
 
@@ -718,6 +721,59 @@ class AutoPilotEngine:
 
         return self._background("commit", work)
 
+    def _rescore_due(self, results: "auto_match.Results") -> bool:
+        """Whether functions were integrated since the last re-evaluation (build/autopilot/rescore.json)"""
+        integrated = sum(1 for entry in results.data.values() if entry.get("integrated"))
+        try:
+            last = json.loads(RESCORE_PATH.read_text(encoding="utf-8")).get("integrated")
+        except (OSError, ValueError):
+            last = None
+        return last != integrated
+
+    def _rescore_pass(self, matcher: "auto_match.Matcher", config: dict) -> list:
+        """Compiles again the best C of the functions of the scope that didn't match, without m2c (minutes, where
+        trying their strategies again takes hours): the functions integrated since make some of them match"""
+        results = matcher.results
+        integrated = sum(1 for entry in results.data.values() if entry.get("integrated"))
+        names = None
+        if config["scope"] == "modules":
+            names = set(config["modules"])
+        entries = [entry for entry in results.data.values()
+                   if entry["status"] in (auto_match.NEAR, auto_match.NO_MATCH)
+                   and (names is None or entry["module"] in names) and entry["module"] not in config["exclude_modules"]]
+        with self.lock:
+            self.stats["stage"] = "drafting"
+            self.current_phase = "drafting"
+            self.stats["strategy"] = "Re-evaluar el C guardado"
+            self.stats["batch_total"] = len(entries)
+            self.stats["batch_drafts"] = 0
+            self.phase_message = f"Re-evaluando {len(entries)} funciones que no coincidían (sin m2c)..."
+        self._log(f"\n>>> [RE-EVALUACIÓN] {len(entries)} funciones que no coincidían, con {integrated} integradas "
+                  "en el build: se compila otra vez su mejor C...")
+        started = time.time()
+        found = []
+
+        def on_result(attempt):
+            found.append(attempt)
+            with self.lock:
+                self.stats["matches_100"] += 1
+                self.stats["pending_integration"] += 1
+                counts = self.stats["by_strategy"].setdefault("rescore", {"tried": 0, "matched": 0})
+                counts["matched"] += 1
+            self._save_note(attempt)
+            self._log(f"  [RE-EVALUACIÓN] {attempt.module}::{attempt.function}: ¡MATCH 100%!")
+
+        matcher.run_rescore(entries, should_stop=self._checkpoint, on_result=on_result, jobs=config["jobs"])
+        with self.lock:
+            self.stats["by_strategy"].setdefault("rescore", {"tried": 0, "matched": 0})["tried"] += len(entries)
+        # Only a pass over every module counts (a pass over some modules is cheap enough to be done in each session)
+        if not self.stop_requested and names is None and not config["exclude_modules"]:
+            RESCORE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            RESCORE_PATH.write_text(json.dumps({"integrated": integrated, "at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                                "found": len(found)}), encoding="utf-8")
+        self._log(f">>> [RE-EVALUACIÓN] {len(found)} coinciden ahora ({time.time() - started:.0f} s).")
+        return found
+
     # The loop ------------------------------------------------------------------------------------------------------
 
     def _run_loop(self):
@@ -784,6 +840,10 @@ class AutoPilotEngine:
             elif integrator:
                 self._check_build_health(integrator, matcher.results, config["repair_build"])
             self._log("[AUTOPILOT] Pre-flight completado. Iniciando pipeline...")
+            if config["reevaluate"] and self._rescore_due(matcher.results) and not self._checkpoint():
+                # First, since it's cheap: the integrations of the last session can make some functions match (the
+                # first batch integrates them). Also with retry_failed, whose batches never run out
+                self._rescore_pass(matcher, config)
 
             while not self._checkpoint():
                 if config["max_functions"] and self.stats["processed"] >= config["max_functions"]:
@@ -802,53 +862,61 @@ class AutoPilotEngine:
                     self.phase_message = f"[Lote #{batch_index}] Fase 1/2: Seleccionando hasta {limit} funciones..."
 
                 candidates = self._select_pending_candidates(limit, matcher.results, session_skip)
-                if not candidates:
-                    self.stats["stop_reason"] = "Todas las estrategias activadas están agotadas en el ámbito (activa más estrategias, amplía el ámbito o marca «volver a empezar»)"
-                    self._log(f"[AUTOPILOT] {self.stats['stop_reason']} (tras {self.stats['batches_completed']} lote(s)).")
-                    break
-                session_skip.update((name, func.address) for name, func, _ in candidates)
-                with self.lock:
-                    self.stats["batch_total"] = len(candidates)
-
-                # STAGE 1: m2c + compile + diff, several functions at a time
-                self._log(f"\n>>> [LOTE #{batch_index} | FASE 1/2] m2c, compilación y diff de {len(candidates)} funciones...")
                 attempts: list[auto_match.Attempt] = []
-                by_module: dict[str, list] = {}
-                strategies_now = sorted({strategy for _, _, strategy in candidates},
-                                        key=list(auto_match.STRATEGIES).index)
-                self.stats["strategy"] = ", ".join(auto_match.STRATEGIES[name] for name in strategies_now)
-                self._log(f"    Estrategia: {self.stats['strategy']}")
-                for mod_name, func, strategy in candidates:
-                    by_module.setdefault(mod_name, []).append((func, strategy))
-                for mod_name, funcs in by_module.items():
-                    if self._checkpoint():
+                if not candidates:
+                    if config["reevaluate"] and self._rescore_due(matcher.results):
+                        # The strategies are done: the integrations since the last pass can make others match
+                        attempts = self._rescore_pass(matcher, config)
+                    else:
+                        self.stats["stop_reason"] = ("Todas las estrategias activadas están agotadas en el ámbito, y la "
+                                                     "re-evaluación no encuentra más (activa más estrategias o amplía "
+                                                     "el ámbito)")
+                        self._log(f"[AUTOPILOT] {self.stats['stop_reason']} (tras {self.stats['batches_completed']} "
+                                  "lote(s)).")
                         break
-                    self._set_current(mod_name, funcs[0][0].name, funcs[0][0].address, funcs[0][0].size,
-                                      f"[Lote #{batch_index}] Fase 1/2: {mod_name} ({len(funcs)} funciones)")
+                if candidates:
+                    session_skip.update((name, func.address) for name, func, _ in candidates)
+                    with self.lock:
+                        self.stats["batch_total"] = len(candidates)
 
-                    def on_result(attempt, total=len(candidates)):
-                        nonlocal consecutive_errors
-                        self._count(attempt)
-                        self._save_note(attempt)
-                        attempts.append(attempt)
-                        consecutive_errors = consecutive_errors + 1 if attempt.status == auto_match.ERROR else 0
-                        self._set_current(attempt.module, attempt.function, attempt.address, attempt.size,
-                                          f"[Lote #{batch_index}] Fase 1/2 ({len(attempts)}/{total}) - "
-                                          f"{attempt.module}::{attempt.function}")
-                        mark = "¡MATCH 100%!" if attempt.status == auto_match.MATCHED else attempt.status
-                        self._log(f"  [{len(attempts)}/{total}] {attempt.module}::{attempt.function} "
-                                  f"({attempt.size:#x} bytes): {mark} {attempt.percent:.1f} %")
-                        if attempt.status == auto_match.ERROR:
-                            self._log(f"      {attempt.note}")
-                        limit_errors = config["max_consecutive_errors"]
-                        if limit_errors and consecutive_errors >= limit_errors and not self.stop_requested:
-                            self.stats["stop_reason"] = f"{consecutive_errors} errores de herramientas seguidos"
-                            self._log(f"[AUTOPILOT] {self.stats['stop_reason']}: parando.")
-                            self.stop_requested = True
+                    # STAGE 1: m2c + compile + diff, several functions at a time
+                    self._log(f"\n>>> [LOTE #{batch_index} | FASE 1/2] m2c, compilación y diff de {len(candidates)} funciones...")
+                    by_module: dict[str, list] = {}
+                    strategies_now = sorted({strategy for _, _, strategy in candidates},
+                                            key=list(auto_match.STRATEGIES).index)
+                    self.stats["strategy"] = ", ".join(auto_match.STRATEGIES[name] for name in strategies_now)
+                    self._log(f"    Estrategia: {self.stats['strategy']}")
+                    for mod_name, func, strategy in candidates:
+                        by_module.setdefault(mod_name, []).append((func, strategy))
+                    for mod_name, funcs in by_module.items():
+                        if self._checkpoint():
+                            break
+                        self._set_current(mod_name, funcs[0][0].name, funcs[0][0].address, funcs[0][0].size,
+                                          f"[Lote #{batch_index}] Fase 1/2: {mod_name} ({len(funcs)} funciones)")
 
-                    matcher.permute_seconds = config["permute_seconds"]
-                    matcher.run_tasks([(mod_name, func, strategy) for func, strategy in funcs],
-                                      should_stop=self._checkpoint, on_result=on_result, jobs=config["jobs"])
+                        def on_result(attempt, total=len(candidates)):
+                            nonlocal consecutive_errors
+                            self._count(attempt)
+                            self._save_note(attempt)
+                            attempts.append(attempt)
+                            consecutive_errors = consecutive_errors + 1 if attempt.status == auto_match.ERROR else 0
+                            self._set_current(attempt.module, attempt.function, attempt.address, attempt.size,
+                                              f"[Lote #{batch_index}] Fase 1/2 ({len(attempts)}/{total}) - "
+                                              f"{attempt.module}::{attempt.function}")
+                            mark = "¡MATCH 100%!" if attempt.status == auto_match.MATCHED else attempt.status
+                            self._log(f"  [{len(attempts)}/{total}] {attempt.module}::{attempt.function} "
+                                      f"({attempt.size:#x} bytes): {mark} {attempt.percent:.1f} %")
+                            if attempt.status == auto_match.ERROR:
+                                self._log(f"      {attempt.note}")
+                            limit_errors = config["max_consecutive_errors"]
+                            if limit_errors and consecutive_errors >= limit_errors and not self.stop_requested:
+                                self.stats["stop_reason"] = f"{consecutive_errors} errores de herramientas seguidos"
+                                self._log(f"[AUTOPILOT] {self.stats['stop_reason']}: parando.")
+                                self.stop_requested = True
+
+                        matcher.permute_seconds = config["permute_seconds"]
+                        matcher.run_tasks([(mod_name, func, strategy) for func, strategy in funcs],
+                                          should_stop=self._checkpoint, on_result=on_result, jobs=config["jobs"])
 
                 # STAGE 2: permute.py on the near matches, then integration of the matches
                 with self.lock:

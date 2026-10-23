@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 extern void *data_ov031_022496a4;
 extern s32 data_ov031_0224c99c;

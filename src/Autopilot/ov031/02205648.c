@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 SOCLi_GetSizeCommandPipe(void *);
 M2C_UNK _Z15PopulateContextP16ProcessorContextjjjjj(s32, M2C_UNK *, s32, s32, s32, s32);

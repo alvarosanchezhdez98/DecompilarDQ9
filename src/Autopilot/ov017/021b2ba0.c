@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK func_020c9be0();
 M2C_UNK strcpy(s32, M2C_UNK);

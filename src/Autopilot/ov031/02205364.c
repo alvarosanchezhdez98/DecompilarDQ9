@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 s32 SOCLi_CreateCommandPacket(M2C_UNK *, s32, M2C_UNK);
 s32 SOCLi_StartupSocket();

@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 
 s32 func_ov001_021599dc(void *arg0, void *arg1) {

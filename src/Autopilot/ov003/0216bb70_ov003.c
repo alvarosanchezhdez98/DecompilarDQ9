@@ -1,5 +1,4 @@
 #include <m2c.h>
-#pragma optimization_level 4
 
 M2C_UNK VectorizedMemset(s32, M2C_UNK, M2C_UNK);
 M2C_UNK _ZN13SafeAllocator11CreateTypeAEPvj(void *, s32, M2C_UNK);
