@@ -50,9 +50,10 @@ is recorded in `build/autopilot/results.json`, with the strategies tried on it, 
 
 | Strategy | What it does | What it gave (October 2026) |
 | -------- | ------------ | --------------------------- |
-| `m2c` | m2c's C as it is | 1537 of 11210 functions |
+| `m2c` | m2c's C as it is, with the parameters that m2c leaves out declared: it names them by register and skips the ones that the function doesn't use, so `f(s32 arg0, void *arg2)` would put `arg2` in `r1` | 1537 of 11210 functions (before the parameters were declared) |
 | `repair` | The C that doesn't compile, repaired: the stack variables (`spNN`) that m2c uses without declaring them, and the calls without prototypes (`T f();`) where m2c's prototype doesn't fit its own calls | 39 of 2092 |
 | `context` | m2c with `--context build/autopilot/m2c_context.c`, the prototypes that `tools/m2c_context.py` writes: the named functions of `symbols.txt` (the parameters from the mangled name, with `this`, and the return type from the headers) and the autopilot's matches. m2c then passes the arguments that it can't see (`this`) and types the returned values (`float`, pointers); fast, on the functions that don't match | 18 of 747 from 50 % that m2c's C alone didn't match (2.4 %); 30 of 257 in ov004, whose menus call many member functions |
+| `assist` | The near-match assistant (`tools/near_match.py`), on the functions from 50 % and the ones that don't compile: round after round, it tries the changes that most often finish m2c's near matches and keeps the best one: the parameters that m2c leaves out, more parameters, no return value, the calls without prototypes, other integer types for the parameters and the variables, the order of two declarations, and a stack variable as a buffer that fills the original's frame (`sub sp, sp, #0x23c`) | Declaring the parameters alone: 319 of 968 functions with gaps in them |
 | `permute` | `permute.py` on the functions from 85 % | |
 | `compilers` | The older compilers of `MWCC_VERSIONS` (2.0/sp2, 2.0/sp1p5, 2.0/sp2p3, 1.2/sp4), after checking that the C doesn't match as it is; a match goes in `MWCC_VERSIONS` | 0 |
 | `rescore` | Not one of the list: when the strategies are done and functions were integrated since the last time, the best C of the functions that didn't match is compiled again as it is. The same C can match once the functions around it are in the build (their delinked neighbours change). Minutes, where `retry_failed` (every strategy again) takes hours. `--rescore` runs it by hand | 782 by 2026-10-23 (most of the matches that the old `compilers` and `variants` were credited with: their version or pragma wasn't needed) |
@@ -63,7 +64,10 @@ halves until the functions that break it are found, which are marked as failed i
 static initializers, or the functions of main's startup code, whose delinked neighbours have symbols bigger than
 their sections). The build without the group is checked first, so that a build broken by other changes isn't blamed
 on them. `--repair-build` finds the autopilot's files that break the build and takes them out of it.
+Of 300 near matches from 80 % (October 2026), most differed only in registers or in a few arguments, from their
+signature or the types of their variables, not in their logic; the assistant goes after those.
 ```shell
+python tools/near_match.py func_ov003_02163e4c            # the assistant on one function, telling what helped
 python tools/auto_match.py ov026                          # the next strategy for every function left in the module
 python tools/auto_match.py ov026 --strategies repair      # only that strategy
 python tools/auto_match.py --integrate-pending            # adds the matches kept earlier to the build
@@ -79,6 +83,12 @@ writes a log of each session in `build/autopilot/sessions/`. The bar under its h
 `config/` (the dashboard has its history). Without the GUI, e.g. from the Task Scheduler:
 `python tools/auto_pilot.py --hours 8` (see its help). The files in `src/Autopilot` are m2c's C, with members by
 offset: they're a start that matches, to give types and move to the right files later.
+
+It's built to be left alone: only one process changes the build at a time (`build/autopilot/autopilot.lock`, taken
+over when its process died); an integration writes the last state that builds in `build/autopilot/journal/` first,
+which the next run puts back if the process died in the middle; a batch that fails is tried again after a pause
+(`max_batch_errors` in a row end the session); and a session cut by a crash or a reboot is resumed, for what was left
+of it, when the GUI opens (`auto_resume`, or `tools/auto_pilot.py --resume`).
 
 ## Matching functions locally
 `tools/diff_function.py` compiles a source file with the same flags as the build and diffs its functions against the original game with objdiff, marking every instruction that differs. It's a local alternative to decomp.me scratches that doesn't need GCC. It needs `build.ninja` and the delinked objects, so run `python tools/configure.py eur` and `ninja delink` first.

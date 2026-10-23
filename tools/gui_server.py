@@ -397,6 +397,15 @@ def auto_start_autopilot(delay: float = 5.0):
     if not auto_pilot_engine:
         return
     config = auto_pilot.load_config(store)
+    state = auto_pilot.interrupted_session()
+    if state and config["auto_resume"]:
+        resumed = auto_pilot.resume_config(state)
+        if resumed:
+            timer = threading.Timer(delay, lambda: auto_pilot_engine.start(config=resumed, resume=state))
+            timer.daemon = True
+            timer.start()
+            return
+        auto_pilot.SESSION_PATH.unlink(missing_ok=True) # Its limits were reached: nothing left to resume
     if config["auto_start"]:
         timer = threading.Timer(delay, lambda: auto_pilot_engine.start(config=config))
         timer.daemon = True
@@ -565,7 +574,7 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
                                        max_functions=int(data.get("max_functions", 0)),
                                        draft_limit=int(data.get("draft_limit", 100)),
                                        permute_seconds=float(data.get("permute_seconds", 60)))
-            self.send_json({"started": started, "status": engine.get_status()})
+            self.send_json({"started": started, "error": engine.last_error, "status": engine.get_status()})
         elif path == "/api/autopilot/stop":
             if bool(data.get("graceful", True)):
                 engine.request_graceful_stop()
@@ -579,12 +588,12 @@ class GUIRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/autopilot/config":
             self.send_json({"config": auto_pilot.save_config(data.get("config") or data, store)})
         elif path == "/api/autopilot/integrate":
-            self.send_json({"started": engine.integrate_pending()})
+            self.send_json({"started": engine.integrate_pending(), "error": engine.last_error})
         elif path == "/api/autopilot/repair":
-            self.send_json({"started": engine.repair_build()})
+            self.send_json({"started": engine.repair_build(), "error": engine.last_error})
         elif path == "/api/autopilot/commit":
             _uncommitted_cache["time"] = 0
-            self.send_json({"started": engine.commit_now()})
+            self.send_json({"started": engine.commit_now(), "error": engine.last_error})
         elif path == "/api/autopilot/results/reset":
             statuses = data.get("statuses") or None
             count = auto_pilot.auto_match.shared_results().reset(statuses, data.get("module") or None)

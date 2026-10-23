@@ -27,6 +27,7 @@ Without the GUI, e.g. from the Windows Task Scheduler:
 
 import argparse
 import ctypes
+import os
 from datetime import datetime, timedelta
 import json
 from pathlib import Path
@@ -55,6 +56,33 @@ import auto_match
 
 SESSIONS_PATH = auto_match.AUTOPILOT_PATH / "sessions"
 RESCORE_PATH = auto_match.AUTOPILOT_PATH / "rescore.json" # The integrated count at the last re-evaluation
+SESSION_PATH = auto_match.AUTOPILOT_PATH / "session.json" # The session running, removed when it ends
+
+
+def interrupted_session() -> Optional[dict]:
+    """The session that was running when its process died (a crash, a reboot), or None"""
+    try:
+        state = json.loads(SESSION_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    pid = int(state.get("pid", 0))
+    if pid == os.getpid() or auto_match.process_alive(pid):
+        return None
+    return state
+
+
+def resume_config(state: dict) -> Optional[dict]:
+    """The configuration to resume an interrupted session with, for what was left of it, or None when nothing was"""
+    config = normalize_config(state.get("config") or {})
+    if config["max_functions"]:
+        left = config["max_functions"] - int(state.get("processed", 0))
+        if left <= 0:
+            return None
+        config["max_functions"] = left
+    deadline = state.get("deadline")
+    if deadline and deadline <= time.time():
+        return None
+    return config
 
 STATUS_TEXT = {
     auto_match.MATCHED: "100% Coincidente",
@@ -88,6 +116,8 @@ DEFAULT_CONFIG = {
     "stop_at": "",                # "HH:MM", local time, empty = never
     "batch_pause_seconds": 0,     # rest between batches
     "max_consecutive_errors": 25, # stop when the tools keep failing
+    "max_batch_errors": 5,        # stop after this many batches in a row fail (each is retried after a pause)
+    "auto_resume": True,          # when the GUI opens after a session was interrupted (a crash, a reboot), resume it
     # How
     "jobs": 0,                    # functions at a time, 0 = half the cores
     "permute_seconds": 120,       # for each function of the permute strategy
@@ -131,6 +161,7 @@ def normalize_config(config: dict) -> dict:
     number("max_hours", float, 0)
     number("batch_pause_seconds", float, 0, 3600)
     number("max_consecutive_errors", int, 0)
+    number("max_batch_errors", int, 1, 100)
     number("jobs", int, 0, 64)
     number("permute_seconds", float, 0, 3600)
     number("permute_threshold", float, 0, 99.9)
@@ -159,7 +190,7 @@ def normalize_config(config: dict) -> dict:
         stop_at = ""
     result["stop_at"] = stop_at
     for key in ("retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority",
-                "auto_start", "repair_build", "reevaluate"):
+                "auto_start", "repair_build", "reevaluate", "auto_resume"):
         result[key] = bool(result[key])
     return result
 
@@ -287,6 +318,8 @@ class AutoPilotEngine:
         self.integration_blocked: str = ""
         self.busy_integrating: bool = False
         self.busy_action: str = ""
+        self.last_error: str = "" # Why the last start or action didn't start
+        self.resumed_from: Optional[float] = None
 
         self.config: dict = normalize_config({})
         self.stats = new_stats(self.config["batch_size"])
@@ -320,12 +353,18 @@ class AutoPilotEngine:
     # Controls ------------------------------------------------------------------------------------------------------
 
     def start(self, scope: str = "all", module: Optional[str] = None, max_functions: int = 0, draft_limit: int = 100,
-              permute_seconds: float = 60, config: Optional[dict] = None) -> bool:
+              permute_seconds: float = 60, config: Optional[dict] = None, resume: Optional[dict] = None) -> bool:
         """Starts the loop in a background thread, with `config` (see DEFAULT_CONFIG). The other arguments are the
         old API's, used when there's no `config`."""
         with self.lock:
-            if self.is_running:
+            if self.is_running or self.busy_integrating:
+                self.last_error = "Ya hay una sesión o una acción en curso"
                 return False
+            ok, why = auto_match.REPO_LOCK.acquire("el modo automático")
+            if not ok:
+                self.last_error = why
+                return False
+            self.last_error = ""
             if config is None:
                 config = load_config(self.store)
                 config.update({"batch_size": draft_limit, "max_functions": max_functions,
@@ -347,7 +386,8 @@ class AutoPilotEngine:
             started = time.time()
             self.stats = new_stats(self.config["batch_size"], started)
             self.stats["stage"] = "preflight"
-            self.stats["deadline"] = deadline_of(self.config, started)
+            self.stats["deadline"] = (resume or {}).get("deadline") or deadline_of(self.config, started)
+            self.resumed_from = (resume or {}).get("started_at")
             self.log_history = []
             SESSIONS_PATH.mkdir(parents=True, exist_ok=True)
             self.session_log = SESSIONS_PATH / f"{time.strftime('%Y%m%d-%H%M%S')}.log"
@@ -437,6 +477,8 @@ class AutoPilotEngine:
                 "current_function": self.current_function,
                 "integration_blocked": self.integration_blocked,
                 "busy_action": self.busy_action,
+                "last_error": self.last_error,
+                "lock_holder": auto_match.REPO_LOCK.holder(),
                 "strategies": auto_match.STRATEGIES,
                 "config": self.config,
                 "session_log": self.session_log.relative_to(root_path).as_posix() if self.session_log else "",
@@ -551,12 +593,25 @@ class AutoPilotEngine:
             counts["matched"] += status == auto_match.MATCHED
 
     def _save_state(self):
-        """Saves the results and the notes, which are written once per batch"""
+        """Saves the results and the notes, which are written once per batch, and the session's state (to resume it
+        if the process dies)"""
         try:
             auto_match.shared_results().flush()
             self.store.save()
         except Exception as e:
             self._log(f"  [WARN] No se pudieron guardar los resultados: {e}")
+        if self.is_running and not self.stop_requested:
+            self._write_session_state()
+
+    def _write_session_state(self):
+        state = {"pid": os.getpid(), "config": self.config, "started_at": self.stats["started_at"],
+                 "deadline": self.stats.get("deadline"), "processed": self.stats["processed"],
+                 "saved_at": time.strftime("%Y-%m-%d %H:%M:%S")}
+        try:
+            SESSION_PATH.parent.mkdir(parents=True, exist_ok=True)
+            auto_match.retry_io(lambda: SESSION_PATH.write_text(json.dumps(state), encoding="utf-8"))
+        except OSError:
+            pass
 
     def _record_progress(self):
         try:
@@ -641,13 +696,20 @@ class AutoPilotEngine:
         """Runs an action that edits the build (integrate, repair, commit) when no session nor other action runs"""
         with self.lock:
             if self.is_running or self.busy_integrating:
+                self.last_error = "Ya hay una sesión o una acción en curso"
                 return False
+            ok, why = auto_match.REPO_LOCK.acquire(f"la acción «{label}»")
+            if not ok:
+                self.last_error = why
+                return False
+            self.last_error = ""
             self.busy_integrating = True
             self.busy_action = label
 
         def run():
             try:
                 auto_match.RUNNER.reset()
+                auto_match.IntegrationJournal().recover(self._log)
                 work()
             except Exception as e:
                 self._log(f"[{label.upper()}] Error: {e}")
@@ -656,6 +718,7 @@ class AutoPilotEngine:
                 with self.lock:
                     self.busy_integrating = False
                     self.busy_action = ""
+                auto_match.REPO_LOCK.release()
 
         threading.Thread(target=run, name=f"AutoPilot-{label}", daemon=True).start()
         return True
@@ -810,6 +873,7 @@ class AutoPilotEngine:
 
         batch_index = 1
         consecutive_errors = 0
+        batch_errors = 0
         session_skip: set = set()
         try:
             ok, _ = doctor.ensure_environment(callback=self._log)
@@ -826,6 +890,10 @@ class AutoPilotEngine:
                     self.stats["stop_reason"] = "Falta m2c"
                 return
 
+            self._write_session_state()
+            if self.resumed_from:
+                self._log(f"[AUTOPILOT] Reanudando la sesión interrumpida del "
+                          f"{datetime.fromtimestamp(self.resumed_from):%Y-%m-%d %H:%M}.")
             self._log("[AUTOPILOT] Cargando índice de la ROM y desensamblado...")
             matcher = auto_match.Matcher(log=self._log, permute_seconds=0,
                                          permute_threshold=config["permute_threshold"])
@@ -838,153 +906,202 @@ class AutoPilotEngine:
                 self._log(f"        {integrator.blocked}")
                 self._log("        Los matches se guardan en build/autopilot/matched/ y se integrarán cuando dsd funcione.")
             elif integrator:
-                self._check_build_health(integrator, matcher.results, config["repair_build"])
+                auto_match.IntegrationJournal().recover(self._log)
+                for attempt in range(3):
+                    try:
+                        self._check_build_health(integrator, matcher.results, config["repair_build"])
+                        break
+                    except auto_match.Cancelled:
+                        raise
+                    except Exception as e:
+                        self._log(f"[ERROR] La comprobación del build falló ({attempt + 1}/3): {e}")
+                        if attempt == 2:
+                            message = f"No se pudo comprobar el build: {e}"
+                            with self.lock:
+                                self.integration_blocked = message
+                            integrator.blocked = message
+                            self._log("[AVISO] Integración en pausa esta sesión; los matches se guardan.")
+                        else:
+                            time.sleep(30)
             self._log("[AUTOPILOT] Pre-flight completado. Iniciando pipeline...")
             if config["reevaluate"] and self._rescore_due(matcher.results) and not self._checkpoint():
                 # First, since it's cheap: the integrations of the last session can make some functions match (the
                 # first batch integrates them). Also with retry_failed, whose batches never run out
-                self._rescore_pass(matcher, config)
+                try:
+                    self._rescore_pass(matcher, config)
+                except auto_match.Cancelled:
+                    raise
+                except Exception as e:
+                    self._log(f"[ERROR] La re-evaluación falló, se sigue con los lotes: {e}")
 
             while not self._checkpoint():
-                if config["max_functions"] and self.stats["processed"] >= config["max_functions"]:
-                    self.stats["stop_reason"] = f"Límite de {config['max_functions']} funciones alcanzado"
-                    self._log(f"[AUTOPILOT] {self.stats['stop_reason']}.")
-                    break
-
-                limit = config["batch_size"]
-                if config["max_functions"]:
-                    limit = min(limit, config["max_functions"] - self.stats["processed"])
-                with self.lock:
-                    self.stats["current_batch"] = batch_index
-                    self.stats["batch_drafts"] = 0
-                    self.stats["stage"] = "drafting"
-                    self.current_phase = "drafting"
-                    self.phase_message = f"[Lote #{batch_index}] Fase 1/2: Seleccionando hasta {limit} funciones..."
-
-                candidates = self._select_pending_candidates(limit, matcher.results, session_skip)
-                attempts: list[auto_match.Attempt] = []
-                if not candidates:
-                    if config["reevaluate"] and self._rescore_due(matcher.results):
-                        # The strategies are done: the integrations since the last pass can make others match
-                        attempts = self._rescore_pass(matcher, config)
-                    else:
-                        self.stats["stop_reason"] = ("Todas las estrategias activadas están agotadas en el ámbito, y la "
-                                                     "re-evaluación no encuentra más (activa más estrategias o amplía "
-                                                     "el ámbito)")
-                        self._log(f"[AUTOPILOT] {self.stats['stop_reason']} (tras {self.stats['batches_completed']} "
-                                  "lote(s)).")
+                try:
+                    if config["max_functions"] and self.stats["processed"] >= config["max_functions"]:
+                        self.stats["stop_reason"] = f"Límite de {config['max_functions']} funciones alcanzado"
+                        self._log(f"[AUTOPILOT] {self.stats['stop_reason']}.")
                         break
-                if candidates:
-                    session_skip.update((name, func.address) for name, func, _ in candidates)
+
+                    limit = config["batch_size"]
+                    if config["max_functions"]:
+                        limit = min(limit, config["max_functions"] - self.stats["processed"])
                     with self.lock:
-                        self.stats["batch_total"] = len(candidates)
+                        self.stats["current_batch"] = batch_index
+                        self.stats["batch_drafts"] = 0
+                        self.stats["stage"] = "drafting"
+                        self.current_phase = "drafting"
+                        self.phase_message = f"[Lote #{batch_index}] Fase 1/2: Seleccionando hasta {limit} funciones..."
 
-                    # STAGE 1: m2c + compile + diff, several functions at a time
-                    self._log(f"\n>>> [LOTE #{batch_index} | FASE 1/2] m2c, compilación y diff de {len(candidates)} funciones...")
-                    by_module: dict[str, list] = {}
-                    strategies_now = sorted({strategy for _, _, strategy in candidates},
-                                            key=list(auto_match.STRATEGIES).index)
-                    self.stats["strategy"] = ", ".join(auto_match.STRATEGIES[name] for name in strategies_now)
-                    self._log(f"    Estrategia: {self.stats['strategy']}")
-                    for mod_name, func, strategy in candidates:
-                        by_module.setdefault(mod_name, []).append((func, strategy))
-                    for mod_name, funcs in by_module.items():
-                        if self._checkpoint():
+                    candidates = self._select_pending_candidates(limit, matcher.results, session_skip)
+                    attempts: list[auto_match.Attempt] = []
+                    if not candidates:
+                        if config["reevaluate"] and self._rescore_due(matcher.results):
+                            # The strategies are done: the integrations since the last pass can make others match
+                            attempts = self._rescore_pass(matcher, config)
+                        else:
+                            self.stats["stop_reason"] = ("Todas las estrategias activadas están agotadas en el ámbito, y la "
+                                                         "re-evaluación no encuentra más (activa más estrategias o amplía "
+                                                         "el ámbito)")
+                            self._log(f"[AUTOPILOT] {self.stats['stop_reason']} (tras {self.stats['batches_completed']} "
+                                      "lote(s)).")
                             break
-                        self._set_current(mod_name, funcs[0][0].name, funcs[0][0].address, funcs[0][0].size,
-                                          f"[Lote #{batch_index}] Fase 1/2: {mod_name} ({len(funcs)} funciones)")
-
-                        def on_result(attempt, total=len(candidates)):
-                            nonlocal consecutive_errors
-                            self._count(attempt)
-                            self._save_note(attempt)
-                            attempts.append(attempt)
-                            consecutive_errors = consecutive_errors + 1 if attempt.status == auto_match.ERROR else 0
-                            self._set_current(attempt.module, attempt.function, attempt.address, attempt.size,
-                                              f"[Lote #{batch_index}] Fase 1/2 ({len(attempts)}/{total}) - "
-                                              f"{attempt.module}::{attempt.function}")
-                            mark = "¡MATCH 100%!" if attempt.status == auto_match.MATCHED else attempt.status
-                            self._log(f"  [{len(attempts)}/{total}] {attempt.module}::{attempt.function} "
-                                      f"({attempt.size:#x} bytes): {mark} {attempt.percent:.1f} %")
-                            if attempt.status == auto_match.ERROR:
-                                self._log(f"      {attempt.note}")
-                            limit_errors = config["max_consecutive_errors"]
-                            if limit_errors and consecutive_errors >= limit_errors and not self.stop_requested:
-                                self.stats["stop_reason"] = f"{consecutive_errors} errores de herramientas seguidos"
-                                self._log(f"[AUTOPILOT] {self.stats['stop_reason']}: parando.")
-                                self.stop_requested = True
-
-                        matcher.permute_seconds = config["permute_seconds"]
-                        matcher.run_tasks([(mod_name, func, strategy) for func, strategy in funcs],
-                                          should_stop=self._checkpoint, on_result=on_result, jobs=config["jobs"])
-
-                # STAGE 2: permute.py on the near matches, then integration of the matches
-                with self.lock:
-                    self.stats["stage"] = "matching"
-                    self.current_phase = "matching"
-                integrated_now: list[dict] = []
-                if integrator and not integrator.blocked:
-                    pending = matcher.results.pending_integration()
-                    if pending and not self.immediate_stop:
-                        self._log(f"\n>>> [LOTE #{batch_index} | FASE 2/2] Integrando {len(pending)} matches en el build...")
-                    group_size = config["integration_group"]
-                    for start in range(0, len(pending), group_size):
-                        # A graceful stop still integrates what matched; only an immediate stop leaves it for later
-                        if self.immediate_stop:
-                            break
-                        group = pending[start:start + group_size]
-                        self._set_current(group[0]["module"], group[0]["function"], group[0]["address"],
-                                          group[0]["size"], f"[Lote #{batch_index}] Fase 2/2: integrando "
-                                          f"{len(group)} funciones y verificando con ninja check")
-
-                        def on_outcome(outcome):
-                            entry = outcome.entry
-                            with self.lock:
-                                if outcome.ok:
-                                    self.stats["integrated"] += 1
-                                    self.stats["pending_integration"] = max(0, self.stats["pending_integration"] - 1)
-                                elif outcome.deterministic:
-                                    self.stats["integration_failed"] += 1
-                                    self.stats["pending_integration"] = max(0, self.stats["pending_integration"] - 1)
-                            if outcome.ok:
-                                integrated_now.append(entry)
-                                self._log(f"  [INTEGRADA] {entry['function']} -> {outcome.message}")
-                            else:
-                                self._log(f"  [NO INTEGRADA] {entry['function']}: {outcome.message}"
-                                          + ("" if outcome.deterministic else " (se reintentará)"))
-
-                        integrator.integrate_many(matcher.results, group, on_outcome)
+                    if candidates:
+                        session_skip.update((name, func.address) for name, func, _ in candidates)
                         with self.lock:
-                            self.stats["build_checks"] = integrator.checks
-                        if integrator.baseline_ok is False:
-                            self._log(f"[AVISO] El build falla sin las funciones nuevas: {integrator.baseline_error}")
-                            self._log("        Integración en pausa esta sesión. Usa «Reparar build» (o "
-                                      "py tools/auto_match.py --repair-build).")
+                            self.stats["batch_total"] = len(candidates)
+
+                        # STAGE 1: m2c + compile + diff, several functions at a time
+                        self._log(f"\n>>> [LOTE #{batch_index} | FASE 1/2] m2c, compilación y diff de {len(candidates)} funciones...")
+                        by_module: dict[str, list] = {}
+                        strategies_now = sorted({strategy for _, _, strategy in candidates},
+                                                key=list(auto_match.STRATEGIES).index)
+                        self.stats["strategy"] = ", ".join(auto_match.STRATEGIES[name] for name in strategies_now)
+                        self._log(f"    Estrategia: {self.stats['strategy']}")
+                        for mod_name, func, strategy in candidates:
+                            by_module.setdefault(mod_name, []).append((func, strategy))
+                        for mod_name, funcs in by_module.items():
+                            if self._checkpoint():
+                                break
+                            self._set_current(mod_name, funcs[0][0].name, funcs[0][0].address, funcs[0][0].size,
+                                              f"[Lote #{batch_index}] Fase 1/2: {mod_name} ({len(funcs)} funciones)")
+
+                            def on_result(attempt, total=len(candidates)):
+                                nonlocal consecutive_errors
+                                self._count(attempt)
+                                self._save_note(attempt)
+                                attempts.append(attempt)
+                                consecutive_errors = consecutive_errors + 1 if attempt.status == auto_match.ERROR else 0
+                                self._set_current(attempt.module, attempt.function, attempt.address, attempt.size,
+                                                  f"[Lote #{batch_index}] Fase 1/2 ({len(attempts)}/{total}) - "
+                                                  f"{attempt.module}::{attempt.function}")
+                                mark = "¡MATCH 100%!" if attempt.status == auto_match.MATCHED else attempt.status
+                                self._log(f"  [{len(attempts)}/{total}] {attempt.module}::{attempt.function} "
+                                          f"({attempt.size:#x} bytes): {mark} {attempt.percent:.1f} %")
+                                if attempt.status == auto_match.ERROR:
+                                    self._log(f"      {attempt.note}")
+                                limit_errors = config["max_consecutive_errors"]
+                                if limit_errors and consecutive_errors >= limit_errors and not self.stop_requested:
+                                    self.stats["stop_reason"] = f"{consecutive_errors} errores de herramientas seguidos"
+                                    self._log(f"[AUTOPILOT] {self.stats['stop_reason']}: parando.")
+                                    self.stop_requested = True
+
+                            matcher.permute_seconds = config["permute_seconds"]
+                            matcher.run_tasks([(mod_name, func, strategy) for func, strategy in funcs],
+                                              should_stop=self._checkpoint, on_result=on_result, jobs=config["jobs"])
+
+                    # STAGE 2: permute.py on the near matches, then integration of the matches
+                    with self.lock:
+                        self.stats["stage"] = "matching"
+                        self.current_phase = "matching"
+                    integrated_now: list[dict] = []
+                    if integrator and not integrator.blocked:
+                        pending = matcher.results.pending_integration()
+                        if pending and not self.immediate_stop:
+                            self._log(f"\n>>> [LOTE #{batch_index} | FASE 2/2] Integrando {len(pending)} matches en el build...")
+                        group_size = config["integration_group"]
+                        for start in range(0, len(pending), group_size):
+                            # A graceful stop still integrates what matched; only an immediate stop leaves it for later
+                            if self.immediate_stop:
+                                break
+                            group = pending[start:start + group_size]
+                            self._set_current(group[0]["module"], group[0]["function"], group[0]["address"],
+                                              group[0]["size"], f"[Lote #{batch_index}] Fase 2/2: integrando "
+                                              f"{len(group)} funciones y verificando con ninja check")
+
+                            def on_outcome(outcome):
+                                entry = outcome.entry
+                                with self.lock:
+                                    if outcome.ok:
+                                        self.stats["integrated"] += 1
+                                        self.stats["pending_integration"] = max(0, self.stats["pending_integration"] - 1)
+                                    elif outcome.deterministic:
+                                        self.stats["integration_failed"] += 1
+                                        self.stats["pending_integration"] = max(0, self.stats["pending_integration"] - 1)
+                                if outcome.ok:
+                                    integrated_now.append(entry)
+                                    self._log(f"  [INTEGRADA] {entry['function']} -> {outcome.message}")
+                                else:
+                                    self._log(f"  [NO INTEGRADA] {entry['function']}: {outcome.message}"
+                                              + ("" if outcome.deterministic else " (se reintentará)"))
+
+                            integrator.integrate_many(matcher.results, group, on_outcome)
                             with self.lock:
-                                self.integration_blocked = "El build está roto: " + integrator.baseline_error
-                            integrator.blocked = self.integration_blocked
-                            break
-                    if integrated_now and not self.immediate_stop:
-                        if config["record_progress"]:
-                            self._record_progress()
-                        if config["auto_commit"]:
-                            self._commit(integrated_now)
+                                self.stats["build_checks"] = integrator.checks
+                            if integrator.baseline_ok is False:
+                                self._log(f"[AVISO] El build falla sin las funciones nuevas: {integrator.baseline_error}")
+                                self._log("        Integración en pausa esta sesión. Usa «Reparar build» (o "
+                                          "py tools/auto_match.py --repair-build).")
+                                with self.lock:
+                                    self.integration_blocked = "El build está roto: " + integrator.baseline_error
+                                integrator.blocked = self.integration_blocked
+                                break
+                        if integrated_now and not self.immediate_stop:
+                            if config["record_progress"]:
+                                self._record_progress()
+                            if config["auto_commit"]:
+                                self._commit(integrated_now)
 
-                with self.lock:
-                    self.stats["batches_completed"] += 1
-                self._save_state()
+                    with self.lock:
+                        self.stats["batches_completed"] += 1
+                    self._save_state()
 
-                self._log(f"\n>>> [LOTE #{batch_index} FINALIZADO] {len(attempts)} intentadas · "
-                          f"{sum(a.status == auto_match.MATCHED for a in attempts)} al 100% · "
-                          f"{len(integrated_now)} integradas")
-                batch_index += 1
+                    self._log(f"\n>>> [LOTE #{batch_index} FINALIZADO] {len(attempts)} intentadas · "
+                              f"{sum(a.status == auto_match.MATCHED for a in attempts)} al 100% · "
+                              f"{len(integrated_now)} integradas")
+                    batch_index += 1
 
-                pause = config["batch_pause_seconds"]
-                if pause and not self.stop_requested:
-                    self._log(f"[AUTOPILOT] Descanso de {pause:.0f} s entre lotes...")
-                    end = time.time() + pause
+                    pause = config["batch_pause_seconds"]
+                    if pause and not self.stop_requested:
+                        self._log(f"[AUTOPILOT] Descanso de {pause:.0f} s entre lotes...")
+                        end = time.time() + pause
+                        while time.time() < end and not self.stop_requested:
+                            time.sleep(1)
+
+                except (auto_match.Cancelled, KeyboardInterrupt):
+                    raise
+                except Exception as e:
+                    # A batch that fails (a tool that hangs, a file that another program has open...) doesn't end the
+                    # session: it's tried again after a pause, longer each time, up to max_batch_errors in a row
+                    import traceback
+                    batch_errors += 1
+                    with self.lock:
+                        self.stats["errors"] += 1
+                    self._log(f"[ERROR] El lote #{batch_index} falló ({batch_errors} seguidos): {e}")
+                    self._log(traceback.format_exc().rstrip().splitlines()[-1])
+                    if batch_errors >= config["max_batch_errors"]:
+                        self.stats["stop_reason"] = f"{batch_errors} lotes seguidos fallaron: {e}"
+                        self._log(f"[AUTOPILOT] {self.stats['stop_reason']}")
+                        break
+                    wait = min(30 * 2 ** (batch_errors - 1), 600)
+                    self._log(f"[AUTOPILOT] Se reintenta en {wait} s...")
+                    end = time.time() + wait
                     while time.time() < end and not self.stop_requested:
                         time.sleep(1)
+                    try:
+                        auto_match.IntegrationJournal().recover(self._log)
+                    except Exception as recover_error:
+                        self._log(f"[ERROR] No se pudo recuperar la integración interrumpida: {recover_error}")
+                    continue
+                batch_errors = 0
 
             if self.stop_requested and not self.stats["stop_reason"]:
                 self.stats["stop_reason"] = "Parada inmediata" if self.immediate_stop else "Parada solicitada"
@@ -1000,6 +1117,9 @@ class AutoPilotEngine:
                 self.stats["stop_reason"] = f"Error: {e}"
         finally:
             self._save_state()
+            # The session ended here (also when it was stopped): nothing to resume
+            auto_match.unlink(SESSION_PATH)
+            auto_match.REPO_LOCK.release()
             with self.lock:
                 self.is_running = False
                 self.stop_requested = False
@@ -1061,8 +1181,10 @@ def main():
     parser.add_argument("--no-integrate", action="store_true")
     parser.add_argument("--commit", action="store_true", help="git commit after each batch that integrated matches")
     parser.add_argument("--retry-failed", action="store_true")
+    parser.add_argument("--no-retry-failed", action="store_true", help="Don't start again the functions whose strategies are done")
     parser.add_argument("--save", action="store_true", help="Save these options as the configuration")
     parser.add_argument("--show-config", action="store_true")
+    parser.add_argument("--resume", action="store_true", help="Resume the session that was interrupted, if any")
     args = parser.parse_args()
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -1083,6 +1205,8 @@ def main():
         config["auto_commit"] = True
     if args.retry_failed:
         config["retry_failed"] = True
+    if args.no_retry_failed:
+        config["retry_failed"] = False
     config = normalize_config(config)
     if args.save:
         save_config(config)
@@ -1090,9 +1214,16 @@ def main():
         print(json.dumps(config, indent=2, ensure_ascii=False))
         return
 
+    resume = None
+    if args.resume:
+        resume = interrupted_session()
+        if resume is None or (config := resume_config(resume)) is None:
+            print("No hay ninguna sesión interrumpida que reanudar.")
+            return
     pilot = AutoPilotEngine()
     pilot._log = lambda text, _log=pilot._log: (_log(text), print(text.rstrip(), flush=True))
-    pilot.start(config=config)
+    if not pilot.start(config=config, resume=resume):
+        sys.exit(f"No se pudo empezar: {pilot.last_error}")
     try:
         while pilot.worker_thread and pilot.worker_thread.is_alive():
             pilot.worker_thread.join(0.5)
