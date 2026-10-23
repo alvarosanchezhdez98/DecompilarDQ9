@@ -971,11 +971,11 @@ document.addEventListener("DOMContentLoaded", () => {
     error: "Error",
   };
   const AP_BOOL_FIELDS = ["retry_failed", "integrate", "record_progress", "auto_commit", "keep_awake", "low_priority",
-    "auto_start", "repair_build", "reevaluate"];
+    "auto_start", "repair_build", "reevaluate", "auto_resume"];
   const AP_NUMBER_FIELDS = ["min_size", "max_size", "batch_size", "max_functions", "max_hours", "batch_pause_seconds",
-    "max_consecutive_errors", "jobs", "permute_seconds", "permute_threshold", "permute_from", "integration_group"];
+    "max_consecutive_errors", "jobs", "permute_seconds", "permute_threshold", "permute_from", "integration_group", "max_batch_errors"];
   const AP_STRATEGY_LABELS = {
-    m2c: "C de m2c", repair: "Reparar", context: "Prototipos", permute: "permute.py", compilers: "Compiladores", variants: "Variantes",
+    m2c: "C de m2c", repair: "Reparar", context: "Prototipos", assist: "Asistente", permute: "permute.py", compilers: "Compiladores", variants: "Variantes",
     rescore: "Re-evaluación",
   };
 
@@ -1360,7 +1360,7 @@ document.addEventListener("DOMContentLoaded", () => {
         apConfigDirty = false;
         refreshAutoPilotStatus();
       } else {
-        alert("El Modo Automático ya se encuentra en ejecución o no se pudo iniciar.");
+        alert(`No se pudo iniciar el Modo Automático: ${data.error || "ya está en ejecución"}`);
       }
     } catch (err) {
       alert(`Error al iniciar Modo Automático: ${err.message}`);
@@ -1369,7 +1369,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function postAutoPilot(path, body = {}) {
     try {
-      await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      if (data.started === false && data.error) alert(`No se pudo empezar: ${data.error}`);
     } catch (err) {
       alert(`Error: ${err.message}`);
     }

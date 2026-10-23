@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body class="dark-theme">
   <div class="app-container">
@@ -300,6 +300,9 @@
                     <label>Parar tras N errores seguidos (0 = nunca)
                       <input name="max_consecutive_errors" type="number" min="0" class="input-text">
                     </label>
+                    <label>Parar tras N lotes fallidos seguidos (cada uno se reintenta)
+                      <input name="max_batch_errors" type="number" min="1" max="100" class="input-text">
+                    </label>
                   </div>
                 </fieldset>
 
@@ -309,9 +312,10 @@
                     <label class="ap-check"><input name="strategies" type="checkbox" value="m2c"> 1. C de m2c tal cual <small>(la que más matches da)</small></label>
                     <label class="ap-check"><input name="strategies" type="checkbox" value="repair"> 2. Reparar el C que no compila <small>(rápida)</small></label>
                     <label class="ap-check"><input name="strategies" type="checkbox" value="context"> 3. m2c con los prototipos del proyecto <small>(rápida)</small></label>
-                    <label class="ap-check"><input name="strategies" type="checkbox" value="permute"> 4. permute.py en los casi-matches</label>
-                    <label class="ap-check"><input name="strategies" type="checkbox" value="compilers"> 5. Otras versiones del compilador</label>
-                    <label class="ap-check"><input name="strategies" type="checkbox" value="variants"> 6. Variantes de m2c y pragmas <small>(lenta)</small></label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="assist"> 4. Asistente de casi-matches: firma, tipos, orden, pila <small>(desde el 50 %)</small></label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="permute"> 5. permute.py en los casi-matches</label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="compilers"> 6. Otras versiones del compilador</label>
+                    <label class="ap-check"><input name="strategies" type="checkbox" value="variants"> 7. Variantes de m2c y pragmas <small>(lenta)</small></label>
                   </div>
                   <div class="ap-row">
                     <label>permute.py por función (s, 0 = no)
@@ -347,6 +351,7 @@
                   <label class="ap-check"><input name="keep_awake" type="checkbox"> Impedir que el PC entre en suspensión mientras trabaja</label>
                   <label class="ap-check"><input name="low_priority" type="checkbox"> Prioridad baja (el PC sigue usable)</label>
                   <label class="ap-check"><input name="auto_start" type="checkbox"> Arrancar solo al abrir el Studio (p. ej. tras reiniciar)</label>
+                  <label class="ap-check"><input name="auto_resume" type="checkbox"> Reanudar al abrir el Studio una sesión que se cortó (un cierre o un reinicio)</label>
                   <div class="ap-config-actions">
                     <button type="button" id="btn-ap-save-config" class="btn btn-sm btn-primary">💾 Guardar configuración</button>
                     <button type="button" id="btn-ap-default-config" class="btn btn-sm btn-outline">↺ Valores por defecto</button>
@@ -788,6 +793,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

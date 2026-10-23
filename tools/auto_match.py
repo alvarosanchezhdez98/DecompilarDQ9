@@ -60,6 +60,8 @@ RESULTS_PATH = AUTOPILOT_PATH / "results.json"
 SAVE_INTERVAL = 3.0 # seconds between the saves of results.json
 SOURCE_PATH = root_path / "src" / "Autopilot"
 CONFIGURE_PATH = root_path / "tools" / "configure.py"
+LOCK_PATH = AUTOPILOT_PATH / "autopilot.lock"
+JOURNAL_PATH = AUTOPILOT_PATH / "journal"
 THUMB_START = re.compile(r"^\s*thumb_func_start\s+(\S+)", re.M)
 IDENTIFIER = re.compile(r"\b[A-Za-z_]\w*\b")
 NOT_NAMES = {"static", "extern", "const", "volatile", "unsigned", "signed", "struct", "union", "enum", "void", "char",
@@ -135,6 +137,78 @@ class ProcessRunner:
 RUNNER = ProcessRunner()
 
 
+def process_alive(pid: int) -> bool:
+    '''Whether a process with that id is running'''
+    if pid <= 0:
+        return False
+    if sys.platform == "win32":
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(0x1000, False, pid) # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return False
+        code = ctypes.c_ulong()
+        kernel32.GetExitCodeProcess(handle, ctypes.byref(code))
+        kernel32.CloseHandle(handle)
+        return code.value == 259 # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
+
+
+class RepoLock:
+    '''Only one process changes the build and the results at a time: the GUI's autopilot, its actions, or
+    tools/auto_match.py and tools/auto_pilot.py from a terminal. The lock is a file with the owner's process id, so a
+    lock whose process died (a crash, a closed window) is taken over. Within a process it's counted, so that an
+    autopilot session and the steps it calls share it'''
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.lock = threading.Lock()
+        self.count = 0
+
+    def holder(self) -> dict | None:
+        '''Who has the lock, if a live process other than this one has it'''
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        pid = int(data.get("pid", 0))
+        if pid == os.getpid() or not process_alive(pid):
+            return None
+        return data
+
+    def acquire(self, owner: str) -> tuple[bool, str]:
+        with self.lock:
+            if self.count:
+                self.count += 1
+                return True, ""
+            holder = self.holder()
+            if holder:
+                return False, (f"{holder.get('owner', 'otro proceso')} (proceso {holder.get('pid')}, desde "
+                               f"{holder.get('since', '?')}) ya está trabajando en el build")
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            data = {"pid": os.getpid(), "owner": owner, "since": time.strftime("%Y-%m-%d %H:%M:%S")}
+            retry_io(lambda: self.path.write_text(json.dumps(data), encoding="utf-8"))
+            self.count = 1
+            return True, ""
+
+    def release(self):
+        with self.lock:
+            if not self.count:
+                return
+            self.count -= 1
+            if self.count == 0:
+                try:
+                    data = json.loads(self.path.read_text(encoding="utf-8"))
+                    if int(data.get("pid", 0)) == os.getpid():
+                        retry_io(lambda: self.path.unlink(missing_ok=True))
+                except (OSError, ValueError):
+                    pass
+
+
 def retry_io(action: Callable[[], object], attempts: int = 40, delay: float = 0.25):
     '''Runs a file operation again while Windows says that another program has the file open (an antivirus or an
     indexer that reads the new files, for a moment), instead of failing the whole run'''
@@ -160,6 +234,9 @@ def write_bytes(path: Path, content: bytes):
 
 def unlink(path: Path):
     retry_io(lambda: path.unlink(missing_ok=True))
+
+
+REPO_LOCK = RepoLock(LOCK_PATH)
 
 
 def remove_empty_directory(directory: Path):
@@ -382,7 +459,7 @@ def m2c_source(declarations: list[str], body: str, symbol: str, thumb: bool) -> 
     lines.append("")
     if thumb:
         lines.append("#pragma thumb on")
-    lines.append(body.rstrip())
+    lines.append((fill_param_gaps(body, symbol) or body).rstrip())
     if thumb:
         lines.append("#pragma thumb off")
     return "\n".join(lines) + "\n"
@@ -394,10 +471,12 @@ STRATEGIES = {
     "m2c": "C de m2c tal cual",
     "repair": "Reparar el C que no compila",
     "context": "m2c con los prototipos del proyecto",
+    "assist": "Asistente de casi-matches (firma, tipos, orden)",
     "permute": "permute.py en los casi-matches",
     "compilers": "Otras versiones del compilador",
     "variants": "Variantes de m2c y pragmas (lenta)",
 }
+ASSIST_FROM = 50.0 # The match from which the assistant is tried
 COMPILER_VERSIONS = ["2.0/sp2", "2.0/sp1p5", "2.0/sp2p3", "1.2/sp4"]
 PRAGMA_VARIANTS = {
     "O4": "#pragma optimization_level 4",
@@ -434,6 +513,8 @@ def next_strategy(entry: dict | None, enabled: list[str], permute_from: float) -
         if strategy == "repair" and status == COMPILE_ERROR:
             return strategy
         if strategy == "context" and status in (NEAR, NO_MATCH):
+            return strategy
+        if strategy == "assist" and (status == COMPILE_ERROR or status in (NEAR, NO_MATCH) and best >= ASSIST_FROM):
             return strategy
         if strategy == "permute" and status in (NEAR, NO_MATCH) and best >= permute_from:
             return strategy
@@ -518,6 +599,154 @@ def unprototype_calls(text: str, symbol: str) -> str | None:
 
 
 REPAIRS = [declare_stack_variables, unprototype_calls]
+
+
+# The near-match assistant -------------------------------------------------------------------------------------------
+# Most near matches of m2c's C differ in the function's signature or in the types of its variables, which change the
+# registers or add conversions (lsl/asr, and #0xff), not in the logic (measured on 300 functions from 80 %, October
+# 2026). The assistant tries targeted changes of those, keeping the one that matches best each round (see
+# Matcher.assist and tools/near_match.py).
+
+INTEGER_TYPES = ["s32", "u32", "s16", "u16", "s8", "u8"]
+
+
+def definition_match(text: str, symbol: str):
+    return re.search(rf"\b{re.escape(symbol)}\s*\((?P<params>[^)]*)\)(?P<brace>\s*\{{)", text)
+
+
+def parameters(text: str, symbol: str) -> list[str] | None:
+    match = definition_match(text, symbol)
+    if not match:
+        return None
+    return [param.strip() for param in match["params"].split(",") if param.strip() and param.strip() != "void"]
+
+
+def with_parameters(text: str, symbol: str, params: list[str]) -> str:
+    match = definition_match(text, symbol)
+    return text[:match.start("params")] + (", ".join(params) or "void") + text[match.end("params"):]
+
+
+def fill_param_gaps(text: str, symbol: str) -> str | None:
+    '''m2c leaves out the parameters that the function doesn't use, `f(s32 arg0, void *arg2)`, so the ones after them
+    go in the wrong registers: they're declared, `f(s32 arg0, s32 arg1, void *arg2)`. None when there's no gap'''
+    params = parameters(text, symbol)
+    if not params:
+        return None
+    numbered = {}
+    for param in params:
+        number = re.search(r"\barg(\d+)\s*$", param)
+        if not number:
+            return None
+        numbered[int(number[1])] = param
+    if sorted(numbered) == list(range(len(numbered))) or max(numbered) > 15:
+        return None
+    return with_parameters(text, symbol, [numbered.get(index, f"s32 arg{index}") for index in range(max(numbered) + 1)])
+
+
+def signature_variants(text: str, symbol: str) -> list[tuple[str, str]]:
+    '''More parameters at the end (the original can receive arguments that it only passes on to a call), and no
+    return value (m2c returns what's left in r0)'''
+    variants = []
+    if filled := fill_param_gaps(text, symbol):
+        variants.append(("parámetros sin usar declarados", filled))
+    params = parameters(text, symbol)
+    if params is not None and len(params) < 4:
+        names = {re.search(r"(\w+)\s*$", param)[1] for param in params}
+        extra = list(params)
+        for index in range(len(params), 4):
+            name = f"arg{index}"
+            while name in names:
+                name += "_"
+            extra.append(f"s32 {name}")
+            variants.append((f"+{len(extra) - len(params)} parámetros", with_parameters(text, symbol, extra)))
+    head = re.search(rf"^(?P<type>[^\n(]*?)\b{re.escape(symbol)}\s*\(", text, re.M)
+    span = function_body_span(text, symbol)
+    if head and span and head["type"].strip() not in ("void", "static void"):
+        new_type = "static void " if head["type"].strip().startswith("static") else "void "
+        body = re.sub(r"\breturn\s+([^;]+);", r"\1; return;", text[span[0]:span[1]])
+        variants.append(("retorno void",
+                         text[:head.start("type")] + new_type + text[head.end("type"):span[0]] + body + text[span[1]:]))
+    return variants
+
+
+def type_variants(text: str, symbol: str) -> list[tuple[str, str]]:
+    '''Other integer types for the parameters and the local variables, one at a time'''
+    variants = []
+    params = parameters(text, symbol) or []
+    for index, param in enumerate(params):
+        match = re.match(r"^(s32|u32|s16|u16|s8|u8|M2C_UNK|void \*)\s*(\w+)$", param)
+        if not match:
+            continue
+        current = match[1].strip()
+        options = [option for option in INTEGER_TYPES if option != current] + (["void *"] if current != "void *" else [])
+        for option in options:
+            changed = list(params)
+            changed[index] = f"{option} {match[2]}" if not option.endswith("*") else f"{option}{match[2]}"
+            variants.append((f"{match[2]}: {option}", with_parameters(text, symbol, changed)))
+    span = function_body_span(text, symbol)
+    if span:
+        body = text[span[0]:span[1]]
+        for match in re.finditer(r"^(\s+)(s32|u32|s16|u16|s8|u8|M2C_UNK)\s+(\w+);$", body, re.M):
+            for option in INTEGER_TYPES:
+                if option != match[2]:
+                    changed = body[:match.start(2)] + option + body[match.end(2):]
+                    variants.append((f"{match[3]}: {option}", text[:span[0]] + changed + text[span[1]:]))
+    return variants
+
+
+def order_variants(text: str, symbol: str) -> list[tuple[str, str]]:
+    '''Two consecutive declarations of local variables swapped: their order decides the registers'''
+    span = function_body_span(text, symbol)
+    if not span:
+        return []
+    lines = text[span[0]:span[1]].split("\n")
+    declarations = [index for index, line in enumerate(lines)
+                    if re.match(r"^\s+[\w\s\*]+?\b\w+(\[[^\]]*\])?;$", line)
+                    and not re.match(r"^\s+(return|break|continue|goto)\b", line)]
+    variants = []
+    for first, second in zip(declarations, declarations[1:]):
+        if second == first + 1:
+            swapped = list(lines)
+            swapped[first], swapped[second] = swapped[second], swapped[first]
+            variants.append((f"orden {lines[first].strip()} <-> {lines[second].strip()}",
+                             text[:span[0]] + "\n".join(swapped) + text[span[1]:]))
+    return variants
+
+
+def call_variants(text: str, symbol: str) -> list[tuple[str, str]]:
+    fixed = unprototype_calls(text, symbol)
+    return [("llamadas sin prototipo", fixed)] if fixed else []
+
+
+def stack_variants(text: str, symbol: str, frame: int | None = None) -> list[tuple[str, str]]:
+    '''When the original reserves more stack (`sub sp, sp, #frame`), a stack variable whose address the function
+    passes on is a buffer or a structure, which m2c declares as one value: it's declared as an array that fills the
+    frame, minus the other variables'''
+    span = function_body_span(text, symbol)
+    if not span or not frame:
+        return []
+    body = text[span[0]:span[1]]
+    variants = []
+    declared = {match[2]: match for match in re.finditer(r"^\s+(s32|u32|s16|u16|s8|u8|M2C_UNK)\s+(sp[0-9A-F]+);$",
+                                                           body, re.M)}
+    for name, match in declared.items():
+        if not re.search(rf"&\s*{name}\b", body):
+            continue
+        others = sum(4 for other in declared if other != name)
+        for size in sorted({frame - others, frame - others - 4, frame, frame - 4} - {0}):
+            if size <= 0:
+                continue
+            element = {"s32": 4, "u32": 4, "M2C_UNK": 4, "s16": 2, "u16": 2}.get(match[1], 1)
+            declaration = f"{match.group(0).split(match[1])[0]}{match[1]} {name}[{max(1, size // element)}];"
+            changed = body.replace(match.group(0), "\x01", 1) # The declaration, the addresses, then the values
+            changed = re.sub(rf"&\s*{name}\b", "\x02", changed)
+            changed = re.sub(rf"\b{name}\b(?!\s*\[)", f"{name}[0]", changed)
+            changed = changed.replace("\x02", name).replace("\x01", declaration)
+            variants.append((f"{name}: buffer de {size:#x} bytes", text[:span[0]] + changed + text[span[1]:]))
+    return variants
+
+
+ASSIST_TRANSFORMS = [signature_variants, call_variants, type_variants, order_variants]
 
 
 
@@ -772,6 +1001,57 @@ class Matcher:
             text, percent, note = self.repaired(attempt, text, note, "context")
         self.keep_if_better(attempt, text, percent, note, "context")
 
+    def assist(self, attempt: "Attempt", text: str, rounds: int = 4, budget: int = 80,
+               log: Callable[[str], None] | None = None) -> tuple[str, float | None, str, list[str]]:
+        '''The near-match assistant: from the C, each round tries the changes of ASSIST_TRANSFORMS and keeps the one
+        that matches best, until it matches or no change helps. Returns the best C, its match, objdiff's note and
+        the changes kept'''
+        percent, note = self.evaluate(attempt, text, "assist")
+        if percent is None: # The parameters' gaps and the repairs first: the rest needs C that compiles
+            filled = fill_param_gaps(text, attempt.function)
+            if filled:
+                text = filled
+            text, percent, note = self.repaired(attempt, text, note, "assist")
+            if percent is None:
+                return text, None, note, []
+        steps: list[str] = []
+        for round_ in range(rounds):
+            if percent >= 100.0:
+                break
+            candidates = [item for transform in ASSIST_TRANSFORMS for item in transform(text, attempt.function)]
+            candidates += stack_variants(text, attempt.function, self.original_frame(attempt.function))
+            best = None
+            for label, candidate in candidates[:budget]:
+                candidate_percent, candidate_note = self.evaluate(attempt, candidate, f"assist{round_}")
+                if candidate_percent is not None and candidate_percent > (best[1] if best else percent):
+                    best = (candidate, candidate_percent, candidate_note, label)
+                    if candidate_percent >= 100.0:
+                        break
+            if best is None:
+                break
+            text, percent, note = best[0], best[1], best[2]
+            steps.append(best[3])
+            if log:
+                log(f"    {attempt.function}: {best[3]} -> {percent:.1f} %")
+        return text, percent, note, steps
+
+    def original_frame(self, name: str) -> int | None:
+        '''The stack that the original function reserves for its variables (`sub sp, sp, #size`), from its assembly'''
+        if name not in self.asm:
+            return None
+        path = self.function_asm(name)
+        match = re.search(r"^\s*sub sp, sp, #(0x[0-9a-f]+|\d+)", path.read_text(encoding="utf-8"), re.M) if path else None
+        return int(match[1], 0) if match else None
+
+    def strategy_assist(self, attempt: "Attempt") -> None:
+        text = self.best_text(attempt)
+        if text is None:
+            return
+        text, percent, note, steps = self.assist(attempt, text)
+        if steps:
+            note = (note + " " if note else "") + "Asistente: " + "; ".join(steps)
+        self.keep_if_better(attempt, text, percent, note, "assist")
+
     def strategy_permute(self, attempt: "Attempt") -> None:
         source = self.work_source(attempt)
         if not source.is_file() or attempt.status not in (NEAR, NO_MATCH):
@@ -844,6 +1124,7 @@ class Matcher:
         if strategy not in attempt.strategies:
             attempt.strategies.append(strategy)
         {"m2c": self.strategy_m2c, "repair": self.strategy_repair, "context": self.strategy_context,
+         "assist": self.strategy_assist,
          "permute": self.strategy_permute, "compilers": self.strategy_compilers,
          "variants": self.strategy_variants}[strategy](attempt)
         return attempt
@@ -968,6 +1249,73 @@ def build_error(output: str) -> str:
     return " | ".join(dict.fromkeys(wanted))[:400]
 
 
+class IntegrationJournal:
+    '''The last state of the configuration files that builds, and the sources added since, written before an
+    integration changes them: when the process dies in the middle (a crash, a power cut), recover() puts them back,
+    so that the build isn't left with half a group'''
+
+    def __init__(self, path: Path = JOURNAL_PATH):
+        self.path = path
+        self.manifest = path / "manifest.json"
+        self.files: list[list[str]] = []
+        self.sources: list[str] = []
+
+    def begin(self, saved: dict[Path, bytes]):
+        self.path.mkdir(parents=True, exist_ok=True)
+        self.files = []
+        for index, (path, content) in enumerate(saved.items()):
+            backup = self.path / f"{index}.bak"
+            write_bytes(backup, content)
+            self.files.append([path.relative_to(root_path).as_posix(), backup.name])
+        self.sources = []
+        self.write()
+
+    def add_source(self, source: Path):
+        self.sources.append(source.relative_to(root_path).as_posix())
+        self.write()
+
+    def reset_sources(self):
+        self.sources = []
+        self.write()
+
+    def write(self):
+        data = json.dumps({"files": self.files, "sources": self.sources,
+                           "at": time.strftime("%Y-%m-%d %H:%M:%S")})
+        temporary = self.manifest.with_suffix(".tmp")
+        retry_io(lambda: temporary.write_text(data, encoding="utf-8"))
+        retry_io(lambda: temporary.replace(self.manifest))
+
+    def clear(self):
+        if self.path.is_dir():
+            for path in self.path.iterdir():
+                unlink(path)
+
+    def recover(self, log: Callable[[str], None] = print) -> bool:
+        '''Puts back the configuration of an integration that didn't finish. True when there was one'''
+        if not self.manifest.is_file():
+            return False
+        try:
+            data = json.loads(self.manifest.read_text(encoding="utf-8"))
+        except ValueError:
+            self.clear()
+            return False
+        log(f"[RECUPERACIÓN] Una integración se interrumpió ({data.get('at', '?')}): se restaura la configuración "
+            f"y se quitan {len(data.get('sources', []))} archivos que no llegaron a verificarse.")
+        for relative, backup in data.get("files", []):
+            content = (self.path / backup).read_bytes()
+            target = root_path / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if not target.is_file() or target.read_bytes() != content:
+                write_bytes(target, content)
+        for relative in data.get("sources", []):
+            source = root_path / relative
+            unlink(source)
+            remove_empty_directory(source.parent)
+        subprocess.run([sys.executable, "tools/configure.py", "eur"], cwd=root_path, capture_output=True)
+        self.clear()
+        return True
+
+
 class Integrator:
     '''Adds matched functions to the build, each in its own file, and keeps them only when `ninja check` passes.
 
@@ -985,6 +1333,7 @@ class Integrator:
         self.baseline_ok: bool | None = None
         self.baseline_error = ""
         self.checks = 0
+        self.journal = IntegrationJournal()
 
     # The state of the configuration -------------------------------------------------------------------------------
 
@@ -1090,12 +1439,15 @@ class Integrator:
             on_outcome(outcome)
 
         paths = self.config_paths(entry["module"] for entry in entries)
+        saved = self.snapshot(paths)
+        self.journal.begin(saved)
         try:
-            self.integrate_group(entries, self.snapshot(paths), paths, finish, top=True)
+            self.integrate_group(entries, saved, paths, finish, top=True)
         except Cancelled:
             pass # integrate_group restored the files
         finally:
             results.flush() # The integrations are recorded at once: the build has them
+        self.journal.clear() # Only when it ended here: after a crash, recover() undoes the unfinished group
         return outcomes
 
     def integrate_group(self, group: list[dict], saved: dict[Path, bytes], paths: list[Path],
@@ -1108,6 +1460,7 @@ class Integrator:
                 if ok:
                     added.append(entry)
                     sources.append(self.source_of(entry))
+                    self.journal.add_source(self.source_of(entry))
                 else:
                     finish(Outcome(entry, False, message, deterministic))
             if not added:
@@ -1115,15 +1468,19 @@ class Integrator:
             ok, error = self.check_build()
         except BaseException:
             self.restore(saved, sources)
+            self.journal.reset_sources()
             subprocess.run([sys.executable, "tools/configure.py", "eur"], cwd=root_path, capture_output=True)
             raise
         if ok:
             self.baseline_ok = True
+            built = self.snapshot(paths)
+            self.journal.begin(built) # Before recording them: after a crash, the files and the results agree
             for entry in added:
                 finish(Outcome(entry, True, self.source_of(entry).relative_to(root_path).as_posix()))
-            return self.snapshot(paths)
+            return built
 
         self.restore(saved, sources)
+        self.journal.reset_sources()
         if top or self.baseline_ok is None:
             # Is it the group, or was the build broken already?
             baseline, baseline_error = self.check_baseline()
@@ -1198,6 +1555,8 @@ class Integrator:
             backups = {self.source_of(entry): self.source_of(entry).read_bytes() for entry in integrated}
 
             def without(count: int) -> bool:
+                # The sources too: if the process dies while they're out, recover() writes them back
+                self.journal.begin({**saved, **backups})
                 try:
                     self.remove_files(integrated[:count])
                     ok, _ = self.check_build()
@@ -1207,6 +1566,7 @@ class Integrator:
                         source.parent.mkdir(parents=True, exist_ok=True)
                         if not source.is_file() or source.read_bytes() != content:
                             write_bytes(source, content)
+                    self.journal.clear()
                 return ok
 
             log(f"[REPARAR] Probando sin los {len(integrated)} archivos del autopilot...")
@@ -1341,6 +1701,13 @@ def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
+
+    ok, why = REPO_LOCK.acquire("tools/auto_match.py")
+    if not ok:
+        sys.exit(f"No se puede empezar: {why}")
+    import atexit
+    atexit.register(REPO_LOCK.release)
+    IntegrationJournal().recover()
 
     results = shared_results()
     if args.repair_build:
