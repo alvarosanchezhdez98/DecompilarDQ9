@@ -889,6 +889,10 @@ src/Autopilot/ov004/021698f4.c:
     complete
     .text start:0x021698f4 end:0x02169a28
 
+src/Autopilot/ov004/02169a28.c:
+    complete
+    .text start:0x02169a28 end:0x02169adc
+
 src/Autopilot/ov004/02169adc.c:
     complete
     .text start:0x02169adc end:0x02169b4c

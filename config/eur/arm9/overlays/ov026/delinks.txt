@@ -28,3 +28,7 @@ src/Autopilot/ov026/021dd3c4.c:
     complete
     .text start:0x021dd3c4 end:0x021dd3dc
 
+src/Autopilot/ov026/021ddd84.c:
+    complete
+    .text start:0x021ddd84 end:0x021dddcc
+

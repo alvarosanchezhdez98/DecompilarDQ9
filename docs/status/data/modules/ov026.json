@@ -6,15 +6,15 @@
     "status": "In progress",
     "range": "0x021d8a40-0x021de6a0",
     "code_bytes": 23648,
-    "done_bytes": 356,
+    "done_bytes": 428,
     "nonmatching_bytes": 0,
     "functions": 24,
-    "decompiled": 6,
+    "decompiled": 7,
     "nonmatching": 0,
-    "remaining": 18,
-    "complete_files": 6,
+    "remaining": 17,
+    "complete_files": 7,
     "partial_files": 0,
-    "remaining_by_size": [0, 8, 8, 2]
+    "remaining_by_size": [0, 7, 8, 2]
   },
   "sections": ["0x021d8a40-0x021de6a0"],
   "files": [
@@ -23,7 +23,8 @@
     {"name": "src/Autopilot/ov026/021d8b98.c", "complete": true, "ranges": ["0x021d8b98-0x021d8ba0"], "code_bytes": 8, "functions": 1, "decompiled": 1, "nonmatching": 0},
     {"name": "src/Autopilot/ov026/021dbe44.c", "complete": true, "ranges": ["0x021dbe44-0x021dbf04"], "code_bytes": 192, "functions": 1, "decompiled": 1, "nonmatching": 0},
     {"name": "src/Autopilot/ov026/021dce1c.c", "complete": true, "ranges": ["0x021dce1c-0x021dce34"], "code_bytes": 24, "functions": 1, "decompiled": 1, "nonmatching": 0},
-    {"name": "src/Autopilot/ov026/021dd3c4.c", "complete": true, "ranges": ["0x021dd3c4-0x021dd3dc"], "code_bytes": 24, "functions": 1, "decompiled": 1, "nonmatching": 0}
+    {"name": "src/Autopilot/ov026/021dd3c4.c", "complete": true, "ranges": ["0x021dd3c4-0x021dd3dc"], "code_bytes": 24, "functions": 1, "decompiled": 1, "nonmatching": 0},
+    {"name": "src/Autopilot/ov026/021ddd84.c", "complete": true, "ranges": ["0x021ddd84-0x021dddcc"], "code_bytes": 72, "functions": 1, "decompiled": 1, "nonmatching": 0}
   ],
   "functions": [
     {"address": "0x021d8a40", "size": 56, "state": "decompiled", "symbol": "func_ov026_021d8a40", "file": "src/Autopilot/ov026/021d8a40.c"},
@@ -48,7 +49,7 @@
     {"address": "0x021dd3c4", "size": 24, "state": "decompiled", "symbol": "func_ov026_021dd3c4", "file": "src/Autopilot/ov026/021dd3c4.c"},
     {"address": "0x021dd3dc", "size": 1228, "state": "remaining", "symbol": "func_ov026_021dd3dc"},
     {"address": "0x021dd8a8", "size": 1244, "state": "remaining", "symbol": "func_ov026_021dd8a8"},
-    {"address": "0x021ddd84", "size": 72, "state": "remaining", "symbol": "func_ov026_021ddd84"},
+    {"address": "0x021ddd84", "size": 72, "state": "decompiled", "symbol": "func_ov026_021ddd84", "file": "src/Autopilot/ov026/021ddd84.c"},
     {"address": "0x021dddcc", "size": 2260, "state": "remaining", "symbol": "func_ov026_021dddcc"}
   ]
 }
