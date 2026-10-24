@@ -1,0 +1,9 @@
+#include <m2c.h>
+
+
+s32 func_020688e4(s32 arg0, void *arg1) {
+    if (M2C_FIELD(arg1, u8 *, 0x19D6) == 0) {
+        return 1;
+    }
+    return 0;
+}
