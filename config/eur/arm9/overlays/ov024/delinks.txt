@@ -4,6 +4,14 @@
     .data       start:0x021ff1e0 end:0x02200140 kind:data align:32
     .bss        start:0x02200140 end:0x02200160 kind:bss align:32
 
+src/Autopilot/ov024/021d8a40_ov024.c:
+    complete
+    .text start:0x021d8a40 end:0x021d8a84
+
+src/Autopilot/ov024/021d8a84.c:
+    complete
+    .text start:0x021d8a84 end:0x021d8ab4
+
 src/Autopilot/ov024/021d8ab4.c:
     complete
     .text start:0x021d8ab4 end:0x021d8ad8
@@ -20,9 +28,17 @@ src/Autopilot/ov024/021d8c70.c:
     complete
     .text start:0x021d8c70 end:0x021d8c90
 
+src/Autopilot/ov024/021d8c90.c:
+    complete
+    .text start:0x021d8c90 end:0x021d8cd4
+
 src/Autopilot/ov024/021d8cd4.c:
     complete
     .text start:0x021d8cd4 end:0x021d8cf4
+
+src/Autopilot/ov024/021d8cf4.c:
+    complete
+    .text start:0x021d8cf4 end:0x021d8d38
 
 src/Autopilot/ov024/021d8d38.c:
     complete
@@ -36,13 +52,33 @@ src/Autopilot/ov024/021d8db4.c:
     complete
     .text start:0x021d8db4 end:0x021d8e18
 
+src/Autopilot/ov024/021d8e18.c:
+    complete
+    .text start:0x021d8e18 end:0x021d8e60
+
 src/Autopilot/ov024/021d8e60.c:
     complete
     .text start:0x021d8e60 end:0x021d8e6c
 
+src/Autopilot/ov024/021d8e6c.c:
+    complete
+    .text start:0x021d8e6c end:0x021d8eb0
+
 src/Autopilot/ov024/021d8eb0.c:
     complete
     .text start:0x021d8eb0 end:0x021d8ed4
+
+src/Autopilot/ov024/021d8ed4.c:
+    complete
+    .text start:0x021d8ed4 end:0x021d8f18
+
+src/Autopilot/ov024/021d8f4c.c:
+    complete
+    .text start:0x021d8f4c end:0x021d8f90
+
+src/Autopilot/ov024/021d8f90.c:
+    complete
+    .text start:0x021d8f90 end:0x021d8fd4
 
 src/Autopilot/ov024/021d8fd4.c:
     complete
@@ -52,13 +88,29 @@ src/Autopilot/ov024/021d8ff8.c:
     complete
     .text start:0x021d8ff8 end:0x021d901c
 
+src/Autopilot/ov024/021d901c.c:
+    complete
+    .text start:0x021d901c end:0x021d9060
+
 src/Autopilot/ov024/021d9060.c:
     complete
     .text start:0x021d9060 end:0x021d9084
 
+src/Autopilot/ov024/021d9084.c:
+    complete
+    .text start:0x021d9084 end:0x021d90c8
+
+src/Autopilot/ov024/021d9174.c:
+    complete
+    .text start:0x021d9174 end:0x021d91b8
+
 src/Autopilot/ov024/021d91b8.c:
     complete
     .text start:0x021d91b8 end:0x021d91c0
+
+src/Autopilot/ov024/021d91c0.c:
+    complete
+    .text start:0x021d91c0 end:0x021d9204
 
 src/Autopilot/ov024/021d9204.c:
     complete

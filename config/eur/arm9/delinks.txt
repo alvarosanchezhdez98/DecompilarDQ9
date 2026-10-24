@@ -3385,6 +3385,10 @@ src/Autopilot/main/0204bf40.c:
     complete
     .text start:0x0204bf40 end:0x0204bf54
 
+src/Autopilot/main/0204bf54.c:
+    complete
+    .text start:0x0204bf54 end:0x0204c040
+
 src/Autopilot/main/0204c618.c:
     complete
     .text start:0x0204c618 end:0x0204c620
@@ -4225,6 +4229,14 @@ src/Autopilot/main/020643f0.c:
     complete
     .text start:0x020643f0 end:0x0206440c
 
+src/Autopilot/main/02064914.c:
+    complete
+    .text start:0x02064914 end:0x020649c0
+
+src/Autopilot/main/020649c0.c:
+    complete
+    .text start:0x020649c0 end:0x02064a04
+
 src/Autopilot/main/02064a04.c:
     complete
     .text start:0x02064a04 end:0x02064a18
@@ -4288,6 +4300,10 @@ src/Autopilot/main/020679e4.c:
 src/Autopilot/main/02067aac.c:
     complete
     .text start:0x02067aac end:0x02067ae8
+
+src/Autopilot/main/02067ae8.c:
+    complete
+    .text start:0x02067ae8 end:0x02067b38
 
 src/Autopilot/main/02067fac.c:
     complete
@@ -5038,6 +5054,10 @@ src/Autopilot/main/0207da8c.c:
     complete
     .text start:0x0207da8c end:0x0207daa4
 
+src/Autopilot/main/0207db68.c:
+    complete
+    .text start:0x0207db68 end:0x0207dbb8
+
 src/Autopilot/main/0207de00.c:
     complete
     .text start:0x0207de00 end:0x0207de2c
@@ -5165,6 +5185,10 @@ src/Autopilot/main/02080c30.c:
 src/Autopilot/main/02080c4c.c:
     complete
     .text start:0x02080c4c end:0x02080c78
+
+src/Autopilot/main/02080c78.c:
+    complete
+    .text start:0x02080c78 end:0x02080cd0
 
 src/Autopilot/main/02080f9c.c:
     complete
@@ -6046,6 +6070,10 @@ src/Autopilot/main/0208e508.c:
     complete
     .text start:0x0208e508 end:0x0208e530
 
+src/Autopilot/main/0208e834.c:
+    complete
+    .text start:0x0208e834 end:0x0208e880
+
 src/Autopilot/main/0208e880.c:
     complete
     .text start:0x0208e880 end:0x0208e894
@@ -6865,6 +6893,10 @@ src/Autopilot/main/020a0cd4.c:
 src/Autopilot/main/020a0d68.c:
     complete
     .text start:0x020a0d68 end:0x020a0d7c
+
+src/Autopilot/main/020a0d7c.c:
+    complete
+    .text start:0x020a0d7c end:0x020a0dc8
 
 src/Autopilot/main/020a0dc8.c:
     complete

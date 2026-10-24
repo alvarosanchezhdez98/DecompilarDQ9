@@ -234,11 +234,11 @@ Last recorded on 2026-10-24.
 
 |  | Decompiled | Total | Progress |
 | --- | ----------: | -----: | --------: |
-| Code (bytes) | 783,820 | 2,959,024 | 26.49 % |
-| Functions | 8,462 | 14,779 | 57.26 % |
+| Code (bytes) | 785,792 | 2,959,024 | 26.56 % |
+| Functions | 8,486 | 14,779 | 57.42 % |
 | Modules | 4 complete, 28 in progress, 0 not started | 32 with code |  |
 
-Source files: 5311 complete, 1 in progress.
+Source files: 5335 complete, 1 in progress.
 
 Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since their C doesn't match yet (see [below](#functions-in-assembly)).
 
@@ -266,13 +266,13 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | 2026-10-21 | 7,843 (53.07 %) | 733,692 (24.80 %) | 4692 |
 | 2026-10-22 | 7,981 (54.00 %) | 745,276 (25.19 %) | 4830 |
 | 2026-10-23 | 8,431 (57.05 %) | 780,972 (26.39 %) | 5280 |
-| 2026-10-24 | 8,462 (57.26 %) | 783,820 (26.49 %) | 5311 |
+| 2026-10-24 | 8,486 (57.42 %) | 785,792 (26.56 %) | 5335 |
 
 ## Modules
 
 | Module | Purpose | Code (KB) | Functions | Decompiled | Remaining | Progress | Status |
 | ------ | ------- | ---------: | ---------: | ----------: | ---------: | --------: | ------ |
-| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 3774 | 2433 | 32.28 % | In progress |
+| main | Always loaded: game code, engine and libraries | 922.3 | 6207 | 3782 | 2425 | 32.37 % | In progress |
 | itcm | Always loaded, fast memory | 5.8 | 38 | 38 | 0 | 94.02 % | In progress |
 | dtcm | Always loaded, fast memory | 0.0 | 0 | 0 | 0 | - | No code |
 | ov000 | *Likely* battle: actors, actions and damage | 189.3 | 826 | 358 | 468 | 10.74 % | In progress |
@@ -292,14 +292,14 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | ov014 | Bestiary | 20.6 | 69 | 68 | 1 | 85.23 % | In progress |
 | ov015 | Fully decompiled (`src/Scene/Overlay_15`): the character viewer (`CharacterViewer`), a debug mode of `main()` with its own main loop. Its menus come from a script, `charaview4.bin`: it loads players, the party's models ("dolls"), NPCs, monsters, effects and event or skill cameras, changes the characters' look (gender, face, colours, hairstyle, build, equipment), plays and steps their motions, moves them, and shows the FPS, the triangles and quads drawn and the memory of the allocators. 17 of the 103 functions in assembly for now | 33.8 | 103 | 86 | 17 | 49.97 % | In progress |
 | ov016 | *Likely* video player (Mobiclip) | 21.0 | 85 | 53 | 32 | 10.06 % | In progress |
-| ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 501 | 693 | 9.04 % | In progress |
+| ov017 | Unclear, the largest overlay: game start and events | 300.4 | 1194 | 504 | 690 | 9.11 % | In progress |
 | ov018 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov019 | *Likely* the screen of the save data's errors, a mode of `main()` with its own main loop (`src/Scene/Overlay_19`): `GameState::saveError_` chooses its message, and some errors ask whether to *likely* delete the save data while a quill pen is drawn. Decompiled, with `Run()` in assembly for now | 3.2 | 5 | 4 | 1 | 8.70 % | In progress |
 | ov020 | What the game starts with (`StartupScene`, `src/Scene/Overlay_20`): in mode 6, the title, the logos (`nintendo.pac`, `bg_mobi_2.pac`, `bg_lv5.pac`); in the others, the versions of the game and its libraries and then a debug menu (`bg_title.pac`) that chooses the next mode. Decompiled, with `Run()` in assembly for now. Needs `FORCE_ACTIVE` | 8.9 | 18 | 17 | 1 | 53.34 % | In progress |
 | ov021 | A mode of `main()` with its own main loop that runs overlay 9 (the character creation) until it's done (`src/Scene/Overlay_21`). Decompiled, with `Run()` in assembly for now | 1.5 | 5 | 4 | 1 | 18.83 % | In progress |
 | ov022 | Empty | 0.0 | 0 | 0 | 0 | - | No code |
 | ov023 | Code shared by the menus and screens, loaded with them: the party members' 3D models (`CharacterModel`), the windows and sprites of overlay 9's character creation and of overlay 12's profile editor, the layouts (`.lia`) of the menus and of overlay 14's bestiary, the screen of the party members (`MemberScreen`), the sorted lists of items, the commands of the scripts that read the state of the game (`StateCommands`), the profile card of tag mode (`ProfileCard`), the window of the guides with their pages and titles (`GuideWindow`), the models of the equipment's items that overlay 5 uses (`EquipmentModelTable`), the window of the information on an item with its sprite, description, stats, places and monsters that overlays 2 to 6 show (`ItemInfoWindow`), the window of a battle's results with the experience and the level ups (`BattleResultWindow`), the end of the battles in overlay 0's battle scene (the states after a victory that give the experience, level ups, skills, gold, items, quests and titles, and the defeat, `BattleEnd`) with the table of experience multipliers (`expadj.nat`, `ExperienceTable`), the downloaded files ("info", "mes", "auction", "quest": checksum, RC4 and script commands, `DownloadContent`), the objects of overlay 11's menus (their list, base class and the objects of type 0 in `MenuObjects`, the backgrounds of type 2 in `MenuBackground`, the canvases of type 6 where the texts, numbers and boxes are drawn in `MenuCanvas`, the texts of type 8 in `MenuText`, the grids of type 7 with a cursor in `MenuGrid`, the objects of type 9 that move the others (the cursor) in `MenuMover`, the lists of texts of type 4 in `MenuTexts`, the sprites of type 10 in `MenuSprites`, the buttons of type 1 in `MenuButton`, the animations of type 11 in `MenuAnimation`, the graphics of type 12 in `MenuGraphics`, the objects of type 14 that pause and resume the music in `MenuMusic`, the numbers of type 15 in `MenuNumber`, the objects of type 16 in `MenuObject10`, the objects of type 17 that load the names of the items in `MenuPartNames`, the objects of type 18 that load their order in `MenuItemSort`, the boxes of type 19 in `MenuBox`, the party members' models of type 5 that L and R turn in `MenuCharacter`, the 3D objects of type 20 in `MenuObject3D`, the objects of type 13 that play a music in `MenuMusicPlayer`, the areas of the touch screen in `MenuTouchArea`; each other class is in its own file), list menus... (`src/Scene/Overlay_23`). 36 files decompiled, with 54 functions in assembly for now | 146.7 | 827 | 773 | 54 | 66.52 % | In progress |
-| ov024 | Unclear, no strings | 151.1 | 573 | 197 | 376 | 7.21 % | In progress |
+| ov024 | Unclear, no strings | 151.1 | 573 | 210 | 363 | 7.77 % | In progress |
 | ov025 | *Likely* battle spell and skill animations | 89.5 | 304 | 141 | 163 | 8.17 % | In progress |
 | ov026 | *Likely* spell and skill effects | 23.1 | 24 | 7 | 17 | 1.81 % | In progress |
 | ov027 | The NitroSDK's MB library, DS Download Play's parent (`src/MultiBoot`): it registers a game, sends its beacons and the blocks of its file to the children, and handles the wireless library. Overlay 31 uses it. Decompiled, in 7 files (`mb_parent.c`, `mb_fileinfo.c`, `mb_gameinfo.c`, `mb_wm_base.c`, `mb_cache.c`, `mb_task.c` and the children's requests), 14 functions still in assembly | 19.6 | 87 | 73 | 14 | 42.02 % | In progress |
@@ -318,7 +318,7 @@ Not counted as decompiled: 170 functions (173,820 bytes) in assembly, since thei
 | Secure area and startup | `0x02000000-0x02000c9c` | 3.2 | 26 | 0 | 26 | 0.00 % |
 | Level-5 code: main | `0x02000c9c-0x02001578` | 2.2 | 1 | 0 | 1 | 0.00 % |
 | C and C++ runtime (MSL, floating point) | `0x02001578-0x0200f398` | 55.5 | 173 | 9 | 164 | 0.29 % |
-| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 2313 | 1885 | 22.49 % |
+| Level-5 code | `0x0200f398-0x020afe44` | 642.7 | 4198 | 2321 | 1877 | 22.62 % |
 | NitroSystem FND and G2D | `0x020afe44-0x020b2adc` | 11.1 | 66 | 19 | 47 | 7.64 % |
 | NitroSystem G3D and GFD | `0x020b2adc-0x020bbd24` | 36.6 | 213 | 205 | 8 | 96.95 % |
 | NitroSystem sound | `0x020bbd24-0x020c0338` | 17.5 | 168 | 167 | 1 | 99.15 % |
@@ -509,7 +509,7 @@ An estimate of the work left in each module, by the size of the functions that a
 
 | Module | < 64 B | 64-511 B | 512 B-2 KB | >= 2 KB | Remaining code (KB) |
 | ------ | ------: | --------: | ----------: | -------: | -------------------: |
-| main | 489 | 1657 | 257 | 30 | 624.6 |
+| main | 489 | 1649 | 257 | 30 | 623.7 |
 | ov000 | 48 | 325 | 86 | 9 | 168.9 |
 | ov001 | 33 | 176 | 21 | 1 | 54.0 |
 | ov002 | 7 | 99 | 56 | 5 | 95.4 |
@@ -525,16 +525,16 @@ An estimate of the work left in each module, by the size of the functions that a
 | ov014 | 0 | 0 | 0 | 1 | 3.0 |
 | ov015 | 0 | 5 | 10 | 2 | 16.9 |
 | ov016 | 5 | 19 | 5 | 3 | 18.9 |
-| ov017 | 70 | 476 | 131 | 16 | 273.3 |
+| ov017 | 68 | 475 | 131 | 16 | 273.0 |
 | ov019 | 0 | 0 | 0 | 1 | 3.0 |
 | ov020 | 0 | 0 | 0 | 1 | 4.2 |
 | ov021 | 0 | 0 | 1 | 0 | 1.2 |
 | ov023 | 0 | 22 | 25 | 7 | 49.1 |
-| ov024 | 13 | 319 | 36 | 8 | 140.2 |
+| ov024 | 12 | 307 | 36 | 8 | 139.4 |
 | ov025 | 16 | 106 | 33 | 8 | 82.2 |
 | ov026 | 0 | 7 | 8 | 2 | 22.7 |
 | ov027 | 0 | 6 | 6 | 2 | 11.4 |
 | ov030 | 0 | 0 | 0 | 2 | 4.3 |
 | ov031 | 165 | 744 | 83 | 4 | 223.6 |
-| **Total** | **887** | **4384** | **917** | **129** | **2124.2** |
+| **Total** | **884** | **4363** | **917** | **129** | **2122.3** |
 <!-- END GENERATED -->
